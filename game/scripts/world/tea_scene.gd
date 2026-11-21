@@ -17,6 +17,7 @@ const Models = preload("res://scripts/world/models.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
+const Reveal = preload("res://scripts/world/reveal.gd")
 
 ## Where the bench and its four seats are, in the stall's own space
 ## (the stall faces -Z, the street).
@@ -80,7 +81,8 @@ func _ready() -> void:
 	await _step("clutter")
 	for hex in Traffic.PALETTE:
 		_palette.append(Color(hex))
-	add_child(Clutter.build(map, _palette))
+	var clutter := Clutter.build(map, _palette)
+	add_child(clutter)
 	await _step("stall")
 	_build_stall(map, tile)
 	_clear_signs(town)
@@ -88,6 +90,24 @@ func _ready() -> void:
 	_sounds()
 	await _step("hud")
 	_build_hud()
+	# A part at a time, so a crash while drawing names the part.
+	var blocks := town.get_node("Blocks")
+	var poles := town.get_node("Poles")
+	var first := [town.get_child(0), town.get_child(1)]
+	await Reveal.run(self, "tea", [
+		["sky", []],
+		["roads", first],
+		["buildings", Reveal.geometry(blocks, false)],
+		["poles and wires", Reveal.geometry(poles, false)],
+		["town bits", Reveal.geometry(town, false, first + [blocks, poles])],
+		["shop signs", Reveal.geometry(town, true)],
+		["roadside", Reveal.geometry(clutter, false) + Reveal.geometry(clutter, true)],
+		["stall", Reveal.geometry(_stall, false) + Reveal.geometry(_stall, true)],
+	])
+	CrashWatch.start("tea: graphics " + Graphics.level())
+	Graphics.apply(get_viewport(), _env, _sun)
+	await get_tree().process_frame
+	await get_tree().process_frame
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
@@ -165,7 +185,7 @@ func _environment() -> void:
 	_sun.shadow_blur = 1.5
 	_sun.directional_shadow_max_distance = 30.0
 	add_child(_sun)
-	Graphics.apply(get_viewport(), env, _sun)
+	Graphics.plain(get_viewport(), env, _sun)
 
 
 ## The stall on the pavement at the tea tile, its sign, Monir Mama, the

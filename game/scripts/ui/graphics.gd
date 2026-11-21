@@ -34,6 +34,14 @@ static func save_level(value: String) -> void:
 	c.save(SETTINGS)
 
 
+## Everything extra off: how a 3D scene starts, before it is shown.
+static func plain(viewport: Viewport, env: Environment, sun: DirectionalLight3D) -> void:
+	viewport.msaa_3d = Viewport.MSAA_DISABLED
+	env.glow_enabled = false
+	env.adjustment_enabled = false
+	sun.shadow_enabled = false
+
+
 ## Sets up a 3D scene's viewport, environment and sun for the level.
 static func apply(viewport: Viewport, env: Environment, sun: DirectionalLight3D) -> void:
 	var high := level() == "high"

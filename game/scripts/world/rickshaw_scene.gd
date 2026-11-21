@@ -20,6 +20,7 @@ const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
+const Reveal = preload("res://scripts/world/reveal.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
@@ -97,11 +98,13 @@ func _ready() -> void:
 	await _step("environment")
 	_environment()
 	await _step("town")
-	add_child(City.build(map, strings.lang))
+	var town := City.build(map, strings.lang)
+	add_child(town)
 	await _step("clutter")
 	for hex in Traffic.PALETTE:
 		_palette.append(Color(hex))
-	add_child(Clutter.build(map, _palette))
+	var clutter := Clutter.build(map, _palette)
+	add_child(clutter)
 	signals = SignalLights.new()
 	add_child(signals)
 	signals.setup(map)
@@ -162,6 +165,31 @@ func _ready() -> void:
 	_yaw = _yaw_for(shift.driver.heading)
 	_place_marker()
 	_follow(0.0, true)
+	# The town a part at a time, so a crash while drawing names the part.
+	var blocks := town.get_node("Blocks")
+	var poles := town.get_node("Poles")
+	var first := [town.get_child(0), town.get_child(1)]
+	var people := []
+	for n in _waiting_nodes.values():
+		people += Reveal.geometry(n, false) + Reveal.geometry(n, true)
+	await Reveal.run(self, "rickshaw", [
+		["sky", []],
+		["roads", first],
+		["buildings", Reveal.geometry(blocks, false)],
+		["poles and wires", Reveal.geometry(poles, false)],
+		["town bits", Reveal.geometry(town, false, first + [blocks, poles])],
+		["shop signs", Reveal.geometry(town, true)],
+		["roadside", Reveal.geometry(clutter, false)],
+		["billboards", Reveal.geometry(clutter, true)],
+		["signals", Reveal.geometry(signals, false) + Reveal.geometry(signals, true)],
+		["traffic", Reveal.geometry(traffic, false)],
+		["rickshaw", Reveal.geometry(rickshaw, false) + Reveal.geometry(marker, false) + Reveal.geometry(marker, true)],
+		["passengers", people],
+	])
+	CrashWatch.start("rickshaw: graphics " + Graphics.level())
+	Graphics.apply(get_viewport(), _env, _sun)
+	await get_tree().process_frame
+	await get_tree().process_frame
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
@@ -312,7 +340,7 @@ func _environment() -> void:
 	sun.directional_shadow_max_distance = 35.0
 	add_child(sun)
 	_sun = sun
-	Graphics.apply(get_viewport(), env, sun)
+	Graphics.plain(get_viewport(), env, sun)
 
 
 ## A tall glowing post where the passenger is going.
