@@ -77,14 +77,7 @@ func _build() -> void:
 	col.add_child(_other("busName", "busRole", Look.SKY, "bus"))
 	if not progress.data.history.is_empty():
 		col.add_child(_history_card())
-	var gfx := Button.new()
-	gfx.name = "Graphics"
-	gfx.text = s.t("graphicsHigh" if Graphics.level() == "high" else "graphicsLow")
-	gfx.flat = true
-	gfx.add_theme_color_override("font_color", Look.MAGENTA)
-	gfx.pressed.connect(_switch_graphics)
-	col.add_child(gfx)
-	col.add_child(Look.label(s.t("graphicsHelp"), 12))
+	col.add_child(_graphics_row())
 	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 13)
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(version)
@@ -307,8 +300,32 @@ func _open_stall() -> void:
 	get_tree().change_scene_to_file("res://scenes/tea.tscn")
 
 
-func _switch_graphics() -> void:
-	Graphics.save_level("low" if Graphics.level() == "high" else "high")
+## Graphics: two buttons, the one in use filled in.
+func _graphics_row() -> Control:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 8)
+	var title := Look.label(s.t("graphics"), 15, true)
+	title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(title)
+	for level in ["high", "low"]:
+		var on := Graphics.level() == level
+		var pick := Look.button(s.t("graphics_" + level), Look.MAGENTA if on else Color("B9B2A6"), 15)
+		pick.name = "Graphics_" + level
+		pick.pressed.connect(_set_graphics.bind(level))
+		row.add_child(pick)
+	box.add_child(row)
+	var help := Look.label(s.t("graphicsHelp"), 12)
+	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(help)
+	return box
+
+
+func _set_graphics(level: String) -> void:
+	Graphics.save_level(level)
 	_build()
 
 

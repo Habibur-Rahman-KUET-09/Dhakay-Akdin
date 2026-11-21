@@ -12,6 +12,8 @@
 ## All models face -Z, Godot's forward, standing on y = 0.
 extends RefCounted
 
+const Graphics = preload("res://scripts/ui/graphics.gd")
+
 const KEEP := 1.0
 const PAINT_A := 0.75
 const PAINT_B := 0.5
@@ -689,13 +691,18 @@ static var _shaders := {}
 ## For a single mesh (multimesh false) the same four numbers come from the
 ## `custom_data` parameter instead.
 static func traffic_material(palette: PackedColorArray, multimesh := true) -> ShaderMaterial:
-	if not _shaders.has(multimesh):
+	# Simple graphics: no highlights either (fewer things for a weak chip).
+	var simple := Graphics.level() == "low"
+	var key := "%s %s" % [multimesh, simple]
+	if not _shaders.has(key):
 		var code := SHADER if multimesh else SHADER.replace("INSTANCE_CUSTOM", "custom_data").replace("uniform vec4 palette[16];", "uniform vec4 palette[16];\nuniform vec4 custom_data;")
+		if simple:
+			code = code.replace("render_mode diffuse_lambert;", "render_mode diffuse_lambert, specular_disabled;")
 		var shader := Shader.new()
 		shader.code = code
-		_shaders[multimesh] = shader
+		_shaders[key] = shader
 	var m := ShaderMaterial.new()
-	m.shader = _shaders[multimesh]
+	m.shader = _shaders[key]
 	var values := PackedVector4Array()
 	for i in 16:
 		var c: Color = palette[i % palette.size()]

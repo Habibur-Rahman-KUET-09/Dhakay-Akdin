@@ -587,14 +587,6 @@
   "bn": "শেষ দিন: {money} টাকা, {served} জন কাস্টমার",
   "en": "Last day: Tk {money}, {served} customers"
  },
- "graphicsHigh": {
-  "bn": "গ্রাফিক্স: উন্নত (বদলাতে ট্যাপ করুন)",
-  "en": "Graphics: high (tap to change)"
- },
- "graphicsLow": {
-  "bn": "গ্রাফিক্স: সাধারণ (বদলাতে ট্যাপ করুন)",
-  "en": "Graphics: simple (tap to change)"
- },
  "graphicsHelp": {
   "bn": "ফোন বন্ধ হয়ে গেলে বা ধীর চললে সাধারণ রাখুন",
   "en": "Use simple if the game crashes or runs slowly"
@@ -602,5 +594,17 @@
  "graphicsLowered": {
   "bn": "এই ফোনের জন্য গ্রাফিক্স সাধারণ করে দেওয়া হলো, আবার চেষ্টা করুন",
   "en": "Graphics set to simple for this phone: try again"
+ },
+ "graphics": {
+  "bn": "গ্রাফিক্স:",
+  "en": "Graphics:"
+ },
+ "graphics_high": {
+  "bn": "উন্নত",
+  "en": "High"
+ },
+ "graphics_low": {
+  "bn": "সাধারণ",
+  "en": "Simple"
  }
 }

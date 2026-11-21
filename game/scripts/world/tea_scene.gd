@@ -59,6 +59,7 @@ var _notice_box: PanelContainer
 var _notice_left := 0.0
 var _ding: AudioStreamPlayer
 var _alive_left := 10.0
+var _frames_logged := 0
 
 
 func _ready() -> void:
@@ -384,6 +385,9 @@ func _say(text: String, colour := Look.OUTLINE, seconds := 2.5) -> void:
 
 
 func _process(dt: float) -> void:
+	if _frames_logged < 5:
+		_frames_logged += 1
+		print("[frame] ", _frames_logged, " ", Time.get_ticks_msec(), " ms")
 	_alive_left -= dt
 	if _alive_left <= 0.0:
 		_alive_left = 10.0

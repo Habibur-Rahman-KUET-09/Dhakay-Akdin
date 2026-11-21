@@ -67,6 +67,7 @@ var _brake_fingers := {}
 var _swipes := {}
 var _key_pedal := false
 var _key_brake := false
+var _frames_logged := 0
 ## The traffic policeman who stops a wrong-way rickshaw, and his whistle.
 var _police: Node3D
 var _police_left := 0.0
@@ -355,6 +356,10 @@ static func _yaw_for(d: int) -> float:
 
 
 func _process(dt: float) -> void:
+	# The first frames, in the log: a crash while drawing shows here.
+	if _frames_logged < 5:
+		_frames_logged += 1
+		print("[frame] ", _frames_logged, " ", Time.get_ticks_msec(), " ms")
 	# A line in the log every 10 s, with the frame rate, for crash reports.
 	_alive_left -= dt
 	if _alive_left <= 0.0:
