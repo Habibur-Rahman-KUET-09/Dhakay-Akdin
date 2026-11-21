@@ -108,7 +108,7 @@ func _process(dt: float) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	var tap := (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) \
+	var tap: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) \
 		or (event is InputEventScreenTouch and event.pressed)
 	if tap and not _choosing:
 		_next()
