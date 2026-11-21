@@ -1,0 +1,32 @@
+name: textures
+
+# Downloads the town's photo textures from Poly Haven (CC0) into
+# game/textures and commits them. Runs when tool/fetch_textures.py changes,
+# or by hand.
+on:
+  push:
+    branches: [main]
+    paths: [tool/fetch_textures.py, .github/workflows/textures.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 tool/fetch_textures.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/textures
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "Photo textures from Poly Haven (CC0)"
+          git push
