@@ -73,13 +73,15 @@ func _ready() -> void:
 	await _step("environment")
 	_environment()
 	await _step("town")
-	add_child(City.build(map, strings.lang, tile))
+	var town := City.build(map, strings.lang, tile)
+	add_child(town)
 	await _step("clutter")
 	for hex in Traffic.PALETTE:
 		_palette.append(Color(hex))
 	add_child(Clutter.build(map, _palette))
 	await _step("stall")
 	_build_stall(map, tile)
+	_clear_signs(town)
 	await _step("sounds")
 	_sounds()
 	await _step("hud")
@@ -185,10 +187,9 @@ func _build_stall(map: RoadMap, tile: Vector2i) -> void:
 	board.outline_size = 12
 	board.modulate = Look.YELLOW
 	board.outline_modulate = Look.OUTLINE
-	board.pixel_size = 0.0036
+	board.pixel_size = 0.0045
 	board.alpha_cut = Label3D.ALPHA_CUT_DISCARD
-	# Painted on the cloth along the roof's front edge.
-	board.position = Vector3(0, 2.52, -0.83)
+	board.position = Vector3(0, 2.9, -0.82)
 	board.rotation.y = PI
 	_stall.add_child(board)
 	# Monir Mama behind the counter: white vest, checked blue lungi.
@@ -234,6 +235,18 @@ func _build_stall(map: RoadMap, tile: Vector2i) -> void:
 	camera.global_position = _stall.to_global(CAMERA_AT)
 	camera.look_at(_stall.to_global(LOOK_AT))
 	camera.current = true
+
+
+## The shop's signboard on the wall behind the stall would show through
+## the stall's own name: take down the town's lettering close by.
+func _clear_signs(town: Node) -> void:
+	var near := _stall.global_position
+	var todo: Array[Node] = [town]
+	while not todo.is_empty():
+		var n: Node = todo.pop_back()
+		todo.append_array(n.get_children())
+		if n is Label3D and (n as Label3D).global_position.distance_to(near) < 4.5:
+			(n as Label3D).visible = false
 
 
 func _sounds() -> void:
