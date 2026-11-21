@@ -51,7 +51,8 @@ static func noise(p: Vector2i, salt := 0) -> float:
 	return float(absi(h) % 10007) / 10007.0
 
 
-static func build(map: RoadMap, lang: String) -> Node3D:
+## skip: a tea stall tile left empty (the tea stall scene builds its own).
+static func build(map: RoadMap, lang: String, skip := Vector2i(-1, -1)) -> Node3D:
 	var town := Node3D.new()
 	town.name = "Town"
 	print("[town] ground and roads")
@@ -62,7 +63,7 @@ static func build(map: RoadMap, lang: String) -> Node3D:
 	print("[town] poles and wires")
 	town.add_child(_poles_and_wires(map))
 	print("[town] features and banners")
-	_features(map, town)
+	_features(map, town, skip)
 	_banners(map, town)
 	print("[town] place names")
 	for pl in map.places:
@@ -584,7 +585,7 @@ static func _cylinder(radius: float, height: float, at: Vector3, colour: Color) 
 
 
 ## Roundabout islands, tea stalls, signals and home.
-static func _features(map: RoadMap, town: Node3D) -> void:
+static func _features(map: RoadMap, town: Node3D, skip := Vector2i(-1, -1)) -> void:
 	for y in map.height:
 		for x in map.width:
 			var p := Vector2i(x, y)
@@ -595,7 +596,7 @@ static func _features(map: RoadMap, town: Node3D) -> void:
 				town.add_child(_cylinder(T * 0.38, 0.5, centre(p, 0.3), Color("5E9E57")))
 				town.add_child(_cylinder(0.35, 6.0, centre(p, 3.0), Color("EDE6DA")))
 				town.add_child(_box(Vector3(1.6, 1.0, 0.2), centre(p, 6.2), Look.PARROT))
-			elif k == RoadMap.Kind.TEA:
+			elif k == RoadMap.Kind.TEA and p != skip:
 				var side := _side(map, p)
 				town.add_child(_box(Vector3(1.6, 1.9, 0.9), side + Vector3(0, 0.95, 0), Color("6B4A2B")))
 				town.add_child(_box(Vector3(2.0, 0.1, 1.4), side + Vector3(0, 2.0, 0), Look.PARROT))

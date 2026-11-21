@@ -402,5 +402,189 @@
  "teaLine": {
   "bn": "চা: {n} কাপ ({money} টাকা)",
   "en": "Tea: {n} cups (Tk {money})"
+ },
+ "step_cup": {
+  "bn": "কাপ",
+  "en": "Cup"
+ },
+ "step_kettle": {
+  "bn": "কেটলি",
+  "en": "Kettle"
+ },
+ "step_milk": {
+  "bn": "দুধ",
+  "en": "Milk"
+ },
+ "step_sugar": {
+  "bn": "চিনি",
+  "en": "Sugar"
+ },
+ "step_banana": {
+  "bn": "কলা",
+  "en": "Banana"
+ },
+ "step_bun_jar": {
+  "bn": "বনরুটি",
+  "en": "Bun jar"
+ },
+ "step_betel_leaf": {
+  "bn": "পান পাতা",
+  "en": "Betel leaf"
+ },
+ "step_areca": {
+  "bn": "সুপারি",
+  "en": "Areca nut"
+ },
+ "step_lime": {
+  "bn": "চুন",
+  "en": "Lime"
+ },
+ "item_liquor_tea": {
+  "bn": "লিকার চা",
+  "en": "Black tea"
+ },
+ "item_milk_tea": {
+  "bn": "দুধ চা",
+  "en": "Milk tea"
+ },
+ "item_banana": {
+  "bn": "কলা",
+  "en": "Banana"
+ },
+ "item_bun": {
+  "bn": "বনরুটি",
+  "en": "Bun"
+ },
+ "item_paan": {
+  "bn": "পান",
+  "en": "Paan"
+ },
+ "kind_normal": {
+  "bn": "কাস্টমার",
+  "en": "Customer"
+ },
+ "kind_office": {
+  "bn": "অফিসগামী",
+  "en": "Office-goer"
+ },
+ "kind_elder": {
+  "bn": "মুরুব্বি",
+  "en": "Elder"
+ },
+ "kind_rahim": {
+  "bn": "রহিম চাচা",
+  "en": "Rahim Chacha"
+ },
+ "teaStallSign": {
+  "bn": "মনির মামার চা",
+  "en": "Monir Mama's Tea"
+ },
+ "teaLoading": {
+  "bn": "চায়ের দোকান খোলা হচ্ছে…",
+  "en": "Opening the tea stall…"
+ },
+ "kettleCups": {
+  "bn": "কেটলি · {n} কাপ",
+  "en": "Kettle · {n} cups"
+ },
+ "kettleEmpty": {
+  "bn": "কেটলি খালি: ভরুন",
+  "en": "Kettle empty: fill"
+ },
+ "kettleFilling": {
+  "bn": "কেটলি ভরছে",
+  "en": "Filling kettle"
+ },
+ "tray": {
+  "bn": "হাতে: {steps}",
+  "en": "In hand: {steps}"
+ },
+ "trayEmpty": {
+  "bn": "উপকরণে ট্যাপ করে বানান",
+  "en": "Tap the things to make an order"
+ },
+ "give": {
+  "bn": "দিন",
+  "en": "Give"
+ },
+ "discard": {
+  "bn": "ফেলুন",
+  "en": "Throw away"
+ },
+ "wrongStep": {
+  "bn": "ভুল ক্রম! আবার শুরু করুন",
+  "en": "Wrong order! Start again"
+ },
+ "nobodyWants": {
+  "bn": "এটা কেউ চায়নি, নষ্ট হলো",
+  "en": "Nobody ordered that: wasted"
+ },
+ "servedHappy": {
+  "bn": "খুশি হয়ে গেলেন! {bill} টাকা + বখশিশ {tip}",
+  "en": "Happy! Tk {bill} + tip {tip}"
+ },
+ "servedPlain": {
+  "bn": "{bill} টাকা পেলেন",
+  "en": "Paid Tk {bill}"
+ },
+ "customerLeft": {
+  "bn": "দেরি দেখে একজন রেগে চলে গেলেন",
+  "en": "Someone got tired of waiting and left"
+ },
+ "kettleEmptyNote": {
+  "bn": "কেটলি খালি! ভরতে কেটলিতে ট্যাপ করুন",
+  "en": "Kettle empty! Tap the kettle to fill it"
+ },
+ "kettleFull": {
+  "bn": "কেটলি ভরা, {n} কাপ",
+  "en": "Kettle full: {n} cups"
+ },
+ "rahimArrived": {
+  "bn": "রহিম চাচা এসেছেন: দুধ চা আর বনরুটি",
+  "en": "Rahim Chacha is here: milk tea and a bun"
+ },
+ "rahimLine": {
+  "bn": "রহিম চাচা: মেয়ের স্কুলের জন্য {n} টাকা জমেছে, আর {left} টাকা লাগবে",
+  "en": "Rahim Chacha: Tk {n} saved for my daughter's school, Tk {left} to go"
+ },
+ "rahimLineDone": {
+  "bn": "রহিম চাচা: মেয়ের স্কুলের ফি জমে গেছে, আলহামদুলিল্লাহ!",
+  "en": "Rahim Chacha: my daughter's school fee is saved, thank God!"
+ },
+ "teaSold": {
+  "bn": "বিক্রি: {n}টা জিনিস",
+  "en": "Sold: {n} things"
+ },
+ "teaServed": {
+  "bn": "সার্ভ করেছেন {served} জন, খুশি {happy} জন",
+  "en": "Served {served}, happy {happy}"
+ },
+ "teaLost": {
+  "bn": "রেগে চলে গেছেন {n} জন",
+  "en": "{n} left angry"
+ },
+ "teaTips": {
+  "bn": "বখশিশ: {n} টাকা",
+  "en": "Tips: Tk {n}"
+ },
+ "teaKept": {
+  "bn": "জমায় গেল: {n} টাকা",
+  "en": "To savings: Tk {n}"
+ },
+ "teaRating": {
+  "bn": "কাস্টমারের খুশি: {stars}/৫",
+  "en": "Customer happiness: {stars}/5"
+ },
+ "openStall": {
+  "bn": "দোকান খুলুন",
+  "en": "Open the stall"
+ },
+ "teaHistoryLine": {
+  "bn": "দিন {day}: চায়ের দোকান · {money} টাকা · {served} জন",
+  "en": "Day {day}: tea stall · Tk {money} · {served} served"
+ },
+ "teaLastDay": {
+  "bn": "শেষ দিন: {money} টাকা, {served} জন কাস্টমার",
+  "en": "Last day: Tk {money}, {served} customers"
  }
 }

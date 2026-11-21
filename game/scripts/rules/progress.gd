@@ -34,6 +34,7 @@ static func fresh() -> Dictionary:
 		"fundProject": PROJECTS[0],
 		"mohalla": {"level": 1, "xp": 0, "projectsDone": []},
 		"rickshaw": {"days": 0, "school": 0, "bestDay": 0, "trips": 0, "earned": 0, "teas": 0, "upgrades": []},
+		"tea": {"days": 0, "bestDay": 0, "served": 0, "happy": 0, "earned": 0, "upgrades": []},
 		"history": [],
 	}
 
@@ -149,17 +150,60 @@ func apply_day(result: Dictionary) -> Dictionary:
 	var out := {"earned": earned, "met": earned >= target}
 	# A tenth to the mohalla's fund, the rest is Rahim Chacha's; whatever
 	# is over the day's target is put by for his daughter's school fee.
-	var fund_cut := int(roundf(earned * b.n("economy.fund_share")))
+	var fund_cut := _to_fund(earned, out)
 	var keep := earned - fund_cut
 	var school := maxi(0, keep - target)
 	school = mini(school, maxi(0, school_goal() - int(data.rickshaw.school)))
-	data.fund = int(data.fund) + fund_cut
 	data.taka = int(data.taka) + keep - school
 	data.rickshaw.school = int(data.rickshaw.school) + school
-	out.fund = fund_cut
 	out.kept = keep - school
 	out.school = school
-	# A finished project.
+	_gain_xp(stars, trips > 0, out)
+	# The record.
+	data.day = int(data.day) + 1
+	data.rickshaw.days = int(data.rickshaw.days) + 1
+	data.rickshaw.trips = int(data.rickshaw.trips) + trips
+	data.rickshaw.earned = int(data.rickshaw.earned) + earned
+	# Cups of tea at the stalls: Monir Mama's regulars (§৬), kept for later.
+	data.rickshaw.teas = int(data.rickshaw.get("teas", 0)) + int(result.get("teas", 0))
+	out.best = earned > int(data.rickshaw.bestDay) and earned > 0
+	if out.best:
+		data.rickshaw.bestDay = earned
+	_remember({"day": data.day, "who": "rickshaw", "earned": earned, "trips": trips, "stars": snappedf(stars, 0.1), "met": out.met})
+	out.day = data.day
+	return out
+
+
+## Takes a day at Monir Mama's tea stall ({earned, served, happy, lost,
+## stars}) into the save: a tenth to the fund, the rest to the savings.
+func apply_tea_day(result: Dictionary) -> Dictionary:
+	var earned: int = maxi(0, int(result.earned))
+	var stars := float(result.stars)
+	var out := {"earned": earned}
+	var fund_cut := _to_fund(earned, out)
+	data.taka = int(data.taka) + earned - fund_cut
+	out.kept = earned - fund_cut
+	_gain_xp(stars, int(result.served) > 0, out)
+	data.day = int(data.day) + 1
+	var tea: Dictionary = data.tea
+	tea.days = int(tea.days) + 1
+	tea.served = int(tea.served) + int(result.served)
+	tea.happy = int(tea.happy) + int(result.happy)
+	tea.earned = int(tea.earned) + earned
+	out.best = earned > int(tea.bestDay) and earned > 0
+	if out.best:
+		tea.bestDay = earned
+	_remember({"day": data.day, "who": "tea", "earned": earned, "served": int(result.served), "stars": snappedf(stars, 0.1), "met": true})
+	out.day = data.day
+	return out
+
+
+## A tenth of the day's money to the mohalla's fund; finishes the project
+## when it is full. Returns the cut.
+func _to_fund(earned: int, out: Dictionary) -> int:
+	var fund_cut := int(roundf(earned * b.n("economy.fund_share")))
+	data.fund = int(data.fund) + fund_cut
+	out.fund = fund_cut
 	out.project = ""
 	if data.fundProject != "" and int(data.fund) >= fund_goal():
 		data.fund = int(data.fund) - fund_goal()
@@ -167,9 +211,13 @@ func apply_day(result: Dictionary) -> Dictionary:
 		out.project = data.fundProject
 		var left := PROJECTS.filter(func(p): return not data.mohalla.projectsDone.has(p))
 		data.fundProject = left[0] if not left.is_empty() else ""
-	# XP: 50 + 20 per star of the day's rating (half when no trips).
+	return fund_cut
+
+
+## XP: 50 + 20 per star of the day's rating (half when nothing was done).
+func _gain_xp(stars: float, worked: bool, out: Dictionary) -> void:
 	var gain := int(b.n("economy.xp_base") + roundf(stars) * b.n("economy.xp_per_rating_star"))
-	if trips == 0:
+	if not worked:
 		gain = int(b.n("economy.xp_base") / 2)
 	out.xp = gain
 	var lvl := level()
@@ -181,18 +229,9 @@ func apply_day(result: Dictionary) -> Dictionary:
 	out.level_up = lvl > level()
 	data.mohalla.level = lvl
 	data.mohalla.xp = total
-	# The record.
-	data.day = int(data.day) + 1
-	data.rickshaw.days = int(data.rickshaw.days) + 1
-	data.rickshaw.trips = int(data.rickshaw.trips) + trips
-	data.rickshaw.earned = int(data.rickshaw.earned) + earned
-	# Cups of tea at the stalls: Monir Mama's regulars (§৬), kept for later.
-	data.rickshaw.teas = int(data.rickshaw.get("teas", 0)) + int(result.get("teas", 0))
-	out.best = earned > int(data.rickshaw.bestDay) and earned > 0
-	if out.best:
-		data.rickshaw.bestDay = earned
-	data.history.push_front({"day": data.day, "earned": earned, "trips": trips, "stars": snappedf(stars, 0.1), "met": out.met})
+
+
+func _remember(entry: Dictionary) -> void:
+	data.history.push_front(entry)
 	while data.history.size() > HISTORY:
 		data.history.pop_back()
-	out.day = data.day
-	return out

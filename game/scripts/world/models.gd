@@ -537,6 +537,90 @@ static func player_rickshaw(hood: Color, body: Color, style := 0) -> Node3D:
 	return root
 
 
+# --- Monir Mama's tea stall ------------------------------------------------
+
+
+## A Dhaka tong (tea stall) against a wall, facing -Z: a painted wooden
+## counter, tin roof on bamboo posts, a shelf of jars, a kettle on a clay
+## stove, glasses, a milk can, the sugar pot, a bunch of bananas hanging
+## from the roof and the paan tray. The counter's top is at y = 1.0, its
+## front at z = -0.45.
+static func tea_stall() -> ArrayMesh:
+	var b := Builder.new()
+	var wood := Color("8B5A2B")
+	var green := Color("2E7D4F")
+	# Counter: a box with a painted front and a yellow band.
+	b.box(Vector3(2.4, 1.0, 0.9), Vector3(0, 0.5, 0), wood)
+	b.box(Vector3(2.42, 0.6, 0.02), Vector3(0, 0.45, -0.46), green)
+	b.box(Vector3(2.42, 0.1, 0.025), Vector3(0, 0.8, -0.465), Color("F6B800"))
+	b.box(Vector3(2.5, 0.05, 1.0), Vector3(0, 1.02, 0), wood.darkened(0.25))
+	# Posts and a sloping tin roof with a cloth edge.
+	for x in [-1.2, 1.2]:
+		for z in [-0.45, 0.5]:
+			b.cyl(0.04, 2.5, Vector3(x, 1.25, z), Color("C8A96A"), Vector3.ZERO, 6)
+	b.box(Vector3(2.9, 0.04, 1.6), Vector3(0, 2.52, 0.0), Color("9AA3A8"), Vector3(-8, 0, 0))
+	b.box(Vector3(2.9, 0.22, 0.02), Vector3(0, 2.52, -0.8), Color("C2185B"))
+	for i in 12:
+		var x := -1.4 + i * 0.255
+		b.quad(Vector3(x, 2.41, -0.81), Vector3(x + 0.12, 2.41, -0.81), Vector3(x + 0.06, 2.3, -0.81), Vector3(x + 0.06, 2.3, -0.81),
+			Color("F6B800") if i % 2 == 0 else Color("2E9E6B"))
+	# Back wall of the stall and a shelf of jars (biscuits, buns).
+	b.box(Vector3(2.4, 2.4, 0.04), Vector3(0, 1.2, 0.5), wood.darkened(0.35))
+	b.box(Vector3(2.2, 0.04, 0.3), Vector3(0, 1.75, 0.36), wood)
+	var jars := [Color("E8D9B0"), Color("F2C14E"), Color("D98E5A"), Color("E8D9B0"), Color("C9B27C"), Color("F2C14E")]
+	for i in jars.size():
+		var x := -0.9 + i * 0.36
+		b.cyl(0.11, 0.3, Vector3(x, 1.92, 0.36), jars[i], Vector3.ZERO, 10)
+		b.cyl(0.115, 0.05, Vector3(x, 2.09, 0.36), Color("D7263D"), Vector3.ZERO, 10)
+	# A calendar and a small mirror on the wall.
+	b.quad(Vector3(0.55, 1.2, 0.47), Vector3(0.95, 1.2, 0.47), Vector3(0.95, 1.65, 0.47), Vector3(0.55, 1.65, 0.47), Color("F2F2F2"))
+	b.quad(Vector3(0.58, 1.45, 0.465), Vector3(0.92, 1.45, 0.465), Vector3(0.92, 1.62, 0.465), Vector3(0.58, 1.62, 0.465), Color("2D8BD6"))
+	# Clay stove and the aluminium kettle (right).
+	b.cyl(0.2, 0.22, Vector3(0.75, 1.15, 0.05), Color("8A4B2A"), Vector3.ZERO, 12)
+	b.cyl(0.13, 0.03, Vector3(0.75, 1.27, 0.05), Color("FF7A1A"), Vector3.ZERO, 12)
+	b.cyl(0.17, 0.26, Vector3(0.75, 1.42, 0.05), Color("C9CDD2"), Vector3.ZERO, 14, KEEP, Vector2.ZERO, 0.12)
+	b.ball(0.04, Vector3(0.75, 1.58, 0.05), Color("3C3F44"))
+	b.cyl(0.025, 0.25, Vector3(0.58, 1.45, -0.05), Color("C9CDD2"), Vector3(0, 0, 55), 8)
+	b.shell(Vector3(0.75, 1.45, 0.05), 0.2, 30, 150, 0.01, Color("3C3F44"), KEEP, 6)
+	# A row of small glasses, a milk can, the sugar pot (left of centre).
+	for i in 6:
+		b.cyl(0.035, 0.09, Vector3(-0.15 + i * 0.09, 1.09, -0.25), Color("D9B36C"), Vector3.ZERO, 8)
+	b.cyl(0.1, 0.28, Vector3(-0.45, 1.18, 0.1), Color("E6E9EC"), Vector3.ZERO, 12)
+	b.cyl(0.08, 0.14, Vector3(-0.2, 1.1, 0.15), Color("D7263D"), Vector3.ZERO, 12)
+	# The paan tray (left): a brass plate with green leaves.
+	b.cyl(0.2, 0.04, Vector3(-0.85, 1.06, -0.1), Color("C9A13B"), Vector3.ZERO, 16)
+	for i in 5:
+		var a := i * TAU / 5
+		var c := Vector3(-0.85 + cos(a) * 0.09, 1.085, -0.1 + sin(a) * 0.09)
+		b.quad(c + Vector3(-0.06, 0, 0), c + Vector3(0, 0, -0.08), c + Vector3(0.06, 0, 0), c + Vector3(0, 0, 0.08), Color("3E8E3A"))
+	# Bananas hanging from the roof at the front left.
+	b.cyl(0.012, 0.35, Vector3(-1.0, 2.2, -0.55), Color("6B4A2B"), Vector3.ZERO, 5)
+	for i in 14:
+		var a := i * TAU / 7
+		var r := 0.07 + 0.03 * (i % 2)
+		b.cyl(0.025, 0.2, Vector3(-1.0 + cos(a) * r, 1.92 - 0.1 * (i / 7), -0.55 + sin(a) * r), Color("F2C230"), Vector3(cos(a) * 20, 0, sin(a) * 20), 6)
+	return b.commit()
+
+
+## A plain wooden bench for customers, 3.4 m long along X.
+static func bench() -> ArrayMesh:
+	var b := Builder.new()
+	var wood := Color("7A5230")
+	b.box(Vector3(3.4, 0.06, 0.4), Vector3(0, 0.46, 0), wood)
+	for x in [-1.5, 0.0, 1.5]:
+		for z in [-0.15, 0.15]:
+			b.box(Vector3(0.06, 0.46, 0.06), Vector3(x, 0.23, z), wood.darkened(0.2))
+	return b.commit()
+
+
+## Someone sitting on a bench (seat at y = 0.48), facing -Z: shirt PAINT_A,
+## trousers or lungi PAINT_B.
+static func bench_sitter() -> ArrayMesh:
+	var b := Builder.new()
+	_body(b, Vector3(0, 0.5, 0), true, false)
+	return b.commit()
+
+
 # --- CNG and bus -----------------------------------------------------------
 
 

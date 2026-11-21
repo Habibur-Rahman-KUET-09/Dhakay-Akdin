@@ -64,7 +64,10 @@ func _build() -> void:
 	col.add_child(_mohalla_card())
 	col.add_child(_rickshaw_card())
 	col.add_child(_fund_card())
-	col.add_child(_other("teaName", "teaRole", Look.PARROT, "tea_stall"))
+	if progress.unlocked("tea_stall"):
+		col.add_child(_tea_card())
+	else:
+		col.add_child(_other("teaName", "teaRole", Look.PARROT, "tea_stall"))
 	col.add_child(_other("busName", "busRole", Look.SKY, "bus"))
 	if not progress.data.history.is_empty():
 		col.add_child(_history_card())
@@ -137,10 +140,12 @@ func _rickshaw_card() -> Control:
 	drive.pressed.connect(_drive)
 	row.add_child(drive)
 	box.add_child(row)
-	if not progress.data.history.is_empty():
-		var last: Dictionary = progress.data.history[0]
-		box.add_child(Look.label(s.t("lastDay", {"money": int(last.earned), "trips": int(last.trips), "stars": last.stars}), 15))
-		box.add_child(Look.label(s.t("bestDay", {"money": int(progress.data.rickshaw.bestDay)}), 14))
+	# His last day (the newest record that is a rickshaw day).
+	for last in progress.data.history:
+		if last.get("who", "rickshaw") == "rickshaw":
+			box.add_child(Look.label(s.t("lastDay", {"money": int(last.earned), "trips": int(last.get("trips", 0)), "stars": last.stars}), 15))
+			box.add_child(Look.label(s.t("bestDay", {"money": int(progress.data.rickshaw.bestDay)}), 14))
+			break
 	var school := int(progress.data.rickshaw.school)
 	box.add_child(Look.label(s.t("schoolFee", {"n": school, "goal": progress.school_goal()}), 15, true))
 	box.add_child(_bar(school, progress.school_goal(), Look.SKY))
@@ -154,6 +159,34 @@ func _rickshaw_card() -> Control:
 		box.add_child(buy)
 	for id in progress.data.rickshaw.upgrades:
 		box.add_child(Look.label(s.t("owned_" + id), 14, false, Look.PARROT.darkened(0.2)))
+	return panel
+
+
+## Monir Mama's tea stall, once the mohalla is big enough: the way in,
+## and how the last day there went.
+func _tea_card() -> Control:
+	var panel := _panel()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	row.add_child(_dot(Look.PARROT))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_child(Look.label(s.t("teaName"), 20, true))
+	text.add_child(Look.label(s.t("teaRole"), 14))
+	row.add_child(text)
+	var open := Look.button(s.t("openStall"), Look.PARROT)
+	open.name = "OpenStall"
+	open.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	open.pressed.connect(_open_stall)
+	row.add_child(open)
+	box.add_child(row)
+	for h in progress.data.history:
+		if h.get("who", "") == "tea":
+			box.add_child(Look.label(s.t("teaLastDay", {"money": int(h.earned), "served": int(h.served)}), 15))
+			break
 	return panel
 
 
@@ -207,7 +240,9 @@ func _history_card() -> Control:
 		if shown >= 5:
 			break
 		shown += 1
-		var line := s.t("historyLine", {"day": int(h.day), "money": int(h.earned), "trips": int(h.trips), "stars": h.stars})
+		var line := s.t("historyLine", {"day": int(h.day), "money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.stars})
+		if h.get("who", "") == "tea":
+			line = s.t("teaHistoryLine", {"day": int(h.day), "money": int(h.earned), "served": int(h.get("served", 0))})
 		box.add_child(Look.label(line, 14, false, Look.PARROT.darkened(0.3) if h.met else Look.OUTLINE))
 	return panel
 
@@ -249,6 +284,11 @@ func _buy(id: String) -> void:
 func _drive() -> void:
 	CrashWatch.start("rickshaw")
 	get_tree().change_scene_to_file("res://scenes/rickshaw.tscn")
+
+
+func _open_stall() -> void:
+	CrashWatch.start("tea")
+	get_tree().change_scene_to_file("res://scenes/tea.tscn")
 
 
 func _switch_language() -> void:

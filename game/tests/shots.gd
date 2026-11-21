@@ -1,4 +1,5 @@
-## Takes screenshots of the home screen and the 3D town for review:
+## Takes screenshots of the home screen, the 3D town and the tea stall for
+## review:
 ##   godot --path game --resolution 540x960 -s res://tests/shots.gd -- <out dir>
 ## Needs a display (CI runs it under xvfb with software OpenGL).
 extends SceneTree
@@ -31,6 +32,17 @@ func _run() -> void:
 	drive.shift.swipe(1)
 	await _seconds(4.0)
 	_save("4-after-right-turn")
+	drive.queue_free()
+	await _frames(2)
+	# Monir Mama's tea stall, a few customers in, a cup of tea on the go.
+	var tea = load("res://scenes/tea.tscn").instantiate()
+	root.add_child(tea)
+	await _frames(20)
+	await _seconds(9.0)
+	tea._on_step("cup")
+	tea._on_step("kettle")
+	await _frames(3)
+	_save("5-tea-stall")
 	quit(0)
 
 

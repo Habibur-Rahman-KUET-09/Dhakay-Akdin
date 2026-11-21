@@ -54,7 +54,7 @@
     }
   },
   "tea_stall": {
-    "start_hour": 6, "end_hour": 23, "rush_hours": [[7, 9], [17, 20]],
+    "start_hour": 6, "end_hour": 23, "day_seconds": 300, "rush_hours": [[7, 9], [17, 20]],
     "arrival_every_s": 6, "rush_arrival_every_s": 3,
     "patience_s": {"normal": 12, "office": 8, "elder": 16},
     "kettle_cups": 8, "kettle_refill_s": 5, "happy_tip_share": 0.10,

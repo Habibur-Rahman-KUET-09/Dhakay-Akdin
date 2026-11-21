@@ -87,3 +87,17 @@ func test_battery_and_tea_cups() -> void:
 	p.apply_day({"earned": 300, "trips": 3, "stars": 4.0, "fines": 0, "teas": 2})
 	p.apply_day({"earned": 300, "trips": 3, "stars": 4.0, "fines": 0})
 	eq(p.data.rickshaw.teas, 2, "cups of tea counted")
+
+
+func test_a_day_at_the_tea_stall() -> void:
+	var p := _fresh()
+	var got := p.apply_tea_day({"earned": 400, "served": 20, "happy": 15, "lost": 5, "stars": 4.0})
+	eq(got.fund, 40, "a tenth to the fund")
+	eq(got.kept, 360, "the rest saved")
+	eq(p.data.taka, 360, "in the savings")
+	eq(p.data.tea.days, 1, "one day at the stall")
+	eq(p.data.tea.served, 20, "customers counted")
+	eq(p.data.day, 1, "the mohalla's day moves on")
+	eq(got.xp, 130, "XP: 50 + 4 stars × 20")
+	eq(p.data.history[0].who, "tea", "the record says whose day it was")
+	check(got.best, "best day at the stall")
