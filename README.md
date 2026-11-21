@@ -8,3 +8,17 @@
 | `docs/DETAILED_DESIGN.md` | বিস্তারিত ডিজাইন: চরিত্রের নিয়ম ও সংখ্যা, স্ক্রিন, অর্থনীতি, কোডের গঠন, সাপ্তাহিক পরিকল্পনা |
 
 স্ট্যাক: Flutter + Flame, Android প্রথমে।
+
+| ফোল্ডার | কী |
+|---|---|
+| `app/` | Flutter + Flame গেম (`lib/economy`, `lib/ui`, `lib/characters`…) |
+| `app/assets/content/balance.json` | গেমের সব সংখ্যা: দাম, গতি, সময় (কোডে কোনো সংখ্যা নেই) |
+| `tool/validate_content.py` | লেখা আর সংখ্যা যাচাই, বাংলা ফন্ট সব অক্ষর আঁকতে পারে কি না সহ |
+| `.github/workflows/app.yml` | প্রতিটা push-এ analyze, test, APK আর GitHub pre-release |
+
+চালানো:
+
+```bash
+cd app && flutter pub get && flutter test && flutter run
+python3 tool/validate_content.py   # pip install fonttools
+```

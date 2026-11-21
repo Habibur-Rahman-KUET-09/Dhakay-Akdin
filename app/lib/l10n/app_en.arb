@@ -1,0 +1,25 @@
+{
+  "@@locale": "en",
+  "appTitle": "A Day in Dhaka",
+  "tagline": "Every day, a different Dhaka life",
+  "rickshawName": "Rahim Chacha",
+  "rickshawRole": "Rickshaw puller",
+  "busName": "Babu",
+  "busRole": "Local bus conductor",
+  "teaName": "Monir Mama",
+  "teaRole": "Tea stall keeper",
+  "comingSoon": "Coming soon",
+  "fontCheck": "Font check",
+  "fontCheckFlutter": "Flutter text",
+  "fontCheckFlame": "Flame game text",
+  "language": "Language",
+  "testBuild": "Test build",
+  "unlocksAt": "Opens at mohalla level {level}",
+  "@unlocksAt": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  }
+}

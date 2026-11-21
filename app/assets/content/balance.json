@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "note": "Starting numbers from docs/DETAILED_DESIGN.md. Tuned after playtests; later overridable from Remote Config.",
+  "day_seconds": 240,
+  "economy": {
+    "fund_share": 0.10,
+    "featured_multiplier": 2,
+    "xp_base": 50,
+    "xp_per_rating_star": 20,
+    "xp_chapter_bonus": 100,
+    "xp_level_base": 80,
+    "xp_level_step": 40,
+    "max_level": 50
+  },
+  "unlocks": {"tea_stall": 2, "bus": 4, "old_dhaka": 5, "early_unlock_tara": 30},
+  "tara": {"daily_challenge": 3, "chapter": 5, "rewarded_ad": 2, "retry_cost": 5,
+           "streak": [5, 5, 10, 10, 10, 15]},
+  "ads": {"double_per_day": 3, "retry_per_day": 2, "tara_per_day": 3,
+          "interstitial_every_n_days": 3, "interstitial_per_day": 3, "no_interstitial_first_days": 3},
+  "rickshaw": {
+    "start_hour": 7, "end_hour": 21, "daily_target": 600,
+    "speed_tiles_per_s": 2.5,
+    "fare_base": 20, "fare_per_tile": 6, "fare_round_to": 5,
+    "counter_offer_factor": 1.2,
+    "eta_slack": 1.3, "late_step": 0.10, "waterlog_star_penalty": 0.5, "five_star_tip": 10,
+    "energy_start": 100, "energy_per_tile": 0.5, "energy_per_tile_rain": 0.8,
+    "tired_below": 20, "tired_speed": 0.7,
+    "tea_cost": 20, "tea_energy": 40,
+    "wrong_way_fine": 50, "wrong_way_stop_s": 5, "signal_wait_s": 3,
+    "waterlog_speed": 0.5, "rain_counter_bonus": 0.2, "rain_chance_per_day": 0.4, "rain_seconds": 40,
+    "waiting_passengers": [3, 5],
+    "passengers": {
+      "normal": {"offer": [0.9, 1.0], "counter_accept": 0.6, "weight": 50},
+      "miser": {"offer": [0.6, 0.8], "counter_accept": 0.3, "weight": 20},
+      "hurry": {"offer": [1.0, 1.1], "counter_accept": 0.9, "weight": 20},
+      "elder": {"offer": [0.8, 0.9], "counter_accept": 0.5, "weight": 10}
+    },
+    "upgrades": {
+      "new_rickshaw": {"cost": 1500, "speed": 1.15},
+      "battery_rickshaw": {"cost": 6000, "speed": 1.5, "energy": 0.5}
+    }
+  },
+  "bus": {
+    "trips_per_day": 2, "seats": 24, "ladies_seats": 4, "elder_seats": 2, "standing": 10,
+    "crowded_above": 30, "seconds_between_stops": [12, 15],
+    "fare_min": 10, "fare_per_stop": 5, "fare_max": 35,
+    "student_share": 0.5, "evader_chance": 0.08, "checker_fine": 20, "on_time_bonus": 50,
+    "start_change": 200, "argument_s": 3,
+    "call_perfect_extra": 2, "call_good_extra": 1,
+    "upgrades": {
+      "notebook": {"cost": 800},
+      "change_bag": {"cost": 1800, "start_change": 400},
+      "loud_voice": {"cost": 2500, "perfect_zone": 1.5}
+    }
+  },
+  "tea_stall": {
+    "start_hour": 6, "end_hour": 23, "rush_hours": [[7, 9], [17, 20]],
+    "arrival_every_s": 6, "rush_arrival_every_s": 3,
+    "patience_s": {"normal": 12, "office": 8, "elder": 16},
+    "kettle_cups": 8, "kettle_refill_s": 5, "happy_tip_share": 0.10,
+    "menu": {
+      "liquor_tea": {"price": 10, "steps": ["cup", "kettle"]},
+      "milk_tea": {"price": 15, "steps": ["cup", "kettle", "milk", "sugar"]},
+      "banana": {"price": 10, "steps": ["banana"]},
+      "bun": {"price": 20, "steps": ["bun_jar"]},
+      "paan": {"price": 10, "steps": ["betel_leaf", "areca", "lime"]}
+    },
+    "upgrades": {
+      "bench": {"cost": 800, "arrivals": 1.2, "patience_bonus_s": 3},
+      "second_kettle": {"cost": 1200},
+      "awning": {"cost": 1500},
+      "fridge": {"cost": 3000, "item": "cold_drink", "price": 25},
+      "shop": {"cost": 5000, "chapter": 3}
+    }
+  },
+  "fund_projects": {
+    "street_lights": {"cost": 2000},
+    "drain_cleaning": {"cost": 3000},
+    "bus_shelter": {"cost": 2500}
+  }
+}

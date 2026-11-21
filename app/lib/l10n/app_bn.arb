@@ -1,0 +1,18 @@
+{
+  "@@locale": "bn",
+  "appTitle": "ঢাকার একদিন",
+  "tagline": "প্রতিদিন ঢাকার একজন নতুন মানুষ",
+  "rickshawName": "রহিম চাচা",
+  "rickshawRole": "রিকশাওয়ালা",
+  "busName": "বাবু",
+  "busRole": "লোকাল বাস কন্ডাক্টর",
+  "teaName": "মনির মামা",
+  "teaRole": "চা-দোকানি",
+  "comingSoon": "শিগগির আসছে",
+  "fontCheck": "ফন্ট পরীক্ষা",
+  "fontCheckFlutter": "Flutter লেখা",
+  "fontCheckFlame": "Flame খেলার লেখা",
+  "language": "ভাষা",
+  "testBuild": "পরীক্ষামূলক সংস্করণ",
+  "unlocksAt": "মহল্লা লেভেল {level}-এ খোলে"
+}

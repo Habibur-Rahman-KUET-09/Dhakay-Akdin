@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bangla on every phone: the game is Bangla first (GDD). -->
+    <string name="app_name">ঢাকার একদিন</string>
+</resources>
