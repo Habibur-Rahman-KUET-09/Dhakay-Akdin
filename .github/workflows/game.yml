@@ -84,7 +84,8 @@ jobs:
         run: |
           if [ -n "$FIREBASE_PROJECT_ID" ] && [ -n "$FIREBASE_API_KEY" ]; then
             python3 -c 'import json, os; json.dump({"project": os.environ["FIREBASE_PROJECT_ID"], "key": os.environ["FIREBASE_API_KEY"]}, open("game/content/cloud.json", "w"))'
-            godot --headless --path game -s res://tests/cloud_check.gd 2>&1 | grep -E "^cloud:|SCRIPT ERROR" || true
+            # Each outcome line as a notice on the run, easy to find.
+            godot --headless --path game -s res://tests/cloud_check.gd 2>&1 | grep -E "^cloud:|SCRIPT ERROR" | sed 's/^/::notice title=Online backup::/' || true
           else
             echo "No Firebase secrets: the online copy is off in this build"
           fi
