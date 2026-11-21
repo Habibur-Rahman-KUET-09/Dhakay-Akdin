@@ -32,6 +32,10 @@ var focus: Driver
 ## street round the player is always busy.
 const NEAR := 13
 var _recycle_left := 0.0
+## Who is where on the road this frame: cell -> [[heading, progress, length]].
+var _lanes := {}
+## Vehicle lengths in tiles (a tile is 6 m).
+const LENGTH := {"rickshaw": 0.45, "rickshaw_full": 0.45, "cng": 0.45, "bus": 1.5, "player": 0.45}
 
 
 func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 20, "rickshaw_full": 14, "cng": 9, "bus": 4, "person": 60}) -> void:
@@ -75,6 +79,7 @@ func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 20, "ricks
 			var agent := {
 				"kind": kind, "driver": d, "mm": mm, "i": i, "side": side,
 				"phase": rng.randf() * TAU, "a": a_colour, "b": b_colour, "at": Vector3.ZERO, "yaw": 0.0,
+				"speed": d.speed,
 			}
 			_agents.append(agent)
 			_place(agent, 0.0, true)
@@ -85,8 +90,18 @@ func _process(dt: float) -> void:
 	if _recycle_left <= 0.0 and focus != null:
 		_recycle_left = 0.5
 		_recycle()
+	_lanes.clear()
+	for a in _agents:
+		if a.kind != "person":
+			_occupy(a.driver, LENGTH[a.kind])
+	if focus != null:
+		_occupy(focus, LENGTH.player)
 	for a in _agents:
 		var d: Driver = a.driver
+		if a.kind != "person":
+			# Keep a gap to whoever is ahead in the same lane: slow, then stop.
+			var gap := gap_ahead(d, LENGTH[a.kind])
+			d.speed = a.speed * clampf((gap - 0.12) / 0.5, 0.0, 1.0)
 		var events := d.update(dt)
 		if events.has(Driver.Event.ENTERED):
 			_steer(a, rng.randf() < 0.35)
@@ -114,6 +129,49 @@ func _recycle() -> void:
 				_steer(a, true)
 				_place(a, 0.0, true)
 				break
+
+
+func _occupy(d: Driver, length: float) -> void:
+	if not _lanes.has(d.cell):
+		_lanes[d.cell] = []
+	_lanes[d.cell].append([d.heading, d.progress, length])
+
+
+## Free road ahead of d in its lane, in tiles (bumper to bumper): anyone
+## heading the same way in its tile or the next two. INF when clear.
+func gap_ahead(d: Driver, length := 0.45) -> float:
+	var best := INF
+	var cell := d.cell
+	for step in 3:
+		for o in _lanes.get(cell, []):
+			if o[0] != d.heading:
+				continue
+			var ahead: float = step + o[1] - d.progress
+			if ahead <= 0.001:
+				continue
+			best = minf(best, ahead - (o[2] + length) / 2.0)
+		if best < INF:
+			return best
+		cell = RoadMap.step(cell, d.heading)
+	return best
+
+
+## A vehicle waiting right behind d, for an impatient horn; else INF.
+func behind(d: Driver) -> Vector3:
+	for a in _agents:
+		if a.kind == "person":
+			continue
+		var o: Driver = a.driver
+		if o.heading != d.heading:
+			continue
+		var back: float = d.progress - o.progress
+		if o.cell == RoadMap.step(d.cell, RoadMap.opposite(d.heading)):
+			back += 1.0
+		elif o.cell != d.cell:
+			continue
+		if back > 0.0 and back < 1.2:
+			return a.at
+	return Vector3.INF
 
 
 ## A spot near the focus where something is driving, for a horn.

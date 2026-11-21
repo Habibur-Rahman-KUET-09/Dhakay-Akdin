@@ -25,6 +25,9 @@ var coast := 0.3
 var braking := 1.5
 ## Current speed, tiles per second.
 var speed_now := 0.0
+## How much of the top speed the road ahead allows (0 when someone is
+## right in front), set by the scene from the traffic.
+var room := 1.0
 
 var destination := Vector2i.ZERO
 ## The real place being driven to, when the map has places; else {}.
@@ -66,6 +69,7 @@ func update(dt: float) -> Array:
 		speed_now = minf(top, speed_now + accel * dt) if speed_now <= top else maxf(top, speed_now - braking * dt)
 	else:
 		speed_now = maxf(0.0, speed_now - coast * dt)
+	speed_now = minf(speed_now, top * room)
 	driver.speed = speed_now
 	var events := driver.update(dt)
 	# Stopped at a junction or a dead end: the rickshaw stands still.

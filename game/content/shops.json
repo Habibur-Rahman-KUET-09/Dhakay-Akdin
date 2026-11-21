@@ -127,5 +127,31 @@
  "to_let": {
   "bn": "টু-লেট",
   "en": "TO-LET"
- }
+ },
+ "billboards": [
+  {
+   "bn": "মজবুত সিমেন্ট, মজবুত বাড়ি",
+   "en": "Strong cement, strong homes"
+  },
+  {
+   "bn": "খাঁটি সরিষার তেল",
+   "en": "Pure mustard oil"
+  },
+  {
+   "bn": "নতুন মোবাইল ইন্টারনেট প্যাক",
+   "en": "New mobile internet pack"
+  },
+  {
+   "bn": "ঘর রাঙান নতুন রঙে",
+   "en": "Paint your home new"
+  },
+  {
+   "bn": "চায়ের সাথে মচমচে বিস্কুট",
+   "en": "Crunchy biscuits with tea"
+  },
+  {
+   "bn": "সহজে টাকা পাঠান",
+   "en": "Send money easily"
+  }
+ ]
 }

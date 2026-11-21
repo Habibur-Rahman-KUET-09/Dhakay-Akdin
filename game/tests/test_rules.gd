@@ -228,3 +228,15 @@ func _dir(a: Vector2i, b: Vector2i) -> int:
 		if RoadMap.step(a, d) == b:
 			return d
 	return -1
+
+
+func test_traffic_ahead_holds_the_rickshaw_back() -> void:
+	var s := Shift.new(small(), 1.0, 0.5, 3, 1)
+	s.pedal = true
+	s.accel = 100.0
+	s.room = 0.0
+	s.update(0.1)
+	near(s.speed_now, 0.0, "blocked: no speed")
+	s.room = 0.5
+	s.update(0.1)
+	near(s.speed_now, 0.5, "half the road free: half speed")

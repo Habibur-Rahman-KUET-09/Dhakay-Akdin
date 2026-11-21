@@ -14,6 +14,7 @@ const Models = preload("res://scripts/world/models.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
 const Sounds = preload("res://scripts/world/sounds.gd")
+const Clutter = preload("res://scripts/world/clutter.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
@@ -35,6 +36,8 @@ var _bell: AudioStreamPlayer
 var _horns: Array[AudioStreamPlayer3D] = []
 var _horn_sounds: Dictionary = {}
 var _horn_left := 2.0
+var _stopped_for := 0.0
+var _bob := 0.0
 var _yaw := 0.0
 var _side := Vector3.ZERO
 var _notice := ""
@@ -57,6 +60,10 @@ func _ready() -> void:
 	shift.braking = b.n("rickshaw.brake_decel")
 	_environment()
 	add_child(City.build(map, strings.lang))
+	var palette := PackedColorArray()
+	for hex in Traffic.PALETTE:
+		palette.append(Color(hex))
+	add_child(Clutter.build(map, palette))
 	traffic = Traffic.new()
 	add_child(traffic)
 	traffic.setup(map, map.home)
@@ -113,10 +120,17 @@ func _sounds() -> void:
 
 func _honk(dt: float) -> void:
 	_horn_left -= dt
+	_stopped_for = _stopped_for + dt if shift.speed_now < 0.05 else 0.0
 	if _horn_left > 0.0:
 		return
 	_horn_left = randf_range(1.2, 4.5)
 	var spot := traffic.somewhere_near(8)
+	# Standing still with someone behind: they let you know.
+	if _stopped_for > 1.5:
+		var queued := traffic.behind(shift.driver)
+		if queued != Vector3.INF:
+			spot = queued
+			_horn_left = randf_range(0.8, 2.0)
 	if spot == Vector3.INF:
 		return
 	var kind := traffic.kind_at_spot(spot)
@@ -133,8 +147,17 @@ func _honk(dt: float) -> void:
 
 func _environment() -> void:
 	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color("D3D4CC")
+	# A hazy Dhaka sky: pale, almost white near the horizon.
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color("9DB4C6")
+	sky_mat.sky_horizon_color = Color("E2DED2")
+	sky_mat.ground_horizon_color = Color("D9D4C6")
+	sky_mat.ground_bottom_color = Color("B8B0A0")
+	sky_mat.sun_angle_max = 20.0
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	env.background_mode = Environment.BG_SKY
+	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color("F3E9D8")
 	env.ambient_light_energy = 0.35
@@ -195,6 +218,8 @@ static func _yaw_for(d: int) -> float:
 
 
 func _process(dt: float) -> void:
+	var gap := traffic.gap_ahead(shift.driver)
+	shift.room = clampf((gap - 0.12) / 0.5, 0.0, 1.0)
 	var events := shift.update(dt)
 	if events.has(Driver.Event.ARRIVED):
 		_place_marker()
@@ -241,8 +266,12 @@ func _follow(dt: float, snap := false) -> void:
 	var pedalling := shift.pedal and d.moving
 	_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if pedalling else 0.0, 0.0, 1.0))
 	var forward := Vector3(-sin(_yaw), 0, -cos(_yaw))
-	camera.position = rickshaw.position - forward * CAMERA_BACK + Vector3.UP * CAMERA_UP
-	camera.look_at(rickshaw.position + forward * 8.0 + Vector3.UP * 1.2)
+	# A gentle sway with each push of the pedals.
+	if pedalling:
+		_bob += dt * d.speed * 9.0
+	var sway := Vector3(0, sin(_bob * 2.0) * 0.05, 0) + Vector3(-forward.z, 0, forward.x) * sin(_bob) * 0.04
+	camera.position = rickshaw.position - forward * CAMERA_BACK + Vector3.UP * CAMERA_UP + sway
+	camera.look_at(rickshaw.position + forward * 8.0 + Vector3.UP * 1.2 + sway * 0.5)
 
 
 func _update_hud() -> void:

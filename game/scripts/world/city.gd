@@ -8,6 +8,7 @@ extends RefCounted
 
 const RoadMap = preload("res://scripts/rules/road_map.gd")
 const Look = preload("res://scripts/ui/look.gd")
+const Clutter = preload("res://scripts/world/clutter.gd")
 
 ## Metres per map tile.
 const T := 6.0
@@ -211,6 +212,13 @@ static func _roads(map: RoadMap) -> MeshInstance3D:
 				_quad(st, dash, 0.02, DASH)
 		if k == RoadMap.Kind.FLOOD:
 			_quad(st, tile.grow(-0.3), 0.03, WATER)
+		elif k == RoadMap.Kind.ROAD and noise(p, 200) < 0.25:
+			# Wear: a dark pothole patch, and in some a puddle.
+			var c := o + Vector2(1.0 + noise(p, 201) * 3.0, 1.0 + noise(p, 202) * 3.0)
+			var size := Vector2(0.8 + noise(p, 203) * 1.2, 0.6 + noise(p, 204) * 0.9)
+			_quad(st, Rect2(c, size), 0.01, Color(0.55, 0.53, 0.5))
+			if noise(p, 205) < 0.5:
+				_quad(st, Rect2(c + Vector2(0.15, 0.12), size * 0.75), 0.02, Color(0.42, 0.5, 0.56))
 		var one := map.one_way(p)
 		if one >= 0:
 			_arrow(st, o + Vector2(T, T) / 2, one)
@@ -304,6 +312,9 @@ static func _blocks(map: RoadMap) -> Node3D:
 	var cloth_colour: Array[Color] = []
 	var ac_at: Array[Transform3D] = []
 	var to_let: Dictionary = shop_list.to_let
+	var mosques := {}
+	for m in Clutter.mosque_tiles(map):
+		mosques[m] = true
 	var tank_at: Array[Transform3D] = []
 	var crown_at: Array[Transform3D] = []
 	var crown_colour: Array[Color] = []
@@ -311,7 +322,7 @@ static func _blocks(map: RoadMap) -> Node3D:
 	for y in map.height:
 		for x in map.width:
 			var p := Vector2i(x, y)
-			if map.kind_at(p) != RoadMap.Kind.BLOCK:
+			if map.kind_at(p) != RoadMap.Kind.BLOCK or mosques.has(p):
 				continue
 			var faces: Array[int] = []
 			for d in 4:

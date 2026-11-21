@@ -260,10 +260,67 @@ static func _rickshaw(b: Builder, rider: bool, passenger: bool, wheels: bool) ->
 		_body(b, Vector3(0, 1.04, 0.66), true, false)
 
 
-## A whole rickshaw in one mesh, for traffic.
-static func rickshaw(passenger := false) -> ArrayMesh:
+## A whole rickshaw in one mesh, for traffic (or parked, without a rider).
+static func rickshaw(passenger := false, rider := true) -> ArrayMesh:
 	var b := Builder.new()
-	_rickshaw(b, true, passenger, true)
+	_rickshaw(b, rider, passenger, true)
+	return b.commit()
+
+
+## A fruit seller's van (a flat three-wheeled cart): a plank bed piled with
+## bananas, oranges, apples and green coconuts, under a faded umbrella.
+static func fruit_cart() -> ArrayMesh:
+	var b := Builder.new()
+	for x in [-0.62, 0.62]:
+		b.wheel(Vector3(x, 0.34, 0.5), 0.34)
+	b.wheel(Vector3(0, 0.34, -1.05), 0.34)
+	b.box(Vector3(1.3, 0.08, 1.5), Vector3(0, 0.72, 0.2), WOOD)
+	b.box(Vector3(0.04, 0.6, 0.04), Vector3(0, 0.5, -0.8), STEEL, Vector3(-30, 0, 0))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	var fruit := [Color("F2C230"), Color("F28C28"), Color("C62828"), Color("6FAE3A")]
+	for i in 46:
+		var c: Color = fruit[i % fruit.size()]
+		var r := 0.09 if i % 4 != 3 else 0.13
+		var x := rng.randf_range(-0.55, 0.55)
+		var z := rng.randf_range(-0.45, 0.85)
+		var mound := 0.25 * (1.0 - absf(x) / 0.7) * (1.0 - absf(z - 0.2) / 0.8)
+		b.ball(r, Vector3(x, 0.8 + mound + r, z), c)
+	b.box(Vector3(0.04, 1.6, 0.04), Vector3(0.5, 1.5, 0.75), STEEL)
+	b.shell(Vector3(0.5, 2.0, 0.75), 0.9, 60, 120, 0.9, Color("2D8BD6").lerp(Color.WHITE, 0.35), KEEP, 6)
+	b.shell(Vector3(0.5, 2.0, 0.75), 0.9, 60, 120, 0.02, Color("D7263D"), KEEP, 6)
+	_body(b, Vector3(-0.9, 0.0, 0.2), false, false)
+	return b.commit()
+
+
+## A mosque: a white prayer hall with a green dome and a tall minaret.
+static func mosque() -> ArrayMesh:
+	var b := Builder.new()
+	var white := Color("F1EEE6")
+	var green := Color("2E8B57")
+	b.box(Vector3(4.6, 4.2, 4.6), Vector3(0, 2.1, 0), white)
+	for x in [-1.4, 0.0, 1.4]:
+		b.box(Vector3(0.8, 1.6, 0.06), Vector3(x, 1.6, -2.31), Color("3B6E5A"))
+	b.cyl(1.7, 0.5, Vector3(0, 4.45, 0), white, Vector3.ZERO, 16)
+	b.ball(1.65, Vector3(0, 4.7, 0), green, Vector3(1, 1.15, 1))
+	b.cyl(0.05, 0.9, Vector3(0, 7.0, 0), Color("D4AF37"))
+	b.cyl(0.42, 11.0, Vector3(2.0, 5.5, 2.0), white, Vector3.ZERO, 10, KEEP, Vector2.ZERO, 0.36)
+	b.cyl(0.62, 0.35, Vector3(2.0, 8.6, 2.0), white, Vector3.ZERO, 12)
+	b.ball(0.42, Vector3(2.0, 11.2, 2.0), green, Vector3(1, 1.3, 1))
+	b.cyl(0.04, 0.7, Vector3(2.0, 12.0, 2.0), Color("D4AF37"))
+	return b.commit()
+
+
+## A billboard on two steel legs, for a rooftop: a board (lettered by the
+## caller) in a steel frame.
+static func billboard_frame() -> ArrayMesh:
+	var b := Builder.new()
+	for x in [-2.2, 2.2]:
+		b.box(Vector3(0.18, 3.0, 0.18), Vector3(x, 1.5, 0.3), STEEL)
+		b.box(Vector3(0.12, 3.2, 0.12), Vector3(x, 1.6, 1.2), STEEL, Vector3(-18, 0, 0))
+	b.box(Vector3(6.2, 3.1, 0.16), Vector3(0, 4.4, 0), STEEL)
+	b.box(Vector3(6.0, 2.9, 0.05), Vector3(0, 4.4, -0.1), Color.WHITE, Vector3.ZERO, PAINT_A)
+	b.box(Vector3(6.0, 0.6, 0.06), Vector3(0, 3.3, -0.11), Color.WHITE, Vector3.ZERO, PAINT_B)
 	return b.commit()
 
 
