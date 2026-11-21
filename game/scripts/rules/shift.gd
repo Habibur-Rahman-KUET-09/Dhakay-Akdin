@@ -68,6 +68,9 @@ func update(dt: float) -> Array:
 		speed_now = maxf(0.0, speed_now - coast * dt)
 	driver.speed = speed_now
 	var events := driver.update(dt)
+	# Stopped at a junction or a dead end: the rickshaw stands still.
+	if not driver.moving:
+		speed_now = 0.0
 	if not events.has(Driver.Event.ENTERED):
 		return events
 	if driver.cell == destination:

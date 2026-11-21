@@ -13,6 +13,7 @@ const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
+const Sounds = preload("res://scripts/world/sounds.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
@@ -29,6 +30,11 @@ var _paint: ShaderMaterial
 var camera: Camera3D
 var marker: Node3D
 var hud: Hud
+var traffic: Traffic
+var _bell: AudioStreamPlayer
+var _horns: Array[AudioStreamPlayer3D] = []
+var _horn_sounds: Dictionary = {}
+var _horn_left := 2.0
 var _yaw := 0.0
 var _side := Vector3.ZERO
 var _notice := ""
@@ -51,9 +57,11 @@ func _ready() -> void:
 	shift.braking = b.n("rickshaw.brake_decel")
 	_environment()
 	add_child(City.build(map, strings.lang))
-	var traffic := Traffic.new()
+	traffic = Traffic.new()
 	add_child(traffic)
 	traffic.setup(map, map.home)
+	traffic.focus = shift.driver
+	_sounds()
 	# Rahim Chacha's own rickshaw: yellow hood, magenta body.
 	rickshaw = Models.player_rickshaw(Look.YELLOW, Look.MAGENTA)
 	_paint = Models.traffic_material(PackedColorArray([Look.YELLOW, Look.MAGENTA]), false)
@@ -77,6 +85,50 @@ func _ready() -> void:
 	_yaw = _yaw_for(shift.driver.heading)
 	_place_marker()
 	_follow(0.0, true)
+
+
+## The bell, a few horn players placed on passing traffic, the road's hum.
+func _sounds() -> void:
+	_bell = AudioStreamPlayer.new()
+	_bell.stream = Sounds.bell()
+	add_child(_bell)
+	var hum := AudioStreamPlayer.new()
+	hum.stream = Sounds.street_hum()
+	hum.volume_db = -10.0
+	hum.autoplay = true
+	add_child(hum)
+	_horn_sounds = {
+		"cng": Sounds.horn(560.0, 700.0, 0.35),
+		"bus": Sounds.horn(290.0, 370.0, 0.9),
+		"rickshaw": Sounds.bell(),
+		"rickshaw_full": Sounds.bell(),
+	}
+	for i in 3:
+		var h := AudioStreamPlayer3D.new()
+		h.unit_size = 8.0
+		h.max_distance = 80.0
+		add_child(h)
+		_horns.append(h)
+
+
+func _honk(dt: float) -> void:
+	_horn_left -= dt
+	if _horn_left > 0.0:
+		return
+	_horn_left = randf_range(1.2, 4.5)
+	var spot := traffic.somewhere_near(8)
+	if spot == Vector3.INF:
+		return
+	var kind := traffic.kind_at_spot(spot)
+	if not _horn_sounds.has(kind):
+		return
+	for h in _horns:
+		if not h.playing:
+			h.stream = _horn_sounds[kind]
+			h.position = spot + Vector3(0, 1.2, 0)
+			h.volume_db = -4.0 if kind == "bus" else -8.0
+			h.play()
+			return
 
 
 func _environment() -> void:
@@ -156,6 +208,7 @@ func _process(dt: float) -> void:
 		if _notice_left <= 0.0 or (_notice_left > 1e6 and shift.driver.moving):
 			_notice = ""
 	_follow(dt)
+	_honk(dt)
 	var ring := marker.get_node("Ring") as Node3D
 	var k := fmod(Time.get_ticks_msec() / 1000.0, 1.2) / 1.2
 	ring.scale = Vector3.ONE * (1.0 + k)
@@ -214,7 +267,9 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var finger: int = event.index
 		if event.pressed:
-			if hud.pedal_rect().has_point(event.position):
+			if hud.bell_rect().has_point(event.position):
+				_bell.play()
+			elif hud.pedal_rect().has_point(event.position):
 				_pedal_fingers[finger] = true
 			elif hud.brake_rect().has_point(event.position):
 				_brake_fingers[finger] = true

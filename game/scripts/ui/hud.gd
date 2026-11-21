@@ -32,6 +32,7 @@ const BRAKE_SIZE := Vector2(104, 104)
 ## themselves: the scene reads touches by finger, so one finger can pedal
 ## while another swipes.
 var pedal_button: Panel
+var bell_button: Panel
 var brake_button: Panel
 var _speed: Label
 var _pedal_down := false
@@ -106,9 +107,16 @@ func _ready() -> void:
 	root.add_child(bottom)
 	var controls := HBoxContainer.new()
 	controls.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var left := VBoxContainer.new()
+	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	left.size_flags_vertical = Control.SIZE_SHRINK_END
+	left.add_theme_constant_override("separation", 10)
+	bell_button = _round_button(s.t("bell"), Vector2(78, 78), Look.YELLOW)
+	bell_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	left.add_child(bell_button)
 	brake_button = _round_button(s.t("brake"), BRAKE_SIZE, Look.VERMILION)
-	brake_button.size_flags_vertical = Control.SIZE_SHRINK_END
-	controls.add_child(brake_button)
+	left.add_child(brake_button)
+	controls.add_child(left)
 	_speed = Look.label("", 18, true)
 	_speed.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_speed.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -162,6 +170,10 @@ func pedal_rect() -> Rect2:
 
 func brake_rect() -> Rect2:
 	return brake_button.get_global_rect().grow(16)
+
+
+func bell_rect() -> Rect2:
+	return bell_button.get_global_rect().grow(10)
 
 
 func show_controls(pedal: bool, brake: bool, kmh: float) -> void:

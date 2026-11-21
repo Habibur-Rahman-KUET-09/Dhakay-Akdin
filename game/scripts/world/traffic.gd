@@ -24,13 +24,23 @@ const PALETTE := [
 var map: RoadMap
 var rng := RandomNumberGenerator.new()
 var _agents: Array = []
+var _roads: Array = []
+var _mains: Array = []
+## The rickshaw the crowd gathers round (set by the scene).
+var focus: Driver
+## Agents further than this (tiles) are moved back near the focus, so the
+## street round the player is always busy.
+const NEAR := 13
+var _recycle_left := 0.0
 
 
-func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 22, "rickshaw_full": 14, "cng": 10, "bus": 5, "person": 50}) -> void:
+func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 20, "rickshaw_full": 14, "cng": 9, "bus": 4, "person": 60}) -> void:
 	map = road_map
 	rng.seed = 2026
 	var roads := map.roads().filter(func(p): return absi(p.x - avoid.x) + absi(p.y - avoid.y) > 3)
 	var mains := roads.filter(func(p): return map.kind_at(p) == RoadMap.Kind.MAIN_ROAD)
+	_roads = roads
+	_mains = mains
 	var palette := PackedColorArray()
 	for hex in PALETTE:
 		palette.append(Color(hex))
@@ -71,6 +81,10 @@ func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 22, "ricks
 
 
 func _process(dt: float) -> void:
+	_recycle_left -= dt
+	if _recycle_left <= 0.0 and focus != null:
+		_recycle_left = 0.5
+		_recycle()
 	for a in _agents:
 		var d: Driver = a.driver
 		var events := d.update(dt)
@@ -79,6 +93,50 @@ func _process(dt: float) -> void:
 		if not d.moving:
 			_steer(a, true)
 		_place(a, dt)
+
+
+## Moves agents that drifted far from the focus to a road 6–12 tiles from
+## it, where the haze hides them appearing.
+func _recycle() -> void:
+	var me := focus.cell
+	for a in _agents:
+		var d: Driver = a.driver
+		if absi(d.cell.x - me.x) + absi(d.cell.y - me.y) <= NEAR:
+			continue
+		var pool: Array = _mains if a.kind == "bus" and not _mains.is_empty() else _roads
+		for attempt in 12:
+			var p: Vector2i = pool[rng.randi() % pool.size()]
+			var far := absi(p.x - me.x) + absi(p.y - me.y)
+			if far >= 6 and far <= 12:
+				d.cell = p
+				d.progress = 0.0
+				d.moving = true
+				_steer(a, true)
+				_place(a, 0.0, true)
+				break
+
+
+## A spot near the focus where something is driving, for a horn.
+func somewhere_near(max_tiles: int) -> Vector3:
+	var picks := []
+	for a in _agents:
+		if a.kind == "person" or focus == null:
+			continue
+		var d: Driver = a.driver
+		if absi(d.cell.x - focus.cell.x) + absi(d.cell.y - focus.cell.y) <= max_tiles:
+			picks.append(a)
+	if picks.is_empty():
+		return Vector3.INF
+	var a: Dictionary = picks[rng.randi() % picks.size()]
+	return a.at
+
+
+## Which kind is at a spot returned by somewhere_near (for its horn).
+func kind_at_spot(spot: Vector3) -> String:
+	for a in _agents:
+		if a.at == spot:
+			return a.kind
+	return ""
 
 
 ## At a tile: buses stay on main roads; the others sometimes turn, and

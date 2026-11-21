@@ -5,7 +5,8 @@
 
 For each slot below it asks the Poly Haven API for textures whose
 categories or tags match, takes the most downloaded one, and saves its
-1k diffuse (colour) map as game/textures/<slot>.jpg. game/textures/
+1k diffuse (colour) map as game/textures/<slot>.jpg (the game uses them
+resized to 512 px: run tool/fetch_textures.py, then resize). game/textures/
 SOURCES.json records which asset each file came from. Run by the
 textures workflow, which has open internet.
 
@@ -25,9 +26,7 @@ SLOTS = {
     'asphalt': (['asphalt', 'road'], ['snow', 'marking', 'line']),
     'pavement': (['pavement', 'paving', 'sidewalk', 'tiles'], ['roof', 'wood', 'ceramic', 'snow']),
     'plaster': (['plaster', 'painted', 'stucco', 'wall'], ['brick', 'wood', 'snow', 'tile']),
-    'concrete': (['concrete'], ['tiles', 'snow', 'brick']),
     'shutter': (['corrugated', 'metal', 'rusty'], ['floor', 'grate', 'snow']),
-    'ground': (['dirt', 'ground', 'soil'], ['snow', 'grass', 'forest', 'leaves']),
     'brick': (['brick'], ['snow', 'white']),
 }
 

@@ -29,6 +29,10 @@ const WALLS := [
 	Color("E6C9B5"), Color("CFE0D2"), Color("D8D3E6"), Color("A9A59C"),
 	Color("E9D7A0"), Color("C7D8E4"),
 ]
+const CLOTHES := [
+	Color("C2185B"), Color("F2B705"), Color("2D8BD6"), Color("2E9E6B"), Color("E2432A"),
+	Color("F2F2F2"), Color("6A1B9A"), Color("FF8A65"), Color("1C4E9B"),
+]
 const SIGN_COLOURS := [
 	Color("C2185B"), Color("1F6F43"), Color("1C4E9B"), Color("D63A2F"),
 	Color("F2B705"), Color("6A1B9A"), Color("0F7C8C"), Color("222222"),
@@ -54,6 +58,7 @@ static func build(map: RoadMap, lang: String) -> Node3D:
 	town.add_child(_blocks(map))
 	town.add_child(_poles_and_wires(map))
 	_features(map, town)
+	_banners(map, town)
 	for pl in map.places:
 		var s := _sign(RoadMap.place_name(pl, lang), centre(pl.at, 10.0), 64)
 		s.visibility_range_end = 110.0
@@ -88,45 +93,77 @@ static func _ground(map: RoadMap) -> MeshInstance3D:
 # --- Textures, drawn once at start --------------------------------------
 
 
-## One bay of an upper floor: plaster, a window with a steel grill, a sill,
-## rain stains. Grey, so each building's colour tints it.
-static func _window_texture() -> ImageTexture:
+## A photo texture from textures/ (Poly Haven, CC0; textures/SOURCES.json),
+## kept as JPEG in the export and decoded here.
+static func _photo(name: String) -> Image:
+	var img := Image.new()
+	var err := img.load_jpg_from_buffer(FileAccess.get_file_as_bytes("res://textures/%s.jpg" % name))
+	if err != OK:
+		push_error("texture %s missing" % name)
+		img = Image.create(64, 64, false, Image.FORMAT_RGB8)
+		img.fill(Color(0.8, 0.8, 0.8))
+	img.convert(Image.FORMAT_RGBA8)
+	return img
+
+
+static func _texture(img: Image) -> ImageTexture:
+	img.generate_mipmaps()
+	return ImageTexture.create_from_image(img)
+
+
+## A photo turned into light grey grain, so a wall colour can tint it.
+static func _grain(photo: Image, size: int, lo: float, hi: float) -> Image:
+	var img: Image = photo.duplicate()
+	img.resize(size, size)
+	for y in size:
+		for x in size:
+			var v := lerpf(lo, hi, clampf((img.get_pixel(x, y).get_luminance() - 0.15) / 0.45, 0.0, 1.0))
+			img.set_pixel(x, y, Color(v, v, v))
+	return img
+
+
+## One bay of an upper floor (3 m square) drawn over a wall: a window with a
+## steel grill, a sill, rain stains below.
+static func _window_bay(wall: Image) -> ImageTexture:
+	var img: Image = wall.duplicate()
+	img.resize(192, 192)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
-	var img := Image.create(96, 96, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0.93, 0.93, 0.92))
-	for i in 900:
-		var v := rng.randf_range(0.82, 0.95)
-		img.set_pixel(rng.randi_range(0, 95), rng.randi_range(0, 95), Color(v, v, v * 0.98))
-	img.fill_rect(Rect2i(18, 20, 60, 48), Color(0.17, 0.2, 0.24))
-	img.fill_rect(Rect2i(18, 20, 60, 3), Color(0.55, 0.55, 0.53))
-	for x in range(22, 78, 7):
-		img.fill_rect(Rect2i(x, 20, 2, 48), Color(0.62, 0.62, 0.6))
-	for y in [34, 50]:
-		img.fill_rect(Rect2i(18, y, 60, 2), Color(0.62, 0.62, 0.6))
-	img.fill_rect(Rect2i(14, 68, 68, 5), Color(0.8, 0.8, 0.78))
-	for i in 12:
-		img.fill_rect(Rect2i(rng.randi_range(16, 80), 73, 2, rng.randi_range(6, 20)), Color(0.72, 0.72, 0.7))
-	img.generate_mipmaps()
-	return ImageTexture.create_from_image(img)
+	img.fill_rect(Rect2i(36, 40, 120, 96), Color(0.15, 0.18, 0.22))
+	img.fill_rect(Rect2i(36, 40, 120, 6), Color(0.5, 0.5, 0.48))
+	for x in range(44, 156, 14):
+		img.fill_rect(Rect2i(x, 40, 4, 96), Color(0.6, 0.6, 0.58))
+	for y in [68, 100]:
+		img.fill_rect(Rect2i(36, y, 120, 4), Color(0.6, 0.6, 0.58))
+	img.fill_rect(Rect2i(28, 136, 136, 10), Color(0.78, 0.78, 0.76))
+	for i in 14:
+		var x := rng.randi_range(32, 160)
+		var run := rng.randi_range(12, 44)
+		for k in run:
+			var c := img.get_pixel(x, 146 + k)
+			img.set_pixel(x, 146 + k, c.darkened(0.25 * (1.0 - float(k) / run)))
+			img.set_pixel(x + 1, 146 + k, c.darkened(0.15 * (1.0 - float(k) / run)))
+	return _texture(img)
 
 
-## One bay of a ground-floor shop: a half-raised shutter over a dark shop.
-static func _shop_texture() -> ImageTexture:
+## One bay of a ground-floor shop: a half-raised corrugated shutter over a
+## dark shop with goods on the shelves.
+static func _shop_bay(wall: Image, shutter: Image) -> ImageTexture:
+	var img: Image = wall.duplicate()
+	img.resize(192, 192)
+	# The photo's ribs run up and down; a rolling shutter's run across.
+	var metal := _grain(shutter, 168, 0.45, 0.8)
+	metal.rotate_90(CLOCKWISE)
+	metal.resize(168, 66)
+	img.fill_rect(Rect2i(12, 28, 168, 164), Color(0.12, 0.11, 0.1))
+	img.blit_rect(metal, Rect2i(0, 0, 168, 66), Vector2i(12, 28))
+	img.fill_rect(Rect2i(12, 92, 168, 4), Color(0.3, 0.3, 0.3))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
-	var img := Image.create(96, 96, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0.85, 0.85, 0.83))
-	img.fill_rect(Rect2i(6, 14, 84, 82), Color(0.13, 0.12, 0.11))
-	for y in range(14, 46, 3):
-		img.fill_rect(Rect2i(6, y, 84, 2), Color(0.62, 0.64, 0.66))
-	img.fill_rect(Rect2i(6, 45, 84, 2), Color(0.35, 0.35, 0.35))
-	# Goods on shelves inside.
-	for i in 40:
-		var c := Color.from_hsv(rng.randf(), rng.randf_range(0.3, 0.8), rng.randf_range(0.35, 0.8))
-		img.fill_rect(Rect2i(rng.randi_range(10, 82), rng.randi_range(52, 88), 5, 4), c)
-	img.generate_mipmaps()
-	return ImageTexture.create_from_image(img)
+	for i in 60:
+		var c := Color.from_hsv(rng.randf(), rng.randf_range(0.3, 0.8), rng.randf_range(0.35, 0.85))
+		img.fill_rect(Rect2i(rng.randi_range(18, 168), rng.randi_range(104, 180), rng.randi_range(6, 14), rng.randi_range(6, 10)), c)
+	return _texture(img)
 
 
 # --- Roads and pavements -------------------------------------------------
@@ -156,13 +193,15 @@ static func _tri(st: SurfaceTool, pts: Array, y: float, c: Color) -> void:
 static func _roads(map: RoadMap) -> MeshInstance3D:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var walk := SurfaceTool.new()
+	walk.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for p in map.roads():
 		var o := Vector2(p.x * T, p.y * T)
 		var tile := Rect2(o, Vector2(T, T))
 		var k := map.kind_at(p)
-		var shade := 0.94 + noise(p, 9) * 0.08
-		var base_colour := MAIN if k == RoadMap.Kind.MAIN_ROAD else TARMAC
-		_quad(st, tile, 0.0, Color(base_colour.r * shade, base_colour.g * shade, base_colour.b * shade))
+		# The photo is the colour; this only shades it tile by tile.
+		var shade := (0.82 if k == RoadMap.Kind.MAIN_ROAD else 0.97) * (0.92 + noise(p, 9) * 0.1)
+		_quad(st, tile, 0.0, Color(shade, shade, shade * 0.98))
 		if k == RoadMap.Kind.MAIN_ROAD:
 			var ew := map.is_road(RoadMap.step(p, RoadMap.E)) and map.is_road(RoadMap.step(p, RoadMap.W))
 			var ns := map.is_road(RoadMap.step(p, RoadMap.N)) and map.is_road(RoadMap.step(p, RoadMap.S))
@@ -183,12 +222,16 @@ static func _roads(map: RoadMap) -> MeshInstance3D:
 				continue
 			for d in 4:
 				if map.is_road(RoadMap.step(p, d)):
-					var v := 0.95 + noise(p, d) * 0.08
-					_quad(st, _strip(p, d, PAVEMENT), 0.15, Color(PAVING.r * v, PAVING.g * v, PAVING.b * v))
+					var v := 0.9 + noise(p, d) * 0.1
+					_quad(walk, _strip(p, d, PAVEMENT), 0.15, Color(v, v * 0.97, v * 0.92))
+	var mesh := ArrayMesh.new()
+	st.commit(mesh)
+	walk.commit(mesh)
+	mesh.surface_set_material(0, _material(true, _texture(_photo("asphalt"))))
+	mesh.surface_set_material(1, _material(true, _texture(_photo("pavement"))))
 	var mi := MeshInstance3D.new()
 	mi.name = "Roads"
-	mi.mesh = st.commit()
-	mi.material_override = _material()
+	mi.mesh = mesh
 	return mi
 
 
@@ -243,6 +286,8 @@ static func _wall(st: SurfaceTool, a: Vector2, b: Vector2, y0: float, y1: float,
 static func _blocks(map: RoadMap) -> Node3D:
 	var walls := SurfaceTool.new()
 	walls.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var bricks := SurfaceTool.new()
+	bricks.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var shops := SurfaceTool.new()
 	shops.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var roofs := SurfaceTool.new()
@@ -253,6 +298,12 @@ static func _blocks(map: RoadMap) -> Node3D:
 	node.name = "Blocks"
 	var board_at: Array[Transform3D] = []
 	var board_colour: Array[Color] = []
+	var slab_at: Array[Transform3D] = []
+	var slab_colour: Array[Color] = []
+	var cloth_at: Array[Transform3D] = []
+	var cloth_colour: Array[Color] = []
+	var ac_at: Array[Transform3D] = []
+	var to_let: Dictionary = shop_list.to_let
 	var tank_at: Array[Transform3D] = []
 	var crown_at: Array[Transform3D] = []
 	var crown_colour: Array[Color] = []
@@ -281,6 +332,11 @@ static func _blocks(map: RoadMap) -> Node3D:
 			var z0 := p.y * T + (PAVEMENT if faces.has(RoadMap.N) else 0.12)
 			var z1 := (p.y + 1) * T - (PAVEMENT if faces.has(RoadMap.S) else 0.12)
 			var wall: Color = WALLS[int(noise(p, 2) * WALLS.size())]
+			# About one building in five is bare brick, never plastered.
+			var brick := noise(p, 8) < 0.2
+			var skin := bricks if brick else walls
+			if brick:
+				wall = Color(0.95, 0.93, 0.9)
 			# Corners of each side, going clockwise seen from above.
 			var sides := {
 				RoadMap.N: [Vector2(x0, z0), Vector2(x1, z0)],
@@ -292,10 +348,22 @@ static func _blocks(map: RoadMap) -> Node3D:
 				var a: Vector2 = sides[d][0]
 				var b: Vector2 = sides[d][1]
 				if not faces.has(d):
-					_wall(walls, a, b, 0.0, h, wall.darkened(0.08), h)
+					_wall(skin, a, b, 0.0, h, wall.darkened(0.08), h)
 					continue
 				_wall(shops, a, b, 0.15, FLOOR, Color.WHITE, FLOOR)
-				_wall(walls, a, b, FLOOR, h, wall, h)
+				_wall(skin, a, b, FLOOR, h, wall, h)
+				_front_details(p, d, a, b, floors, wall, slab_at, slab_colour, cloth_at, cloth_colour, ac_at)
+				if floors >= 3 and noise(p, 70 + d) < 0.12:
+					var out_dir := Vector3(RoadMap.DX[d], 0, RoadMap.DY[d])
+					var spot := Vector3((a.x + b.x) / 2, FLOOR + 1.6, (a.y + b.y) / 2) + out_dir * 0.08
+					var along_dir := Vector3(b.x - a.x, 0, b.y - a.y).normalized()
+					board_at.append(Transform3D(Basis(along_dir * 1.6, Vector3.UP * 0.7, out_dir * 0.04), spot))
+					board_colour.append(Color("F4F1E8"))
+					var let_label := _sign(to_let.bn if noise(p, 71 + d) < 0.6 else to_let.en, spot + out_dir * 0.04, 34, Look.VERMILION, false)
+					let_label.outline_size = 0
+					let_label.rotation.y = atan2(out_dir.x, out_dir.z)
+					let_label.visibility_range_end = 30.0
+					node.add_child(let_label)
 				# A signboard over the shop, its name facing the road.
 				var out := Vector3(RoadMap.DX[d], 0, RoadMap.DY[d])
 				var along := Vector3(b.x - a.x, 0, b.y - a.y)
@@ -312,14 +380,22 @@ static func _blocks(map: RoadMap) -> Node3D:
 				label.rotation.y = atan2(out.x, out.z)
 				label.visibility_range_end = 38.0
 				node.add_child(label)
-			_quad(roofs, Rect2(x0, z0, x1 - x0, z1 - z0), h, wall.darkened(0.3))
+			_quad(roofs, Rect2(x0, z0, x1 - x0, z1 - z0), h, wall.lightened(0.3))
 			if noise(p, 3) < 0.45:
 				tank_at.append(Transform3D(Basis(), Vector3(x0 + 1.4, h + 0.7, z0 + 1.4)))
 	var mesh := ArrayMesh.new()
 	walls.commit(mesh)
+	bricks.commit(mesh)
 	shops.commit(mesh)
 	roofs.commit(mesh)
-	var textures := [_window_texture(), _shop_texture(), null]
+	var concrete := _photo("plaster")
+	var plaster := _grain(concrete, 192, 0.8, 0.98)
+	var textures := [
+		_window_bay(plaster),
+		_window_bay(_photo("brick")),
+		_shop_bay(plaster, _photo("shutter")),
+		_texture(concrete),
+	]
 	for i in mesh.get_surface_count():
 		var m := _material(true, textures[i])
 		m.cull_mode = BaseMaterial3D.CULL_DISABLED
@@ -328,6 +404,9 @@ static func _blocks(map: RoadMap) -> Node3D:
 	mi.mesh = mesh
 	node.add_child(mi)
 	node.add_child(_multi(BoxMesh.new(), board_at, board_colour))
+	node.add_child(_multi(BoxMesh.new(), slab_at, slab_colour))
+	node.add_child(_multi(BoxMesh.new(), cloth_at, cloth_colour))
+	node.add_child(_multi(BoxMesh.new(), ac_at, [], Color("ECECEA")))
 	var tank := CylinderMesh.new()
 	tank.top_radius = 0.7
 	tank.bottom_radius = 0.7
@@ -347,6 +426,37 @@ static func _blocks(map: RoadMap) -> Node3D:
 	trunk.radial_segments = 6
 	node.add_child(_multi(trunk, trunk_at, [], Color("6B4A2B")))
 	return node
+
+
+## On a wall facing a road: balconies with railings (some hung with
+## washing) and air-conditioner boxes on the upper floors.
+static func _front_details(p: Vector2i, d: int, a: Vector2, b: Vector2, floors: int, wall: Color,
+		slab_at: Array[Transform3D], slab_colour: Array[Color], cloth_at: Array[Transform3D],
+		cloth_colour: Array[Color], ac_at: Array[Transform3D]) -> void:
+	var out := Vector3(RoadMap.DX[d], 0, RoadMap.DY[d])
+	var along := Vector3(b.x - a.x, 0, b.y - a.y)
+	var length := along.length()
+	var t := along / length
+	var mid := Vector3((a.x + b.x) / 2, 0, (a.y + b.y) / 2)
+	for fl in range(1, floors):
+		var y := fl * FLOOR
+		var n := noise(p, 40 + d * 7 + fl)
+		var shift := (noise(p, 50 + d * 7 + fl) - 0.5) * length * 0.35
+		var c := mid + t * shift + Vector3(0, y, 0)
+		if n < 0.5:
+			var w := length * 0.45
+			slab_at.append(Transform3D(Basis(t * w, Vector3.UP * 0.12, out * 0.85), c + out * 0.42))
+			slab_colour.append(wall.darkened(0.1))
+			var rail := Color("3A3D42") if n < 0.25 else wall.darkened(0.25)
+			slab_at.append(Transform3D(Basis(t * w, Vector3.UP * 0.95, out * 0.05), c + out * 0.84 + Vector3(0, 0.55, 0)))
+			slab_colour.append(rail)
+			if n < 0.32:
+				for k in 3:
+					cloth_at.append(Transform3D(Basis(t * 0.5, Vector3.UP * 0.75, out * 0.02),
+						c + out * 0.89 + Vector3(0, 0.75, 0) + t * (k - 1) * w * 0.3))
+					cloth_colour.append(CLOTHES[int(noise(p, 60 + fl * 3 + k + d) * CLOTHES.size())])
+		elif n > 0.78:
+			ac_at.append(Transform3D(Basis(t * 0.8, Vector3.UP * 0.55, out * 0.4), c + out * 0.22 + Vector3(0, 1.7, 0)))
 
 
 ## A multimesh: one copy per transform, coloured from `colours` or `colour`.
@@ -484,6 +594,36 @@ static func _features(map: RoadMap, town: Node3D) -> void:
 				town.add_child(_box(Vector3(2.6, 2.6, 2.2), side + Vector3(0, 1.3, 0), Color("B5651D")))
 				town.add_child(_box(Vector3(3.0, 0.15, 2.6), side + Vector3(0, 2.7, 0), Color("8C8C8C")))
 				town.add_child(_sign("বাড়ি", side + Vector3(0, 3.4, 0), 48, Look.MAGENTA))
+
+
+## Cloth banners hung across some straight stretches of road, lettered on
+## both sides: admissions, discounts, flats for sale.
+static func _banners(map: RoadMap, town: Node3D) -> void:
+	var list: Array = JSON.parse_string(FileAccess.get_file_as_string("res://content/shops.json")).banners
+	var cloth_at: Array[Transform3D] = []
+	var cloth_colour: Array[Color] = []
+	for p in map.roads():
+		if noise(p, 99) > 0.07:
+			continue
+		var ew := map.is_road(RoadMap.step(p, RoadMap.E)) and map.is_road(RoadMap.step(p, RoadMap.W))
+		var ns := map.is_road(RoadMap.step(p, RoadMap.N)) and map.is_road(RoadMap.step(p, RoadMap.S))
+		if ew == ns:
+			continue
+		# The banner spans the road, facing traffic.
+		var face := Vector3(1, 0, 0) if ew else Vector3(0, 0, 1)
+		var across := Vector3(0, 0, 1) if ew else Vector3(1, 0, 0)
+		var at := centre(p, 5.4)
+		var colour: Color = [Color("F4F1E8"), Color("FFF3B0"), Color("D7F0DD")][int(noise(p, 98) * 3)]
+		cloth_at.append(Transform3D(Basis(across * (T - 0.6), Vector3.UP * 1.0, face * 0.03), at))
+		cloth_colour.append(colour)
+		var text: Dictionary = list[int(noise(p, 97) * list.size())]
+		for side in [1.0, -1.0]:
+			var l := _sign(text.bn, at + face * 0.03 * side, 44, Look.VERMILION if side > 0 else Look.PARROT, false)
+			l.outline_size = 0
+			l.rotation.y = atan2(face.x * side, face.z * side)
+			l.visibility_range_end = 60.0
+			town.add_child(l)
+	town.add_child(_multi(BoxMesh.new(), cloth_at, cloth_colour))
 
 
 ## A spot at the edge of a road tile, beside a building, for things that
