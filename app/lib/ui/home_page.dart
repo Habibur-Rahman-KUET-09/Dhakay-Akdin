@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../economy/balance.dart';
 import '../l10n/gen/app_localizations.dart';
+import '../characters/rickshaw/rickshaw_page.dart';
 import 'font_check_page.dart';
 
 const _buildVersion = String.fromEnvironment(
@@ -10,8 +11,8 @@ const _buildVersion = String.fromEnvironment(
   defaultValue: 'dev',
 );
 
-/// The mohalla screen (§৩). For now: the three characters, still to come,
-/// and the font check of week 1.
+/// The mohalla screen (§৩). For now: the three characters (the rickshaw
+/// can be driven since week 2) and the font check of week 1.
 class HomePage extends StatelessWidget {
   const HomePage({
     super.key,
@@ -87,7 +88,13 @@ class HomePage extends StatelessWidget {
                   subtitle: Text(
                     level > 1 ? '$role · ${l.unlocksAt(level)}' : role,
                   ),
-                  trailing: Text(l.comingSoon, style: t.bodySmall),
+                  trailing: level == 1
+                      ? FilledButton(
+                          key: const ValueKey('drive'),
+                          onPressed: () => RickshawPage.open(context, balance),
+                          child: Text(l.rickshawDrive),
+                        )
+                      : Text(l.comingSoon, style: t.bodySmall),
                 ),
               ),
             ),

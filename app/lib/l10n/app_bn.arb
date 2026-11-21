@@ -14,5 +14,13 @@
   "fontCheckFlame": "Flame খেলার লেখা",
   "language": "ভাষা",
   "testBuild": "পরীক্ষামূলক সংস্করণ",
-  "unlocksAt": "মহল্লা লেভেল {level}-এ খোলে"
+  "unlocksAt": "মহল্লা লেভেল {level}-এ খোলে",
+  "rickshawDrive": "চালান",
+  "rickshawToGo": "গন্তব্য: {tiles} ব্লক দূরে",
+  "rickshawNoRoute": "এখান থেকে সোজা পথ নেই: ঘুরে যান",
+  "rickshawTrips": "ট্রিপ {count}",
+  "rickshawHint": "মোড়ের আগেই যেদিকে যাবেন সেদিকে সোয়াইপ করুন",
+  "rickshawWhichWay": "কোন দিকে? সোয়াইপ করুন",
+  "rickshawWrongWay": "একমুখী রাস্তা! উল্টো দিকে যাচ্ছেন",
+  "rickshawArrived": "পৌঁছে গেছেন! নতুন গন্তব্য"
 }

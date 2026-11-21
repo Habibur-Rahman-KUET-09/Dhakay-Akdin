@@ -21,5 +21,27 @@
         "type": "int"
       }
     }
-  }
+  },
+  "rickshawDrive": "Drive",
+  "rickshawToGo": "Destination: {tiles} blocks away",
+  "@rickshawToGo": {
+    "placeholders": {
+      "tiles": {
+        "type": "int"
+      }
+    }
+  },
+  "rickshawNoRoute": "No legal way from here: turn round",
+  "rickshawTrips": "Trips {count}",
+  "@rickshawTrips": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rickshawHint": "Swipe the way you want to turn before the junction",
+  "rickshawWhichWay": "Which way? Swipe",
+  "rickshawWrongWay": "One-way street! Wrong way",
+  "rickshawArrived": "Arrived! New destination"
 }

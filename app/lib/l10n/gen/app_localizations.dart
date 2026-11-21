@@ -187,6 +187,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opens at mohalla level {level}'**
   String unlocksAt(int level);
+
+  /// No description provided for @rickshawDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Drive'**
+  String get rickshawDrive;
+
+  /// No description provided for @rickshawToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination: {tiles} blocks away'**
+  String rickshawToGo(int tiles);
+
+  /// No description provided for @rickshawNoRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'No legal way from here: turn round'**
+  String get rickshawNoRoute;
+
+  /// No description provided for @rickshawTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips {count}'**
+  String rickshawTrips(int count);
+
+  /// No description provided for @rickshawHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe the way you want to turn before the junction'**
+  String get rickshawHint;
+
+  /// No description provided for @rickshawWhichWay.
+  ///
+  /// In en, this message translates to:
+  /// **'Which way? Swipe'**
+  String get rickshawWhichWay;
+
+  /// No description provided for @rickshawWrongWay.
+  ///
+  /// In en, this message translates to:
+  /// **'One-way street! Wrong way'**
+  String get rickshawWrongWay;
+
+  /// No description provided for @rickshawArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived! New destination'**
+  String get rickshawArrived;
 }
 
 class _AppLocalizationsDelegate

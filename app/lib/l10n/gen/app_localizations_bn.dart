@@ -55,4 +55,32 @@ class AppLocalizationsBn extends AppLocalizations {
   String unlocksAt(int level) {
     return 'মহল্লা লেভেল $level-এ খোলে';
   }
+
+  @override
+  String get rickshawDrive => 'চালান';
+
+  @override
+  String rickshawToGo(int tiles) {
+    return 'গন্তব্য: $tiles ব্লক দূরে';
+  }
+
+  @override
+  String get rickshawNoRoute => 'এখান থেকে সোজা পথ নেই: ঘুরে যান';
+
+  @override
+  String rickshawTrips(int count) {
+    return 'ট্রিপ $count';
+  }
+
+  @override
+  String get rickshawHint => 'মোড়ের আগেই যেদিকে যাবেন সেদিকে সোয়াইপ করুন';
+
+  @override
+  String get rickshawWhichWay => 'কোন দিকে? সোয়াইপ করুন';
+
+  @override
+  String get rickshawWrongWay => 'একমুখী রাস্তা! উল্টো দিকে যাচ্ছেন';
+
+  @override
+  String get rickshawArrived => 'পৌঁছে গেছেন! নতুন গন্তব্য';
 }

@@ -55,4 +55,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String unlocksAt(int level) {
     return 'Opens at mohalla level $level';
   }
+
+  @override
+  String get rickshawDrive => 'Drive';
+
+  @override
+  String rickshawToGo(int tiles) {
+    return 'Destination: $tiles blocks away';
+  }
+
+  @override
+  String get rickshawNoRoute => 'No legal way from here: turn round';
+
+  @override
+  String rickshawTrips(int count) {
+    return 'Trips $count';
+  }
+
+  @override
+  String get rickshawHint =>
+      'Swipe the way you want to turn before the junction';
+
+  @override
+  String get rickshawWhichWay => 'Which way? Swipe';
+
+  @override
+  String get rickshawWrongWay => 'One-way street! Wrong way';
+
+  @override
+  String get rickshawArrived => 'Arrived! New destination';
 }

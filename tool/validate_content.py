@@ -10,6 +10,9 @@
   only characters the bundled font (Hind Siliguri) can draw. It has no
   arrows (→), check marks or stars (★): use an icon for those, or the
   placeholder box shows on the phone.
+- maps/*.json: rows of equal length, only legend characters, one home (H),
+  a border of buildings. Whether every road can be reached legally is
+  checked by the app's tests (test/rickshaw/road_test.dart).
 """
 import glob
 import json
@@ -109,8 +112,33 @@ def check_glyphs(texts):
             err(where, f'the font cannot draw {" ".join(missing)} (use an icon instead)')
 
 
+MAP_TILES = set('#.nesw' + 'WTPH')
+
+
+def check_maps():
+    for path in sorted(glob.glob(os.path.join(ROOT, 'assets', 'content', 'maps', '*.json'))):
+        rel = os.path.relpath(path, ROOT)
+        m = json.load(open(path, encoding='utf-8'))
+        rows = m.get('rows') or []
+        if not rows:
+            err(rel, 'no rows')
+            continue
+        if len({len(r) for r in rows}) != 1:
+            err(rel, 'rows have different lengths')
+        for y, r in enumerate(rows):
+            bad = set(r) - MAP_TILES
+            if bad:
+                err(rel, f'row {y}: unknown tiles {" ".join(sorted(bad))}')
+        if sum(r.count('H') for r in rows) != 1:
+            err(rel, 'needs exactly one home tile (H)')
+        edge = rows[0] + rows[-1] + ''.join(r[0] + r[-1] for r in rows)
+        if set(edge) != {'#'}:
+            err(rel, 'the edge must be all buildings (#)')
+
+
 def main():
     check_balance()
+    check_maps()
     texts = check_arb() + content_texts()
     check_glyphs(texts)
     if errors:
