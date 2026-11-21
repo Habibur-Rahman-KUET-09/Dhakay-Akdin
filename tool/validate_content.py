@@ -112,7 +112,7 @@ def check_glyphs(texts):
             err(where, f'the font cannot draw {" ".join(missing)} (use an icon instead)')
 
 
-MAP_TILES = set('#.nesw' + 'WTPH')
+MAP_TILES = set('#O.Mnesw' + 'WTPH')
 
 
 def check_maps():

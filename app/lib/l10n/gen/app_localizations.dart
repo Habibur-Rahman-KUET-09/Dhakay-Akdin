@@ -235,6 +235,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Arrived! New destination'**
   String get rickshawArrived;
+
+  /// No description provided for @rickshawToPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'{place} · {tiles} blocks'**
+  String rickshawToPlace(String place, int tiles);
 }
 
 class _AppLocalizationsDelegate

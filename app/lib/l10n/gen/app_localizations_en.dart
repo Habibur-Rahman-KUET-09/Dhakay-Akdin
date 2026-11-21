@@ -84,4 +84,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rickshawArrived => 'Arrived! New destination';
+
+  @override
+  String rickshawToPlace(String place, int tiles) {
+    return '$place · $tiles blocks';
+  }
 }

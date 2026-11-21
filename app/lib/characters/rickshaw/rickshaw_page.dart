@@ -45,6 +45,7 @@ class RickshawPage extends StatefulWidget {
 class _RickshawPageState extends State<RickshawPage> {
   late final game = RickshawGame(
     RickshawShift.fromBalance(widget.map, widget.balance),
+    lang: Localizations.localeOf(context).languageCode,
   );
   Offset _moved = Offset.zero;
   bool _used = false;
@@ -79,7 +80,14 @@ class _RickshawPageState extends State<RickshawPage> {
             ),
             ValueListenableBuilder(
               valueListenable: game.hud,
-              builder: (context, h, _) => _Hud(hud: h, l: l),
+              builder: (context, h, _) => _Hud(
+                hud: h,
+                l: l,
+                place: game.shift.place?.name(
+                  Localizations.localeOf(context).languageCode,
+                ),
+                credit: widget.map.credit,
+              ),
             ),
           ],
         ),
@@ -89,10 +97,16 @@ class _RickshawPageState extends State<RickshawPage> {
 }
 
 class _Hud extends StatelessWidget {
-  const _Hud({required this.hud, required this.l});
+  const _Hud({required this.hud, required this.l, this.place, this.credit});
 
   final RickshawHud hud;
   final AppLocalizations l;
+
+  /// The real place being driven to, if the map has places.
+  final String? place;
+
+  /// Credit for the map data, always on screen.
+  final String? credit;
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +141,8 @@ class _Hud extends StatelessWidget {
                         child: Text(
                           hud.remaining == null
                               ? l.rickshawNoRoute
+                              : place != null
+                              ? l.rickshawToPlace(place!, hud.remaining!)
                               : l.rickshawToGo(hud.remaining!),
                           style: t.titleSmall,
                           overflow: TextOverflow.ellipsis,
@@ -147,6 +163,20 @@ class _Hud extends StatelessWidget {
           ),
         ),
         const Spacer(),
+        if (credit != null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
+              child: IgnorePointer(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  color: Palette.cream.withValues(alpha: 0.85),
+                  child: Text(credit!, style: t.labelSmall),
+                ),
+              ),
+            ),
+          ),
         Padding(
           padding: EdgeInsets.fromLTRB(
             16,

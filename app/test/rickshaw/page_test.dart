@@ -35,7 +35,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     }
     expect(find.byType(RickshawPage), findsOneWidget);
-    expect(find.textContaining('গন্তব্য'), findsOneWidget);
+    expect(find.textContaining('ব্লক'), findsOneWidget);
+    expect(find.textContaining('OpenStreetMap'), findsOneWidget);
     expect(find.text('ট্রিপ 0'), findsOneWidget);
 
     final game = tester

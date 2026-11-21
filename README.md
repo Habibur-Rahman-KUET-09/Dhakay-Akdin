@@ -14,6 +14,9 @@
 | `app/` | Flutter + Flame গেম (`lib/economy`, `lib/ui`, `lib/characters`…) |
 | `app/assets/content/balance.json` | গেমের সব সংখ্যা: দাম, গতি, সময় (কোডে কোনো সংখ্যা নেই) |
 | `tool/validate_content.py` | লেখা আর সংখ্যা যাচাই, বাংলা ফন্ট সব অক্ষর আঁকতে পারে কি না সহ |
+| `app/assets/content/maps/` | রিকশার ম্যাপ, আসল রাস্তা থেকে বানানো |
+| `tool/fetch_osm.py`, `.github/workflows/osm.yml` | OpenStreetMap থেকে এলাকার আসল রাস্তা আর জায়গা নামানো (`tool/osm/`) |
+| `tool/build_map.py` | সেই রাস্তা থেকে খেলার ম্যাপ বানানো: `python3 tool/build_map.py mirpur` |
 | `.github/workflows/app.yml` | প্রতিটা push-এ analyze, test, APK আর GitHub pre-release |
 
 চালানো:
@@ -22,3 +25,5 @@
 cd app && flutter pub get && flutter test && flutter run
 python3 tool/validate_content.py   # pip install fonttools
 ```
+
+ম্যাপের তথ্য: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL 1.0। গেমের পর্দাতেও লেখা থাকে।

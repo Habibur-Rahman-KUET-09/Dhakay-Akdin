@@ -22,5 +22,6 @@
   "rickshawHint": "মোড়ের আগেই যেদিকে যাবেন সেদিকে সোয়াইপ করুন",
   "rickshawWhichWay": "কোন দিকে? সোয়াইপ করুন",
   "rickshawWrongWay": "একমুখী রাস্তা! উল্টো দিকে যাচ্ছেন",
-  "rickshawArrived": "পৌঁছে গেছেন! নতুন গন্তব্য"
+  "rickshawArrived": "পৌঁছে গেছেন! নতুন গন্তব্য",
+  "rickshawToPlace": "{place} · আর {tiles} ব্লক"
 }

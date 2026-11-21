@@ -83,4 +83,9 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get rickshawArrived => 'পৌঁছে গেছেন! নতুন গন্তব্য';
+
+  @override
+  String rickshawToPlace(String place, int tiles) {
+    return '$place · আর $tiles ব্লক';
+  }
 }

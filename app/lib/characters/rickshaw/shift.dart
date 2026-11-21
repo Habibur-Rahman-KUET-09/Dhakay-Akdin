@@ -17,7 +17,7 @@ class RickshawShift {
     Random? random,
   }) : driver = Driver(map, speed: baseSpeed),
        _random = random ?? Random() {
-    destination = _pick();
+    _pick();
     _measure();
   }
 
@@ -41,6 +41,9 @@ class RickshawShift {
   final Random _random;
 
   late Point<int> destination;
+
+  /// The real place being driven to, when the map has places.
+  Place? place;
   int delivered = 0;
 
   /// Tiles left on the shortest legal way, from the last tile entered.
@@ -58,7 +61,7 @@ class RickshawShift {
     if (!events.contains(DriveEvent.enteredTile)) return events;
     if (driver.cell == destination) {
       delivered++;
-      destination = _pick();
+      _pick();
       events.add(DriveEvent.arrived);
     }
     _measure();
@@ -67,22 +70,40 @@ class RickshawShift {
 
   void _measure() => remaining = map.distance(driver.cell, destination);
 
-  /// A random dry road tile at least [minTrip] legal tiles away; the
-  /// farthest one if the map is too small for that.
-  Point<int> _pick() {
-    final dist = map.distancesFrom(driver.cell)
-      ..removeWhere(
-        (p, _) => switch (map.at(p).kind) {
-          TileKind.road || TileKind.teaStall || TileKind.signal => false,
-          _ => true,
-        },
-      );
+  /// A real place at least [minTrip] legal tiles away, other than the last
+  /// one; on a map without places, a dry road tile. The farthest one if
+  /// the map is too small for that.
+  void _pick() {
+    final dist = map.distancesFrom(driver.cell);
+    if (map.places.isNotEmpty) {
+      final options = [
+        for (final p in map.places)
+          if (p != place && dist.containsKey(p.at)) p,
+      ];
+      if (options.isEmpty) throw StateError('${map.id}: no place to drive to');
+      final far = options.where((p) => dist[p.at]! >= minTrip).toList();
+      place = far.isNotEmpty
+          ? far[_random.nextInt(far.length)]
+          : options.reduce((a, b) => dist[a.at]! >= dist[b.at]! ? a : b);
+      destination = place!.at;
+      return;
+    }
+    dist.removeWhere(
+      (p, _) => switch (map.at(p).kind) {
+        TileKind.road ||
+        TileKind.mainRoad ||
+        TileKind.teaStall ||
+        TileKind.signal => false,
+        _ => true,
+      },
+    );
+    if (dist.isEmpty) throw StateError('${map.id}: no dry road to drive to');
     final far = [
       for (final e in dist.entries)
         if (e.value >= minTrip) e.key,
     ];
-    if (far.isNotEmpty) return far[_random.nextInt(far.length)];
-    if (dist.isEmpty) throw StateError('${map.id}: no dry road to drive to');
-    return dist.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+    destination = far.isNotEmpty
+        ? far[_random.nextInt(far.length)]
+        : dist.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   }
 }

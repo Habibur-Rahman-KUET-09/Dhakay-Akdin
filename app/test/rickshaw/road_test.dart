@@ -77,13 +77,54 @@ void main() {
       final mirpur = RoadMap.fromJson(
         File('assets/content/maps/mirpur.json').readAsStringSync(),
       );
-      expect((mirpur.width, mirpur.height), (20, 28));
-      final roads = mirpur.roads.toList();
-      for (final a in [mirpur.home, roads[roads.length ~/ 3], roads.last]) {
-        for (final b in roads) {
-          expect(mirpur.route(a, b), isNotNull, reason: '$a → $b');
-        }
+      final roads = mirpur.roads.toSet();
+      expect(roads.length, greaterThan(500));
+      expect(
+        mirpur.distancesFrom(mirpur.home).keys.toSet(),
+        roads,
+        reason: 'every road can be reached from home',
+      );
+      for (final r in roads) {
+        expect(
+          mirpur.distancesFrom(r).containsKey(mirpur.home),
+          isTrue,
+          reason: 'home can be reached from $r',
+        );
       }
+      expect(mirpur.credit, contains('OpenStreetMap'));
+      expect(mirpur.places.length, greaterThanOrEqualTo(10));
+      expect(
+        mirpur.places.map((p) => p.at).toSet(),
+        hasLength(mirpur.places.length),
+        reason: 'two places on one tile would be the same destination',
+      );
+      expect(
+        mirpur.roads.where((p) => mirpur.at(p).oneWay != null),
+        isNotEmpty,
+      );
+    });
+
+    test('main roads and roundabout islands', () {
+      final m = RoadMap.parse('ring', [
+        '#####',
+        '#HMM#',
+        '#MOM#',
+        '#MMM#',
+        '#####',
+      ]);
+      expect(m.at(p(2, 2)).isRoad, isFalse);
+      expect(m.at(p(2, 1)).kind, TileKind.mainRoad);
+      expect(m.distance(p(1, 1), p(3, 3)), 4);
+      expect(
+        () => RoadMap.parse(
+          'bad',
+          ['###', '#H#', '###'],
+          places: [
+            Place('x', const {'en': 'X'}, p(0, 0)),
+          ],
+        ),
+        throwsFormatException,
+      );
     });
   });
 
@@ -152,10 +193,11 @@ void main() {
       File('assets/content/maps/mirpur.json').readAsStringSync(),
     );
 
-    test('destinations are dry roads at least minTrip legal tiles away', () {
+    test('destinations are real places at least minTrip legal tiles away', () {
       for (var seed = 0; seed < 30; seed++) {
         final s = RickshawShift(mirpur, baseSpeed: 2, random: Random(seed));
-        expect(s.map.at(s.destination).kind, isNot(TileKind.flood));
+        expect(s.place, isNotNull);
+        expect(s.destination, s.place!.at);
         expect(s.remaining, greaterThanOrEqualTo(8));
         expect(s.remaining, mirpur.distance(mirpur.home, s.destination));
       }

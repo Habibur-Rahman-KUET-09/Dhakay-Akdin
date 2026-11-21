@@ -43,5 +43,16 @@
   "rickshawHint": "Swipe the way you want to turn before the junction",
   "rickshawWhichWay": "Which way? Swipe",
   "rickshawWrongWay": "One-way street! Wrong way",
-  "rickshawArrived": "Arrived! New destination"
+  "rickshawArrived": "Arrived! New destination",
+  "rickshawToPlace": "{place} · {tiles} blocks",
+  "@rickshawToPlace": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      },
+      "tiles": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -32,9 +32,12 @@ typedef RickshawHud = ({
 
 /// The rickshaw on the map (§৪.১): placeholder shapes for now (§১০).
 class RickshawGame extends FlameGame {
-  RickshawGame(this.shift);
+  RickshawGame(this.shift, {this.lang = 'bn'});
 
   final RickshawShift shift;
+
+  /// Language of the place names drawn on the map.
+  final String lang;
 
   /// Direction to the destination in 10° steps, clockwise from north.
   final hud = ValueNotifier<RickshawHud>((
@@ -56,7 +59,7 @@ class RickshawGame extends FlameGame {
 
   @override
   Future<void> onLoad() async {
-    world.add(MapComponent(map));
+    world.add(MapComponent(map, lang: lang));
     _destination = DestinationComponent()
       ..position = _centre(shift.destination);
     world.add(_destination);
@@ -146,13 +149,19 @@ class RickshawGame extends FlameGame {
 
 /// The whole map, drawn once into a picture.
 class MapComponent extends PositionComponent {
-  MapComponent(this.map)
+  MapComponent(this.map, {this.lang = 'bn'})
     : super(size: Vector2(map.width * tile, map.height * tile));
 
   final RoadMap map;
+  final String lang;
   late final Picture _picture;
 
   static final _asphalt = Paint()..color = const Color(0xFF8A8F96);
+  static final _main = Paint()..color = const Color(0xFF5A5F68);
+  static final _dash = Paint()
+    ..color = const Color(0xFFF6D365)
+    ..strokeWidth = 3;
+  static final _grass = Paint()..color = const Color(0xFF7CC47F);
   static final _lane = Paint()..color = const Color(0xFFA7ACB2);
   static final _water = Paint()..color = const Color(0xFF6FB4E8);
   static final _ground = Paint()..color = const Color(0xFFE9DCC0);
@@ -181,12 +190,21 @@ class MapComponent extends PositionComponent {
         _tile(c, Point(x, y));
       }
     }
+    for (final p in map.places) {
+      _sign(c, p);
+    }
     _picture = rec.endRecording();
   }
 
   void _tile(Canvas c, Point<int> p) {
     final r = Rect.fromLTWH(p.x * tile, p.y * tile, tile, tile);
     final t = map.at(p);
+    if (t.kind == TileKind.island) {
+      c.drawRect(r, _main);
+      c.drawCircle(r.center, tile * 0.42, _grass);
+      c.drawCircle(r.center, tile * 0.42, _outline);
+      return;
+    }
     if (!t.isRoad) {
       // A building wherever a road runs alongside; open ground elsewhere.
       final nextToRoad = Dir.values.any((d) => map.at(d.step(p)).isRoad);
@@ -202,7 +220,36 @@ class MapComponent extends PositionComponent {
       }
       return;
     }
-    c.drawRect(r, t.oneWay != null ? _lane : _asphalt);
+    if (t.kind == TileKind.mainRoad) {
+      c.drawRect(r, _main);
+      final ew = map.at(Dir.e.step(p)).isRoad && map.at(Dir.w.step(p)).isRoad;
+      final ns = map.at(Dir.n.step(p)).isRoad && map.at(Dir.s.step(p)).isRoad;
+      if (ew != ns) {
+        final a = ew
+            ? Offset(r.left + 12, r.center.dy)
+            : Offset(r.center.dx, r.top + 12);
+        final b = ew
+            ? Offset(r.right - 12, r.center.dy)
+            : Offset(r.center.dx, r.bottom - 12);
+        c.drawLine(a, b, _dash);
+      }
+    } else {
+      // A lane is narrower than its tile, joined to the roads beside it.
+      final paint = t.oneWay != null ? _lane : _asphalt;
+      const inset = 7.0;
+      c.drawRect(r.deflate(inset), paint);
+      for (final d in Dir.values) {
+        if (!map.at(d.step(p)).isRoad) continue;
+        c.drawRect(
+          Rect.fromCenter(
+            center: r.center + Offset(d.dx * tile / 4, d.dy * tile / 4),
+            width: d.dx != 0 ? tile / 2 : tile - 2 * inset,
+            height: d.dy != 0 ? tile / 2 : tile - 2 * inset,
+          ),
+          paint,
+        );
+      }
+    }
     if (t.oneWay case final d?) _arrow(c, r.center, d);
     switch (t.kind) {
       case TileKind.flood:
@@ -225,9 +272,38 @@ class MapComponent extends PositionComponent {
         );
       case TileKind.home:
         _marker(c, r, Palette.magenta, 'বাড়ি');
-      case TileKind.road || TileKind.block:
+      case TileKind.road ||
+          TileKind.mainRoad ||
+          TileKind.block ||
+          TileKind.island:
         break;
     }
+  }
+
+  /// A place's name on a small sign above its tile.
+  void _sign(Canvas c, Place p) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: p.name(lang),
+        style: const TextStyle(
+          fontFamily: 'HindSiliguri',
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Palette.outline,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout(maxWidth: tile * 4);
+    final centre = Offset((p.at.x + 0.5) * tile, p.at.y * tile - 4);
+    final box = Rect.fromCenter(
+      center: centre.translate(0, -tp.height / 2),
+      width: tp.width + 12,
+      height: tp.height + 4,
+    );
+    final rr = RRect.fromRectAndRadius(box, const Radius.circular(6));
+    c.drawRRect(rr, Paint()..color = const Color(0xEEFFF6E5));
+    c.drawRRect(rr, _outline);
+    tp.paint(c, box.topLeft + const Offset(6, 2));
   }
 
   /// A one-way lane's direction, drawn as a path: the font has no arrows.

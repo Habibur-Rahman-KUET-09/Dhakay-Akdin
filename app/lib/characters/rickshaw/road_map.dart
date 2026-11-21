@@ -22,7 +22,21 @@ enum Dir {
   double get angle => atan2(dy.toDouble(), dx.toDouble());
 }
 
-enum TileKind { block, road, flood, teaStall, signal, home }
+enum TileKind {
+  block,
+
+  /// The green island in the middle of a roundabout.
+  island,
+  road,
+
+  /// A big two-way road (Mirpur Road, Begum Rokeya Sarani…): drives the
+  /// same as a lane, drawn wider.
+  mainRoad,
+  flood,
+  teaStall,
+  signal,
+  home,
+}
 
 class Tile {
   const Tile(this.kind, [this.oneWay]);
@@ -34,18 +48,45 @@ class Tile {
   /// For a one-way lane, the only direction of travel; null when two-way.
   final Dir? oneWay;
 
-  bool get isRoad => kind != TileKind.block;
+  bool get isRoad => kind != TileKind.block && kind != TileKind.island;
 }
 
 /// What happens when the rickshaw moves one tile in a direction.
 enum Move { blocked, ok, wrongWay }
 
-/// The road grid of one area, read from `assets/content/maps/<id>.json`.
-/// Rows of characters; the legend is in the file.
-class RoadMap {
-  RoadMap._(this.id, this.width, this.height, this._tiles, this.home);
+/// A real place a passenger can ask for, on the road tile nearest to it.
+class Place {
+  const Place(this.id, this.names, this.at);
 
-  factory RoadMap.parse(String id, List<String> rows) {
+  final String id;
+
+  /// By language code: bn, en.
+  final Map<String, String> names;
+  final Point<int> at;
+
+  String name(String lang) => names[lang] ?? names['en'] ?? id;
+}
+
+/// The road grid of one area, read from `assets/content/maps/<id>.json`.
+/// Rows of characters; the legend is in the file. tool/build_map.py makes
+/// it from the area's real streets (OpenStreetMap).
+class RoadMap {
+  RoadMap._(
+    this.id,
+    this.width,
+    this.height,
+    this._tiles,
+    this.home,
+    this.places,
+    this.credit,
+  );
+
+  factory RoadMap.parse(
+    String id,
+    List<String> rows, {
+    List<Place> places = const [],
+    String? credit,
+  }) {
     final h = rows.length;
     final w = rows.first.length;
     if (rows.any((r) => r.length != w)) {
@@ -58,6 +99,8 @@ class RoadMap {
         final ch = rows[y][x];
         tiles.add(switch (ch) {
           '#' => Tile.block,
+          'O' => const Tile(TileKind.island),
+          'M' => const Tile(TileKind.mainRoad),
           '.' => const Tile(TileKind.road),
           'n' => const Tile(TileKind.road, Dir.n),
           'e' => const Tile(TileKind.road, Dir.e),
@@ -73,12 +116,30 @@ class RoadMap {
       }
     }
     if (home == null) throw FormatException('$id: no home tile (H)');
-    return RoadMap._(id, w, h, tiles, home);
+    final map = RoadMap._(id, w, h, tiles, home, places, credit);
+    for (final p in places) {
+      if (!map.at(p.at).isRoad) {
+        throw FormatException('$id: place ${p.id} is not on a road');
+      }
+    }
+    return map;
   }
 
   factory RoadMap.fromJson(String source) {
     final j = jsonDecode(source) as Map<String, dynamic>;
-    return RoadMap.parse(j['id'] as String, (j['rows'] as List).cast<String>());
+    return RoadMap.parse(
+      j['id'] as String,
+      (j['rows'] as List).cast<String>(),
+      places: [
+        for (final p in (j['places'] as List? ?? const []))
+          Place(
+            p['id'] as String,
+            (p['name'] as Map).cast<String, String>(),
+            Point(p['x'] as int, p['y'] as int),
+          ),
+      ],
+      credit: j['credit'] as String?,
+    );
   }
 
   final String id;
@@ -88,6 +149,12 @@ class RoadMap {
 
   /// Where the day starts.
   final Point<int> home;
+
+  /// Real places passengers ask for; may be empty.
+  final List<Place> places;
+
+  /// Whom the map data must be credited to, shown on screen.
+  final String? credit;
 
   Tile at(Point<int> p) => p.x < 0 || p.y < 0 || p.x >= width || p.y >= height
       ? Tile.block
