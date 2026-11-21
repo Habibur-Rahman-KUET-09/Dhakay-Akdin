@@ -102,8 +102,12 @@ func _ready() -> void:
 	_sounds()
 	await _step("rickshaw and hud")
 	# Rahim Chacha's own rickshaw: yellow hood, magenta body.
+	# The street's colours too, for the decorations (hood 0, body 1).
 	rickshaw = Models.player_rickshaw(Look.YELLOW, Look.MAGENTA)
-	_paint = Models.traffic_material(PackedColorArray([Look.YELLOW, Look.MAGENTA]), false)
+	var own := _palette.duplicate()
+	own[0] = Look.YELLOW
+	own[1] = Look.MAGENTA
+	_paint = Models.traffic_material(own, false)
 	(rickshaw.get_meta("body") as MeshInstance3D).material_override = _paint
 	var plain := Models.material()
 	for w in rickshaw.get_meta("wheels"):
@@ -251,6 +255,15 @@ func _environment() -> void:
 	env.fog_enabled = true
 	env.fog_light_color = Color("D8D5C8")
 	env.fog_density = 0.011
+	# A little more colour and contrast than the camera sees, and a soft
+	# glow round the brightest things (signals, the sky, lamps at night).
+	env.adjustment_enabled = true
+	env.adjustment_saturation = 1.15
+	env.adjustment_contrast = 1.06
+	env.glow_enabled = true
+	env.glow_intensity = 0.45
+	env.glow_strength = 0.9
+	env.glow_hdr_threshold = 0.95
 	_env = env
 	_sky = sky_mat
 	var we := WorldEnvironment.new()
@@ -261,6 +274,7 @@ func _environment() -> void:
 	sun.light_color = Color("FFF1D6")
 	sun.light_energy = 0.75
 	sun.shadow_enabled = true
+	sun.shadow_blur = 1.5
 	sun.directional_shadow_max_distance = 35.0
 	add_child(sun)
 	_sun = sun
@@ -526,9 +540,9 @@ func _day_light() -> void:
 	var dusk := clampf((h - 16.5) / 3.0, 0.0, 1.0)
 	var night := clampf((h - 19.0) / 2.0, 0.0, 1.0)
 	_sun.light_color = Color("FFE2B8").lerp(Color("FFF6E6"), noon).lerp(Color("FF9A4D"), dusk).lerp(Color("8FA3D6"), night)
-	_sun.light_energy = lerpf(0.55, 0.85, noon) * lerpf(1.0, 0.35, night)
+	_sun.light_energy = lerpf(0.65, 0.95, noon) * lerpf(1.0, 0.35, night)
 	_sun.rotation_degrees.x = -lerpf(18.0, 60.0, noon)
-	_env.ambient_light_energy = lerpf(0.35, 0.18, night)
+	_env.ambient_light_energy = lerpf(0.32, 0.18, night)
 	_env.ambient_light_color = Color("F3E9D8").lerp(Color("F2C9A0"), dusk).lerp(Color("5A6A90"), night)
 	_sky.sky_top_color = Color("9DB4C6").lerp(Color("C9876A"), dusk).lerp(Color("1E2A44"), night)
 	_sky.sky_horizon_color = Color("E2DED2").lerp(Color("F0B27A"), dusk).lerp(Color("3A4566"), night)

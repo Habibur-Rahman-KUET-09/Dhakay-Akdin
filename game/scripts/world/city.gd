@@ -287,8 +287,10 @@ static func _wall(st: SurfaceTool, a: Vector2, b: Vector2, y0: float, y1: float,
 		Vector2(0, (top - y1) / FLOOR), Vector2(u1, (top - y1) / FLOOR),
 		Vector2(u1, (top - y0) / FLOOR), Vector2(0, (top - y0) / FLOOR),
 	]
+	# Darker at the foot of the street: less sky reaches it.
+	var foot := c.darkened(0.3) if y0 < 0.5 else c
 	for i in [0, 1, 2, 0, 2, 3]:
-		st.set_color(c)
+		st.set_color(foot if i >= 2 else c)
 		st.set_normal(n)
 		st.set_uv(uvs[i])
 		st.add_vertex(pts[i])

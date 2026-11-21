@@ -63,6 +63,8 @@ static func build(map: RoadMap, palette: PackedColorArray) -> Node3D:
 	node.name = "Clutter"
 	var paint := Models.traffic_material(palette)
 	var parked: Array = []
+	for style in Models.STYLES:
+		parked.append([])
 	var carts: Array = []
 	var people: Array = []
 	var boards: Array = []
@@ -83,7 +85,8 @@ static func build(map: RoadMap, palette: PackedColorArray) -> Node3D:
 				# lane, clear of the traffic.
 				for i in 1 + int(noise(p, 145) * 2):
 					var at := centre(p) + inward * (T / 2 - 0.72) + along * (i - 0.5) * 2.7
-					parked.append([Transform3D(_facing(along), at), Color(0, 0, floor(noise(p, 150 + i) * 8), 8 + floor(noise(p, 151 + i) * 8))])
+					var style := int(noise(p, 152 + i) * Models.STYLES) % Models.STYLES
+					parked[style].append([Transform3D(_facing(along), at), Color(0, 0, floor(noise(p, 150 + i) * 8), 8 + floor(noise(p, 151 + i) * 8))])
 			elif k == RoadMap.Kind.ROAD and n < 0.1:
 				carts.append([Transform3D(_facing(along), centre(p) + inward * (T / 2 - 0.75)), colours])
 			elif n < 0.24:
@@ -113,7 +116,8 @@ static func build(map: RoadMap, palette: PackedColorArray) -> Node3D:
 				label.position = at + Vector3(0, 4.55, 0) - inward * 0.16
 				label.visibility_range_end = 120.0
 				node.add_child(label)
-	node.add_child(_multi(Models.rickshaw(false, false), parked, paint))
+	for style in Models.STYLES:
+		node.add_child(_multi(Models.rickshaw(false, false, style), parked[style], paint))
 	node.add_child(_multi(Models.fruit_cart(), carts, paint))
 	node.add_child(_multi(Models.person(), people, paint))
 	node.add_child(_multi(Models.billboard_frame(), boards, paint))

@@ -58,49 +58,59 @@ func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 20, "ricks
 	for hex in PALETTE:
 		palette.append(Color(hex))
 	var material := Models.traffic_material(palette)
+	# Rickshaws come in every style of decoration: one multimesh each.
 	var meshes := {
-		"rickshaw": Models.rickshaw(false),
-		"rickshaw_full": Models.rickshaw(true),
-		"cng": Models.cng(),
-		"bus": Models.bus(),
-		"person": Models.person(),
+		"rickshaw": [], "rickshaw_full": [],
+		"cng": [Models.cng()], "bus": [Models.bus()], "person": [Models.person()],
 	}
+	for style in Models.STYLES:
+		meshes.rickshaw.append(Models.rickshaw(false, true, style))
+		meshes.rickshaw_full.append(Models.rickshaw(true, true, style))
 	var speeds := {"rickshaw": [0.8, 1.2], "rickshaw_full": [0.7, 1.0], "cng": [1.7, 2.2], "bus": [1.3, 1.6], "person": [0.16, 0.26]}
 	for kind in counts:
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		# Colours on (all white): without them some phones (Mali) multiply
-		# the paint by black.
-		mm.use_colors = true
-		mm.use_custom_data = true
-		mm.mesh = meshes[kind]
-		mm.instance_count = counts[kind]
-		for i in counts[kind]:
-			mm.set_instance_color(i, Color.WHITE)
-		var mmi := MultiMeshInstance3D.new()
-		mmi.multimesh = mm
-		mmi.material_override = material
-		# They move all over the map: never cull the whole set.
-		mmi.custom_aabb = AABB(Vector3(-50, -5, -50), Vector3(map.width * City.T + 100, 30, map.height * City.T + 100))
-		add_child(mmi)
-		var pool: Array = mains if kind == "bus" and not mains.is_empty() else roads
-		for i in counts[kind]:
-			var start: Vector2i = pool[rng.randi() % pool.size()]
-			var d := Driver.new(map, rng.randf_range(speeds[kind][0], speeds[kind][1]), start)
-			var side := KEEP_LEFT
-			if kind == "bus":
-				side = BUS_LEFT
-			elif kind == "person":
-				side = PAVEMENT_SIDE * (1.0 if rng.randf() < 0.5 else -1.0)
-			var a_colour := rng.randi_range(0, 7)
-			var b_colour := rng.randi_range(8, 15) if kind != "bus" else rng.randi_range(0, 7)
-			var agent := {
-				"kind": kind, "driver": d, "mm": mm, "i": i, "side": side,
-				"phase": rng.randf() * TAU, "a": a_colour, "b": b_colour, "at": Vector3.ZERO, "yaw": 0.0,
-				"speed": d.speed, "wait": 0.0,
-			}
-			_agents.append(agent)
-			_place(agent, 0.0, true)
+		var variants: Array = meshes[kind]
+		var total: int = counts[kind]
+		for v in variants.size():
+			var count: int = total / variants.size() + (1 if v < total % variants.size() else 0)
+			var mm := MultiMesh.new()
+			mm.transform_format = MultiMesh.TRANSFORM_3D
+			# Colours on (all white): without them some phones (Mali) multiply
+			# the paint by black.
+			mm.use_colors = true
+			mm.use_custom_data = true
+			mm.mesh = variants[v]
+			mm.instance_count = count
+			for i in count:
+				mm.set_instance_color(i, Color.WHITE)
+			var mmi := MultiMeshInstance3D.new()
+			mmi.multimesh = mm
+			mmi.material_override = material
+			# They move all over the map: never cull the whole set.
+			mmi.custom_aabb = AABB(Vector3(-50, -5, -50), Vector3(map.width * City.T + 100, 30, map.height * City.T + 100))
+			add_child(mmi)
+			var pool: Array = mains if kind == "bus" and not mains.is_empty() else roads
+			_spawn(kind, mm, count, speeds[kind], pool)
+
+
+## Puts count agents of a kind on the road, copies 0..count-1 of mm.
+func _spawn(kind: String, mm: MultiMesh, count: int, speed: Array, pool: Array) -> void:
+	for i in count:
+		var start: Vector2i = pool[rng.randi() % pool.size()]
+		var d := Driver.new(map, rng.randf_range(speed[0], speed[1]), start)
+		var side := KEEP_LEFT
+		if kind == "bus":
+			side = BUS_LEFT
+		elif kind == "person":
+			side = PAVEMENT_SIDE * (1.0 if rng.randf() < 0.5 else -1.0)
+		var a_colour := rng.randi_range(0, 7)
+		var b_colour := rng.randi_range(8, 15) if kind != "bus" else rng.randi_range(0, 7)
+		var agent := {
+			"kind": kind, "driver": d, "mm": mm, "i": i, "side": side,
+			"phase": rng.randf() * TAU, "a": a_colour, "b": b_colour, "at": Vector3.ZERO, "yaw": 0.0,
+			"speed": d.speed, "wait": 0.0,
+		}
+		_agents.append(agent)
+		_place(agent, 0.0, true)
 
 
 func _process(dt: float) -> void:
