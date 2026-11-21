@@ -10,20 +10,22 @@ const Balance = preload("res://scripts/rules/balance.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const City = preload("res://scripts/world/city.gd")
-const RickshawModel = preload("res://scripts/world/rickshaw_model.gd")
+const Models = preload("res://scripts/world/models.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
-const CAMERA_BACK := 5.5
-const CAMERA_UP := 3.4
+const CAMERA_BACK := 6.2
+const CAMERA_UP := 3.9
 ## Bangladesh drives on the left.
 const KEEP_LEFT := 1.2
 
 var strings := Strings.new()
 var shift: Shift
 var rickshaw: Node3D
+## The rickshaw body's material: paints hood and body, pedals the legs.
+var _paint: ShaderMaterial
 var camera: Camera3D
 var marker: Node3D
 var hud: Hud
@@ -46,7 +48,13 @@ func _ready() -> void:
 	var traffic := Traffic.new()
 	add_child(traffic)
 	traffic.setup(map, map.home)
-	rickshaw = RickshawModel.build()
+	# Rahim Chacha's own rickshaw: yellow hood, magenta body.
+	rickshaw = Models.player_rickshaw(Look.YELLOW, Look.MAGENTA)
+	_paint = Models.traffic_material(PackedColorArray([Look.YELLOW, Look.MAGENTA]), false)
+	(rickshaw.get_meta("body") as MeshInstance3D).material_override = _paint
+	var plain := Models.material()
+	for w in rickshaw.get_meta("wheels"):
+		(w as MeshInstance3D).material_override = plain
 	add_child(rickshaw)
 	marker = _marker()
 	add_child(marker)
@@ -170,7 +178,8 @@ func _follow(dt: float, snap := false) -> void:
 		_yaw = lerp_angle(_yaw, want, minf(1.0, dt * 3.5))
 	if d.moving:
 		for w in rickshaw.get_meta("wheels"):
-			w.rotate_x(-dt * d.speed * 4.0)
+			w.rotate_x(-dt * d.speed * City.T / 0.34)
+	_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if d.moving else 0.0, 0.0, 1.0))
 	var forward := Vector3(-sin(_yaw), 0, -cos(_yaw))
 	camera.position = rickshaw.position - forward * CAMERA_BACK + Vector3.UP * CAMERA_UP
 	camera.look_at(rickshaw.position + forward * 8.0 + Vector3.UP * 1.2)

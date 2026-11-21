@@ -1,51 +1,73 @@
-## The rest of the street: rickshaws, CNGs and buses driving on the left,
-## people walking on the pavements. They use the same driving rules as
-## Rahim Chacha and turn at random; buses keep to the main roads. They do
-## not get in his way yet (that is week 4's jam).
+## The rest of the street: rickshaws (some with passengers), CNGs and buses
+## driving on the left, people walking on the pavements. They use the same
+## driving rules as Rahim Chacha and turn at random; buses keep to the main
+## roads. One multimesh per kind, so the whole crowd is a handful of draw
+## calls. They do not get in his way yet (that is week 4's jam).
 extends Node3D
 
 const RoadMap = preload("res://scripts/rules/road_map.gd")
 const Driver = preload("res://scripts/rules/driver.gd")
 const City = preload("res://scripts/world/city.gd")
-const Vehicles = preload("res://scripts/world/vehicles.gd")
+const Models = preload("res://scripts/world/models.gd")
 
 ## Sideways from the middle of the road: vehicles keep left; people walk
 ## on the pavement.
-const KEEP_LEFT := 1.3
+const KEEP_LEFT := 1.4
 const PAVEMENT_SIDE := City.T / 2 + City.PAVEMENT * 0.5
+
+## Colours swapped into the models (indices 0–7 bright, 8–15 darker).
+const PALETTE := [
+	"F6B800", "2D8BD6", "2E9E6B", "E2432A", "C2185B", "F2F2F2", "6A1B9A", "0F7C8C",
+	"8B1A3A", "1F4F2F", "1C3E7B", "3E2A20", "2B2B2B", "6D6A64", "9E2A1E", "37474F",
+]
 
 var map: RoadMap
 var rng := RandomNumberGenerator.new()
 var _agents: Array = []
 
 
-func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 28, "cng": 10, "bus": 5, "person": 45}) -> void:
+func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 22, "rickshaw_full": 14, "cng": 10, "bus": 5, "person": 50}) -> void:
 	map = road_map
 	rng.seed = 2026
 	var roads := map.roads().filter(func(p): return absi(p.x - avoid.x) + absi(p.y - avoid.y) > 3)
 	var mains := roads.filter(func(p): return map.kind_at(p) == RoadMap.Kind.MAIN_ROAD)
-	var material := Vehicles.material()
+	var palette := PackedColorArray()
+	for hex in PALETTE:
+		palette.append(Color(hex))
+	var material := Models.traffic_material(palette)
 	var meshes := {
-		"rickshaw": [Vehicles.rickshaw(rng, true), Vehicles.rickshaw(rng), Vehicles.rickshaw(rng, true), Vehicles.rickshaw(rng)],
-		"cng": [Vehicles.cng(rng), Vehicles.cng(rng)],
-		"bus": [Vehicles.bus(rng), Vehicles.bus(rng), Vehicles.bus(rng)],
-		"person": [Vehicles.person(rng), Vehicles.person(rng), Vehicles.person(rng), Vehicles.person(rng), Vehicles.person(rng), Vehicles.person(rng)],
+		"rickshaw": Models.rickshaw(false),
+		"rickshaw_full": Models.rickshaw(true),
+		"cng": Models.cng(),
+		"bus": Models.bus(),
+		"person": Models.person(),
 	}
-	var speeds := {"rickshaw": [0.9, 1.3], "cng": [1.8, 2.3], "bus": [1.4, 1.7], "person": [0.18, 0.28]}
+	var speeds := {"rickshaw": [0.8, 1.2], "rickshaw_full": [0.7, 1.0], "cng": [1.7, 2.2], "bus": [1.3, 1.6], "person": [0.16, 0.26]}
 	for kind in counts:
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_custom_data = true
+		mm.mesh = meshes[kind]
+		mm.instance_count = counts[kind]
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.material_override = material
+		# They move all over the map: never cull the whole set.
+		mmi.custom_aabb = AABB(Vector3(-50, -5, -50), Vector3(map.width * City.T + 100, 30, map.height * City.T + 100))
+		add_child(mmi)
 		var pool: Array = mains if kind == "bus" and not mains.is_empty() else roads
 		for i in counts[kind]:
 			var start: Vector2i = pool[rng.randi() % pool.size()]
 			var d := Driver.new(map, rng.randf_range(speeds[kind][0], speeds[kind][1]), start)
-			var mi := MeshInstance3D.new()
-			var choices: Array = meshes[kind]
-			mi.mesh = choices[rng.randi() % choices.size()]
-			mi.material_override = material
-			mi.visibility_range_end = 70.0 if kind == "person" else 110.0
-			add_child(mi)
 			var side := KEEP_LEFT if kind != "person" else PAVEMENT_SIDE * (1.0 if rng.randf() < 0.5 else -1.0)
-			_agents.append({"kind": kind, "driver": d, "node": mi, "side": side, "phase": rng.randf() * TAU})
-			_place(_agents.back(), 0.0, true)
+			var a_colour := rng.randi_range(0, 7)
+			var b_colour := rng.randi_range(8, 15) if kind != "bus" else rng.randi_range(0, 7)
+			var agent := {
+				"kind": kind, "driver": d, "mm": mm, "i": i, "side": side,
+				"phase": rng.randf() * TAU, "a": a_colour, "b": b_colour, "at": Vector3.ZERO, "yaw": 0.0,
+			}
+			_agents.append(agent)
+			_place(agent, 0.0, true)
 
 
 func _process(dt: float) -> void:
@@ -84,17 +106,18 @@ func _steer(a: Dictionary, turn: bool) -> void:
 
 func _place(a: Dictionary, dt: float, snap := false) -> void:
 	var d: Driver = a.driver
-	var node: Node3D = a.node
 	var pos := d.position()
 	var f := Vector3(RoadMap.DX[d.heading], 0, RoadMap.DY[d.heading])
 	var left := Vector3(f.z, 0, -f.x)
 	var target: Vector3 = Vector3((pos.x + 0.5) * City.T, 0, (pos.y + 0.5) * City.T) + left * a.side
 	if a.kind == "person":
-		target.y = 0.15 + absf(sin(Time.get_ticks_msec() / 180.0 + a.phase)) * 0.05
+		target.y = 0.15
 	var yaw := -d.heading * PI / 2
-	if snap:
-		node.position = target
-		node.rotation.y = yaw
-	else:
-		node.position = node.position.lerp(target, minf(1.0, dt * 8.0))
-		node.rotation.y = lerp_angle(node.rotation.y, yaw, minf(1.0, dt * 8.0))
+	var k := 1.0 if snap else minf(1.0, dt * 8.0)
+	var at: Vector3 = a.at
+	a.at = at.lerp(target, k)
+	a.yaw = lerp_angle(a.yaw, yaw, k)
+	var mm: MultiMesh = a.mm
+	mm.set_instance_transform(a.i, Transform3D(Basis(Vector3.UP, a.yaw), a.at))
+	var moving := 1.0 if d.moving else 0.0
+	mm.set_instance_custom_data(a.i, Color(a.phase, moving, a.a, a.b))
