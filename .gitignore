@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 game/content/cloud.json
+game/android/
+game/addons/google_sign_in/bin/
+android-plugin/build/
+android-plugin/.gradle/

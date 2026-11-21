@@ -80,10 +80,11 @@ jobs:
         env:
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
           FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         continue-on-error: true
         run: |
           if [ -n "$FIREBASE_PROJECT_ID" ] && [ -n "$FIREBASE_API_KEY" ]; then
-            python3 -c 'import json, os; json.dump({"project": os.environ["FIREBASE_PROJECT_ID"], "key": os.environ["FIREBASE_API_KEY"]}, open("game/content/cloud.json", "w"))'
+            python3 tool/cloud_config.py game/content/cloud.json
             # Each outcome line as a notice on the run, easy to find.
             godot --headless --path game -s res://tests/cloud_check.gd 2>&1 | grep -E "^cloud:|SCRIPT ERROR" | sed 's/^/::notice title=Online backup::/' || true
           else
@@ -103,6 +104,23 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Google sign-in plugin
+        # The Android library for Google sign-in (android-plugin/), and
+        # Godot's Android build template, which the Gradle build needs.
+        run: |
+          gradle -p android-plugin --no-daemon --quiet assembleRelease
+          mkdir -p game/addons/google_sign_in/bin
+          cp android-plugin/build/outputs/aar/GoogleSignIn-release.aar game/addons/google_sign_in/bin/
+          rm -rf game/android && mkdir -p game/android/build
+          unzip -q ~/.local/share/godot/export_templates/$GODOT_TEMPLATES/android_source.zip -d game/android/build
+          printf '%s' "$GODOT_TEMPLATES" > game/android/.build_version
+          touch game/android/build/.gdignore
+          ls -la game/addons/google_sign_in/bin
 
       - name: APK
         if: github.event_name != 'pull_request'

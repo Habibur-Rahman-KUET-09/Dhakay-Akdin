@@ -2,7 +2,9 @@
 ## Android plugin is needed). On first use an account with no name is
 ## made quietly; after each day the save is copied to Firestore at
 ## players/<account>. To move to another phone the player can tie the
-## account to an email and password, and sign in with them there.
+## account to their Google account (Android's own picker, through the
+## GoogleSignIn plugin in addons/) or to an email and password, and sign
+## in the same way there.
 ## The project's id and web API key come from content/cloud.json, which
 ## the build writes from the repository's secrets; without it all of this
 ## is off and the game plays as before.
@@ -13,10 +15,16 @@ const AUTH := "user://cloud.cfg"
 const AUTH_URL := "https://identitytoolkit.googleapis.com/v1/accounts:"
 const TOKEN_URL := "https://securetoken.googleapis.com/v1/token?key="
 
+signal _google_done(token: String, error: String)
+
 var project := ""
 var key := ""
+## The Firebase project's web client, for Google sign-in ("" if unknown).
+var google_client := ""
 var uid := ""
 var email := ""
+## How the account is tied: "" (nameless), "google" or "password".
+var provider := ""
 var _refresh := ""
 var _token := ""
 var _token_until := 0.0
@@ -31,10 +39,12 @@ func _init() -> void:
 		if typeof(parsed) == TYPE_DICTIONARY:
 			project = str(parsed.get("project", ""))
 			key = str(parsed.get("key", ""))
+			google_client = str(parsed.get("google_client", ""))
 	var c := ConfigFile.new()
 	if c.load(AUTH) == OK:
 		uid = c.get_value("auth", "uid", "")
 		email = c.get_value("auth", "email", "")
+		provider = c.get_value("auth", "provider", "")
 		_refresh = c.get_value("auth", "refresh", "")
 		last_day = c.get_value("copy", "day", -1)
 		last_time = c.get_value("copy", "time", "")
@@ -59,6 +69,7 @@ func _remember() -> void:
 	var c := ConfigFile.new()
 	c.set_value("auth", "uid", uid)
 	c.set_value("auth", "email", email)
+	c.set_value("auth", "provider", provider)
 	c.set_value("auth", "refresh", _refresh)
 	c.set_value("copy", "day", last_day)
 	c.set_value("copy", "time", last_time)
@@ -205,6 +216,7 @@ func link_email(address: String, password: String) -> String:
 	if not reply.ok:
 		return error_of(reply)
 	email = address
+	provider = "password"
 	_took(reply.data)
 	return ""
 
@@ -219,8 +231,58 @@ func sign_in(address: String, password: String) -> String:
 	if not reply.ok:
 		return error_of(reply)
 	email = address
+	provider = "password"
 	_took(reply.data)
 	return ""
+
+
+# --- Google --------------------------------------------------------------------
+
+
+## Google sign-in works here: on Android with the plugin, and the
+## project's web client known.
+func google_ready() -> bool:
+	return enabled() and google_client != "" and Engine.has_singleton("GoogleSignIn")
+
+
+## Shows Android's Google account picker; then, with `link`, ties this
+## phone's account to the Google account chosen, or else signs in as
+## whoever that Google account already is (on a new phone). "" when it
+## worked, else the error ("CANCELLED" if the picker was closed).
+func google(link: bool) -> String:
+	if not google_ready():
+		return "NO_GOOGLE"
+	var plugin = Engine.get_singleton("GoogleSignIn")
+	# Plugin signals are connected by name (as Godot's Android plugin docs do).
+	if not plugin.is_connected("signed_in", _google_ok):
+		plugin.connect("signed_in", _google_ok)
+		plugin.connect("sign_in_failed", _google_fail)
+	plugin.signIn(google_client)
+	var got: Array = await _google_done
+	if got[1] != "":
+		return str(got[1]).split(" ")[0]
+	var body := {"requestUri": "http://localhost", "postBody": "id_token=%s&providerId=google.com" % got[0],
+		"returnSecureToken": true, "returnIdpCredential": true}
+	if link:
+		var e := await ensure_user()
+		if e != "":
+			return e
+		body["idToken"] = _token
+	var reply := await _json_post(AUTH_URL + "signInWithIdp?key=" + key, body)
+	if not reply.ok:
+		return error_of(reply)
+	email = str(reply.data.get("email", ""))
+	provider = "google"
+	_took(reply.data)
+	return ""
+
+
+func _google_ok(token: String) -> void:
+	_google_done.emit(token, "")
+
+
+func _google_fail(reason: String) -> void:
+	_google_done.emit("", reason)
 
 
 ## Removes this account and its copy (used by the build's own check).

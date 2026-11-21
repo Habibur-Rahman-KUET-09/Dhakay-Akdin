@@ -213,7 +213,7 @@ func _cloud_card() -> Control:
 	if not cloud.enabled():
 		return panel
 	if cloud.email != "":
-		box.add_child(Look.label(s.t("cloudLinked", {"email": cloud.email}), 14, true, Look.PARROT.darkened(0.2)))
+		box.add_child(Look.label(s.t("cloudLinkedGoogle" if cloud.provider == "google" else "cloudLinked", {"email": cloud.email}), 14, true, Look.PARROT.darkened(0.2)))
 	else:
 		box.add_child(Look.label(s.t("cloudHelp"), 13))
 		var row := HBoxContainer.new()
@@ -235,6 +235,14 @@ func _cloud_card() -> Control:
 func _email_form(keep: bool) -> void:
 	var rows := []
 	rows.append(Look.label(s.t("cloudKeepHelp" if keep else "cloudFetchHelp"), 14))
+	var note := Look.label("", 14, true, Look.VERMILION)
+	# Google first, where the phone and the build can do it.
+	if cloud.google_ready():
+		var google := Look.button(s.t("cloudGoogleKeep" if keep else "cloudGoogleFetch"), Color("1A73E8"), 17)
+		google.custom_minimum_size = Vector2(0, 56)
+		google.pressed.connect(_google_go.bind(keep, note, google))
+		rows.append(google)
+		rows.append(Look.label(s.t("cloudOrEmail"), 14, true))
 	var address := LineEdit.new()
 	address.placeholder_text = s.t("cloudEmail")
 	address.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_EMAIL_ADDRESS
@@ -246,26 +254,46 @@ func _email_form(keep: bool) -> void:
 	password.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_PASSWORD
 	password.custom_minimum_size = Vector2(0, 48)
 	rows.append(password)
-	var note := Look.label("", 14, true, Look.VERMILION)
-	rows.append(note)
-	var go := Look.button(s.t("cloudKeep" if keep else "cloudFetch"), Look.SKY, 16)
+	var go := Look.button(s.t("cloudEmailKeep" if keep else "cloudEmailFetch"), Look.SKY, 16)
 	go.pressed.connect(_email_go.bind(keep, address, password, note, go))
 	rows.append(go)
+	rows.append(note)
 	_overlay(s.t("cloudTitle"), rows)
 
 
 func _email_go(keep: bool, address: LineEdit, password: LineEdit, note: Label, go: Button) -> void:
 	go.disabled = true
-	note.add_theme_color_override("font_color", Look.OUTLINE)
-	note.text = s.t("cloudWorking")
+	_working(note)
 	var e := ""
 	if keep:
 		e = await cloud.link_email(address.text.strip_edges(), password.text)
-		if e == "":
-			e = await cloud.upload(progress.data)
 	else:
 		e = await cloud.sign_in(address.text.strip_edges(), password.text)
 	go.disabled = false
+	await _signed_in(keep, e, note, go)
+
+
+func _google_go(keep: bool, note: Label, go: Button) -> void:
+	go.disabled = true
+	_working(note)
+	var e := await cloud.google(keep)
+	go.disabled = false
+	if e == "CANCELLED":
+		note.text = ""
+		return
+	await _signed_in(keep, e, note, go)
+
+
+func _working(note: Label) -> void:
+	note.add_theme_color_override("font_color", Look.OUTLINE)
+	note.text = s.t("cloudWorking")
+
+
+## After signing in either way: when keeping, copy this phone's progress
+## up; when fetching, show what is kept online and offer to take it.
+func _signed_in(keep: bool, e: String, note: Label, go: Button) -> void:
+	if e == "" and keep:
+		e = await cloud.upload(progress.data)
 	if e != "":
 		note.add_theme_color_override("font_color", Look.VERMILION)
 		note.text = s.t("cloudErr_" + e) if s.has("cloudErr_" + e) else s.t("cloudErrOther", {"e": e})
@@ -273,7 +301,6 @@ func _email_go(keep: bool, address: LineEdit, password: LineEdit, note: Label, g
 	if keep:
 		_build()
 		return
-	# Signed in on this phone: bring the progress over, if there is any.
 	var back := await cloud.download()
 	if back.is_empty():
 		note.text = s.t("cloudNothing")

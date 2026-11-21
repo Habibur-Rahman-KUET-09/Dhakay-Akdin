@@ -27,6 +27,11 @@ window/handheld/orientation=1
 ; Keep a log on phones too, so a crash can be read on the next start.
 file_logging/enable_file_logging=true
 
+[editor_plugins]
+
+; Google sign-in for the online backup (Android; built by CI).
+enabled=PackedStringArray("res://addons/google_sign_in/plugin.cfg")
+
 [gui]
 
 theme/custom_font="res://fonts/HindSiliguri-Regular.ttf"

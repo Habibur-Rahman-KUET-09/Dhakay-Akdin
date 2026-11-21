@@ -1184,24 +1184,24 @@
   "en": "Kept with: {email}"
  },
  "cloudHelp": {
-  "bn": "অগ্রগতি নিজে থেকেই অনলাইনে জমা হয়। নতুন ফোনেও পেতে চাইলে একটা ইমেইল আর পাসওয়ার্ড দিয়ে রাখুন।",
-  "en": "Progress is copied online by itself. To have it on a new phone too, keep it with an email and password."
+  "bn": "অগ্রগতি নিজে থেকেই অনলাইনে জমা হয়। নতুন ফোনেও পেতে চাইলে Google account বা একটা ইমেইল-পাসওয়ার্ড দিয়ে সংরক্ষণ করুন।",
+  "en": "Progress is copied online by itself. To have it on a new phone too, keep it with your Google account or an email and password."
  },
  "cloudKeep": {
-  "bn": "ইমেইল দিয়ে সংরক্ষণ",
-  "en": "Keep with email"
+  "bn": "সংরক্ষণ করুন",
+  "en": "Keep it"
  },
  "cloudFetch": {
   "bn": "অন্য ফোন থেকে আনুন",
   "en": "Bring from another phone"
  },
  "cloudKeepHelp": {
-  "bn": "যেকোনো ইমেইল আর অন্তত ৬ অক্ষরের পাসওয়ার্ড দিন। নতুন ফোনে এগুলো দিয়েই অগ্রগতি ফেরত আনবেন।",
-  "en": "Any email and a password of at least 6 characters. On a new phone, use them to bring your progress back."
+  "bn": "Google account দিয়ে, অথবা যেকোনো ইমেইল আর অন্তত ৬ অক্ষরের পাসওয়ার্ড দিয়ে। নতুন ফোনে একইভাবে ঢুকে অগ্রগতি ফেরত আনবেন।",
+  "en": "With your Google account, or any email and a password of at least 6 characters. On a new phone, sign in the same way to bring your progress back."
  },
  "cloudFetchHelp": {
-  "bn": "আগের ফোনে যে ইমেইল আর পাসওয়ার্ড দিয়ে সংরক্ষণ করেছিলেন, সেগুলো দিন।",
-  "en": "The email and password you kept your progress with on the other phone."
+  "bn": "আগের ফোনে যেভাবে সংরক্ষণ করেছিলেন (Google বা ইমেইল-পাসওয়ার্ড), সেভাবেই ঢুকুন।",
+  "en": "Sign in the way you kept your progress on the other phone (Google, or email and password)."
  },
  "cloudEmail": {
   "bn": "ইমেইল",
@@ -1274,5 +1274,45 @@
  "cloudErrOther": {
   "bn": "হলো না ({e})। একটু পরে আবার চেষ্টা করুন।",
   "en": "That did not work ({e}). Try again later."
+ },
+ "cloudGoogleKeep": {
+  "bn": "Google দিয়ে সংরক্ষণ",
+  "en": "Keep with Google"
+ },
+ "cloudGoogleFetch": {
+  "bn": "Google দিয়ে আনুন",
+  "en": "Bring with Google"
+ },
+ "cloudOrEmail": {
+  "bn": "অথবা ইমেইল আর পাসওয়ার্ড দিয়ে:",
+  "en": "Or with an email and password:"
+ },
+ "cloudEmailKeep": {
+  "bn": "ইমেইল দিয়ে সংরক্ষণ",
+  "en": "Keep with email"
+ },
+ "cloudEmailFetch": {
+  "bn": "ইমেইল দিয়ে আনুন",
+  "en": "Bring with email"
+ },
+ "cloudLinkedGoogle": {
+  "bn": "Google-এ সংরক্ষিত: {email}",
+  "en": "Kept with Google: {email}"
+ },
+ "cloudErr_FEDERATED_USER_ID_ALREADY_LINKED": {
+  "bn": "এই Google account-এ আগে থেকেই অগ্রগতি আছে। 'অন্য ফোন থেকে আনুন' দিয়ে আনুন।",
+  "en": "This Google account already has progress: use 'Bring from another phone'."
+ },
+ "cloudErr_NO_ACCOUNT": {
+  "bn": "ফোনে কোনো Google account নেই, অথবা বাছাই করা যায়নি",
+  "en": "No Google account on this phone, or none could be chosen"
+ },
+ "cloudErr_NO_GOOGLE": {
+  "bn": "এই ফোনে Google দিয়ে ঢোকা যাচ্ছে না, ইমেইল দিয়ে চেষ্টা করুন",
+  "en": "Google sign-in is not available here: try email"
+ },
+ "cloudErr_INVALID_IDP_RESPONSE": {
+  "bn": "Google থেকে ঠিক উত্তর আসেনি, একটু পরে আবার চেষ্টা করুন",
+  "en": "Google's answer was not accepted: try again later"
  }
 }
