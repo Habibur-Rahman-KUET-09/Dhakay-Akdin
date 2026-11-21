@@ -99,7 +99,7 @@ func _ready() -> void:
 	_seats = Models.bus_seats()
 	_standing = Models.bus_standing()
 	# Signs over the front windows: the elder seats (left), the women's (right).
-	for sign_at in [[Vector3(-1.1, 2.0, -1.6), "seatElder"], [Vector3(1.1, 2.0, -1.4), "seatWomen"]]:
+	for sign_at in [[Vector3(-0.72, 1.9, -1.6), "seatElder"], [Vector3(0.72, 1.9, -1.4), "seatWomen"]]:
 		var board := Label3D.new()
 		board.text = strings.t(sign_at[1])
 		board.font = Look.font(Look.BOLD)
@@ -107,7 +107,7 @@ func _ready() -> void:
 		board.outline_size = 8
 		board.modulate = Color.WHITE
 		board.outline_modulate = Color("1C4E9B")
-		board.pixel_size = 0.005
+		board.pixel_size = 0.0035
 		board.alpha_cut = Label3D.ALPHA_CUT_DISCARD
 		board.position = sign_at[0]
 		add_child(board)
