@@ -114,10 +114,10 @@ jobs:
           for abi in arm64-v8a armeabi-v7a; do
             other=$([ "$abi" = arm64-v8a ] && echo armeabi-v7a || echo arm64-v8a)
             sed -i "s/^architectures\/$abi=.*/architectures\/$abi=true/; s/^architectures\/$other=.*/architectures\/$other=false/" game/export_presets.cfg
-            godot --headless --path game --export-release "Android" "$PWD/build/DhakarEkdin-$v-$abi.apk" 2>&1 | tee "export-$abi.log"
+            godot --headless --path game --export-release "Android" "$PWD/build/PranerDhaka-$v-$abi.apk" 2>&1 | tee "export-$abi.log"
             ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "export-$abi.log"
-            test -s "build/DhakarEkdin-$v-$abi.apk"
-            cp "build/DhakarEkdin-$v-$abi.apk" dist/
+            test -s "build/PranerDhaka-$v-$abi.apk"
+            cp "build/PranerDhaka-$v-$abi.apk" dist/
           done
           ls -la dist
 
@@ -125,7 +125,7 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           tag_name: v${{ steps.v.outputs.version }}
-          name: ঢাকার একদিন ${{ steps.v.outputs.version }} (3D)
+          name: প্রাণের ঢাকা ${{ steps.v.outputs.version }} (3D)
           prerelease: true
           body: |
             পরীক্ষামূলক 3D সংস্করণ। বেশিরভাগ ফোনে `arm64-v8a` APK-টা নামান; খুব পুরোনো ফোনে `armeabi-v7a`। সাথে খেলার কয়েকটা screenshot।

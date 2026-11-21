@@ -23,6 +23,8 @@ const CHROME := Color("B8BCC2")
 const RUBBER := Color("1A1A1A")
 const VINYL := Color("2B5BA8")
 const WOOD := Color("7A5230")
+## Rickshaw-art colours: red, yellow, green, magenta, blue, orange.
+const BRIGHT := [Color("E2432A"), Color("F6B800"), Color("2E9E6B"), Color("C2185B"), Color("2D8BD6"), Color("F28C28")]
 
 
 class Builder:
@@ -181,6 +183,15 @@ static func _art(b: Builder, centre: Vector3, w: float, h: float) -> void:
 	b.quad(Vector3(r.position.x, r.position.y, z), Vector3(r.end.x, r.position.y, z),
 		Vector3(r.end.x, r.end.y, z), Vector3(r.position.x, r.end.y, z), Color("1E3A8A"))
 	var inner := r.grow(-0.05)
+	var dot_z := z + 0.003
+	for i in 14:
+		var t := (i + 0.5) / 14.0
+		for y in [r.position.y + 0.025, r.end.y - 0.025]:
+			_dot(b, Vector3(lerpf(r.position.x, r.end.x, t), y, dot_z), 0.013, CHROME)
+	for i in 5:
+		var t := (i + 0.5) / 5.0
+		for x in [r.position.x + 0.025, r.end.x - 0.025]:
+			_dot(b, Vector3(x, lerpf(r.position.y, r.end.y, t), dot_z), 0.013, CHROME)
 	z += 0.004
 	b.quad(Vector3(inner.position.x, inner.position.y, z), Vector3(inner.end.x, inner.position.y, z),
 		Vector3(inner.end.x, inner.end.y, z), Vector3(inner.position.x, inner.end.y, z), Color("F6E7B0"))
@@ -199,6 +210,29 @@ static func _art(b: Builder, centre: Vector3, w: float, h: float) -> void:
 		var lc := c + Vector2(side * w * 0.33, 0)
 		b.quad(Vector3(lc.x - 0.07, lc.y, z), Vector3(lc.x, lc.y - 0.12, z),
 			Vector3(lc.x + 0.07, lc.y, z), Vector3(lc.x, lc.y + 0.12, z), Color("2E9E6B"))
+
+
+## A small diamond on a panel facing +Z (a chrome stud, a sequin).
+static func _dot(b: Builder, at: Vector3, s: float, colour: Color) -> void:
+	b.quad(at + Vector3(-s, 0, 0), at + Vector3(0, -s, 0), at + Vector3(s, 0, 0), at + Vector3(0, s, 0), colour)
+
+
+## The sunburst painted on a rickshaw hood's side: rays of colour fanning
+## out from the hinge, and a yellow sun in the middle. Faces outward (side).
+static func _sunburst(b: Builder, hinge: Vector3, side: int, radius: float, from_deg: float, to_deg: float) -> void:
+	var rays := 11
+	for i in rays:
+		var a0 := deg_to_rad(lerpf(from_deg, to_deg, float(i) / rays))
+		var a1 := deg_to_rad(lerpf(from_deg, to_deg, float(i + 1) / rays))
+		var p0 := hinge + Vector3(0, sin(a0), cos(a0)) * radius
+		var p1 := hinge + Vector3(0, sin(a1), cos(a1)) * radius
+		b.quad(hinge, p0, p1, p1, BRIGHT[i % BRIGHT.size()])
+	var sun := hinge + Vector3(side * 0.003, 0, 0)
+	for i in 8:
+		var a0 := deg_to_rad(lerpf(from_deg, to_deg, i / 8.0))
+		var a1 := deg_to_rad(lerpf(from_deg, to_deg, (i + 1) / 8.0))
+		b.quad(sun, sun + Vector3(0, sin(a0), cos(a0)) * radius * 0.28,
+			sun + Vector3(0, sin(a1), cos(a1)) * radius * 0.28, sun + Vector3(0, sin(a1), cos(a1)) * radius * 0.28, Color("FFD23F"))
 
 
 ## Adds a cycle rickshaw to b: frame, three spoked wheels (unless the
@@ -237,23 +271,43 @@ static func _rickshaw(b: Builder, rider: bool, passenger: bool, wheels: bool) ->
 		b.shell(Vector3(x, 0.34, 0.45), 0.4, 20, 160, 0.06, Color.WHITE, PAINT_B, 8)
 	# Painted art on the back and on the sides of the seat box.
 	_art(b, Vector3(0, 0.72, 0.92), 0.95, 0.42)
-	# The hood, folded half up over the seat, with ribs and a fringe.
+	# The hood, folded half up over the seat: painted cloth with bright
+	# bands, ribs, a sunburst on each side, a fringe and two pennants.
 	var hc := Vector3(0, 1.1, 0.62)
 	b.shell(hc, 0.6, 5, 120, 0.56, Color.WHITE, PAINT_A, 12)
+	var bands := [BRIGHT[1], BRIGHT[2], BRIGHT[4], BRIGHT[0], BRIGHT[3]]
+	for k in bands.size():
+		var a0 := 12.0 + k * 22.0
+		b.shell(hc, 0.604, a0, a0 + 6.0, 0.562, bands[k], KEEP, 1)
 	for k in 4:
 		var a := deg_to_rad(15 + k * 30)
 		var p := hc + Vector3(0, sin(a), cos(a)) * 0.61
 		b.box(Vector3(1.14, 0.035, 0.035), p, STEEL)
 	for side in [-1, 1]:
-		b.quad(hc + Vector3(side * 0.565, 0, 0.6), hc + Vector3(side * 0.565, 0.6, 0),
-			hc + Vector3(side * 0.565, 0.3, -0.1), hc + Vector3(side * 0.565, -0.05, 0.25), Color("E2432A"))
+		_sunburst(b, hc + Vector3(side * 0.566, 0, 0), side, 0.6, 5.0, 120.0)
 	var front := deg_to_rad(120)
 	var edge := hc + Vector3(0, sin(front), cos(front)) * 0.6
 	for i in 9:
 		var x := -0.5 + i * 0.125
 		b.quad(edge + Vector3(x - 0.03, 0, 0), edge + Vector3(x + 0.03, 0, 0),
 			edge + Vector3(x + 0.03, -0.12, 0), edge + Vector3(x - 0.03, -0.12, 0),
-			[Color("F6B800"), Color("2E9E6B"), Color("E2432A")][i % 3])
+			BRIGHT[i % BRIGHT.size()])
+	for side in [-1, 1]:
+		var foot := edge + Vector3(side * 0.5, 0, 0)
+		b.box(Vector3(0.015, 0.38, 0.015), foot + Vector3(0, 0.19, 0), CHROME)
+		var top := foot + Vector3(0, 0.38, 0)
+		b.quad(top, top + Vector3(0, -0.14, 0), top + Vector3(0, -0.07, -0.2), top + Vector3(0, -0.07, -0.2),
+			BRIGHT[3] if side < 0 else BRIGHT[1])
+	# Plastic flowers and tassels on the handlebar.
+	for k in 5:
+		var x := -0.24 + k * 0.12
+		var at := Vector3(x, 1.2 + 0.03 * (k % 2), -1.08)
+		b.box(Vector3(0.012, 0.08, 0.012), at + Vector3(0, -0.04, 0), Color("2E9E6B"))
+		b.ball(0.04, at, BRIGHT[(k * 2) % BRIGHT.size()], Vector3(1, 0.7, 1))
+		b.ball(0.015, at + Vector3(0, 0.025, 0), Color("FFE45C"))
+	for x in [-0.31, 0.31]:
+		for t in 3:
+			b.box(Vector3(0.012, 0.16, 0.012), Vector3(x + (t - 1) * 0.015, 1.06, -1.08), BRIGHT[(t + 2) % BRIGHT.size()])
 	if rider:
 		_body(b, Vector3(0, 1.08, -0.42), true, true, true)
 	if passenger:
@@ -473,6 +527,7 @@ void vertex() {
 
 void fragment() {
 	ALBEDO = tint;
+	EMISSION = tint * 0.12;
 	ROUGHNESS = 0.85;
 }
 """

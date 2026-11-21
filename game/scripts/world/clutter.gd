@@ -135,11 +135,15 @@ static func build(map: RoadMap, palette: PackedColorArray) -> Node3D:
 static func _multi(mesh: Mesh, items: Array, material: Material) -> MultiMeshInstance3D:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
+	# Colours on (all white): without them some phones (Mali) multiply the
+	# paint by black.
+	mm.use_colors = true
 	mm.use_custom_data = true
 	mm.mesh = mesh
 	mm.instance_count = items.size()
 	for i in items.size():
 		mm.set_instance_transform(i, items[i][0])
+		mm.set_instance_color(i, Color.WHITE)
 		mm.set_instance_custom_data(i, items[i][1])
 	var mi := MultiMeshInstance3D.new()
 	mi.multimesh = mm

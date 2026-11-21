@@ -69,9 +69,14 @@ func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 20, "ricks
 	for kind in counts:
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
+		# Colours on (all white): without them some phones (Mali) multiply
+		# the paint by black.
+		mm.use_colors = true
 		mm.use_custom_data = true
 		mm.mesh = meshes[kind]
 		mm.instance_count = counts[kind]
+		for i in counts[kind]:
+			mm.set_instance_color(i, Color.WHITE)
 		var mmi := MultiMeshInstance3D.new()
 		mmi.multimesh = mm
 		mmi.material_override = material
