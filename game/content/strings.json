@@ -606,5 +606,85 @@
  "graphics_low": {
   "bn": "সাধারণ",
   "en": "Simple"
+ },
+ "step_fridge": {
+  "bn": "ফ্রিজ",
+  "en": "Fridge"
+ },
+ "item_cold_drink": {
+  "bn": "ঠান্ডা পানীয়",
+  "en": "Cold drink"
+ },
+ "kind_babu": {
+  "bn": "বাবু",
+  "en": "Babu"
+ },
+ "coldSign": {
+  "bn": "ঠান্ডা পানীয়",
+  "en": "Cold drinks"
+ },
+ "kettleTwo": {
+  "bn": "কেটলি · {a} | {b}",
+  "en": "Kettles · {a} | {b}"
+ },
+ "filling": {
+  "bn": "ভরছে",
+  "en": "filling"
+ },
+ "babuArrived": {
+  "bn": "বাবু এসেছেন: লিকার চা আর পান",
+  "en": "Babu is here: black tea and paan"
+ },
+ "babuLine": {
+  "bn": "বাবু: মহল্লা লেভেল {level} হলে আমার বাসেও একদিন কাজ করবেন!",
+  "en": "Babu: at mohalla level {level}, come and work on my bus one day!"
+ },
+ "teaRain": {
+  "bn": "বৃষ্টি নামল! ছাউনি নেই, কাস্টমার কম আসবে",
+  "en": "Rain! No awning, so fewer customers"
+ },
+ "teaRainAwning": {
+  "bn": "বৃষ্টি নামল! ছাউনির নিচে ভিড় জমছে",
+  "en": "Rain! People crowd under the awning"
+ },
+ "teaHot": {
+  "bn": "আজ খুব গরম",
+  "en": "A hot day today"
+ },
+ "teaHotFridge": {
+  "bn": "আজ খুব গরম! ঠান্ডা পানীয় বেশি চলবে",
+  "en": "A hot day: cold drinks will sell"
+ },
+ "buy_bench": {
+  "bn": "নতুন বেঞ্চ · {n} টাকা (কাস্টমার বেশি, ধৈর্যও বেশি)",
+  "en": "New bench · Tk {n} (more customers, more patient)"
+ },
+ "buy_second_kettle": {
+  "bn": "দ্বিতীয় কেটলি · {n} টাকা (একটা ভরার সময় অন্যটায় চা)",
+  "en": "Second kettle · Tk {n} (one pours while one fills)"
+ },
+ "buy_awning": {
+  "bn": "ছাউনি · {n} টাকা (বৃষ্টিতেও কাস্টমার)",
+  "en": "Awning · Tk {n} (customers in the rain)"
+ },
+ "buy_fridge": {
+  "bn": "ফ্রিজ · {n} টাকা (ঠান্ডা পানীয় ২৫ টাকা)",
+  "en": "Fridge · Tk {n} (cold drinks at Tk 25)"
+ },
+ "owned_bench": {
+  "bn": "কেনা আছে: নতুন বেঞ্চ",
+  "en": "Owned: a new bench"
+ },
+ "owned_second_kettle": {
+  "bn": "কেনা আছে: দ্বিতীয় কেটলি",
+  "en": "Owned: a second kettle"
+ },
+ "owned_awning": {
+  "bn": "কেনা আছে: ছাউনি",
+  "en": "Owned: an awning"
+ },
+ "owned_fridge": {
+  "bn": "কেনা আছে: ফ্রিজ",
+  "en": "Owned: a fridge"
  }
 }

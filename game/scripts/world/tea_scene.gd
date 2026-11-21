@@ -18,6 +18,7 @@ const Traffic = preload("res://scripts/world/traffic.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
 const Reveal = preload("res://scripts/world/reveal.gd")
+const Weather = preload("res://scripts/world/weather.gd")
 
 ## Where the bench and its four seats are, in the stall's own space
 ## (the stall faces -Z, the street).
@@ -30,6 +31,7 @@ const STEP_COLOURS := {
 	"cup": Color("8B5A2B"), "kettle": Color("8B5A2B"), "milk": Color("8B5A2B"), "sugar": Color("8B5A2B"),
 	"banana": Color("C98A00"), "bun_jar": Color("C98A00"),
 	"betel_leaf": Color("2E7D32"), "areca": Color("2E7D32"), "lime": Color("2E7D32"),
+	"fridge": Color("C62828"),
 }
 
 var strings := Strings.new()
@@ -59,6 +61,10 @@ var _notice: Label
 var _notice_box: PanelContainer
 var _notice_left := 0.0
 var _ding: AudioStreamPlayer
+## Rain: how hard (0–1, eased), the drops and their sound.
+var _rain_k := 0.0
+var _drops: CPUParticles3D
+var _rain_sound: AudioStreamPlayer
 var _alive_left := 10.0
 var _frames_logged := 0
 
@@ -67,7 +73,7 @@ func _ready() -> void:
 	strings.lang = Strings.saved_lang()
 	b = Balance.new()
 	progress = Progress.new(b)
-	day = TeaDay.new(b)
+	day = TeaDay.new(b, -1, progress.data.tea.upgrades)
 	set_process(false)
 	var loading := _loading_screen()
 	await _step("map")
@@ -111,6 +117,8 @@ func _ready() -> void:
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
+	if day.hot:
+		_say(strings.t("teaHotFridge" if day.has("fridge") else "teaHot"), Look.VERMILION, 4.0)
 
 
 func _loading_screen() -> CanvasLayer:
@@ -229,6 +237,22 @@ func _build_stall(map: RoadMap, tile: Vector2i) -> void:
 	bench.material_override = plain
 	bench.position = Vector3(0, 0, BENCH_Z)
 	_stall.add_child(bench)
+	if not day.upgrades.is_empty():
+		var extras := MeshInstance3D.new()
+		extras.mesh = Models.tea_extras(day.upgrades, BENCH_Z)
+		extras.material_override = plain
+		_stall.add_child(extras)
+		if day.has("fridge"):
+			var cold := Label3D.new()
+			cold.text = strings.t("coldSign")
+			cold.font = Look.font(Look.BOLD)
+			cold.font_size = 32
+			cold.pixel_size = 0.004
+			cold.modulate = Look.VERMILION
+			cold.alpha_cut = Label3D.ALPHA_CUT_DISCARD
+			cold.position = Vector3(-1.65, 1.42, -0.43)
+			cold.rotation.y = PI
+			_stall.add_child(cold)
 	var sitter_mesh := Models.bench_sitter()
 	for i in SEAT_X.size():
 		var sitter := MeshInstance3D.new()
@@ -279,6 +303,13 @@ func _sounds() -> void:
 	add_child(hum)
 	hum.finished.connect(hum.play)
 	hum.play()
+	_rain_sound = AudioStreamPlayer.new()
+	_rain_sound.stream = load("res://sounds/rain.wav")
+	_rain_sound.volume_db = -60.0
+	add_child(_rain_sound)
+	_rain_sound.finished.connect(_rain_again)
+	_drops = Weather.rain_drops()
+	add_child(_drops)
 	_ding = AudioStreamPlayer.new()
 	_ding.stream = load("res://sounds/bell.wav")
 	_ding.volume_db = -8.0
@@ -385,7 +416,7 @@ func _build_hud() -> void:
 	grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
-	for step in TeaDay.STEPS:
+	for step in day.steps():
 		var button := Look.button(strings.t("step_" + step), STEP_COLOURS[step], 17)
 		button.custom_minimum_size = Vector2(0, 56)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -420,6 +451,7 @@ func _process(dt: float) -> void:
 		_notice_left -= dt
 		if _notice_left <= 0.0:
 			_notice_box.visible = false
+	_weather(dt)
 	_light()
 	_refresh()
 
@@ -427,17 +459,24 @@ func _process(dt: float) -> void:
 func _handle(events: Array) -> void:
 	if events.has(TeaDay.Event.ARRIVED):
 		for c in day.customers:
-			if c.kind == "rahim" and not _seated.has(c.id):
-				_say(strings.t("rahimArrived"), Look.MAGENTA, 3.0)
+			if not _seated.has(c.id) and (c.kind == "rahim" or c.kind == "babu"):
+				_say(strings.t(c.kind + "Arrived"), Look.MAGENTA, 3.0)
 	if events.has(TeaDay.Event.SERVED):
 		var last: Dictionary = day.last_served
 		if last.kind == "rahim":
 			_say(_rahim_line(), Look.MAGENTA, 5.0)
+		elif last.kind == "babu":
+			_say(strings.t("babuLine", {"level": int(b.n("unlocks.bus"))}), Look.SKY, 5.0)
 		elif last.happy:
 			_say(strings.t("servedHappy", {"bill": last.bill, "tip": last.tip}), Look.PARROT)
 		else:
 			_say(strings.t("servedPlain", {"bill": last.bill}), Look.OUTLINE)
 		_ding.play()
+	if events.has(TeaDay.Event.RAIN_START):
+		_say(strings.t("teaRainAwning" if day.has("awning") else "teaRain"), Look.SKY, 3.5)
+		_rain_sound.play()
+	if events.has(TeaDay.Event.RAIN_END):
+		_say(strings.t("rainEnd"), Look.SKY, 2.0)
 	if events.has(TeaDay.Event.LEFT):
 		_say(strings.t("customerLeft"), Look.VERMILION)
 	if events.has(TeaDay.Event.WRONG_STEP):
@@ -528,7 +567,9 @@ func _refresh() -> void:
 			steps.append(strings.t("step_" + st))
 		_tray.text = strings.t("tray", {"steps": " + ".join(steps)})
 	_give.disabled = day.made() == ""
-	if day.refill_left > 0.0:
+	if day.has_second:
+		_kettle_button.text = strings.t("kettleTwo", {"a": _kettle_state(day.kettle, day.refill_left), "b": _kettle_state(day.kettle2, day.refill2_left)})
+	elif day.refill_left > 0.0:
 		_kettle_button.text = strings.t("kettleFilling")
 	elif day.kettle <= 0:
 		_kettle_button.text = strings.t("kettleEmpty")
@@ -537,11 +578,18 @@ func _refresh() -> void:
 	_status.text = "%s\n%s" % [_clock_text(), strings.t("taka", {"n": day.money})]
 
 
+## One kettle of two: its cups, or that it is filling.
+func _kettle_state(cups: int, filling: float) -> String:
+	return strings.t("filling") if filling > 0.0 else str(cups)
+
+
 ## Shirt and trousers from the street's colours; Rahim Chacha in his own.
 func _sitter_paint(c: Dictionary) -> ShaderMaterial:
 	var paint: ShaderMaterial
 	if c.kind == "rahim":
 		paint = Models.traffic_material(PackedColorArray([Color("3A6EA5"), Color("4E4A44")]), false)
+	elif c.kind == "babu":
+		paint = Models.traffic_material(PackedColorArray([Color("1F4F8B"), Color("6D6A64")]), false)
 	elif c.kind == "office":
 		paint = Models.traffic_material(PackedColorArray([Color("F2F2F2"), Color("2B2B2B")]), false)
 	else:
@@ -570,6 +618,19 @@ func _clock_text() -> String:
 
 
 ## Morning to night: the light follows the clock (dawn at 6, dark by 8).
+func _rain_again() -> void:
+	if _rain_k > 0.02:
+		_rain_sound.play()
+
+
+## Eases the rain in and out: drops in front of the camera, the sound.
+func _weather(dt: float) -> void:
+	_rain_k = move_toward(_rain_k, 1.0 if day.raining else 0.0, dt / 4.0)
+	_drops.emitting = _rain_k > 0.3 and day.raining
+	_drops.position = camera.global_position + (_stall.global_position - camera.global_position).normalized() * 4.0 + Vector3(0, 6.0, 0)
+	_rain_sound.volume_db = linear_to_db(maxf(_rain_k, 0.001)) - 4.0
+
+
 func _light() -> void:
 	var h := day.hour()
 	var dawn := clampf(1.0 - (h - 6.0) / 1.5, 0.0, 1.0)
@@ -583,10 +644,18 @@ func _light() -> void:
 	_sky.sky_top_color = Color("9DB4C6").lerp(Color("C9876A"), dusk).lerp(Color("1E2A44"), maxf(night, dawn * 0.6))
 	_sky.sky_horizon_color = Color("E2DED2").lerp(Color("F0B27A"), maxf(dusk, dawn)).lerp(Color("3A4566"), night)
 	_env.fog_light_color = Color("D8D5C8").lerp(Color("E5B48C"), dusk).lerp(Color("2E3650"), night)
+	if _rain_k > 0.0:
+		_sun.light_energy *= lerpf(1.0, 0.3, _rain_k)
+		_sky.sky_top_color = _sky.sky_top_color.lerp(Color("6E7882"), _rain_k * 0.8)
+		_sky.sky_horizon_color = _sky.sky_horizon_color.lerp(Color("9DA4AA"), _rain_k * 0.8)
+		_env.fog_light_color = _env.fog_light_color.lerp(Color("8F979E"), _rain_k * 0.8)
+	_env.fog_density = lerpf(0.014, 0.03, _rain_k)
 
 
 func _end_day() -> void:
 	set_process(false)
+	_rain_sound.stop()
+	_drops.emitting = false
 	var result := {"earned": day.money, "served": day.served, "happy": day.happy, "lost": day.lost, "stars": day.stars()}
 	var got := progress.apply_tea_day(result)
 	progress.save()

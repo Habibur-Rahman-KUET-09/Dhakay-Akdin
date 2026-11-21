@@ -194,7 +194,23 @@ func _tea_card() -> Control:
 		if h.get("who", "") == "tea":
 			box.add_child(Look.label(s.t("teaLastDay", {"money": int(h.earned), "served": int(h.served)}), 15))
 			break
+	# What the stall can buy next, from the shared savings.
+	var next := progress.next_upgrade("tea")
+	if next != "":
+		var cost := progress.price(next, "tea")
+		var buy := Look.button(s.t("buy_" + next, {"n": cost}), Look.PARROT if int(progress.data.taka) >= cost else Color("9E9E9E"), 15)
+		buy.disabled = int(progress.data.taka) < cost
+		buy.pressed.connect(_buy_for_stall.bind(next))
+		box.add_child(buy)
+	for id in progress.data.tea.upgrades:
+		box.add_child(Look.label(s.t("owned_" + id), 14, false, Look.PARROT.darkened(0.2)))
 	return panel
+
+
+func _buy_for_stall(id: String) -> void:
+	if progress.buy(id, "tea"):
+		progress.save()
+		_build()
 
 
 ## The community fund and the project it is filling.

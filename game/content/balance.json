@@ -58,6 +58,7 @@
     "arrival_every_s": 6, "rush_arrival_every_s": 3,
     "patience_s": {"normal": 12, "office": 8, "elder": 16},
     "kettle_cups": 8, "kettle_refill_s": 5, "happy_tip_share": 0.10,
+    "rain_chance_per_day": 0.4, "rain_seconds": 60, "rain_arrivals": 0.5, "hot_chance_per_day": 0.3,
     "menu": {
       "liquor_tea": {"price": 10, "steps": ["cup", "kettle"]},
       "milk_tea": {"price": 15, "steps": ["cup", "kettle", "milk", "sugar"]},

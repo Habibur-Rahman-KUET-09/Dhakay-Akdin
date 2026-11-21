@@ -4,7 +4,11 @@
 ## tapping its steps in order (cup, kettle, milk, sugar for milk tea); the
 ## wrong step spoils it. The kettle holds eight cups and takes a while to
 ## fill again. More customers in the morning and evening rush. Rahim
-## Chacha stops by once a day. No drawing here, so it can be tested.
+## Chacha and Babu stop by once a day. Upgrades (§৪.৩): a new bench
+## (more customers, more patient), a second kettle (one pours while the
+## other fills), an awning (rain does not keep people away) and a fridge
+## (cold drinks, most on a hot day). A shower on some days, a hot day on
+## others. No drawing here, so it can be tested.
 extends RefCounted
 
 const Balance = preload("res://scripts/rules/balance.gd")
@@ -19,13 +23,17 @@ enum Event {
 	KETTLE_EMPTY, ## the last cup poured: fill it again
 	REFILLING, ## the kettle is being filled
 	KETTLE_FULL, ## and is full again
+	RAIN_START,
+	RAIN_END,
 	DAY_OVER,
 }
 
 ## What can be ordered, in the order shown on the counter.
 const STEPS := ["cup", "kettle", "milk", "sugar", "banana", "bun_jar", "betel_leaf", "areca", "lime"]
-## How often each thing is ordered (out of 100).
+## How often each thing is ordered (out of 100); cold drinks once there is
+## a fridge (twice as often on a hot day).
 const ORDER_WEIGHTS := {"milk_tea": 40, "liquor_tea": 20, "bun": 14, "paan": 14, "banana": 12}
+const COLD_DRINK_WEIGHT := 12
 ## Customer kinds (out of 100): patience comes from the balance file.
 const KIND_WEIGHTS := {"normal": 60, "office": 25, "elder": 15}
 const SEATS := 4
@@ -52,23 +60,67 @@ var happy := 0
 var lost := 0
 ## The customer just served, for the screen: {name, kind, bill, tip, happy}.
 var last_served := {}
-## When Rahim Chacha comes (seconds into the day); -1 once he has.
+## When Rahim Chacha and Babu come (seconds into the day); -1 once they
+## have.
 var rahim_at := -1.0
+var babu_at := -1.0
+var upgrades: Array = []
+## The second kettle (with that upgrade): cups, and seconds left filling.
+var has_second := false
+var kettle2 := 0
+var refill2_left := 0.0
+## Weather: a shower from rain_at (or none), and a hot day.
+var raining := false
+var rain_at := -1.0
+var rain_seconds := 60.0
+var hot := false
+var weather := RandomNumberGenerator.new()
+var _weights := {}
 var _next_in := 2.0
 var _next_id := 0
 
 
-func _init(balance: Balance, seed_value := -1) -> void:
+func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
 	b = balance
+	upgrades = owned
 	if seed_value >= 0:
 		rng.seed = seed_value
+		weather.seed = seed_value + 7
 	else:
 		rng.randomize()
-	menu = b.at("tea_stall.menu")
+		weather.randomize()
+	menu = (b.at("tea_stall.menu") as Dictionary).duplicate(true)
 	day_seconds = b.n("tea_stall.day_seconds")
 	kettle_size = int(b.n("tea_stall.kettle_cups"))
 	kettle = kettle_size
 	rahim_at = rng.randf_range(0.2, 0.7) * day_seconds
+	babu_at = weather.randf_range(0.4, 0.9) * day_seconds
+	has_second = upgrades.has("second_kettle")
+	if has_second:
+		kettle2 = kettle_size
+	_weights = ORDER_WEIGHTS.duplicate()
+	if weather.randf() < b.n("tea_stall.rain_chance_per_day"):
+		rain_at = weather.randf_range(0.15, 0.75) * day_seconds
+		rain_seconds = b.n("tea_stall.rain_seconds")
+	elif weather.randf() < b.n("tea_stall.hot_chance_per_day"):
+		hot = true
+	if upgrades.has("fridge"):
+		menu["cold_drink"] = {"price": int(b.n("tea_stall.upgrades.fridge.price")), "steps": ["fridge"]}
+		_weights["cold_drink"] = COLD_DRINK_WEIGHT * (2 if hot else 1)
+
+
+func has(upgrade: String) -> bool:
+	return upgrades.has(upgrade)
+
+
+## The steps on the counter: the fridge too, once there is one.
+func steps() -> Array:
+	return STEPS + (["fridge"] if has("fridge") else [])
+
+
+## Starts the day's shower now (tests).
+func start_rain() -> void:
+	rain_at = clock
 
 
 ## The hour of the day, 6.0 to 23.0.
@@ -107,11 +159,22 @@ func update(dt: float) -> Array:
 		return []
 	var events := []
 	clock += dt
+	if rain_at >= 0.0:
+		var now := clock >= rain_at and clock < rain_at + rain_seconds
+		if now != raining:
+			raining = now
+			events.append(Event.RAIN_START if now else Event.RAIN_END)
 	if refill_left > 0.0:
 		refill_left -= dt
 		if refill_left <= 0.0:
 			refill_left = 0.0
 			kettle = kettle_size
+			events.append(Event.KETTLE_FULL)
+	if refill2_left > 0.0:
+		refill2_left -= dt
+		if refill2_left <= 0.0:
+			refill2_left = 0.0
+			kettle2 = kettle_size
 			events.append(Event.KETTLE_FULL)
 	for c in customers.duplicate():
 		c.left -= dt
@@ -122,11 +185,19 @@ func update(dt: float) -> Array:
 	_next_in -= dt
 	if _next_in <= 0.0:
 		var every := b.n("tea_stall.rush_arrival_every_s" if rush() else "tea_stall.arrival_every_s")
+		if has("bench"):
+			every /= b.n("tea_stall.upgrades.bench.arrivals")
+		# Rain keeps people away, unless there is an awning to sit under.
+		if raining and not has("awning"):
+			every /= b.n("tea_stall.rain_arrivals")
 		_next_in = every * rng.randf_range(0.6, 1.4)
-		if _arrive(false):
+		if _arrive():
 			events.append(Event.ARRIVED)
-	if rahim_at >= 0.0 and clock >= rahim_at and _arrive(true):
+	if rahim_at >= 0.0 and clock >= rahim_at and _arrive("rahim"):
 		rahim_at = -1.0
+		events.append(Event.ARRIVED)
+	if babu_at >= 0.0 and clock >= babu_at and _arrive("babu"):
+		babu_at = -1.0
 		events.append(Event.ARRIVED)
 	if clock >= day_seconds:
 		over = true
@@ -142,17 +213,25 @@ func _free_seat() -> int:
 	return -1
 
 
-## Someone sits down, if there is room. Rahim Chacha always has milk tea
-## and a bun.
-func _arrive(rahim: bool) -> bool:
+## Someone sits down, if there is room: a passer-by, or one of the
+## regulars ("rahim": milk tea and a bun; "babu": black tea and paan).
+func _arrive(regular := "") -> bool:
 	var seat := _free_seat()
 	if seat < 0:
 		return false
-	var kind := "rahim" if rahim else _pick(KIND_WEIGHTS)
-	var items := ["milk_tea", "bun"] if rahim else [_pick(ORDER_WEIGHTS)]
-	if not rahim and rng.randf() < 0.35:
-		items.append(_pick(ORDER_WEIGHTS))
-	var patience := b.n("tea_stall.patience_s." + ("normal" if rahim else kind)) + (4.0 if rahim else 0.0)
+	var kind := regular if regular != "" else _pick(KIND_WEIGHTS)
+	var items := []
+	if regular == "rahim":
+		items = ["milk_tea", "bun"]
+	elif regular == "babu":
+		items = ["liquor_tea", "paan"]
+	else:
+		items = [_pick(_weights)]
+		if rng.randf() < 0.35:
+			items.append(_pick(_weights))
+	var patience := b.n("tea_stall.patience_s." + ("normal" if regular != "" else kind)) + (4.0 if regular != "" else 0.0)
+	if has("bench"):
+		patience += b.n("tea_stall.upgrades.bench.patience_bonus_s")
 	var bill := 0
 	for it in items:
 		bill += price(it)
@@ -208,23 +287,41 @@ func _wanted_further() -> bool:
 func tap(step: String) -> Array:
 	if over:
 		return []
+	var pour_from := 0
 	if step == "kettle":
-		if refill_left > 0.0:
-			return []
-		if kettle <= 0:
+		if kettle > 0 and refill_left <= 0.0:
+			pour_from = 1
+		elif has_second and kettle2 > 0 and refill2_left <= 0.0:
+			pour_from = 2
+		elif kettle <= 0 and refill_left <= 0.0:
 			# Empty: tapping it puts it on to fill.
 			refill_left = b.n("tea_stall.kettle_refill_s")
 			return [Event.REFILLING]
+		elif has_second and kettle2 <= 0 and refill2_left <= 0.0:
+			refill2_left = b.n("tea_stall.kettle_refill_s")
+			return [Event.REFILLING]
+		else:
+			return []
 	var next := tray.duplicate()
 	next.append(step)
 	if not _leads_somewhere(next):
 		tray.clear()
 		return [Event.WRONG_STEP]
 	var events := []
-	if step == "kettle":
+	if pour_from == 1:
 		kettle -= 1
-		if kettle == 0:
-			events.append(Event.KETTLE_EMPTY)
+	elif pour_from == 2:
+		kettle2 -= 1
+	if pour_from > 0 and has_second:
+		# Two kettles: an empty one goes straight on to fill.
+		if kettle == 0 and refill_left <= 0.0:
+			refill_left = b.n("tea_stall.kettle_refill_s")
+			events.append(Event.REFILLING)
+		if kettle2 == 0 and refill2_left <= 0.0:
+			refill2_left = b.n("tea_stall.kettle_refill_s")
+			events.append(Event.REFILLING)
+	elif pour_from == 1 and kettle == 0:
+		events.append(Event.KETTLE_EMPTY)
 	tray = next
 	# Done, and nobody waits for more on top of it: hand it over.
 	if made() != "" and not _wanted_further():

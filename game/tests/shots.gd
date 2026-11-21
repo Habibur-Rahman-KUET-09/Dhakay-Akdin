@@ -34,7 +34,11 @@ func _run() -> void:
 	_save("4-after-right-turn")
 	drive.queue_free()
 	await _frames(2)
-	# Monir Mama's tea stall, a few customers in, a cup of tea on the go.
+	# Monir Mama's tea stall with everything bought (bench, second kettle,
+	# awning, fridge), a few customers in, a cup of tea on the go.
+	var save = load("res://scripts/rules/progress.gd").new(load("res://scripts/rules/balance.gd").new())
+	save.data.tea.upgrades = ["bench", "second_kettle", "awning", "fridge"]
+	save.save()
 	var tea = load("res://scenes/tea.tscn").instantiate()
 	root.add_child(tea)
 	await _frames(20)

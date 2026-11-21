@@ -131,3 +131,74 @@ func test_a_day_of_customers_with_rush_hours_and_rahim_chacha() -> void:
 	check(t.customers.is_empty(), "closed at night")
 	near(t.hour(), 23.0, "closes at 11 pm")
 	check(t.stars() >= 1.0, "a rating for the day")
+
+
+# --- Week 7: upgrades, weather, Babu --------------------------------------
+
+
+func test_second_kettle_pours_while_the_first_fills() -> void:
+	var t := TeaDay.new(Balance.new(), 1, ["second_kettle"])
+	t.rahim_at = -1.0
+	t.babu_at = -1.0
+	t.kettle = 1
+	t.tap("cup")
+	var got := t.tap("kettle")
+	check(got.has(TeaDay.Event.REFILLING), "the empty one goes on to fill by itself")
+	t.discard()
+	t.tap("cup")
+	t.tap("kettle")
+	eq(t.kettle2, 7, "the second kettle pours meanwhile")
+	eq(t.kettle, 0, "the first still filling")
+
+
+func test_bench_brings_more_and_more_patient_customers() -> void:
+	var plain := TeaDay.new(Balance.new(), 3)
+	var bench := TeaDay.new(Balance.new(), 3, ["bench"])
+	for t in [plain, bench]:
+		t.rahim_at = -1.0
+		t.babu_at = -1.0
+		t.rain_at = -1.0
+	plain._arrive()
+	bench._arrive()
+	near(bench.customers[0].patience - plain.customers[0].patience, 3.0, "+3 seconds")
+
+
+func test_rain_keeps_customers_away_unless_there_is_an_awning() -> void:
+	var counts := {}
+	for owned in [[], ["awning"]]:
+		var t := TeaDay.new(Balance.new(), 5, owned)
+		t.rahim_at = -1.0
+		t.babu_at = -1.0
+		t.start_rain()
+		t.rain_seconds = 1000.0
+		var arrived := 0
+		var rained := false
+		for i in 400:
+			var got := t.update(0.25)
+			rained = rained or got.has(TeaDay.Event.RAIN_START)
+			arrived += got.count(TeaDay.Event.ARRIVED)
+			t.customers.clear()
+		check(rained, "it rained")
+		counts[owned.size()] = arrived
+	check(counts[1] > counts[0] * 1.4, "more come under an awning (%d against %d)" % [counts[1], counts[0]])
+
+
+func test_fridge_sells_cold_drinks() -> void:
+	var t := TeaDay.new(Balance.new(), 1, ["fridge"])
+	check(t.steps().has("fridge"), "a fridge on the counter")
+	t.customers = [{"id": 1, "seat": 0, "kind": "normal", "items": ["cold_drink"], "ordered": ["cold_drink"], "patience": 12.0, "left": 12.0, "bill": 25}]
+	check(t.tap("fridge").has(TeaDay.Event.SERVED), "a cold drink")
+	eq(t.money, 25 + 3, "25 taka and a tip")
+	var plain := TeaDay.new(Balance.new(), 1)
+	check(not plain.steps().has("fridge"), "no fridge, no cold drinks")
+
+
+func test_babu_comes_for_black_tea_and_paan() -> void:
+	var t := TeaDay.new(Balance.new(), 2)
+	t.rahim_at = -1.0
+	t.babu_at = 1.0
+	t.update(1.5)
+	var babu = t.customers.filter(func(c): return c.kind == "babu")
+	check(not babu.is_empty(), "Babu sat down")
+	if not babu.is_empty():
+		eq(babu[0].items, ["liquor_tea", "paan"], "black tea and paan")

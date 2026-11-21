@@ -101,3 +101,16 @@ func test_a_day_at_the_tea_stall() -> void:
 	eq(got.xp, 130, "XP: 50 + 4 stars × 20")
 	eq(p.data.history[0].who, "tea", "the record says whose day it was")
 	check(got.best, "best day at the stall")
+
+
+func test_tea_stall_upgrades() -> void:
+	var p := _fresh()
+	eq(p.next_upgrade("tea"), "bench", "a bench first")
+	eq(p.price("bench", "tea"), 800, "800 taka")
+	p.data.taka = 2500
+	check(p.buy("bench", "tea"), "bought")
+	check(p.has_upgrade("bench", "tea") and not p.has_upgrade("bench"), "the stall's, not the rickshaw's")
+	eq(p.next_upgrade("tea"), "second_kettle", "then a second kettle")
+	check(p.buy("second_kettle", "tea"), "bought")
+	eq(p.data.taka, 500, "paid 800 + 1200")
+	eq(p.next_upgrade(), "new_rickshaw", "the rickshaw's own list is apart")

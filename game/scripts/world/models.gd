@@ -604,6 +604,35 @@ static func tea_stall() -> ArrayMesh:
 	return b.commit()
 
 
+## What Monir Mama has bought for the stall, in the stall's own space:
+## a cushion on the new bench, a second kettle on its own stove, a blue
+## tarpaulin awning over the bench on bamboo poles, a red drinks fridge.
+static func tea_extras(owned: Array, bench_z: float) -> ArrayMesh:
+	var b := Builder.new()
+	if owned.has("bench"):
+		b.box(Vector3(3.3, 0.06, 0.36), Vector3(0, 0.52, bench_z), Color("C2185B"))
+		b.box(Vector3(3.42, 0.04, 0.42), Vector3(0, 0.49, bench_z), Color("F6B800"))
+	if owned.has("second_kettle"):
+		b.cyl(0.17, 0.2, Vector3(0.35, 1.13, 0.1), Color("8A4B2A"), Vector3.ZERO, 12)
+		b.cyl(0.14, 0.24, Vector3(0.35, 1.36, 0.1), Color("B8BCC2"), Vector3.ZERO, 14, KEEP, Vector2.ZERO, 0.1)
+		b.ball(0.035, Vector3(0.35, 1.5, 0.1), Color("3C3F44"))
+		b.cyl(0.022, 0.22, Vector3(0.2, 1.38, 0.02), Color("B8BCC2"), Vector3(0, 0, 55), 8)
+	if owned.has("awning"):
+		var front := bench_z - 0.7
+		b.quad(Vector3(-1.7, 2.45, -0.85), Vector3(1.7, 2.45, -0.85), Vector3(1.7, 2.15, front), Vector3(-1.7, 2.15, front), Color("1F6FB2"))
+		for x in [-1.65, 1.65]:
+			b.cyl(0.035, 2.15, Vector3(x, 1.075, front), Color("C8A96A"), Vector3.ZERO, 6)
+		b.box(Vector3(3.4, 0.05, 0.05), Vector3(0, 2.15, front), Color("C8A96A"))
+	if owned.has("fridge"):
+		b.box(Vector3(0.7, 1.5, 0.6), Vector3(-1.65, 0.75, -0.1), Color("D7263D"))
+		b.box(Vector3(0.56, 1.1, 0.02), Vector3(-1.65, 0.85, -0.41), Color("BFE3F2"))
+		for i in 3:
+			for k in 4:
+				b.cyl(0.035, 0.18, Vector3(-1.85 + k * 0.13, 0.5 + i * 0.32, -0.3), [Color("2E9E6B"), Color("E2432A"), Color("F6B800"), Color("3E2A20")][k], Vector3.ZERO, 8)
+		b.box(Vector3(0.7, 0.18, 0.02), Vector3(-1.65, 1.42, -0.415), Color("F2F2F2"))
+	return b.commit()
+
+
 ## A plain wooden bench for customers, 3.4 m long along X.
 static func bench() -> ArrayMesh:
 	var b := Builder.new()

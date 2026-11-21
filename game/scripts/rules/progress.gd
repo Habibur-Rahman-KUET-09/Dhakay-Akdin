@@ -12,6 +12,8 @@ const DEFAULT_PATH := "user://save.json"
 const HISTORY := 10
 const PROJECTS := ["street_lights", "drain_cleaning", "bus_shelter"]
 const UPGRADES := ["new_rickshaw", "battery_rickshaw"]
+## The stall grows in this order (§৪.৩); the move to a shop comes with the story.
+const TEA_UPGRADES := ["bench", "second_kettle", "awning", "fridge"]
 
 var b: Balance
 var path := DEFAULT_PATH
@@ -88,27 +90,29 @@ func unlocked(what: String) -> bool:
 # --- Rahim Chacha's rickshaw ----------------------------------------------------
 
 
-func has_upgrade(id: String) -> bool:
-	return data.rickshaw.upgrades.has(id)
+## Upgrades for Rahim Chacha's rickshaw ("rickshaw", the default) or
+## Monir Mama's stall ("tea"), bought from the shared savings.
+func has_upgrade(id: String, who := "rickshaw") -> bool:
+	return data[who].upgrades.has(id)
 
 
-## The next upgrade on sale and its price; "" when all are bought.
-func next_upgrade() -> String:
-	for id in UPGRADES:
-		if not has_upgrade(id):
+## The next upgrade on sale; "" when all are bought.
+func next_upgrade(who := "rickshaw") -> String:
+	for id in (TEA_UPGRADES if who == "tea" else UPGRADES):
+		if not has_upgrade(id, who):
 			return id
 	return ""
 
 
-func price(id: String) -> int:
-	return int(b.n("rickshaw.upgrades.%s.cost" % id))
+func price(id: String, who := "rickshaw") -> int:
+	return int(b.n("%s.upgrades.%s.cost" % ["tea_stall" if who == "tea" else "rickshaw", id]))
 
 
-func buy(id: String) -> bool:
-	if has_upgrade(id) or int(data.taka) < price(id):
+func buy(id: String, who := "rickshaw") -> bool:
+	if has_upgrade(id, who) or int(data.taka) < price(id, who):
 		return false
-	data.taka = int(data.taka) - price(id)
-	data.rickshaw.upgrades.append(id)
+	data.taka = int(data.taka) - price(id, who)
+	data[who].upgrades.append(id)
 	return true
 
 
