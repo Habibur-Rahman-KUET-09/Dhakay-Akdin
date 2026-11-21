@@ -109,10 +109,16 @@ jobs:
           sed -i "s/^version\/name=.*/version\/name=\"$v\"/; s/^version\/code=.*/version\/code=$((3000 + ${{ github.run_number }}))/" game/export_presets.cfg
           mkdir -p build dist
           set -o pipefail
-          godot --headless --path game --export-release "Android" "$PWD/build/DhakarEkdin-$v.apk" 2>&1 | tee export.log
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" export.log
-          test -s "build/DhakarEkdin-$v.apk"
-          cp "build/DhakarEkdin-$v.apk" dist/
+          # One APK per processor family, so each is about half the size:
+          # arm64-v8a for nearly every phone, armeabi-v7a for old ones.
+          for abi in arm64-v8a armeabi-v7a; do
+            other=$([ "$abi" = arm64-v8a ] && echo armeabi-v7a || echo arm64-v8a)
+            sed -i "s/^architectures\/$abi=.*/architectures\/$abi=true/; s/^architectures\/$other=.*/architectures\/$other=false/" game/export_presets.cfg
+            godot --headless --path game --export-release "Android" "$PWD/build/DhakarEkdin-$v-$abi.apk" 2>&1 | tee "export-$abi.log"
+            ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "export-$abi.log"
+            test -s "build/DhakarEkdin-$v-$abi.apk"
+            cp "build/DhakarEkdin-$v-$abi.apk" dist/
+          done
           ls -la dist
 
       - uses: softprops/action-gh-release@v2
@@ -122,5 +128,5 @@ jobs:
           name: ঢাকার একদিন ${{ steps.v.outputs.version }} (3D)
           prerelease: true
           body: |
-            পরীক্ষামূলক 3D সংস্করণ। APK-টা নামান; বেশিরভাগ Android ফোনে চলবে। সাথে খেলার কয়েকটা screenshot।
+            পরীক্ষামূলক 3D সংস্করণ। বেশিরভাগ ফোনে `arm64-v8a` APK-টা নামান; খুব পুরোনো ফোনে `armeabi-v7a`। সাথে খেলার কয়েকটা screenshot।
           files: dist/*

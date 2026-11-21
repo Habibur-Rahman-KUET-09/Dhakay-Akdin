@@ -6,10 +6,11 @@ extends CanvasLayer
 
 const Look = preload("res://scripts/ui/look.gd")
 const RoadMap = preload("res://scripts/rules/road_map.gd")
+const Strings = preload("res://scripts/ui/strings.gd")
 
 signal back_pressed
 
-var s
+var s: Strings
 var map: RoadMap
 var _target: Label
 var _trips: Label
@@ -37,7 +38,7 @@ var _pedal_down := false
 var _brake_down := false
 
 
-func setup(strings, road_map: RoadMap) -> void:
+func setup(strings: Strings, road_map: RoadMap) -> void:
 	s = strings
 	map = road_map
 

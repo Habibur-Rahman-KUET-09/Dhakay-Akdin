@@ -29,7 +29,9 @@ pointing/emulate_touch_from_mouse=true
 
 [internationalization]
 
-locale/include_text_server_data=true
+; Line-breaking dictionaries for Thai, Chinese and the like (~4 MB): Bangla
+; breaks at spaces and is shaped by HarfBuzz without them.
+locale/include_text_server_data=false
 
 [rendering]
 
