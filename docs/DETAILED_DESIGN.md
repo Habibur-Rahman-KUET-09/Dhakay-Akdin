@@ -98,7 +98,8 @@ flowchart LR
 - ওপরে একটা ছোট তীর গন্তব্যের দিক দেখায়।
 - এতে এক হাতে খেলা যায় আর আসল চ্যালেঞ্জ থাকে "কোন রাস্তা নেব"-তে।
 - **খুঁটিনাটি (সপ্তাহ ২):**
-  - খেলার সময় ম্যাপ ঘোরে না। তাই সোয়াইপ পর্দার দিক: ওপরে সোয়াইপ মানে পর্দার ওপরের দিকে, রিকশা যেদিকেই মুখ করে থাকুক।
+  - 3D-তে ক্যামেরা রিকশার পেছনে থাকে, তাই সোয়াইপ রিকশার দিক ধরে: বাঁয়ে বা ডানে মানে পরের মোড়ে সেদিকে বাঁক, নিচে মানে এখনই ঘোরা, ওপরে মানে মোড়ে সোজা যাওয়া। রাস্তার বাঁক সেদিকেই হলে সেটাতেই বাঁকটা ধরা হয়। (2D সংস্করণে ম্যাপ স্থির ছিল আর সোয়াইপ ছিল পর্দার দিক।)
+  - কোণে পুরো ম্যাপের ছোট ছবি থাকে, রিকশা আর গন্তব্যের বিন্দুসহ।
   - সোয়াইপটা মনে থাকে আর পরের যে মোড়ে সেদিকে রাস্তা আছে সেখানে কাজে লাগে।
   - পেছনের দিকে সোয়াইপ করলে সাথে সাথে ঘুরে যায়, টাইলের মাঝখানে থাকলেও।
   - কোনো সোয়াইপ না থাকলে রিকশা সোজা চলে; সোজা না গেলে একটাই বাঁক থাকলে সেটা নেয়; দুই দিকে পথ থাকলে থেমে "কোন দিকে?" জিজ্ঞেস করে। রিকশা নিজে থেকে কখনো উল্টো পথে যায় না।
@@ -382,71 +383,54 @@ flowchart LR
 
 | অংশ | পছন্দ | মন্তব্য |
 |---|---|---|
-| ইঞ্জিন | Flutter + **Flame** | মেনু আর ফর্ম Flutter widget-এ, মিনি-গেম Flame-এ |
-| ম্যাপ | অক্ষরের সারি দিয়ে লেখা JSON, নিজের `RoadMap` (§৪.১) | রিকশার ম্যাপ |
-| সেভ | একটা JSON ফাইল (`path_provider`), atomic write **[সিদ্ধান্ত]** | GDD-তে Hive আছে, কিন্তু মূল Hive প্যাকেজ আর রক্ষণাবেক্ষণ হচ্ছে না; একটা ছোট JSON সেভই যথেষ্ট আর সহজ |
-| সেটিংস | `shared_preferences` | ভাষা, শব্দ |
-| অডিও | `flame_audio` | OGG ফাইল |
-| Ads | `google_mobile_ads` | |
-| কেনাকাটা | `in_app_purchase` | |
-| Analytics, Crash, Remote Config | Firebase (ফ্রি) | Learning-App-এর মতো, Firebase না থাকলে কাজ না করে চুপ থাকে |
-| ভাষা | Flutter `gen-l10n` (ARB) + content JSON-এ `{bn, en}` | |
+| ইঞ্জিন | **Godot 4.5, 3D** (Compatibility renderer, OpenGL ES 3) **[সিদ্ধান্ত, সপ্তাহ ২]** | কম দামের ফোনেও চলে; বিনামূল্যে, open source; GitHub Actions-এ APK বানানো যায়। প্রথম দুই সপ্তাহ Flutter + Flame 2D-তে হয়েছিল |
+| ভাষা (কোড) | GDScript | নিয়মের অংশ (`scripts/rules`) আঁকা থেকে আলাদা, headless test চলে |
+| ম্যাপ | অক্ষরের সারি দিয়ে লেখা JSON, নিজের `RoadMap` (§৪.১) | একই ফাইল থেকে 3D শহর বানানো হয় |
+| সেভ | একটা JSON ফাইল `user://save.json`-এ, atomic write | GDD-র Hive-এর বদলে |
+| সেটিংস | `ConfigFile` (`user://settings.cfg`) | ভাষা, শব্দ |
+| অডিও | Godot-এর `AudioStreamPlayer`, OGG | |
+| Ads | AdMob-এর Godot Android plugin | সপ্তাহ ১১-এ বাছাই |
+| কেনাকাটা | Google Play Billing-এর Godot plugin | |
+| Analytics, Crash, Remote Config | Firebase, Godot Android plugin দিয়ে | Firebase না থাকলে চুপ থাকে; সপ্তাহ ১১-এ বাছাই |
+| লেখা | `content/strings.json`, প্রতিটা লেখা `{bn, en}`; Hind Siliguri ফন্ট | Godot-এর text server (HarfBuzz) যুক্তাক্ষর জোড়ে |
 
 ### ৯.২ কোডের গঠন
 
 ```
-app/lib/
-  main.dart, app.dart
-  core/            # থিম, ফন্ট, রাউটার, Remote Config, analytics
-  economy/         # টাকা, তারা, ফান্ড, XP, লেভেল (পিওর ডার্ট, টেস্টসহ)
-  world/           # মহল্লা, NPC খাতা, আজকের চরিত্র, চ্যালেঞ্জ, আবহাওয়া, ইভেন্ট
-  story/           # অধ্যায়ের শর্ত আর প্যানেল প্লেয়ার
-  save/            # SaveGame মডেল, লোড/সেভ, মাইগ্রেশন
-  services/        # ads, purchases, analytics (Firebase ছাড়াও চলে)
-  ui/              # মহল্লা, চরিত্রের পাতা, ব্রিফিং, দিনশেষ, সেটিংস
-  characters/
-    character_day.dart        # সবার জন্য এক interface
-    rickshaw/                 # রহিম চাচা: game, components, rules
-    bus/                      # বাবু
-    tea_stall/                # মনির মামা
-app/assets/content/           # JSON: balance, passengers, npcs, story, events, challenges
-app/assets/                   # ছবি (atlas), ম্যাপ, শব্দ, ফন্ট
-tool/validate_content.py      # লেখা, সংখ্যা আর ফন্টের অক্ষর যাচাই
+game/
+  project.godot, export_presets.cfg
+  scenes/          # main.tscn (মহল্লা), rickshaw.tscn …
+  scripts/
+    rules/         # ম্যাপ, চলা, দিন, ব্যালান্স: আঁকা ছাড়া, test সহ
+    world/         # 3D: শহর বানানো, রিকশার মডেল, দৃশ্য, ক্যামেরা
+    ui/            # মহল্লা, HUD, লেখা, রঙ-ফন্ট
+    economy/ story/ save/ services/   # পরের সপ্তাহগুলোতে
+  content/         # balance.json, strings.json, maps/, পরে passengers, npcs, story …
+  fonts/           # Hind Siliguri
+  tests/           # run_tests.gd (headless), shots.gd (screenshot)
+tool/              # validate_content.py, fetch_osm.py, build_map.py
+keys/dev.keystore  # পরীক্ষার APK-র সই (Play-র key আলাদা, GitHub secret-এ)
 ```
 
 ### ৯.৩ চরিত্রের interface
 
 প্রতিটা চরিত্র একই চুক্তি মানে। নতুন চরিত্র মানে নতুন ফোল্ডার, বাকি গেম বদলায় না।
 
-```dart
-/// What the shared game gives a character for one day.
-class DayContext {
-  final DateTime date;
-  final Weather weather;            // clear, rain, fog
-  final List<ActiveEvent> events;   // e.g. pohela_boishakh
-  final Upgrades upgrades;          // what this character owns
-  final CommunityPerks perks;       // finished fund projects
-  final List<NpcVisit> visitors;    // named NPCs due to appear today
-  final Challenge? challenge;
-  final bool featured;              // today's character: 2x income
-  final Random rng;                 // seeded per day, so a retry is the same day
-}
+```gdscript
+# DayContext (Dictionary বা ছোট class): যা একটা চরিত্র দিনের শুরুতে পায়
+#   date, weather ("clear" | "rain" | "fog"), events, upgrades, perks,
+#   visitors (আজ আসবেন এমন NPC), challenge, featured (আজকের চরিত্র: আয় ২×),
+#   rng (দিনের seed: আবার খেললে একই দিন)
+#
+# DayResult: যা দিনশেষে ফেরত আসে
+#   earned (১০% ফান্ডের আগে), spent (জরিমানা, চা, ভুল ভাংতি), rating (১–৫),
+#   npc_outcomes, stats (চ্যালেঞ্জ আর analytics), challenge_met
 
-/// What a character's day hands back.
-class DayResult {
-  final int earned;                 // before the 10% fund
-  final int spent;                  // fines, tea, wrong change
-  final double rating;              // 1–5
-  final List<NpcOutcome> npcOutcomes;
-  final Map<String, num> stats;     // for challenges and analytics
-  final bool challengeMet;
-}
-
-abstract class CharacterDay {
-  String get id;                    // 'rickshaw', 'bus', 'tea_stall'
-  FlameGame createGame(DayContext ctx, void Function(DayResult) onDayEnd);
-  Widget? briefing(DayContext ctx); // optional custom morning screen
-}
+# প্রতিটা চরিত্রের ফোল্ডারে একটা script এই চুক্তি মানে:
+extends RefCounted
+func id() -> String: return "rickshaw"          # "bus", "tea_stall"
+func create_day(ctx: Dictionary, on_end: Callable) -> Node3D: ...
+func briefing(ctx: Dictionary) -> Control: return null   # ঐচ্ছিক সকালের পর্দা
 ```
 
 ### ৯.৪ সেভের গঠন (`save.json`)
@@ -538,14 +522,16 @@ abstract class CharacterDay {
 | কালো আউটলাইন | `#1D1A1A` (৩–৪ px) |
 | পটভূমি | হালকা ক্রিম `#FFF6E5` |
 
+**3D [সিদ্ধান্ত, সপ্তাহ ২]:** সব চরিত্র আর জিনিস low-poly 3D মডেল, রিকশা-আর্টের উজ্জ্বল রঙে, flat বা সাধারণ shading। এখন সাধারণ আকৃতি (বাক্স, সিলিন্ডার) দিয়ে বানানো; আসল মডেল Blender-এ বানিয়ে বা কিনে `glTF` হিসেবে একই জায়গায় বসবে। লক্ষ্য: পুরো দৃশ্যে ~১০০টার কম draw call, প্রতিটা চরিত্রের মডেল ~২–৩ হাজার ত্রিভুজ।
+
 **ছবির কাজ:**
 
 | কী | সংখ্যা |
 |---|---|
-| ৩টা প্রধান চরিত্রের পোর্ট্রেট (৩টা মুখভঙ্গি) আর খেলার স্প্রাইট | ৩ সেট |
-| যাত্রী/কাস্টমারের ধরন (৪টা ধরন × ৩টা চেহারা) | ১২ |
+| ৩টা প্রধান চরিত্রের 3D মডেল (চলা, বসা, হাত নাড়ার animation) আর পোর্ট্রেট | ৩ সেট |
+| যাত্রী/কাস্টমারের ধরন (৪টা ধরন × ৩টা চেহারা), 3D | ১২ |
 | নামধারী NPC-র মুখ | ২০ |
-| মিরপুর আর পুরান ঢাকার টাইলসেট (রাস্তা, গলি, দোকান, জলাবদ্ধতা) | ২টা |
+| মিরপুর আর পুরান ঢাকার 3D সেট: দালান, দোকান, রিকশা, বাস, গাছ, জলাবদ্ধতা, সাইনবোর্ড | ২টা |
 | বাসের ভেতর, চা-দোকানের ৩টা ধাপ | ৪টা দৃশ্য |
 | মহল্লার হোম ইলাস্ট্রেশন (প্রকল্প অনুযায়ী ৪টা অবস্থা) | ৪ |
 | গল্পের প্যানেল | ~৪৫ |
@@ -567,7 +553,7 @@ GDD-র চার ধাপকে সাপ্তাহিক কাজে ভ�
 | সপ্তাহ | কাজ | শেষে যা দেখা যাবে |
 |---|---|---|
 | **১** | Flutter + Flame প্রকল্প, CI (analyze, test, APK), বাংলা ফন্ট আর যুক্তাক্ষর টেস্ট, `balance.json` লোড | ফোনে একটা খালি দৃশ্যে বাংলা লেখা ঠিক দেখায় |
-| **২** | রিকশা: লেখা ম্যাপ (§৪.১), রাস্তা ধরে চলা, মোড়ে সোয়াইপ, গন্তব্যের তীর | মিরপুরের ম্যাপে রিকশা চালানো যায় |
+| **২** | রিকশা: আসল মিরপুরের ম্যাপ (§৪.১), রাস্তা ধরে চলা, মোড়ে সোয়াইপ, গন্তব্যের তীর; তারপর **3D-তে যাওয়া** (Godot) | মিরপুরের ম্যাপে রিকশা চালানো যায় |
 | **৩** | যাত্রী, ৩-বোতামের দরদাম, পৌঁছানো, রেটিং, ৪ মিনিটের ঘড়ি, দিনশেষের স্ক্রিন | একটা পূর্ণ দিন খেলা যায় |
 | **৪** | বাধা (জলাবদ্ধতা, একমুখী, পুলিশ, বৃষ্টি), এনার্জি আর চা, সেভ, টাকা | **গেট ১:** ৫ জন খেলে বলেন মজা লাগছে |
 | **৫** | মহল্লা স্ক্রিন, অর্থনীতি, XP আর লেভেল, আপগ্রেডের দোকান | মহল্লায় ফিরে টাকা খরচ করা যায় |
@@ -582,6 +568,8 @@ GDD-র চার ধাপকে সাপ্তাহিক কাজে ভ�
 | **১৪** | Play Store-এর পাতা, গোপনীয়তা নীতি, closed test (১২ জন × ১৪ দিন) | **গেট ৩:** crash নেই, কম দামের ফোনে চলে |
 | **১৫+** | লঞ্চ; তারপর প্রতি মাসে একটা চরিত্র আর একটা উৎসব | |
 
+**3D-তে যাওয়ার প্রভাব:** 3D মডেল আর animation-এর কাজ 2D ছবির চেয়ে অনেক বেশি। তাই সপ্তাহ ৩ থেকে প্রতিটা ধাপ প্রায় দেড় গুণ সময় নেবে ধরে রাখা ভালো (মোট ~২২–২৫ সপ্তাহ), যদি না মডেলগুলো কেনা হয়।
+
 **নতুন personal Play Console account হলে:** production-এ যাওয়ার আগে ১২ জন tester নিয়ে ১৪ দিনের closed test বাধ্যতামূলক। তাই সপ্তাহ ১১ থেকেই tester জোগাড় শুরু করা ভালো।
 
 ---
@@ -592,9 +580,10 @@ GDD-র চার ধাপকে সাপ্তাহিক কাজে ভ�
 |---|---|
 | **চরিত্রকে ছোট করে দেখানো** | প্রতিটা চরিত্র দক্ষ আর মর্যাদাবান। হাসি পরিস্থিতি নিয়ে, মানুষ নিয়ে নয়। গল্প আর সংলাপ লঞ্চের আগে কয়েকজন বাস্তব রিকশাওয়ালা, কন্ডাক্টর বা দোকানিকে শুনিয়ে নেওয়া ভালো |
 | **ট্রেডমার্ক ও ব্র্যান্ড** | GDD-তে "Rush Hour ধাঁচ" লেখা আছে। এটা একটা নিবন্ধিত ট্রেডমার্ক, তাই গেম বা Store-এ শুধু "জ্যাম পাজল" বা "ব্লক সরানোর পাজল" লিখতে হবে। বাস কোম্পানি, দোকান আর ব্র্যান্ডের নাম কাল্পনিক (GDD অনুযায়ী) |
-| **একটা বাস্তব এলাকার ভুল চিত্র** | ম্যাপ বাস্তব রাস্তার নকল নয়, "মিরপুরের মতো" কাল্পনিক রাস্তা। কেউ রাস্তা না মিললে অভিযোগ করবেন না |
+| **একটা বাস্তব এলাকার ভুল চিত্র** | ম্যাপ আসল রাস্তা থেকে বানানো, তবে সহজ করা (ঘোরানো, সোজা করা, কিছু গলি বাদ)। Store-এ "মিরপুরের আসল রাস্তা থেকে অনুপ্রাণিত" লেখা হবে, হুবহু নয়। দোকান আর ব্র্যান্ড কাল্পনিক থাকবে; শুধু জনসাধারণের জায়গার নাম (গোলচত্বর, স্টেডিয়াম, চিড়িয়াখানা, মাজার) আসল |
 | **তিনটা ভিন্ন গেম বানানোর চাপ** | রিকশার দিন আগে পুরো শেষ করা (গেট ১); বাকি দুটো একই অংশ (ঘড়ি, ফল, সেভ) ব্যবহার করবে |
-| **বাংলা যুক্তাক্ষর Flame-এর লেখায়** | সপ্তাহ ১-এ পরীক্ষা হয়েছে: Flutter আর Flame দুই জায়গাতেই যুক্তাক্ষর ঠিক দেখায় (অ্যাপের "ফন্ট পরীক্ষা" পাতা)। তবে Hind Siliguri-তে তীর (→), টিক (✓) আর তারা (★) নেই; এগুলো ছবি বা icon দিয়ে দেখাতে হবে। `tool/validate_content.py` প্রতিটা লেখায় এমন অক্ষর খুঁজে CI আটকায় |
+| **বাংলা যুক্তাক্ষর** | সপ্তাহ ১-এ Flutter আর Flame-এ পরীক্ষা হয়েছিল। Godot-এ HUD আর 3D নামফলকে CI-এর screenshot দিয়ে যাচাই হয়। তবে Hind Siliguri-তে তীর (→), টিক (✓) আর তারা (★) নেই; এগুলো ছবি বা icon দিয়ে দেখাতে হবে। `tool/validate_content.py` প্রতিটা লেখায় এমন অক্ষর খুঁজে CI আটকায় |
+| **3D কম দামের ফোনে ভারী** | Compatibility renderer, একটা মেশ আর multimesh-এ পুরো শহর, ছোট ছায়ার দূরত্ব, দূরের নামফলক লুকানো। ২–৩ GB RAM-এর ফোনে পরীক্ষা গেট ১-এর আগে |
 | **Ads-এ খারাপ রিভিউ** | §৮-এর সীমা মানা; খেলার মাঝে কখনো ad নয় |
 
 ---
@@ -610,4 +599,5 @@ GDD-র চার ধাপকে সাপ্তাহিক কাজে ভ�
 | আর্ট | শুরুতে সাধারণ আকৃতি দিয়ে বানানো (placeholder); পরে আসল আর্ট একই নামে বসবে |
 | Firebase | এই গেমের জন্য আলাদা project; না থাকা পর্যন্ত analytics, crash আর Remote Config চুপ থাকে |
 | ম্যাপের ফাইল (সপ্তাহ ২) | Tiled-এর বদলে অক্ষরের সারি দিয়ে লেখা JSON; সোয়াইপ পর্দার দিক অনুযায়ী (§৪.১) |
+| ইঞ্জিন (সপ্তাহ ২) | পুরো 3D, Godot 4.5-এ; Flutter অ্যাপ বাদ। ক্যামেরা রিকশার পেছনে, তাই সোয়াইপ এখন বাঁক: বাঁয়ে/ডানে পরের মোড়ে, নিচে ঘোরা, ওপরে সোজা (§৪.১) |
 | আসল ম্যাপ (সপ্তাহ ২) | মিরপুরের আসল রাস্তা আর জায়গা, OpenStreetMap থেকে, খেলার মতো করে সহজ করা; ভাড়া আর এনার্জি সেই মাপে (§৪.১) |

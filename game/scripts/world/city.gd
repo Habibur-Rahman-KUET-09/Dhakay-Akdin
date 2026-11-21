@@ -18,8 +18,9 @@ const GROUND := Color("E3D3B1")
 const DASH := Color("F6D365")
 const MARK := Color("F4F4F4")
 const WALLS := [
-	Color("F2B5C9"), Color("B9E0CB"), Color("FFE08A"), Color("B7D6F2"),
-	Color("F7C1A8"), Color("EDE6DA"), Color("C9C3BA"), Color("D8E7A8"),
+	Color("D9668F"), Color("5FAE86"), Color("E8B53A"), Color("5B97C9"),
+	Color("E08A63"), Color("C9BFAE"), Color("8F8A84"), Color("A8C25E"),
+	Color("B57FB3"), Color("D9D2C3"),
 ]
 
 
@@ -162,8 +163,8 @@ static func _buildings(map: RoadMap) -> Node3D:
 				crown_colour.append(Color("4E9A52").lerp(Color("2F7A3A"), noise(p, 6)))
 				trunk_at.append(Transform3D(Basis(), centre(p, 1.0)))
 				continue
-			var floors := 1 + int(noise(p, 1) * (6 if street else 3))
-			var h := 1.0 + floors * 1.3
+			var floors := 1 + int(noise(p, 1) * (4 if street else 2))
+			var h := 0.6 + floors * 1.1
 			var size := T * (0.86 if noise(p, 4) < 0.7 else 0.7)
 			house_at.append(Transform3D(Basis.from_scale(Vector3(size, h, size)), centre(p, h / 2)))
 			house_colour.append(WALLS[int(noise(p, 2) * WALLS.size())])

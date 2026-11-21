@@ -14,8 +14,8 @@ const RickshawModel = preload("res://scripts/world/rickshaw_model.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 
 const SWIPE_PX := 36.0
-const CAMERA_BACK := 8.5
-const CAMERA_UP := 9.5
+const CAMERA_BACK := 7.0
+const CAMERA_UP := 11.0
 
 var strings := Strings.new()
 var shift: Shift
@@ -62,7 +62,8 @@ func _environment() -> void:
 	env.background_color = Color("C9DDEA")
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color("F3E9D8")
-	env.ambient_light_energy = 0.55
+	env.ambient_light_energy = 0.35
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.fog_enabled = true
 	env.fog_light_color = Color("D9E1E4")
 	env.fog_density = 0.006
@@ -72,7 +73,7 @@ func _environment() -> void:
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-52, -35, 0)
 	sun.light_color = Color("FFF1D6")
-	sun.light_energy = 1.1
+	sun.light_energy = 0.75
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 55.0
 	add_child(sun)
@@ -160,7 +161,7 @@ func _follow(dt: float, snap := false) -> void:
 			w.rotate_x(-dt * d.speed * 4.0)
 	var forward := Vector3(-sin(_yaw), 0, -cos(_yaw))
 	camera.position = rickshaw.position - forward * CAMERA_BACK + Vector3.UP * CAMERA_UP
-	camera.look_at(rickshaw.position + forward * 5.0 + Vector3.UP * 0.5)
+	camera.look_at(rickshaw.position + forward * 3.0)
 
 
 func _update_hud() -> void:

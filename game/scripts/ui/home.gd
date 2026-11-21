@@ -92,7 +92,10 @@ func _card(name_key: String, role_key: String, colour: Color, level: int) -> Con
 		drive.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/rickshaw.tscn"))
 		row.add_child(drive)
 	else:
-		row.add_child(Look.label(s.t("comingSoon"), 13))
+		var soon := Look.label(s.t("comingSoon"), 13)
+		soon.autowrap_mode = TextServer.AUTOWRAP_OFF
+		soon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(soon)
 	return panel
 
 

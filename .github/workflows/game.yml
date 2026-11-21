@@ -52,9 +52,7 @@ jobs:
           godot --headless --path game -s res://tests/run_tests.gd 2>&1 | tee test.log
           ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" test.log
 
-      # Pictures for review; a failure here does not stop the APK.
       - name: Screenshots
-        continue-on-error: true
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 > /dev/null
@@ -112,6 +110,7 @@ jobs:
           mkdir -p build dist
           set -o pipefail
           godot --headless --path game --export-release "Android" "$PWD/build/DhakarEkdin-$v.apk" 2>&1 | tee export.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" export.log
           test -s "build/DhakarEkdin-$v.apk"
           cp "build/DhakarEkdin-$v.apk" dist/
           ls -la dist

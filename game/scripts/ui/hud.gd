@@ -141,7 +141,7 @@ func refresh(target: String, trips: int, angle: float, notice: String, notice_co
 		_me = me
 		_goal = goal
 		_mini.queue_redraw()
-	var text := notice if notice != "" else s.t("rickshawHint")
+	var text: String = notice if notice != "" else s.t("rickshawHint")
 	if _notice.text != text:
 		_notice.text = text
 		var fill := notice_colour if notice != "" else Look.CREAM

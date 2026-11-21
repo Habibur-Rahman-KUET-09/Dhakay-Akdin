@@ -5,6 +5,20 @@ const Balance = preload("res://scripts/rules/balance.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 
 
+## Every script compiles (a parse error elsewhere would only show on the
+## phone).
+func test_every_script_compiles() -> void:
+	var dirs := ["res://scripts"]
+	while not dirs.is_empty():
+		var dir: String = dirs.pop_back()
+		for sub in DirAccess.get_directories_at(dir):
+			dirs.append(dir.path_join(sub))
+		for f in DirAccess.get_files_at(dir):
+			if f.ends_with(".gd"):
+				var script: GDScript = load(dir.path_join(f))
+				check(script != null and script.can_instantiate(), "%s compiles" % f)
+
+
 func test_balance_numbers() -> void:
 	var b := Balance.new()
 	check(b.n("rickshaw.speed_tiles_per_s") > 0.0, "rickshaw speed")
