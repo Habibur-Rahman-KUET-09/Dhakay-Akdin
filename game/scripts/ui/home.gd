@@ -63,6 +63,8 @@ func _build() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	# A finger has to move a little before it scrolls, so taps stay taps.
+	scroll.scroll_deadzone = 12
 	add_child(scroll)
 	var margin := MarginContainer.new()
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -113,6 +115,17 @@ func _build() -> void:
 	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 13)
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(version)
+	_let_scroll(margin)
+
+
+## Cards, rows and labels stopped a finger dragging the page: the touch
+## ended at the card. Let everything but buttons and text boxes pass
+## touches on, so the page scrolls from anywhere.
+static func _let_scroll(node: Node) -> void:
+	for c in node.get_children():
+		if c is Control and not (c is BaseButton or c is LineEdit or c is ScrollContainer):
+			(c as Control).mouse_filter = Control.MOUSE_FILTER_PASS
+		_let_scroll(c)
 
 
 func _panel(fill := Color.WHITE) -> PanelContainer:
@@ -402,9 +415,11 @@ func _overlay(title: String, rows: Array) -> void:
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list.add_theme_constant_override("separation", 8)
+	scroll.scroll_deadzone = 12
 	scroll.add_child(list)
 	for r in rows:
 		list.add_child(r)
+	_let_scroll(list)
 
 
 ## Chapters read, to read again; the rest shown locked.
@@ -521,7 +536,8 @@ func _tea_card() -> Control:
 	text.add_child(Look.label(s.t("teaName"), 20, true))
 	text.add_child(Look.label(s.t("teaRole"), 14))
 	row.add_child(text)
-	var open := Look.button(s.t("openStall"), Look.PARROT)
+	# The same words on every character's button: today's day.
+	var open := Look.button(s.t("startDay", {"n": int(progress.data.day) + 1}), Look.PARROT)
 	open.name = "OpenStall"
 	open.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	open.pressed.connect(_open_stall)
@@ -559,7 +575,7 @@ func _bus_card() -> Control:
 	text.add_child(Look.label(s.t("busName"), 20, true))
 	text.add_child(Look.label(s.t("busRole"), 14))
 	row.add_child(text)
-	var board := Look.button(s.t("openBus"), Look.SKY)
+	var board := Look.button(s.t("startDay", {"n": int(progress.data.day) + 1}), Look.SKY)
 	board.name = "Board"
 	board.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	board.pressed.connect(_board_bus)
