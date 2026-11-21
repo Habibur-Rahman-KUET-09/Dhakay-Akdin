@@ -50,6 +50,8 @@ static func build(map: RoadMap, lang: String) -> Node3D:
 static func _material(vertex_colours := true) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.vertex_color_use_as_albedo = vertex_colours
+	# The palette is written in sRGB, like every colour picker.
+	m.vertex_color_is_srgb = true
 	m.roughness = 1.0
 	return m
 
