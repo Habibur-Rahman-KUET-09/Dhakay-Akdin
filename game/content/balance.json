@@ -27,7 +27,7 @@
     "tired_below": 20, "tired_speed": 0.7,
     "tea_cost": 20, "tea_energy": 40,
     "wrong_way_fine": 50, "red_light_fine": 50, "signal_cycle_s": 12, "wrong_way_stop_s": 5, "signal_wait_s": 3,
-    "waterlog_speed": 0.5, "rain_counter_bonus": 0.2, "rain_chance_per_day": 0.4, "rain_seconds": 40,
+    "waterlog_speed": 0.5, "rain_counter_bonus": 0.2, "rain_chance_per_day": 0.4, "rain_seconds": 60,
     "waiting_passengers": [3, 5],
     "passengers": {
       "normal": {"offer": [0.9, 1.0], "counter_accept": 0.6, "weight": 50},

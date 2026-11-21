@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Writes the game's placeholder street sounds as WAV files (no recordings
-yet): the rickshaw bell, CNG and bus horns, and the road's hum.
+yet): the rickshaw bell, CNG and bus horns, the road's hum, rain, and a
+traffic policeman's whistle.
 
     python3 tool/make_sounds.py
 
@@ -68,9 +69,52 @@ def hum(seconds):
     return out
 
 
+def rain(seconds):
+    """Steady rain: hiss (noise through a gentle low-pass) with drops
+    pattering on tin roofs and puddles."""
+    rnd = random.Random(11)
+    n = int(RATE * seconds)
+    out, low, prev = [], 0.0, 0.0
+    for i in range(n):
+        white = rnd.uniform(-1, 1)
+        low += (white - low) * 0.35
+        out.append((low - prev * 0.6) * 0.32)
+        prev = low
+    for _ in range(int(seconds * 45)):
+        at = rnd.randrange(n - RATE // 20)
+        f = rnd.uniform(900, 2600)
+        a = rnd.uniform(0.05, 0.22)
+        for k in range(RATE // 25):
+            t = k / RATE
+            out[at + k] += math.sin(2 * math.pi * f * t) * a * math.exp(-t * 160)
+    fade = RATE // 3
+    for i in range(fade):
+        k = i / fade
+        out[i] *= k
+        out[n - 1 - i] *= k
+    return out
+
+
+def whistle():
+    """Two blasts of a pea whistle: a high note warbling as the pea spins."""
+    out = []
+    for length, gap in ((0.28, 0.12), (0.62, 0.0)):
+        n = int(RATE * length)
+        for i in range(n):
+            t = i / RATE
+            env = min(1, t / 0.02) * min(1, (length - t) / 0.04)
+            trill = 0.55 + 0.45 * math.sin(2 * math.pi * 34 * t)
+            f = 2950 + 60 * math.sin(2 * math.pi * 34 * t)
+            out.append(math.sin(2 * math.pi * f * t) * env * trill * 0.5)
+        out.extend([0.0] * int(RATE * gap))
+    return out
+
+
 if __name__ == '__main__':
     write('bell.wav', bell())
     write('horn_cng.wav', horn(560, 700, 0.35))
     write('horn_bus.wav', horn(290, 370, 0.9))
     write('hum.wav', hum(12))
+    write('rain.wav', rain(8))
+    write('whistle.wav', whistle())
     print('sounds written to', os.path.normpath(OUT))

@@ -13,6 +13,7 @@ signal offer_accept
 signal offer_counter
 signal offer_refuse
 signal again_pressed
+signal tea_pressed
 
 var s: Strings
 var map: RoadMap
@@ -46,6 +47,11 @@ var _offer_sub: Label
 var _counter_button: Button
 var _end_layer: Control
 var _brake_down := false
+var _energy_bar: ProgressBar
+var _energy_fill: StyleBoxFlat
+var _energy_text: Label
+var _energy_shown := -1
+var _tea_button: Button
 
 
 func setup(strings: Strings, road_map: RoadMap) -> void:
@@ -105,6 +111,47 @@ func _ready() -> void:
 	_mini.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_mini.draw.connect(_draw_mini)
 	root.add_child(_mini)
+
+	# Energy, under the map: a bar that turns from green to red.
+	var energy := VBoxContainer.new()
+	energy.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	energy.offset_left = -map.width * MINI_PX - 10
+	energy.offset_right = -10
+	energy.offset_top = 78 + map.height * MINI_PX
+	energy.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	energy.add_theme_constant_override("separation", 2)
+	_energy_text = Look.label("", 14, true, Color.WHITE)
+	_energy_text.add_theme_color_override("font_outline_color", Look.OUTLINE)
+	_energy_text.add_theme_constant_override("outline_size", 5)
+	energy.add_child(_energy_text)
+	_energy_bar = ProgressBar.new()
+	_energy_bar.max_value = 100
+	_energy_bar.show_percentage = false
+	_energy_bar.custom_minimum_size = Vector2(0, 12)
+	_energy_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color(1, 1, 1, 0.75)
+	bar_bg.set_corner_radius_all(6)
+	bar_bg.border_color = Look.OUTLINE
+	bar_bg.set_border_width_all(2)
+	_energy_fill = StyleBoxFlat.new()
+	_energy_fill.bg_color = Look.PARROT
+	_energy_fill.set_corner_radius_all(6)
+	_energy_bar.add_theme_stylebox_override("background", bar_bg)
+	_energy_bar.add_theme_stylebox_override("fill", _energy_fill)
+	energy.add_child(_energy_bar)
+	root.add_child(energy)
+
+	# Tea, when stopped beside a stall.
+	_tea_button = Look.button("", Color("8B5A2B"), 18)
+	_tea_button.set_anchors_preset(Control.PRESET_CENTER)
+	_tea_button.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_tea_button.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_tea_button.offset_top = 120
+	_tea_button.offset_bottom = 120
+	_tea_button.pressed.connect(func(): tea_pressed.emit())
+	_tea_button.visible = false
+	root.add_child(_tea_button)
 
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
@@ -260,6 +307,27 @@ func _press(b: Panel, down: bool) -> void:
 	b.pivot_offset = b.size / 2
 
 
+## The tea button, with its price; hidden with show_tea(false).
+func show_tea(shown: bool, price := 0) -> void:
+	_tea_button.text = s.t("teaButton", {"n": price})
+	_tea_button.visible = shown
+
+
+func tea_rect() -> Rect2:
+	return _tea_button.get_global_rect().grow(8) if _tea_button.visible else Rect2()
+
+
+## Energy 0–100: the bar, its colour and the number.
+func show_energy(value: float) -> void:
+	var n := clampi(ceili(value), 0, 100)
+	if n == _energy_shown:
+		return
+	_energy_shown = n
+	_energy_bar.value = n
+	_energy_text.text = s.t("energy", {"n": n})
+	_energy_fill.bg_color = Look.VERMILION if n < 20 else (Look.YELLOW if n < 50 else Look.PARROT)
+
+
 ## Where the buttons are, in the same coordinates as touch events.
 func pedal_rect() -> Rect2:
 	return pedal_button.get_global_rect().grow(16)
@@ -290,6 +358,8 @@ func _mini_image() -> Image:
 	img.fill(Color(1, 0.97, 0.9, 0.75))
 	for p in map.roads():
 		var c := Color("50555E") if map.kind_at(p) == RoadMap.Kind.MAIN_ROAD else Color("9AA0A6")
+		if map.kind_at(p) == RoadMap.Kind.TEA:
+			c = Color("8B5A2B")
 		img.fill_rect(Rect2i(p * MINI_PX, Vector2i(MINI_PX, MINI_PX)), c)
 	return img
 

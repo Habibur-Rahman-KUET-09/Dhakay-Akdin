@@ -77,3 +77,13 @@ func test_history_keeps_the_last_ten_days() -> void:
 	eq(p.data.history.size(), 10, "ten days")
 	eq(p.data.history[0].day, 14, "newest first")
 	eq(p.data.rickshaw.bestDay, 1300, "best day")
+
+
+func test_battery_and_tea_cups() -> void:
+	var p := _fresh()
+	near(p.energy_factor(), 1.0, "no upgrade: full cost")
+	p.data.rickshaw.upgrades = ["new_rickshaw", "battery_rickshaw"]
+	near(p.energy_factor(), 0.5, "battery rickshaw: half")
+	p.apply_day({"earned": 300, "trips": 3, "stars": 4.0, "fines": 0, "teas": 2})
+	p.apply_day({"earned": 300, "trips": 3, "stars": 4.0, "fines": 0})
+	eq(p.data.rickshaw.teas, 2, "cups of tea counted")

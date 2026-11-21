@@ -28,6 +28,8 @@ var speed_now := 0.0
 ## How much of the top speed the road ahead allows (0 when someone is
 ## right in front), set by the scene from the traffic.
 var room := 1.0
+## Top speed factor for how Rahim Chacha is (tired: less), set by the day.
+var speed_factor := 1.0
 
 var destination := Vector2i.ZERO
 ## The real place being driven to, when the map has places; else {}.
@@ -62,7 +64,7 @@ func swipe(t: int) -> Array:
 
 
 func update(dt: float) -> Array:
-	var top := base_speed * (flood_speed if on_flood() else 1.0)
+	var top := base_speed * speed_factor * (flood_speed if on_flood() else 1.0)
 	if brake:
 		speed_now = maxf(0.0, speed_now - braking * dt)
 	elif pedal:

@@ -33,7 +33,7 @@ static func fresh() -> Dictionary:
 		"fund": 0,
 		"fundProject": PROJECTS[0],
 		"mohalla": {"level": 1, "xp": 0, "projectsDone": []},
-		"rickshaw": {"days": 0, "school": 0, "bestDay": 0, "trips": 0, "earned": 0, "upgrades": []},
+		"rickshaw": {"days": 0, "school": 0, "bestDay": 0, "trips": 0, "earned": 0, "teas": 0, "upgrades": []},
 		"history": [],
 	}
 
@@ -119,6 +119,15 @@ func speed_factor() -> float:
 	return best
 
 
+## Energy cost factor from the upgrades bought (the battery rickshaw: half).
+func energy_factor() -> float:
+	var best := 1.0
+	for id in data.rickshaw.upgrades:
+		var up: Dictionary = b.at("rickshaw.upgrades." + id)
+		best = minf(best, float(up.get("energy", 1.0)))
+	return best
+
+
 func school_goal() -> int:
 	return int(b.n("rickshaw.school_fee_goal"))
 
@@ -130,7 +139,7 @@ func fund_goal() -> int:
 # --- The end of a day ---------------------------------------------------------
 
 
-## Takes a day's result ({earned, trips, stars, fines}) into the save and
+## Takes a day's result ({earned, trips, stars, fines, teas}) into the save and
 ## says what changed, for the end-of-day screen.
 func apply_day(result: Dictionary) -> Dictionary:
 	var earned: int = maxi(0, int(result.earned))
@@ -177,6 +186,8 @@ func apply_day(result: Dictionary) -> Dictionary:
 	data.rickshaw.days = int(data.rickshaw.days) + 1
 	data.rickshaw.trips = int(data.rickshaw.trips) + trips
 	data.rickshaw.earned = int(data.rickshaw.earned) + earned
+	# Cups of tea at the stalls: Monir Mama's regulars (§৬), kept for later.
+	data.rickshaw.teas = int(data.rickshaw.get("teas", 0)) + int(result.get("teas", 0))
 	out.best = earned > int(data.rickshaw.bestDay) and earned > 0
 	if out.best:
 		data.rickshaw.bestDay = earned

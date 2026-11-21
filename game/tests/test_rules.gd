@@ -374,3 +374,113 @@ func test_the_day_ends_and_red_lights_fine() -> void:
 	if e.driver.cell == p:
 		check(got.has(Day.FINED), "fined for running the red")
 		eq(e.money, before - 50, "50 taka")
+
+
+# --- Week 4: energy and tea, the police, rain (§৪.১ বাধা, এনার্জি) ---------
+
+
+func _tile(m: RoadMap, kind: int) -> Vector2i:
+	for r in m.roads():
+		if m.kind_at(r) == kind:
+			return r
+	return Vector2i(-1, -1)
+
+
+func test_energy_runs_down_and_tea_brings_it_back() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 3)
+	d.rain_at = -1.0
+	eq(d.energy, 100.0, "full in the morning")
+	var ev := []
+	d.energy = 20.1
+	d._entered(ev)
+	near(d.energy, 19.85, "a quarter a tile", 1e-4)
+	check(ev.has(Day.TIRED), "tired below 20")
+	d.update(0.01)
+	near(d.speed_factor, 0.7, "tired: 70% of the top speed")
+	# Pull up at a tea stall, nobody else about.
+	var tea := _tile(d.map, RoadMap.Kind.TEA)
+	check(tea.x >= 0, "the map has a tea stall")
+	d.waiting.clear()
+	d.driver.cell = tea
+	d.driver.progress = 0.0
+	d.speed_now = 0.0
+	var got := d.update(0.01)
+	check(got.has(Day.TEA_NEAR) and d.at_tea, "tea on offer")
+	var money := d.money
+	check(d.drink_tea(), "a cup")
+	eq(d.money, money - 20, "20 taka")
+	near(d.energy, 59.85, "+40 energy", 1e-4)
+	eq(d.teas, 1, "one cup")
+	d.update(0.01)
+	near(d.speed_factor, 1.0, "not tired any more")
+	# Worn out: the day ends.
+	d.energy = 0.1
+	ev = []
+	d._entered(ev)
+	check(ev.has(Day.WORN_OUT), "worn out")
+	check(d.update(0.01).has(Day.DAY_OVER) and d.over, "he goes home")
+
+
+func test_battery_rickshaw_halves_the_energy_cost() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 3)
+	d.rain_at = -1.0
+	d.energy_factor = 0.5
+	d._entered([])
+	near(d.energy, 99.875, "an eighth a tile", 1e-4)
+
+
+func test_the_police_stop_a_wrong_way_turn() -> void:
+	var d := Day.new(small(), Balance.new(), 1)
+	d.rain_at = -1.0
+	d.driver.cell = p(3, 3)
+	d.driver.heading = RoadMap.E
+	d.driver.progress = 0.0
+	d.driver.moving = true
+	var got := d.swipe(Driver.BACK)
+	check(got.has(Day.POLICE), "turning back up the one-way lane: police")
+	eq(d.money, -50, "fined 50")
+	eq(d.police_fines, 50, "counted as a police fine")
+	d.pedal = true
+	d.accel = 100.0
+	for i in 40:
+		d.update(0.1)
+	eq(d.driver.cell, p(3, 3), "held for 5 seconds")
+	eq(d.speed_now, 0.0, "standing")
+	for i in 30:
+		d.update(0.1)
+	check(d.driver.cell != p(3, 3) or d.driver.progress > 0.0, "then free to go")
+	# Straight back again: not fined twice for the same stretch.
+	check(not d.swipe(Driver.BACK).has(Day.POLICE) or d.money == -50, "no second fine at once")
+
+
+func test_rain_spreads_the_water_and_softens_bargains() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 4)
+	# A dry road tile next to a flooded one.
+	var beside := Vector2i(-1, -1)
+	for r in d.map.roads():
+		if d.map.kind_at(r) == RoadMap.Kind.FLOOD:
+			continue
+		for k in 4:
+			if d.map.kind_at(RoadMap.step(r, k)) == RoadMap.Kind.FLOOD:
+				beside = r
+		if beside.x >= 0:
+			break
+	check(beside.x >= 0, "the map has a flooded tile")
+	d.rain_at = -1.0
+	d.update(0.01)
+	check(not d.wet(beside), "dry before the rain")
+	d.start_rain()
+	var got := d.update(0.01)
+	check(got.has(Day.RAIN_START) and d.raining, "it rains")
+	check(d.wet(beside), "the water spreads")
+	var before := d.energy
+	d._entered([])
+	near(before - d.energy, 0.4, "rain costs more energy", 1e-4)
+	got = d.update(d.rain_seconds)
+	check(got.has(Day.RAIN_END) and not d.raining, "and stops")
+	# Some days rain, most do not.
+	var wet_days := 0
+	for s in 50:
+		if Day.new(_mirpur(), Balance.new(), s).rain_at >= 0.0:
+			wet_days += 1
+	check(wet_days > 5 and wet_days < 40, "rain on some days (%d of 50)" % wet_days)

@@ -1,7 +1,10 @@
 ## Rahim Chacha's working day (§৪.১): 7 am to 9 pm in a few minutes,
 ## passengers waiting by the road with an offer, bargaining, the trip, the
-## rating and the tip, fines for running a red light. Driving itself is the
-## shift's (shift.gd). No drawing here, so it can be tested.
+## rating and the tip, fines for running a red light. His energy, which
+## every tile costs and tea at a stall brings back; the police, who stop
+## him for going the wrong way up a one-way lane; and a sudden shower that
+## floods the roads (§৪.১ বাধা, এনার্জি). Driving itself is the shift's
+## (shift.gd). No drawing here, so it can be tested.
 extends "res://scripts/rules/shift.gd"
 
 const Fares = preload("res://scripts/rules/fares.gd")
@@ -16,6 +19,17 @@ const DECLINED := 13
 const DELIVERED := 14
 const FINED := 15
 const DAY_OVER := 16
+## Stopped by the police: a fine, and standing still for a while.
+const POLICE := 17
+## Stopped beside a tea stall (tea on offer), and driven off again.
+const TEA_NEAR := 18
+const TEA_GONE := 19
+const RAIN_START := 20
+const RAIN_END := 21
+## Energy fell low: slower until he has tea.
+const TIRED := 22
+## Energy gone: he goes home (DAY_OVER comes too).
+const WORN_OUT := 23
 
 var fares: Fares
 var balance: Balance
@@ -39,6 +53,31 @@ var signal_cycle := 12.0
 var _want_waiting := 4
 var _next_id := 1
 
+## Energy: 100 at the start of the day, less every tile (more in rain);
+## low, the rickshaw is slower; gone, the day is over. The battery
+## rickshaw halves the cost (energy_factor, set by the scene).
+var energy := 100.0
+var energy_max := 100.0
+var energy_factor := 1.0
+var worn_out := false
+var _was_tired := false
+## Tea: on offer when stopped beside a stall.
+var at_tea := false
+var teas := 0
+var tea_spent := 0
+var _tea_tiles: Array = []
+## The police: seconds still held, and what they have fined today.
+var held := 0.0
+var police_fines := 0
+var _police_rest := 0.0
+## Weather: the day's one shower (if any), from `rain_at` for
+## `rain_seconds` of the clock. Its own dice, so the rest of the day plays
+## the same with or without it.
+var raining := false
+var rain_at := -1.0
+var rain_seconds := 60.0
+var weather := RandomNumberGenerator.new()
+
 
 func _init(road_map: RoadMap, b: Balance, seed_value := -1) -> void:
 	balance = b
@@ -53,6 +92,16 @@ func _init(road_map: RoadMap, b: Balance, seed_value := -1) -> void:
 	_want_waiting = rng.randi_range(int(range_of[0]), int(range_of[1]))
 	_top_up()
 	_aim()
+	energy_max = b.n("rickshaw.energy_start")
+	energy = energy_max
+	_tea_tiles = map.roads().filter(func(p): return map.kind_at(p) == RoadMap.Kind.TEA)
+	rain_seconds = b.n("rickshaw.rain_seconds")
+	if seed_value >= 0:
+		weather.seed = seed_value + 7
+	else:
+		weather.randomize()
+	if weather.randf() < b.n("rickshaw.rain_chance_per_day"):
+		rain_at = weather.randf_range(0.15, 0.75) * day_seconds
 
 
 ## The hour of the day, 7.0 to 21.0.
@@ -68,12 +117,102 @@ func update(dt: float) -> Array:
 	if over:
 		return []
 	clock += dt
+	var early := []
+	_weather(early)
+	_police_rest = maxf(0.0, _police_rest - dt)
+	speed_factor = balance.n("rickshaw.tired_speed") if energy < balance.n("rickshaw.tired_below") else 1.0
+	# Held by the police: standing still, whatever the pedal says.
+	if held > 0.0:
+		held -= dt
+		speed_factor = 0.0
+		speed_now = 0.0
 	var events := super(dt)
+	events.append_array(early)
+	if events.has(Driver.Event.WRONG_WAY):
+		_police(events)
 	_talk(events)
-	if clock >= day_seconds:
+	_tea(events)
+	if clock >= day_seconds or worn_out:
 		over = true
 		events.append(DAY_OVER)
 	return events
+
+
+func swipe(t: int) -> Array:
+	var events := super(t)
+	if events.has(Driver.Event.WRONG_WAY):
+		_police(events)
+	return events
+
+
+## A shower now, for testing (and for a forecast, one day).
+func start_rain() -> void:
+	rain_at = clock
+
+
+func _weather(events: Array) -> void:
+	if rain_at < 0.0:
+		return
+	var now := clock >= rain_at and clock < rain_at + rain_seconds
+	if now != raining:
+		raining = now
+		events.append(RAIN_START if now else RAIN_END)
+
+
+## Is p under water? Flooded tiles always; in rain, the tiles next to them
+## too (the water spreads).
+func wet(p: Vector2i) -> bool:
+	if map.kind_at(p) == RoadMap.Kind.FLOOD:
+		return true
+	if not raining:
+		return false
+	for d in 4:
+		if map.kind_at(RoadMap.step(p, d)) == RoadMap.Kind.FLOOD:
+			return true
+	return false
+
+
+func on_flood() -> bool:
+	return wet(driver.cell) or (driver.moving and wet(driver.next_cell()))
+
+
+## Up a one-way lane the wrong way: the police stop him, fine him and keep
+## him standing. Not again straight away for the same stretch.
+func _police(events: Array) -> void:
+	if _police_rest > 0.0:
+		return
+	var fine := int(balance.n("rickshaw.wrong_way_fine"))
+	money -= fine
+	fines += fine
+	police_fines += fine
+	held = balance.n("rickshaw.wrong_way_stop_s")
+	_police_rest = held + 15.0
+	speed_now = 0.0
+	events.append(POLICE)
+
+
+## Stopped next to a tea stall, not bargaining, and not full of energy.
+func _tea(events: Array) -> void:
+	var near := speed_now < 0.6 and offer_for.is_empty() and energy < energy_max - 5.0 \
+		and _tea_tiles.any(func(t): return _near(t) <= 1)
+	if near != at_tea:
+		at_tea = near
+		events.append(TEA_NEAR if near else TEA_GONE)
+
+
+## A cup of tea: costs a little, brings energy back. False if no stall is
+## at hand.
+func drink_tea() -> bool:
+	if not at_tea:
+		return false
+	var cost := int(balance.n("rickshaw.tea_cost"))
+	money -= cost
+	tea_spent += cost
+	teas += 1
+	energy = minf(energy_max, energy + balance.n("rickshaw.tea_energy"))
+	_was_tired = energy < balance.n("rickshaw.tired_below")
+	at_tea = false
+	return true
 
 
 ## Whether the signal at p shows red to someone going `heading` now.
@@ -82,6 +221,15 @@ func red_at(p: Vector2i, heading: int) -> bool:
 
 
 func _entered(events: Array) -> void:
+	# Every tile costs energy, more in the rain.
+	var cost := balance.n("rickshaw.energy_per_tile_rain" if raining else "rickshaw.energy_per_tile")
+	energy = maxf(0.0, energy - cost * energy_factor)
+	if energy < balance.n("rickshaw.tired_below") and not _was_tired:
+		_was_tired = true
+		events.append(TIRED)
+	if energy <= 0.0 and not worn_out:
+		worn_out = true
+		events.append(WORN_OUT)
 	# Into a junction against the red light: a fine.
 	if red_at(driver.cell, driver.heading):
 		var fine := int(balance.n("rickshaw.red_light_fine"))
@@ -89,7 +237,7 @@ func _entered(events: Array) -> void:
 		fines += fine
 		events.append(FINED)
 	if not riding.is_empty():
-		if map.kind_at(driver.cell) == RoadMap.Kind.FLOOD:
+		if wet(driver.cell):
 			riding.flooded += 1
 		if driver.cell == riding.at:
 			_deliver(events)
@@ -132,7 +280,7 @@ func counter() -> bool:
 	if offer_for.is_empty():
 		return false
 	var w: Dictionary = offer_for
-	if fares.accepts_counter(w.type, rng):
+	if fares.accepts_counter(w.type, rng, raining):
 		_board(w, fares.counter(w.fair))
 		return true
 	waiting.erase(w)

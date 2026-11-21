@@ -358,5 +358,49 @@
  "nextDay": {
   "bn": "পরের দিন",
   "en": "Next day"
+ },
+ "energy": {
+  "bn": "এনার্জি {n}",
+  "en": "Energy {n}"
+ },
+ "teaButton": {
+  "bn": "চা খান · {n} টাকা",
+  "en": "Have tea · Tk {n}"
+ },
+ "teaDrunk": {
+  "bn": "আহ, গরম চা! এনার্জি +{n}",
+  "en": "Ah, hot tea! Energy +{n}"
+ },
+ "teaStall": {
+  "bn": "চা",
+  "en": "Tea"
+ },
+ "tired": {
+  "bn": "চাচা ক্লান্ত, রিকশা ধীরে চলছে। চায়ের দোকানে থামুন",
+  "en": "Rahim Chacha is tired and slower: stop at a tea stall"
+ },
+ "wornOut": {
+  "bn": "চাচা আর পারছেন না, বাড়ি ফিরলেন",
+  "en": "Rahim Chacha is worn out and went home"
+ },
+ "police": {
+  "bn": "পুলিশ থামাল! উল্টো পথ, {fine} টাকা জরিমানা",
+  "en": "Police! Wrong way: Tk {fine} fine"
+ },
+ "policeName": {
+  "bn": "ট্রাফিক পুলিশ",
+  "en": "Traffic police"
+ },
+ "rainStart": {
+  "bn": "বৃষ্টি নামল! রাস্তায় পানি জমছে, যাত্রীরা দরদামে নরম",
+  "en": "Rain! Roads are flooding; passengers bargain less"
+ },
+ "rainEnd": {
+  "bn": "বৃষ্টি থামল",
+  "en": "The rain has stopped"
+ },
+ "teaLine": {
+  "bn": "চা: {n} কাপ ({money} টাকা)",
+  "en": "Tea: {n} cups (Tk {money})"
  }
 }
