@@ -794,6 +794,8 @@ func _end_day() -> void:
 	var stats := {"good_trips": shift.good_trips, "clean": 1 if shift.fines == 0 and shift.trips >= 3 else 0, "earned": shift.money}
 	var got := progress.apply_day({"earned": shift.money, "trips": shift.trips, "stars": shift.average_stars(), "fines": shift.fines, "teas": shift.teas, "stats": stats, "npcs": shift.npc_log})
 	progress.save()
+	# And a copy online, if this build has it (not waited for).
+	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
 	CrashWatch.stop()
 	lines.append(strings.t("gainKept", {"n": got.kept}))
 	if got.school > 0:

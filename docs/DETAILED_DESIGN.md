@@ -499,6 +499,8 @@ func briefing(ctx: Dictionary) -> Control: return null   # ঐচ্ছিক �
 
 ### ৯.৪ সেভের গঠন (`save.json`)
 
+**অনলাইন ব্যাকআপ [সিদ্ধান্ত, ২১ নভেম্বর ২০২৬] (`ui/cloud.gd`):** খেলতে লগইন লাগে না। Firebase-এর সাধারণ HTTPS API দিয়ে (Android plugin ছাড়া): প্রথমবার নিজে থেকে একটা নামহীন account, প্রতিটা দিনের শেষে আর মহল্লার পাতায় ফিরলে পুরো `save.json` Firestore-এর `players/<account>`-এ জমা (নিয়ম: প্রত্যেকে শুধু নিজেরটা পড়তে-লিখতে পারে)। ইন্টারনেট না থাকলে খেলা চলে, পরে জমা হয়। নতুন ফোনে নেওয়ার জন্য ঐচ্ছিক "ইমেইল দিয়ে সংরক্ষণ" (নামহীন account-টাই ইমেইল-পাসওয়ার্ডে বাঁধা হয়) আর "অন্য ফোন থেকে আনুন" (সেই ইমেইলে ঢুকে অগ্রগতি দেখিয়ে নিশ্চিত করলে বদলায়)। Google দিয়ে ঢোকা Play Store-এর সময় (Play Games-এর সাথে)। Project ID আর web API key repo-র GitHub secret থেকে build-এর সময় `content/cloud.json`-এ লেখা হয় (git-এ নেই); Firebase-এর নিয়মে এগুলো APK-তে থাকেই, নিরাপত্তা আসে Firestore-এর নিয়ম থেকে। build প্রতিবার আসল Firebase-এ একটা account বানিয়ে, জমা দিয়ে, পড়ে, মুছে পরীক্ষা করে (`tests/cloud_check.gd`)।
+
 ```json
 {
   "schema": 1,

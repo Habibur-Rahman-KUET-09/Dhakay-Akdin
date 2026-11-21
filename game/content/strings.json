@@ -1162,5 +1162,117 @@
  "close": {
   "bn": "বন্ধ",
   "en": "Close"
+ },
+ "cloudTitle": {
+  "bn": "অনলাইন ব্যাকআপ",
+  "en": "Online backup"
+ },
+ "cloudOff": {
+  "bn": "এই build-এ অনলাইন ব্যাকআপ চালু নেই",
+  "en": "Online backup is off in this build"
+ },
+ "cloudNever": {
+  "bn": "এখনো জমা হয়নি, প্রথম দিনের শেষে হবে",
+  "en": "Not copied yet: it will be after a day"
+ },
+ "cloudLast": {
+  "bn": "শেষ জমা: {time} (দিন {n})",
+  "en": "Last copied: {time} (day {n})"
+ },
+ "cloudLinked": {
+  "bn": "ইমেইলে সংরক্ষিত: {email}",
+  "en": "Kept with: {email}"
+ },
+ "cloudHelp": {
+  "bn": "অগ্রগতি নিজে থেকেই অনলাইনে জমা হয়। নতুন ফোনেও পেতে চাইলে একটা ইমেইল আর পাসওয়ার্ড দিয়ে রাখুন।",
+  "en": "Progress is copied online by itself. To have it on a new phone too, keep it with an email and password."
+ },
+ "cloudKeep": {
+  "bn": "ইমেইল দিয়ে সংরক্ষণ",
+  "en": "Keep with email"
+ },
+ "cloudFetch": {
+  "bn": "অন্য ফোন থেকে আনুন",
+  "en": "Bring from another phone"
+ },
+ "cloudKeepHelp": {
+  "bn": "যেকোনো ইমেইল আর অন্তত ৬ অক্ষরের পাসওয়ার্ড দিন। নতুন ফোনে এগুলো দিয়েই অগ্রগতি ফেরত আনবেন।",
+  "en": "Any email and a password of at least 6 characters. On a new phone, use them to bring your progress back."
+ },
+ "cloudFetchHelp": {
+  "bn": "আগের ফোনে যে ইমেইল আর পাসওয়ার্ড দিয়ে সংরক্ষণ করেছিলেন, সেগুলো দিন।",
+  "en": "The email and password you kept your progress with on the other phone."
+ },
+ "cloudEmail": {
+  "bn": "ইমেইল",
+  "en": "Email"
+ },
+ "cloudPassword": {
+  "bn": "পাসওয়ার্ড",
+  "en": "Password"
+ },
+ "cloudWorking": {
+  "bn": "একটু অপেক্ষা করুন…",
+  "en": "One moment…"
+ },
+ "cloudNothing": {
+  "bn": "এই ইমেইলে কোনো অগ্রগতি জমা নেই",
+  "en": "No progress is kept with this email"
+ },
+ "cloudFound": {
+  "bn": "পাওয়া গেছে: দিন {n}, জমা {taka} টাকা। এই ফোনের অগ্রগতি এর বদলে যাবে।",
+  "en": "Found: day {n}, savings Tk {taka}. It will replace this phone's progress."
+ },
+ "cloudUse": {
+  "bn": "এটা নিন",
+  "en": "Use it"
+ },
+ "cloudErr_NETWORK": {
+  "bn": "ইন্টারনেট সংযোগ নেই",
+  "en": "No internet connection"
+ },
+ "cloudErr_EMAIL_EXISTS": {
+  "bn": "এই ইমেইল আগেই ব্যবহার হয়েছে। 'অন্য ফোন থেকে আনুন' দিয়ে ঢুকুন।",
+  "en": "That email is already used: use 'Bring from another phone'."
+ },
+ "cloudErr_INVALID_EMAIL": {
+  "bn": "ইমেইলটা ঠিক নেই",
+  "en": "That email does not look right"
+ },
+ "cloudErr_MISSING_EMAIL": {
+  "bn": "ইমেইল দিন",
+  "en": "Enter an email"
+ },
+ "cloudErr_MISSING_PASSWORD": {
+  "bn": "পাসওয়ার্ড দিন",
+  "en": "Enter a password"
+ },
+ "cloudErr_WEAK_PASSWORD": {
+  "bn": "পাসওয়ার্ড অন্তত ৬ অক্ষরের হতে হবে",
+  "en": "The password needs at least 6 characters"
+ },
+ "cloudErr_INVALID_LOGIN_CREDENTIALS": {
+  "bn": "ইমেইল বা পাসওয়ার্ড ভুল",
+  "en": "Wrong email or password"
+ },
+ "cloudErr_EMAIL_NOT_FOUND": {
+  "bn": "ইমেইল বা পাসওয়ার্ড ভুল",
+  "en": "Wrong email or password"
+ },
+ "cloudErr_INVALID_PASSWORD": {
+  "bn": "ইমেইল বা পাসওয়ার্ড ভুল",
+  "en": "Wrong email or password"
+ },
+ "cloudErr_OPERATION_NOT_ALLOWED": {
+  "bn": "Firebase-এ ইমেইল দিয়ে ঢোকা এখনো চালু করা হয়নি",
+  "en": "Email sign-in is not switched on in Firebase yet"
+ },
+ "cloudErr_TOO_MANY_ATTEMPTS_TRY_LATER": {
+  "bn": "অনেকবার চেষ্টা হয়েছে, একটু পরে আবার করুন",
+  "en": "Too many tries: try again later"
+ },
+ "cloudErrOther": {
+  "bn": "হলো না ({e})। একটু পরে আবার চেষ্টা করুন।",
+  "en": "That did not work ({e}). Try again later."
  }
 }

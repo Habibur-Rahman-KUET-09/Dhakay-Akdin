@@ -13,6 +13,10 @@ func _init() -> void:
 	_all = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 
 
+func has(key: String) -> bool:
+	return _all.has(key)
+
+
 func t(key: String, values: Dictionary = {}) -> String:
 	if not _all.has(key):
 		return key

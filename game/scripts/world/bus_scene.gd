@@ -830,6 +830,8 @@ func _end_trip() -> void:
 	var stats := {"no_slip": 1 if bus.slipped == 0 and bus.boarded >= 20 else 0, "on_time": bus.bonus / int(b.n("bus.on_time_bonus")), "riders": bus.boarded}
 	var got := progress.apply_bus_day({"earned": earned, "riders": bus.boarded, "stars": bus.rating, "stats": stats, "npcs": bus.npc_log})
 	progress.save()
+	# And a copy online, if this build has it (not waited for).
+	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
 	CrashWatch.stop()
 	var lines := [
 		strings.t("earned", {"money": earned}),

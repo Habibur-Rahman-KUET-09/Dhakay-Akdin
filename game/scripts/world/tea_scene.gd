@@ -670,6 +670,8 @@ func _end_day() -> void:
 	var result := {"earned": day.money, "served": day.served, "happy": day.happy, "lost": day.lost, "stars": day.stars(), "stats": stats, "npcs": day.npc_log}
 	var got := progress.apply_tea_day(result)
 	progress.save()
+	# And a copy online, if this build has it (not waited for).
+	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
 	CrashWatch.stop()
 	var lines := [
 		strings.t("earned", {"money": day.money}),

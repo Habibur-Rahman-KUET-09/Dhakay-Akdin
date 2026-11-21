@@ -15,6 +15,7 @@ const Graphics = preload("res://scripts/ui/graphics.gd")
 const Story = preload("res://scripts/rules/story.gd")
 const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const StoryPlayer = preload("res://scripts/ui/story_player.gd")
+const Cloud = preload("res://scripts/ui/cloud.gd")
 
 var s := Strings.new()
 var b := Balance.new()
@@ -25,6 +26,7 @@ var story := Story.new()
 var neighbours := Neighbours.new()
 ## Where to go once an opening chapter has been read.
 var _then_scene := ""
+var cloud: Cloud
 
 
 func _ready() -> void:
@@ -35,13 +37,25 @@ func _ready() -> void:
 		Graphics.save_level("low")
 		_lowered = true
 	progress = Progress.new(b)
+	cloud = Cloud.new()
+	add_child(cloud)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build()
+	_backup()
+
+
+## Copies the save online if it has changed since the last copy.
+func _backup() -> void:
+	if not cloud.enabled() or int(progress.data.day) == cloud.last_day:
+		return
+	if await cloud.upload(progress.data) == "":
+		_build()
 
 
 func _build() -> void:
 	for c in get_children():
-		c.queue_free()
+		if c != cloud:
+			c.queue_free()
 	var bg := ColorRect.new()
 	bg.color = Look.CREAM
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -94,6 +108,7 @@ func _build() -> void:
 	if not progress.data.history.is_empty():
 		col.add_child(_history_card())
 	col.add_child(_book_row())
+	col.add_child(_cloud_card())
 	col.add_child(_graphics_row())
 	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 13)
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -182,6 +197,103 @@ func _chapter_card(c: Dictionary) -> Control:
 	read.pressed.connect(_play_chapter.bind(c.id, ""))
 	row.add_child(read)
 	return panel
+
+
+## The online copy: when it was last made, and the email to move phones.
+func _cloud_card() -> Control:
+	var panel := _panel(Color("EEF2F5"))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("cloudTitle"), 17, true))
+	var status := s.t("cloudOff")
+	if cloud.enabled():
+		status = s.t("cloudNever") if cloud.last_time == "" else s.t("cloudLast", {"time": cloud.last_time.substr(0, 16), "n": cloud.last_day + 1})
+	box.add_child(Look.label(status, 14))
+	if not cloud.enabled():
+		return panel
+	if cloud.email != "":
+		box.add_child(Look.label(s.t("cloudLinked", {"email": cloud.email}), 14, true, Look.PARROT.darkened(0.2)))
+	else:
+		box.add_child(Look.label(s.t("cloudHelp"), 13))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var keep := Look.button(s.t("cloudKeep"), Look.SKY, 14)
+		keep.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		keep.pressed.connect(_email_form.bind(true))
+		row.add_child(keep)
+		var fetch := Look.button(s.t("cloudFetch"), Look.OUTLINE, 14)
+		fetch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		fetch.pressed.connect(_email_form.bind(false))
+		row.add_child(fetch)
+		box.add_child(row)
+	return panel
+
+
+## Asks for an email and password: to tie this phone's progress to them
+## (keep), or to bring progress from another phone (fetch).
+func _email_form(keep: bool) -> void:
+	var rows := []
+	rows.append(Look.label(s.t("cloudKeepHelp" if keep else "cloudFetchHelp"), 14))
+	var address := LineEdit.new()
+	address.placeholder_text = s.t("cloudEmail")
+	address.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_EMAIL_ADDRESS
+	address.custom_minimum_size = Vector2(0, 48)
+	rows.append(address)
+	var password := LineEdit.new()
+	password.placeholder_text = s.t("cloudPassword")
+	password.secret = true
+	password.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_PASSWORD
+	password.custom_minimum_size = Vector2(0, 48)
+	rows.append(password)
+	var note := Look.label("", 14, true, Look.VERMILION)
+	rows.append(note)
+	var go := Look.button(s.t("cloudKeep" if keep else "cloudFetch"), Look.SKY, 16)
+	go.pressed.connect(_email_go.bind(keep, address, password, note, go))
+	rows.append(go)
+	_overlay(s.t("cloudTitle"), rows)
+
+
+func _email_go(keep: bool, address: LineEdit, password: LineEdit, note: Label, go: Button) -> void:
+	go.disabled = true
+	note.add_theme_color_override("font_color", Look.OUTLINE)
+	note.text = s.t("cloudWorking")
+	var e := ""
+	if keep:
+		e = await cloud.link_email(address.text.strip_edges(), password.text)
+		if e == "":
+			e = await cloud.upload(progress.data)
+	else:
+		e = await cloud.sign_in(address.text.strip_edges(), password.text)
+	go.disabled = false
+	if e != "":
+		note.add_theme_color_override("font_color", Look.VERMILION)
+		note.text = s.t("cloudErr_" + e) if s.has("cloudErr_" + e) else s.t("cloudErrOther", {"e": e})
+		return
+	if keep:
+		_build()
+		return
+	# Signed in on this phone: bring the progress over, if there is any.
+	var back := await cloud.download()
+	if back.is_empty():
+		note.text = s.t("cloudNothing")
+		return
+	note.text = s.t("cloudFound", {"n": int(back.day) + 1, "taka": int(back.save.get("taka", 0))})
+	go.text = s.t("cloudUse")
+	for c in go.pressed.get_connections():
+		go.pressed.disconnect(c.callable)
+	go.pressed.connect(_restore.bind(back.save))
+
+
+## Takes the progress from online in place of this phone's.
+func _restore(save: Dictionary) -> void:
+	var base := Progress.fresh()
+	for k in save:
+		base[k] = save[k]
+	progress.data = base
+	progress.save()
+	cloud.last_day = int(base.day)
+	_build()
 
 
 ## The story read so far, and the neighbours' notebook.

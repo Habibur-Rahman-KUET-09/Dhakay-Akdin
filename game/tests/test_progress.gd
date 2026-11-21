@@ -222,3 +222,18 @@ func test_neighbours_remember() -> void:
 	eq(p.data.log[0].who, "tea", "noted in the mohalla's notebook")
 	p.apply_npcs([{"id": "rafiq", "delta": -9, "what": "left"}], "tea")
 	eq(p.relation("rafiq"), -5, "no lower than -5")
+
+
+func test_the_online_copy_round_trips() -> void:
+	var Cloud = load("res://scripts/ui/cloud.gd")
+	var data := Progress.fresh()
+	data.taka = 450
+	data.day = 3
+	var doc: Dictionary = Cloud.to_fields(data, "2026-11-21 10:00:00")
+	var back: Dictionary = Cloud.from_doc(doc)
+	eq(int(back.save.taka), 450, "the savings come back")
+	eq(back.day, 3, "and the day")
+	check(Cloud.from_doc({}).is_empty(), "nothing from nothing")
+	eq(Cloud.error_of({"code": 0}), "NETWORK", "no reply: no network")
+	eq(Cloud.error_of({"code": 400, "data": {"error": {"message": "WEAK_PASSWORD : Password should be at least 6 characters"}}}), "WEAK_PASSWORD", "sign-in errors by name")
+	eq(Cloud.error_of({"code": 403, "data": {"error": {"message": "Missing or insufficient permissions.", "status": "PERMISSION_DENIED"}}}), "PERMISSION_DENIED", "Firestore errors by status")
