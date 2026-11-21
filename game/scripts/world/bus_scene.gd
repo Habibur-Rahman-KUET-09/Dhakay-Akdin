@@ -99,8 +99,9 @@ func _ready() -> void:
 	camera.near = 0.1
 	camera.far = 200
 	add_child(camera)
-	camera.position = Vector3(0.35, 1.75, 4.25)
-	camera.look_at(Vector3(-0.1, 1.15, -4.5))
+	# In the aisle, between the two ceiling rails, at eye height.
+	camera.position = Vector3(0.0, 1.55, 4.3)
+	camera.look_at(Vector3(-0.05, 1.05, -4.5))
 	camera.current = true
 	await _step("sounds")
 	_sounds()
@@ -517,7 +518,7 @@ func _process(dt: float) -> void:
 	_scenery.position.z = fmod(_distance, PERIOD)
 	_stop_sign.position.z += _speed * dt
 	# A little sway on the road.
-	camera.position.y = 1.75 + sin(_distance * 0.9) * 0.015 * minf(1.0, _speed / SPEED)
+	camera.position.y = 1.55 + sin(_distance * 0.9) * 0.015 * minf(1.0, _speed / SPEED)
 	if _notice_left > 0.0:
 		_notice_left -= dt
 		if _notice_left <= 0.0:
