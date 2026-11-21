@@ -185,9 +185,10 @@ func _build_stall(map: RoadMap, tile: Vector2i) -> void:
 	board.outline_size = 12
 	board.modulate = Look.YELLOW
 	board.outline_modulate = Look.OUTLINE
-	board.pixel_size = 0.0045
+	board.pixel_size = 0.0036
 	board.alpha_cut = Label3D.ALPHA_CUT_DISCARD
-	board.position = Vector3(0, 2.78, -0.82)
+	# Painted on the cloth along the roof's front edge.
+	board.position = Vector3(0, 2.52, -0.83)
 	board.rotation.y = PI
 	_stall.add_child(board)
 	# Monir Mama behind the counter: white vest, checked blue lungi.
