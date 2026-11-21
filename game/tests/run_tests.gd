@@ -4,7 +4,7 @@
 ## half way is caught too.
 extends SceneTree
 
-const FILES := ["res://tests/test_rules.gd", "res://tests/test_content.gd"]
+const FILES := ["res://tests/test_rules.gd", "res://tests/test_content.gd", "res://tests/test_progress.gd"]
 
 
 func _initialize() -> void:

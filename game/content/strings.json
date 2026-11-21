@@ -242,5 +242,121 @@
  "taka": {
   "bn": "{n} টাকা",
   "en": "Tk {n}"
+ },
+ "dayNumber": {
+  "bn": "দিন {n}",
+  "en": "Day {n}"
+ },
+ "savings": {
+  "bn": "জমা: {n} টাকা",
+  "en": "Saved: Tk {n}"
+ },
+ "mohallaLevel": {
+  "bn": "মহল্লা লেভেল {level} · {xp}/{need} XP",
+  "en": "Mohalla level {level} · {xp}/{need} XP"
+ },
+ "startDay": {
+  "bn": "দিন {n} শুরু",
+  "en": "Start day {n}"
+ },
+ "lastDay": {
+  "bn": "আগের দিন: {money} টাকা · {trips} ট্রিপ · রেটিং {stars}/৫",
+  "en": "Last day: Tk {money} · {trips} trips · rating {stars}/5"
+ },
+ "bestDay": {
+  "bn": "সেরা দিন: {money} টাকা",
+  "en": "Best day: Tk {money}"
+ },
+ "schoolFee": {
+  "bn": "মেয়ের স্কুল ফি: {n} / {goal} টাকা",
+  "en": "Daughter's school fee: Tk {n} / {goal}"
+ },
+ "schoolHelp": {
+  "bn": "দিনের ৬০০ টাকার লক্ষ্যের বেশি যা আয় করবেন, তা এখানে জমবে।",
+  "en": "Whatever you earn above the 600 taka target is put by here."
+ },
+ "buy_new_rickshaw": {
+  "bn": "নতুন রিকশা কিনুন · {n} টাকা (১৫% দ্রুত)",
+  "en": "Buy a new rickshaw · Tk {n} (15% faster)"
+ },
+ "buy_battery_rickshaw": {
+  "bn": "ব্যাটারি রিকশা কিনুন · {n} টাকা (৫০% দ্রুত)",
+  "en": "Buy a battery rickshaw · Tk {n} (50% faster)"
+ },
+ "owned_new_rickshaw": {
+  "bn": "কেনা আছে: নতুন রিকশা",
+  "en": "Owned: a new rickshaw"
+ },
+ "owned_battery_rickshaw": {
+  "bn": "কেনা আছে: ব্যাটারি রিকশা",
+  "en": "Owned: a battery rickshaw"
+ },
+ "fundTitle": {
+  "bn": "মহল্লার তহবিল",
+  "en": "Mohalla fund"
+ },
+ "fundProgress": {
+  "bn": "{project}: {n} / {goal} টাকা",
+  "en": "{project}: Tk {n} / {goal}"
+ },
+ "fundHelp": {
+  "bn": "প্রতিদিনের আয়ের ১০% এখানে জমা হয়। পূর্ণ হলে মহল্লায় কাজটা হয়ে যাবে।",
+  "en": "A tenth of every day's takings goes here. When it is full, the work gets done."
+ },
+ "project_street_lights": {
+  "bn": "রাস্তার বাতি",
+  "en": "Street lights"
+ },
+ "project_drain_cleaning": {
+  "bn": "নর্দমা পরিষ্কার",
+  "en": "Drain cleaning"
+ },
+ "project_bus_shelter": {
+  "bn": "যাত্রী ছাউনি",
+  "en": "Bus shelter"
+ },
+ "projectDone": {
+  "bn": "হয়ে গেছে: {project}",
+  "en": "Done: {project}"
+ },
+ "recentDays": {
+  "bn": "শেষ কয়েক দিন",
+  "en": "Recent days"
+ },
+ "historyLine": {
+  "bn": "দিন {day}: {money} টাকা · {trips} ট্রিপ · {stars}/৫",
+  "en": "Day {day}: Tk {money} · {trips} trips · {stars}/5"
+ },
+ "gainKept": {
+  "bn": "চাচার পকেটে: {n} টাকা",
+  "en": "In his pocket: Tk {n}"
+ },
+ "gainSchool": {
+  "bn": "মেয়ের স্কুল ফি-তে: {n} টাকা",
+  "en": "To the school fee: Tk {n}"
+ },
+ "gainFund": {
+  "bn": "মহল্লার তহবিলে: {n} টাকা",
+  "en": "To the mohalla fund: Tk {n}"
+ },
+ "gainXp": {
+  "bn": "+{n} XP",
+  "en": "+{n} XP"
+ },
+ "levelUp": {
+  "bn": "মহল্লা লেভেল {level}!",
+  "en": "Mohalla level {level}!"
+ },
+ "newBest": {
+  "bn": "নতুন রেকর্ড: সেরা দিন!",
+  "en": "New record: best day!"
+ },
+ "projectFinished": {
+  "bn": "মহল্লায় {project} হয়ে গেল!",
+  "en": "{project} done in the mohalla!"
+ },
+ "nextDay": {
+  "bn": "পরের দিন",
+  "en": "Next day"
  }
 }

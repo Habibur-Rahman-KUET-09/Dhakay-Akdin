@@ -228,10 +228,10 @@ func show_day_end(lines: Array, good: bool) -> void:
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 10)
-	var again := Look.button(s.t("again"), Look.MAGENTA, 18)
+	var again := Look.button(s.t("nextDay"), Look.MAGENTA, 18)
 	again.pressed.connect(func(): again_pressed.emit())
 	row.add_child(again)
-	var home := Look.button(s.t("toMohalla"), Look.OUTLINE, 18)
+	var home := Look.button(s.t("toMohalla"), Look.PARROT, 18)
 	home.pressed.connect(func(): back_pressed.emit())
 	row.add_child(home)
 	col.add_child(row)

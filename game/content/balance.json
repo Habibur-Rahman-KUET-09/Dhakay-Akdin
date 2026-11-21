@@ -1,7 +1,7 @@
 {
   "version": 1,
   "note": "Starting numbers from docs/DETAILED_DESIGN.md. Tuned after playtests; later overridable from Remote Config.",
-  "day_seconds": 240,
+  "day_seconds": 360, "school_fee_goal": 3000,
   "economy": {
     "fund_share": 0.10,
     "featured_multiplier": 2,
@@ -18,7 +18,7 @@
   "ads": {"double_per_day": 3, "retry_per_day": 2, "tara_per_day": 3,
           "interstitial_every_n_days": 3, "interstitial_per_day": 3, "no_interstitial_first_days": 3},
   "rickshaw": {
-    "start_hour": 7, "end_hour": 21, "day_seconds": 240, "daily_target": 600,
+    "start_hour": 7, "end_hour": 21, "day_seconds": 360, "school_fee_goal": 3000, "daily_target": 600,
     "speed_tiles_per_s": 1.5, "accel_tiles_per_s2": 0.6, "coast_decel": 0.3, "brake_decel": 1.5,
     "fare_base": 20, "fare_per_tile": 1.5, "fare_round_to": 5,
     "counter_offer_factor": 1.2,

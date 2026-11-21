@@ -17,6 +17,7 @@ const Traffic = preload("res://scripts/world/traffic.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
+const Progress = preload("res://scripts/rules/progress.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
@@ -38,6 +39,7 @@ var _sun: DirectionalLight3D
 var _sky: ProceduralSkyMaterial
 var _env: Environment
 var _target_money := 600
+var progress: Progress
 var rickshaw: Node3D
 ## The rickshaw body's material: paints hood and body, pedals the legs.
 var _paint: ShaderMaterial
@@ -71,6 +73,9 @@ func _ready() -> void:
 	var b := Balance.new()
 	shift = Day.new(map, b)
 	_target_money = int(b.n("rickshaw.daily_target"))
+	# What carries over from earlier days: a faster rickshaw, for one.
+	progress = Progress.new(b)
+	shift.base_speed *= progress.speed_factor()
 	# Built a step per frame behind a loading screen, so a slow phone keeps
 	# responding, and the log shows which step a crash happened in.
 	set_process(false)
@@ -542,6 +547,21 @@ func _end_day() -> void:
 	if shift.fines > 0:
 		lines.append(strings.t("finesPaid", {"fines": shift.fines}))
 	var met := shift.money >= _target_money
+	# Into the save: savings, school fee, fund, XP, the record.
+	var got := progress.apply_day({"earned": shift.money, "trips": shift.trips, "stars": shift.average_stars(), "fines": shift.fines})
+	progress.save()
+	CrashWatch.stop()
+	lines.append(strings.t("gainKept", {"n": got.kept}))
+	if got.school > 0:
+		lines.append(strings.t("gainSchool", {"n": got.school}))
+	lines.append(strings.t("gainFund", {"n": got.fund}))
+	lines.append(strings.t("gainXp", {"n": got.xp}))
+	if got.level_up:
+		lines.append(strings.t("levelUp", {"level": progress.level()}))
+	if got.best:
+		lines.append(strings.t("newBest"))
+	if got.project != "":
+		lines.append(strings.t("projectFinished", {"project": strings.t("project_" + got.project)}))
 	lines.append(strings.t("targetMet" if met else "targetMissed", {"target": _target_money}))
 	hud.show_day_end(lines, met)
 

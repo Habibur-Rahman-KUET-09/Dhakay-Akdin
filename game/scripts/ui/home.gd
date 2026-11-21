@@ -1,19 +1,25 @@
-## The mohalla screen (§৩). For now: the three characters (Rahim Chacha can
-## be driven) and a language switch.
+## The mohalla screen (§৩, §৫): where the days add up. The day number,
+## mohalla level and XP, Rahim Chacha's savings and his daughter's school
+## fee, the community fund and its project, the rickshaw upgrades on sale,
+## the last few days, and the characters (Rahim Chacha can work).
 extends Control
 
 const Look = preload("res://scripts/ui/look.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
+const Progress = preload("res://scripts/rules/progress.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 
 var s := Strings.new()
+var b := Balance.new()
+var progress: Progress
 var _crash := ""
 
 
 func _ready() -> void:
 	s.lang = Strings.saved_lang()
 	_crash = CrashWatch.last_crash()
+	progress = Progress.new(b)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build()
 
@@ -25,20 +31,23 @@ func _build() -> void:
 	bg.color = Look.CREAM
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
-
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	add_child(scroll)
 	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 20)
-	margin.add_theme_constant_override("margin_top", 28)
+		margin.add_theme_constant_override("margin_" + side, 18)
+	margin.add_theme_constant_override("margin_top", 24)
 	margin.add_theme_constant_override("margin_bottom", 20)
-	add_child(margin)
+	scroll.add_child(margin)
 	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 14)
+	col.add_theme_constant_override("separation", 12)
 	margin.add_child(col)
 
 	var top := HBoxContainer.new()
-	var title := Look.label(s.t("appTitle"), 34, true)
+	var title := Look.label(s.t("appTitle"), 32, true)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(title)
 	var lang := Button.new()
@@ -49,59 +58,166 @@ func _build() -> void:
 	lang.pressed.connect(_switch_language)
 	top.add_child(lang)
 	col.add_child(top)
-	col.add_child(Look.label(s.t("tagline"), 18))
 
-	var b := Balance.new()
-	var people := [
-		["rickshawName", "rickshawRole", Look.MAGENTA, 1],
-		["teaName", "teaRole", Look.PARROT, int(b.n("unlocks.tea_stall"))],
-		["busName", "busRole", Look.SKY, int(b.n("unlocks.bus"))],
-	]
-	for p in people:
-		col.add_child(_card(p[0], p[1], p[2], p[3]))
 	if _crash != "":
 		col.add_child(_crash_card())
-
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(spacer)
+	col.add_child(_mohalla_card())
+	col.add_child(_rickshaw_card())
+	col.add_child(_fund_card())
+	col.add_child(_other("teaName", "teaRole", Look.PARROT, "tea_stall"))
+	col.add_child(_other("busName", "busRole", Look.SKY, "bus"))
+	if not progress.data.history.is_empty():
+		col.add_child(_history_card())
 	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 13)
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(version)
 
 
-func _card(name_key: String, role_key: String, colour: Color, level: int) -> Control:
+func _panel(fill := Color.WHITE) -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", Look.card(Color.WHITE, 18, 3))
+	panel.add_theme_stylebox_override("panel", Look.card(fill, 16, 3))
+	return panel
+
+
+## A labelled bar: how far along something is.
+func _bar(value: int, goal: int, colour: Color) -> Control:
+	var bar := ProgressBar.new()
+	bar.max_value = maxi(1, goal)
+	bar.value = clampi(value, 0, maxi(1, goal))
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, 14)
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color("E8E0CF")
+	bg.set_corner_radius_all(7)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = colour
+	fill.set_corner_radius_all(7)
+	bar.add_theme_stylebox_override("background", bg)
+	bar.add_theme_stylebox_override("fill", fill)
+	return bar
+
+
+## Day, level and XP, and the savings.
+func _mohalla_card() -> Control:
+	var panel := _panel(Color("FFF0C9"))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 14)
-	panel.add_child(row)
-	var dot := Panel.new()
-	dot.custom_minimum_size = Vector2(52, 52)
-	var circle := Look.card(colour, 26, 0)
-	dot.add_theme_stylebox_override("panel", circle)
-	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(dot)
+	var day := Look.label(s.t("dayNumber", {"n": int(progress.data.day) + 1}), 22, true)
+	day.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(day)
+	var savings := Look.label(s.t("savings", {"n": int(progress.data.taka)}), 18, true, Look.PARROT.darkened(0.2))
+	savings.autowrap_mode = TextServer.AUTOWRAP_OFF
+	row.add_child(savings)
+	box.add_child(row)
+	box.add_child(Look.label(s.t("mohallaLevel", {"level": progress.level(), "xp": progress.xp(), "need": progress.to_next(progress.level())}), 15))
+	box.add_child(_bar(progress.xp(), progress.to_next(progress.level()), Look.MAGENTA))
+	return panel
+
+
+## Rahim Chacha: the last day, the best day, the school fee, the rickshaw
+## upgrade on sale, and the way out to work.
+func _rickshaw_card() -> Control:
+	var panel := _panel()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	row.add_child(_dot(Look.MAGENTA))
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text.add_child(Look.label(s.t(name_key), 20, true))
-	var role := s.t(role_key)
-	if level > 1:
-		role += " · " + s.t("unlocksAt", {"level": level})
-	text.add_child(Look.label(role, 15))
+	text.add_child(Look.label(s.t("rickshawName"), 20, true))
+	text.add_child(Look.label(s.t("rickshawRole"), 14))
 	row.add_child(text)
-	if level == 1:
-		var drive := Look.button(s.t("rickshawDrive"))
-		drive.name = "Drive"
-		drive.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		drive.pressed.connect(_drive)
-		row.add_child(drive)
-	else:
-		var soon := Look.label(s.t("comingSoon"), 13)
-		soon.autowrap_mode = TextServer.AUTOWRAP_OFF
-		soon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(soon)
+	var drive := Look.button(s.t("startDay", {"n": int(progress.data.day) + 1}))
+	drive.name = "Drive"
+	drive.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	drive.pressed.connect(_drive)
+	row.add_child(drive)
+	box.add_child(row)
+	if not progress.data.history.is_empty():
+		var last: Dictionary = progress.data.history[0]
+		box.add_child(Look.label(s.t("lastDay", {"money": int(last.earned), "trips": int(last.trips), "stars": last.stars}), 15))
+		box.add_child(Look.label(s.t("bestDay", {"money": int(progress.data.rickshaw.bestDay)}), 14))
+	var school := int(progress.data.rickshaw.school)
+	box.add_child(Look.label(s.t("schoolFee", {"n": school, "goal": progress.school_goal()}), 15, true))
+	box.add_child(_bar(school, progress.school_goal(), Look.SKY))
+	box.add_child(Look.label(s.t("schoolHelp"), 13))
+	var next := progress.next_upgrade()
+	if next != "":
+		var cost := progress.price(next)
+		var buy := Look.button(s.t("buy_" + next, {"n": cost}), Look.PARROT if progress.data.taka >= cost else Color("9E9E9E"), 15)
+		buy.disabled = int(progress.data.taka) < cost
+		buy.pressed.connect(_buy.bind(next))
+		box.add_child(buy)
+	for id in progress.data.rickshaw.upgrades:
+		box.add_child(Look.label(s.t("owned_" + id), 14, false, Look.PARROT.darkened(0.2)))
 	return panel
+
+
+## The community fund and the project it is filling.
+func _fund_card() -> Control:
+	var panel := _panel(Color("E7F4EC"))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("fundTitle"), 18, true))
+	var project: String = progress.data.fundProject
+	if project != "":
+		box.add_child(Look.label(s.t("fundProgress", {"project": s.t("project_" + project), "n": int(progress.data.fund), "goal": progress.fund_goal()}), 15))
+		box.add_child(_bar(int(progress.data.fund), progress.fund_goal(), Look.PARROT))
+	box.add_child(Look.label(s.t("fundHelp"), 13))
+	for done in progress.data.mohalla.projectsDone:
+		box.add_child(Look.label(s.t("projectDone", {"project": s.t("project_" + done)}), 14, true, Look.PARROT.darkened(0.2)))
+	return panel
+
+
+func _other(name_key: String, role_key: String, colour: Color, unlock: String) -> Control:
+	var panel := _panel()
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	row.add_child(_dot(colour))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_child(Look.label(s.t(name_key), 18, true))
+	var level := int(b.n("unlocks." + unlock))
+	var role := s.t(role_key)
+	if not progress.unlocked(unlock):
+		role += " · " + s.t("unlocksAt", {"level": level})
+	text.add_child(Look.label(role, 14))
+	row.add_child(text)
+	var soon := Look.label(s.t("comingSoon"), 13)
+	soon.autowrap_mode = TextServer.AUTOWRAP_OFF
+	soon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(soon)
+	return panel
+
+
+## The last five days, newest first.
+func _history_card() -> Control:
+	var panel := _panel()
+	var box := VBoxContainer.new()
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("recentDays"), 17, true))
+	var shown := 0
+	for h in progress.data.history:
+		if shown >= 5:
+			break
+		shown += 1
+		var line := s.t("historyLine", {"day": int(h.day), "money": int(h.earned), "trips": int(h.trips), "stars": h.stars})
+		box.add_child(Look.label(line, 14, false, Look.PARROT.darkened(0.3) if h.met else Look.OUTLINE))
+	return panel
+
+
+func _dot(colour: Color) -> Control:
+	var dot := Panel.new()
+	dot.custom_minimum_size = Vector2(48, 48)
+	dot.add_theme_stylebox_override("panel", Look.card(colour, 24, 0))
+	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return dot
 
 
 ## Shown after a run that ended suddenly: a note and a button that copies
@@ -122,6 +238,12 @@ func _crash_card() -> Control:
 func _copy_log(button: Button) -> void:
 	DisplayServer.clipboard_set(_crash)
 	button.text = s.t("copied")
+
+
+func _buy(id: String) -> void:
+	if progress.buy(id):
+		progress.save()
+		_build()
 
 
 func _drive() -> void:
