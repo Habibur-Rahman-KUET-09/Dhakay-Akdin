@@ -46,5 +46,6 @@ locale/include_text_server_data=true
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
-; 4x: cheap on phone GPUs (tile-based), and the edges stop crawling.
-anti_aliasing/quality/msaa_3d=2
+; Off here; the 3D scenes turn on 4x where the phone can take it
+; (scripts/ui/graphics.gd).
+anti_aliasing/quality/msaa_3d=0

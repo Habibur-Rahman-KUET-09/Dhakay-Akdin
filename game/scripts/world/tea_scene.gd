@@ -16,6 +16,7 @@ const Clutter = preload("res://scripts/world/clutter.gd")
 const Models = preload("res://scripts/world/models.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
+const Graphics = preload("res://scripts/ui/graphics.gd")
 
 ## Where the bench and its four seats are, in the stall's own space
 ## (the stall faces -Z, the street).
@@ -163,6 +164,7 @@ func _environment() -> void:
 	_sun.shadow_blur = 1.5
 	_sun.directional_shadow_max_distance = 30.0
 	add_child(_sun)
+	Graphics.apply(get_viewport(), env, _sun)
 
 
 ## The stall on the pavement at the tea tile, its sign, Monir Mama, the

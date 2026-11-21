@@ -9,16 +9,22 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
+const Graphics = preload("res://scripts/ui/graphics.gd")
 
 var s := Strings.new()
 var b := Balance.new()
 var progress: Progress
 var _crash := ""
+var _lowered := false
 
 
 func _ready() -> void:
 	s.lang = Strings.saved_lang()
 	_crash = CrashWatch.last_crash()
+	# A crash in a 3D scene: next time, go easy on the graphics chip.
+	if _crash != "" and Graphics.level() == "high":
+		Graphics.save_level("low")
+		_lowered = true
 	progress = Progress.new(b)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build()
@@ -71,6 +77,14 @@ func _build() -> void:
 	col.add_child(_other("busName", "busRole", Look.SKY, "bus"))
 	if not progress.data.history.is_empty():
 		col.add_child(_history_card())
+	var gfx := Button.new()
+	gfx.name = "Graphics"
+	gfx.text = s.t("graphicsHigh" if Graphics.level() == "high" else "graphicsLow")
+	gfx.flat = true
+	gfx.add_theme_color_override("font_color", Look.MAGENTA)
+	gfx.pressed.connect(_switch_graphics)
+	col.add_child(gfx)
+	col.add_child(Look.label(s.t("graphicsHelp"), 12))
 	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 13)
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(version)
@@ -264,6 +278,8 @@ func _crash_card() -> Control:
 	panel.add_child(box)
 	box.add_child(Look.label(s.t("crashTitle"), 16, true, Look.VERMILION))
 	box.add_child(Look.label(s.t("crashHelp"), 14))
+	if _lowered:
+		box.add_child(Look.label(s.t("graphicsLowered"), 14, true))
 	var copy := Look.button(s.t("copyLog"), Look.OUTLINE, 15)
 	copy.pressed.connect(_copy_log.bind(copy))
 	box.add_child(copy)
@@ -289,6 +305,11 @@ func _drive() -> void:
 func _open_stall() -> void:
 	CrashWatch.start("tea")
 	get_tree().change_scene_to_file("res://scenes/tea.tscn")
+
+
+func _switch_graphics() -> void:
+	Graphics.save_level("low" if Graphics.level() == "high" else "high")
+	_build()
 
 
 func _switch_language() -> void:

@@ -19,6 +19,7 @@ const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
+const Graphics = preload("res://scripts/ui/graphics.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
@@ -310,6 +311,7 @@ func _environment() -> void:
 	sun.directional_shadow_max_distance = 35.0
 	add_child(sun)
 	_sun = sun
+	Graphics.apply(get_viewport(), env, sun)
 
 
 ## A tall glowing post where the passenger is going.
