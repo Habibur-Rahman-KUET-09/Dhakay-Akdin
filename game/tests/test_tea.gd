@@ -202,3 +202,14 @@ func test_babu_comes_for_black_tea_and_paan() -> void:
 	check(not babu.is_empty(), "Babu sat down")
 	if not babu.is_empty():
 		eq(babu[0].items, ["liquor_tea", "paan"], "black tea and paan")
+
+
+func test_a_neighbour_who_likes_the_stall_tips_more() -> void:
+	var t := _stall(["banana"])
+	t.customers[0].npc = "rafiq"
+	t.relations = {"rafiq": 3}
+	t.tap("banana")
+	eq(t.money, 10 + 1 + 20, "10, a tip, and 20 more from Rafiq Chacha")
+	eq(t.npc_log.size(), 1, "he remembers")
+	eq(t.npc_log[0].delta, 1, "fondly")
+	eq(t.sold_items.get("banana", 0), 1, "a banana counted")

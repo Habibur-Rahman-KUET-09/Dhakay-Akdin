@@ -16,6 +16,8 @@ const Models = preload("res://scripts/world/models.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
+const Neighbours = preload("res://scripts/rules/neighbours.gd")
+const DayLines = preload("res://scripts/ui/day_lines.gd")
 
 ## How fast the street goes by, metres a second, between stops.
 const SPEED := 9.0
@@ -25,6 +27,7 @@ const PERIOD := 6.0
 const BAG_NOTES := [5, 10, 20, 50, 100]
 
 var strings := Strings.new()
+var neighbours := Neighbours.new()
 var b: Balance
 var bus: BusDay
 var progress: Progress
@@ -85,6 +88,10 @@ func _ready() -> void:
 	b = Balance.new()
 	progress = Progress.new(b)
 	bus = BusDay.new(b, -1, progress.data.bus.upgrades)
+	var ids := neighbours.ids()
+	ids.shuffle()
+	bus.npc_pool = ids.slice(0, 6)
+	bus.relations = progress.data.npcs
 	set_process(false)
 	var loading := _loading_screen()
 	await _step("environment")
@@ -768,6 +775,8 @@ func _refresh() -> void:
 		else:
 			var r: Dictionary = bus.asking
 			_fare_title.text = strings.t("fareTitle", {"stop": _stop_name(int(r.to)), "fare": bus.asking_fare})
+			if r.get("npc", "") != "":
+				_fare_title.text = neighbours.name_of(r.npc, strings.lang) + " · " + _fare_title.text
 			if r.kind == "student" and _student_row.visible:
 				_fare_sub.text = strings.t("studentAsks", {"half": int(r.fare * b.n("bus.student_share"))})
 			else:
@@ -818,7 +827,8 @@ func _end_trip() -> void:
 	_call_box.visible = false
 	_fare_box.visible = false
 	var earned := bus.earned()
-	var got := progress.apply_bus_day({"earned": earned, "riders": bus.boarded, "stars": bus.rating})
+	var stats := {"no_slip": 1 if bus.slipped == 0 and bus.boarded >= 20 else 0, "on_time": bus.bonus / int(b.n("bus.on_time_bonus")), "riders": bus.boarded}
+	var got := progress.apply_bus_day({"earned": earned, "riders": bus.boarded, "stars": bus.rating, "stats": stats, "npcs": bus.npc_log})
 	progress.save()
 	CrashWatch.stop()
 	var lines := [
@@ -838,6 +848,7 @@ func _end_trip() -> void:
 	if bus.fines > 0:
 		lines.append(strings.t("busFines", {"n": bus.fines}))
 	lines.append(strings.t("busRatingLine", {"stars": "%.1f" % bus.rating}))
+	lines.append_array(DayLines.lines(got, strings))
 	lines.append(strings.t("teaKept", {"n": got.kept}))
 	lines.append(strings.t("gainFund", {"n": got.fund}))
 	lines.append(strings.t("gainXp", {"n": got.xp}))

@@ -101,6 +101,11 @@ var fines := 0
 var bonus := 0
 ## Seconds an argument (or asking round) holds everything up.
 var locked_left := 0.0
+## The named neighbours who may ride today (set by the scene), how they
+## feel (id -> -5..5), and what happened with them: [{id, delta, what}].
+var npc_pool: Array = []
+var relations := {}
+var npc_log: Array = []
 var _next_id := 0
 
 
@@ -322,11 +327,16 @@ func _board_at(i: int, n: int) -> int:
 			kind = "student"
 		elif roll < b.n("bus.student_chance") + 0.12:
 			kind = "elder"
+		var npc := ""
+		if not npc_pool.is_empty() and rng.randf() < 0.12:
+			npc = npc_pool.pop_back()
+			# Farhan is a college student; the others ride as themselves.
+			kind = "student" if npc == "farhan" else "normal"
 		var r := {
 			"id": _next_id, "from": i, "to": to, "fare": f, "kind": kind,
-			"woman": rng.randf() < 0.35, "evader": rng.randf() < b.n("bus.evader_chance"),
+			"woman": rng.randf() < 0.35, "evader": rng.randf() < b.n("bus.evader_chance") and npc == "",
 			"note": _note_for(f if kind != "student" else int(f * b.n("bus.student_share"))),
-			"paid": false, "owed": 0, "seat": -1,
+			"paid": false, "owed": 0, "seat": -1, "npc": npc,
 		}
 		r.seat = _place_for(r)
 		riders.append(r)
@@ -449,8 +459,13 @@ func ask(id: int, full := true) -> Dictionary:
 					asking_fare = int(r.fare * b.n("bus.student_share"))
 					rating += 0.2
 				rating = clampf(rating, 1.0, 5.0)
+				if r.get("npc", "") != "":
+					npc_log.append({"id": r.npc, "delta": -1 if full else 1, "what": "student_fare"})
 			if r.note < asking_fare:
 				r.note = _note_for(asking_fare)
+			# A neighbour who thinks well of Babu has the fare ready, exactly.
+			if r.get("npc", "") != "" and int(relations.get(r.npc, 0)) >= 3:
+				r.note = asking_fare
 			return r
 	return {}
 
@@ -511,6 +526,8 @@ func give(notes: Dictionary) -> Array:
 		total += int(note) * int(notes[note])
 	var due := change_due()
 	if total < due:
+		if asking.get("npc", "") != "":
+			npc_log.append({"id": asking.npc, "delta": -1, "what": "short_change"})
 		arguments += 1
 		rating = clampf(rating - 0.5, 1.0, 5.0)
 		locked_left = b.n("bus.argument_s")

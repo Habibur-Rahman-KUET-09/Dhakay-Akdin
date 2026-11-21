@@ -77,6 +77,13 @@ var raining := false
 var rain_at := -1.0
 var rain_seconds := 60.0
 var weather := RandomNumberGenerator.new()
+## Trips rated 4 stars or more (for the day's challenge).
+var good_trips := 0
+## The named neighbours who may need a ride today (set by the scene), how
+## they feel (id -> -5..5), and what happened with them: [{id, delta, what}].
+var npc_pool: Array = []
+var relations := {}
+var npc_log: Array = []
 
 
 func _init(road_map: RoadMap, b: Balance, seed_value := -1) -> void:
@@ -285,6 +292,8 @@ func counter() -> bool:
 		return true
 	waiting.erase(w)
 	offer_for = {}
+	if w.get("npc", "") != "":
+		npc_log.append({"id": w.npc, "delta": -1, "what": "haggled"})
 	_top_up()
 	_aim()
 	return false
@@ -302,7 +311,7 @@ func _board(w: Dictionary, fare: int) -> void:
 	offer_for = {}
 	riding = {
 		"place": w.place, "at": w.place.at, "type": w.type, "fare": fare,
-		"since": clock, "eta": fares.eta(w.tiles, base_speed), "flooded": 0,
+		"since": clock, "eta": fares.eta(w.tiles, base_speed), "flooded": 0, "npc": w.get("npc", ""),
 	}
 	_top_up()
 	_aim()
@@ -311,10 +320,22 @@ func _board(w: Dictionary, fare: int) -> void:
 func _deliver(events: Array) -> void:
 	var given := fares.stars(clock - riding.since, riding.eta, riding.flooded, riding.type)
 	var tip := fares.tip(given)
+	# A neighbour who thinks well of the mohalla tips more.
+	var npc: String = riding.get("npc", "")
+	var thanks := npc != "" and int(relations.get(npc, 0)) >= 3
+	if thanks:
+		tip += 20
+	if npc != "":
+		if given >= 4.5:
+			npc_log.append({"id": npc, "delta": 1, "what": "good_ride"})
+		elif given < 3.0:
+			npc_log.append({"id": npc, "delta": -1, "what": "bad_ride"})
+	if given >= 4.0:
+		good_trips += 1
 	money += riding.fare + tip
 	trips += 1
 	stars_sum += given
-	last_trip = {"fare": riding.fare, "tip": tip, "stars": given}
+	last_trip = {"fare": riding.fare, "tip": tip, "stars": given, "npc": npc, "thanks": thanks}
 	riding = {}
 	delivered += 1
 	events.append(DELIVERED)
@@ -345,10 +366,14 @@ func _top_up() -> void:
 		var who := fares.pick_type(rng)
 		var fair_fare := fares.fair(tiles)
 		_next_id += 1
-		waiting.append({
+		var w := {
 			"id": _next_id, "at": at, "place": place_to, "type": who, "tiles": tiles,
-			"fair": fair_fare, "offer": fares.offer(who, fair_fare, rng), "refused": false,
-		})
+			"fair": fair_fare, "offer": fares.offer(who, fair_fare, rng), "refused": false, "npc": "",
+		}
+		# Now and then one of the named neighbours.
+		if not npc_pool.is_empty() and rng.randf() < 0.25:
+			w.npc = npc_pool.pop_back()
+		waiting.append(w)
 
 
 ## Where the arrow points: the drop-off with a passenger aboard, else the

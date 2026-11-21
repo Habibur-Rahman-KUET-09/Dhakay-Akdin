@@ -57,6 +57,17 @@ func _run() -> void:
 	bus._on_next_fare()
 	await _frames(3)
 	_save("6-bus")
+	bus.queue_free()
+	await _frames(2)
+	# A story chapter: Rahim Chacha's first day.
+	var strings = load("res://scripts/ui/strings.gd").new()
+	strings.lang = "bn"
+	var story = load("res://scripts/rules/story.gd").new()
+	var reader = load("res://scripts/ui/story_player.gd").new()
+	reader.setup(story, story.chapter("rahim_1"), strings)
+	root.add_child(reader)
+	await _frames(10)
+	_save("7-story")
 	quit(0)
 
 

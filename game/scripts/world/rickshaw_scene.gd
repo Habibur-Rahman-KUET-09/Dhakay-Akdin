@@ -19,6 +19,8 @@ const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
+const Neighbours = preload("res://scripts/rules/neighbours.gd")
+const DayLines = preload("res://scripts/ui/day_lines.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
 const Reveal = preload("res://scripts/world/reveal.gd")
 const Weather = preload("res://scripts/world/weather.gd")
@@ -31,6 +33,7 @@ const CAMERA_UP := 3.9
 const KEEP_LEFT := 1.0
 
 var strings := Strings.new()
+var neighbours := Neighbours.new()
 var shift: Day
 var signals: SignalLights
 ## People waiting by the road, by passenger id.
@@ -92,6 +95,11 @@ func _ready() -> void:
 	progress = Progress.new(b)
 	shift.base_speed *= progress.speed_factor()
 	shift.energy_factor = progress.energy_factor()
+	# A few of the named neighbours may need a ride today.
+	var ids := neighbours.ids()
+	ids.shuffle()
+	shift.npc_pool = ids.slice(0, 6)
+	shift.relations = progress.data.npcs
 	# Built a step per frame behind a loading screen, so a slow phone keeps
 	# responding, and the log shows which step a crash happened in.
 	set_process(false)
@@ -121,7 +129,9 @@ func _ready() -> void:
 	await _step("rickshaw and hud")
 	# Rahim Chacha's own rickshaw: yellow hood, magenta body.
 	# The street's colours too, for the decorations (hood 0, body 1).
-	rickshaw = Models.player_rickshaw(Look.YELLOW, Look.MAGENTA)
+	# The festive hood (seven days running) is the studded one.
+	var hood_style := 1 if (progress.data.cosmetics as Array).has("festive_hood") else 0
+	rickshaw = Models.player_rickshaw(Look.YELLOW, Look.MAGENTA, hood_style)
 	var own := _palette.duplicate()
 	own[0] = Look.YELLOW
 	own[1] = Look.MAGENTA
@@ -512,20 +522,31 @@ func _clock_text() -> String:
 	return strings.t("clock", {"part": strings.t(part), "h": h12, "m": "%02d" % m})
 
 
+## Who is offering: a named neighbour by name and job, else the kind.
+func _who(w: Dictionary) -> String:
+	var npc: String = w.get("npc", "")
+	if npc == "":
+		return strings.t("type_" + w.type)
+	return "%s · %s" % [neighbours.name_of(npc, strings.lang), neighbours.role_of(npc, strings.lang)]
+
+
 ## What the day's events mean on screen.
 func _handle(events: Array) -> void:
 	if events.has(Day.OFFER):
 		var w: Dictionary = shift.offer_for
 		hud.show_offer(
 			strings.t("offerTitle", {"place": RoadMap.place_name(w.place, strings.lang), "fare": w.offer}),
-			strings.t("type_" + w.type),
+			_who(w),
 			strings.t("counter", {"fare": shift.fares.counter(w.fair)}))
 	if events.has(Day.OFFER_GONE):
 		hud.hide_offer()
 	if events.has(Day.DELIVERED):
 		var t: Dictionary = shift.last_trip
 		var tip_text := strings.t("tipText", {"tip": t.tip}) if t.tip > 0 else ""
-		_say(strings.t("delivered", {"fare": t.fare, "tip": tip_text, "stars": _stars(t.stars)}), Look.PARROT, 3.5)
+		var said := strings.t("delivered", {"fare": t.fare, "tip": tip_text, "stars": _stars(t.stars)})
+		if t.get("thanks", false):
+			said += "\n" + strings.t("npcThanks", {"name": neighbours.name_of(t.npc, strings.lang)})
+		_say(said, Look.PARROT, 3.5)
 		_rider_seat.visible = false
 		_bell.play()
 		_place_marker()
@@ -704,6 +725,8 @@ func _sync_waiting() -> void:
 		node.add_child(body)
 		var label := Label3D.new()
 		label.text = "%s\n%s" % [RoadMap.place_name(w.place, strings.lang), strings.t("taka", {"n": w.offer})]
+		if w.get("npc", "") != "":
+			label.text = neighbours.name_of(w.npc, strings.lang) + "\n" + label.text
 		label.font = Look.font(Look.BOLD)
 		label.font_size = 40
 		label.outline_size = 12
@@ -768,7 +791,8 @@ func _end_day() -> void:
 		lines.append(strings.t("teaLine", {"n": shift.teas, "money": shift.tea_spent}))
 	var met := shift.money >= _target_money
 	# Into the save: savings, school fee, fund, XP, the record.
-	var got := progress.apply_day({"earned": shift.money, "trips": shift.trips, "stars": shift.average_stars(), "fines": shift.fines, "teas": shift.teas})
+	var stats := {"good_trips": shift.good_trips, "clean": 1 if shift.fines == 0 and shift.trips >= 3 else 0, "earned": shift.money}
+	var got := progress.apply_day({"earned": shift.money, "trips": shift.trips, "stars": shift.average_stars(), "fines": shift.fines, "teas": shift.teas, "stats": stats, "npcs": shift.npc_log})
 	progress.save()
 	CrashWatch.stop()
 	lines.append(strings.t("gainKept", {"n": got.kept}))
@@ -782,6 +806,7 @@ func _end_day() -> void:
 		lines.append(strings.t("newBest"))
 	if got.project != "":
 		lines.append(strings.t("projectFinished", {"project": strings.t("project_" + got.project)}))
+	lines.append_array(DayLines.lines(got, strings))
 	lines.append(strings.t("targetMet" if met else "targetMissed", {"target": _target_money}))
 	hud.show_day_end(lines, met)
 

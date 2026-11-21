@@ -1,0 +1,205 @@
+{
+ "note": "Named neighbours (§৬.১). They turn up as passengers and customers; how they are treated is remembered.",
+ "people": [
+  {
+   "id": "rumana",
+   "bn": "রুমানা আপা",
+   "en": "Rumana Apa",
+   "role": {
+    "bn": "স্কুল শিক্ষিকা",
+    "en": "Schoolteacher"
+   },
+   "woman": true
+  },
+  {
+   "id": "kamal",
+   "bn": "কামাল ভাই",
+   "en": "Kamal Bhai",
+   "role": {
+    "bn": "অফিসের কেরানি",
+    "en": "Office clerk"
+   },
+   "woman": false
+  },
+  {
+   "id": "farhan",
+   "bn": "ফারহান",
+   "en": "Farhan",
+   "role": {
+    "bn": "কলেজ ছাত্র",
+    "en": "College student"
+   },
+   "woman": false
+  },
+  {
+   "id": "sultana",
+   "bn": "সুলতানা খালা",
+   "en": "Sultana Khala",
+   "role": {
+    "bn": "গৃহিণী",
+    "en": "Homemaker"
+   },
+   "woman": true
+  },
+  {
+   "id": "haider",
+   "bn": "হায়দার সাহেব",
+   "en": "Haider Saheb",
+   "role": {
+    "bn": "অবসরপ্রাপ্ত শিক্ষক",
+    "en": "Retired teacher"
+   },
+   "woman": false
+  },
+  {
+   "id": "mithu",
+   "bn": "মিঠু",
+   "en": "Mithu",
+   "role": {
+    "bn": "দোকানের কর্মচারী",
+    "en": "Shop assistant"
+   },
+   "woman": false
+  },
+  {
+   "id": "nasrin",
+   "bn": "নাসরিন",
+   "en": "Nasrin",
+   "role": {
+    "bn": "নার্স",
+    "en": "Nurse"
+   },
+   "woman": true
+  },
+  {
+   "id": "jamal",
+   "bn": "জামাল মিয়া",
+   "en": "Jamal Mia",
+   "role": {
+    "bn": "রাজমিস্ত্রি",
+    "en": "Mason"
+   },
+   "woman": false
+  },
+  {
+   "id": "tania",
+   "bn": "তানিয়া",
+   "en": "Tania",
+   "role": {
+    "bn": "গার্মেন্টস কর্মী",
+    "en": "Garment worker"
+   },
+   "woman": true
+  },
+  {
+   "id": "belal",
+   "bn": "বেলাল ভাই",
+   "en": "Belal Bhai",
+   "role": {
+    "bn": "মুদি দোকানি",
+    "en": "Grocer"
+   },
+   "woman": false
+  },
+  {
+   "id": "shirin",
+   "bn": "শিরিন আপা",
+   "en": "Shirin Apa",
+   "role": {
+    "bn": "ব্যাংক কর্মকর্তা",
+    "en": "Bank officer"
+   },
+   "woman": true
+  },
+  {
+   "id": "rafiq",
+   "bn": "রফিক চাচা",
+   "en": "Rafiq Chacha",
+   "role": {
+    "bn": "পত্রিকা বিক্রেতা",
+    "en": "Newspaper seller"
+   },
+   "woman": false
+  },
+  {
+   "id": "joya",
+   "bn": "জয়া",
+   "en": "Joya",
+   "role": {
+    "bn": "বিশ্ববিদ্যালয়ের ছাত্রী",
+    "en": "University student"
+   },
+   "woman": true
+  },
+  {
+   "id": "alam",
+   "bn": "আলম ভাই",
+   "en": "Alam Bhai",
+   "role": {
+    "bn": "ডেলিভারি ম্যান",
+    "en": "Delivery man"
+   },
+   "woman": false
+  },
+  {
+   "id": "rehana",
+   "bn": "রেহানা বেগম",
+   "en": "Rehana Begum",
+   "role": {
+    "bn": "দর্জি",
+    "en": "Tailor"
+   },
+   "woman": true
+  },
+  {
+   "id": "sajib",
+   "bn": "সজীব",
+   "en": "Sajib",
+   "role": {
+    "bn": "কিশোর ফুটবলার",
+    "en": "Young footballer"
+   },
+   "woman": false
+  },
+  {
+   "id": "karim",
+   "bn": "করিম সাহেব",
+   "en": "Karim Saheb",
+   "role": {
+    "bn": "ব্যবসায়ী",
+    "en": "Businessman"
+   },
+   "woman": false
+  },
+  {
+   "id": "pinky",
+   "bn": "পিংকি",
+   "en": "Pinky",
+   "role": {
+    "bn": "পার্লার কর্মী",
+    "en": "Beauty parlour worker"
+   },
+   "woman": true
+  },
+  {
+   "id": "motin",
+   "bn": "মতিন দাদু",
+   "en": "Motin Dadu",
+   "role": {
+    "bn": "মহল্লার মুরুব্বি",
+    "en": "The mohalla's elder"
+   },
+   "woman": false
+  },
+  {
+   "id": "dipu",
+   "bn": "দীপু",
+   "en": "Dipu",
+   "role": {
+    "bn": "অফিস পিয়ন",
+    "en": "Office peon"
+   },
+   "woman": false
+  }
+ ]
+}

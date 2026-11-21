@@ -1,0 +1,798 @@
+{
+ "note": "Story chapters (§৬.২): five for each character, unlocked by days played, money earned, upgrades bought or the school fee. Pictures are drawn from the scene name until real art arrives.",
+ "cast": {
+  "rahim": {
+   "bn": "রহিম চাচা",
+   "en": "Rahim Chacha",
+   "colour": "C2185B"
+  },
+  "rokeya": {
+   "bn": "রোকেয়া",
+   "en": "Rokeya",
+   "colour": "6A1B9A"
+  },
+  "sumi": {
+   "bn": "সুমি",
+   "en": "Sumi",
+   "colour": "F6B800"
+  },
+  "monir": {
+   "bn": "মনির মামা",
+   "en": "Monir Mama",
+   "colour": "2E9E6B"
+  },
+  "babu": {
+   "bn": "বাবু",
+   "en": "Babu",
+   "colour": "2D8BD6"
+  },
+  "ostad": {
+   "bn": "ওস্তাদ",
+   "en": "Ostad",
+   "colour": "3E2A20"
+  },
+  "babu_ma": {
+   "bn": "বাবুর মা",
+   "en": "Babu's mother",
+   "colour": "8B1A3A"
+  },
+  "rafiq": {
+   "bn": "রফিক চাচা",
+   "en": "Rafiq Chacha",
+   "colour": "37474F"
+  },
+  "belal": {
+   "bn": "বেলাল ভাই",
+   "en": "Belal Bhai",
+   "colour": "0F7C8C"
+  },
+  "sultana": {
+   "bn": "সুলতানা খালা",
+   "en": "Sultana Khala",
+   "colour": "9E2A1E"
+  },
+  "haider": {
+   "bn": "হায়দার সাহেব",
+   "en": "Haider Saheb",
+   "colour": "6D6A64"
+  },
+  "joya": {
+   "bn": "জয়া",
+   "en": "Joya",
+   "colour": "E2432A"
+  },
+  "nasrin": {
+   "bn": "নাসরিন",
+   "en": "Nasrin",
+   "colour": "1C3E7B"
+  },
+  "rumana": {
+   "bn": "রুমানা আপা",
+   "en": "Rumana Apa",
+   "colour": "1F4F2F"
+  },
+  "kamal": {
+   "bn": "কামাল ভাই",
+   "en": "Kamal Bhai",
+   "colour": "2B2B2B"
+  }
+ },
+ "chapters": [
+  {
+   "id": "rahim_1",
+   "who": "rickshaw",
+   "n": 1,
+   "title": {
+    "bn": "শহরে প্রথম দিন",
+    "en": "First day in the city"
+   },
+   "unlock": {
+    "start": "rickshaw"
+   },
+   "panels": [
+    {
+     "scene": "home_dawn",
+     "lines": [
+      {
+       "by": "rahim",
+       "bn": "সুমির মা, আজ থেকে মিরপুরের রাস্তায় রিকশা চালাব।",
+       "en": "Sumi's mother, from today I pedal a rickshaw on the streets of Mirpur."
+      },
+      {
+       "by": "rokeya",
+       "bn": "সাবধানে চালাবেন। ঢাকার রাস্তা তো গ্রামের মতো না।",
+       "en": "Ride carefully. Dhaka's roads are nothing like the village."
+      },
+      {
+       "by": "sumi",
+       "bn": "আব্বা, আমি কিন্তু বড় স্কুলে পড়ব!",
+       "en": "Abba, I am going to study at the big school!"
+      }
+     ]
+    },
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "rahim",
+       "bn": "মেয়েটার স্কুলের জন্য তিন হাজার টাকা লাগবে। একটু একটু করে জমাব।",
+       "en": "Her school needs three thousand taka. I'll save it bit by bit."
+      },
+      {
+       "by": "monir",
+       "bn": "চাচা, নতুন নাকি? এক কাপ চা খেয়ে যান, প্রথম দিনেরটা আমার তরফ থেকে।",
+       "en": "New here, Chacha? Have a cup of tea. The first day's is on me."
+      },
+      {
+       "by": "rahim",
+       "bn": "আল্লাহ ভরসা। চলি তাহলে!",
+       "en": "In God's hands. Off I go!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rahim_2",
+   "who": "rickshaw",
+   "n": 2,
+   "title": {
+    "bn": "সুমির ভর্তির খবর",
+    "en": "News from Sumi's school"
+   },
+   "unlock": {
+    "days": [
+     "rickshaw",
+     3
+    ]
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, স্কুলের আপা বলেছেন, ভর্তি পরীক্ষায় আমি প্রথম হয়েছি!",
+       "en": "Abba, the teacher says I came first in the admission test!"
+      },
+      {
+       "by": "rahim",
+       "bn": "সত্যি? মাশাআল্লাহ!",
+       "en": "Really? Mashallah!"
+      },
+      {
+       "by": "rokeya",
+       "bn": "কিন্তু ভর্তির টাকা মাসের শেষেই দিতে হবে।",
+       "en": "But the admission fee is due at the end of the month."
+      }
+     ]
+    },
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "rahim",
+       "bn": "চিন্তা কোরো না। রোজ লক্ষ্যের বেশি যা আয় হবে, সব সুমির জন্য রাখব।",
+       "en": "Don't worry. Whatever I earn over each day's target goes to Sumi."
+      },
+      {
+       "by": "sumi",
+       "bn": "আমিও পড়াশোনায় একটুও ফাঁকি দেব না, আব্বা।",
+       "en": "And I won't slack at my studies one bit, Abba."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rahim_3",
+   "who": "rickshaw",
+   "n": 3,
+   "title": {
+    "bn": "বৃষ্টির রাতে",
+    "en": "A rainy night"
+   },
+   "unlock": {
+    "earned": [
+     "rickshaw",
+     3000
+    ]
+   },
+   "panels": [
+    {
+     "scene": "rain_night",
+     "lines": [
+      {
+       "by": "rahim",
+       "bn": "এত রাতে, এই বৃষ্টিতে রাস্তায় একটা মানুষও নেই…",
+       "en": "This late, in this rain, there isn't a soul on the road…"
+      },
+      {
+       "by": "nasrin",
+       "bn": "চাচা! আমার বাবার বুকে ব্যথা। হাসপাতালে নিয়ে যাবেন?",
+       "en": "Chacha! My father has chest pains. Will you take us to the hospital?"
+      },
+      {
+       "by": "rahim",
+       "bn": "উঠে পড়ুন, ভাড়ার কথা পরে।",
+       "en": "Get in. Never mind the fare."
+      }
+     ]
+    },
+    {
+     "scene": "hospital",
+     "lines": [
+      {
+       "by": "nasrin",
+       "bn": "আপনি না থাকলে কী যে হতো। এই নিন, ভাড়াটা…",
+       "en": "I don't know what we'd have done without you. Here, the fare…"
+      },
+      {
+       "by": "rahim",
+       "bn": "টাকা রাখুন, মা। আপনার বাবা সুস্থ হয়ে উঠুক, সেটাই আমার ভাড়া।",
+       "en": "Keep it, child. Your father getting well is all the fare I need."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rahim_4",
+   "who": "rickshaw",
+   "n": 4,
+   "title": {
+    "bn": "নতুন রিকশা",
+    "en": "A new rickshaw"
+   },
+   "unlock": {
+    "upgrade": [
+     "rickshaw",
+     "new_rickshaw"
+    ]
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "rahim",
+       "bn": "নতুন রিকশা! চাকাগুলো কেমন চকচক করছে দেখো।",
+       "en": "A new rickshaw! Look how the wheels shine."
+      },
+      {
+       "by": "sumi",
+       "bn": "আব্বা, হুডে আমার নাম লিখে দেবেন?",
+       "en": "Abba, will you paint my name on the hood?"
+      },
+      {
+       "by": "rahim",
+       "bn": "লিখব, মা। বড় বড় করে লিখব: 'সুমির রিকশা'।",
+       "en": "I will, love. In big letters: 'Sumi's Rickshaw'."
+      }
+     ]
+    },
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "চাচা, নতুন রিকশার মিষ্টি খাওয়াবেন না?",
+       "en": "Chacha, no sweets to celebrate the new rickshaw?"
+      },
+      {
+       "by": "rahim",
+       "bn": "আজ সবার চা আমার তরফ থেকে!",
+       "en": "Today everyone's tea is on me!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rahim_5",
+   "who": "rickshaw",
+   "n": 5,
+   "title": {
+    "bn": "সুমির ভর্তি",
+    "en": "Sumi starts school"
+   },
+   "unlock": {
+    "school_full": true
+   },
+   "panels": [
+    {
+     "scene": "school",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, এই দেখো আমার নতুন ইউনিফর্ম!",
+       "en": "Abba, look at my new uniform!"
+      },
+      {
+       "by": "rokeya",
+       "bn": "তোমার আব্বার ঘাম আর রিকশার চাকা মিলেই এই স্কুল।",
+       "en": "Your father's sweat and his rickshaw's wheels paid for this school."
+      }
+     ]
+    },
+    {
+     "scene": "school",
+     "lines": [
+      {
+       "by": "rumana",
+       "bn": "সুমি খুব মেধাবী, রহিম ভাই। ওকে আমরা দেখে রাখব।",
+       "en": "Sumi is very bright, Rahim Bhai. We will look after her."
+      },
+      {
+       "by": "rahim",
+       "bn": "আমি তো পড়াশোনা জানি না, আপা। মেয়েটা যেন আমার মতো না হয়।",
+       "en": "I never had schooling, Apa. Let her not end up like me."
+      },
+      {
+       "by": "rumana",
+       "bn": "আপনি একজন বাবা, রহিম ভাই। ওর কাছে সেটাই সবচেয়ে বড় শিক্ষা।",
+       "en": "You are her father, Rahim Bhai. That is the biggest lesson she'll ever have."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "monir_1",
+   "who": "tea",
+   "n": 1,
+   "title": {
+    "bn": "টং খোলা",
+    "en": "Opening the stall"
+   },
+   "unlock": {
+    "start": "tea"
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "বিশ বছর এই মোড়ে অন্যের দোকানে চা বানিয়েছি। আজ থেকে টংটা নিজের।",
+       "en": "Twenty years making tea on this corner for others. From today the stall is mine."
+      },
+      {
+       "by": "rafiq",
+       "bn": "মনির, আগে আমার পত্রিকার সাথে এক কাপ লিকার চা!",
+       "en": "Monir, first a black tea to go with my newspaper!"
+      },
+      {
+       "by": "monir",
+       "bn": "রফিক চাচা, আপনিই আমার প্রথম কাস্টমার, সবসময়ের মতো।",
+       "en": "Rafiq Chacha, you're my first customer, as always."
+      }
+     ]
+    },
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "কাপ, কেটলি, দুধ, চিনি। ক্রম ভুল হলেই সব নষ্ট। ধৈর্য রাখতে হবে।",
+       "en": "Cup, kettle, milk, sugar. Get the order wrong and it's ruined. Patience."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "monir_2",
+   "who": "tea",
+   "n": 2,
+   "title": {
+    "bn": "প্রথম নিয়মিত কাস্টমার",
+    "en": "The first regular"
+   },
+   "unlock": {
+    "days": [
+     "tea",
+     2
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "rahim",
+       "bn": "মামা, এক কাপ দুধ চা আর একটা বনরুটি।",
+       "en": "Mama, a milk tea and a bun."
+      },
+      {
+       "by": "monir",
+       "bn": "রোজ একই জিনিস! কাল থেকে আর বলতে হবে না।",
+       "en": "The same every day! From tomorrow you needn't even ask."
+      },
+      {
+       "by": "rahim",
+       "bn": "আপনার চা না খেলে প্যাডেলে জোর পাই না।",
+       "en": "Without your tea there's no strength in my pedals."
+      }
+     ]
+    },
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "নিয়মিত কাস্টমারই দোকানের আসল পুঁজি।",
+       "en": "Regulars are a stall's real capital."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "monir_3",
+   "who": "tea",
+   "n": 3,
+   "title": {
+    "bn": "দোকান বড় হচ্ছে",
+    "en": "The stall grows"
+   },
+   "unlock": {
+    "upgrade": [
+     "tea",
+     "bench"
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "নতুন বেঞ্চ! এবার আর কেউ দাঁড়িয়ে চা খাবে না।",
+       "en": "A new bench! Nobody has to drink their tea standing now."
+      },
+      {
+       "by": "belal",
+       "bn": "মনির, তোমার টং তো এখন মহল্লার আড্ডাখানা!",
+       "en": "Monir, your stall is the mohalla's meeting place now!"
+      },
+      {
+       "by": "monir",
+       "bn": "আড্ডাই তো চায়ের আসল স্বাদ, বেলাল ভাই।",
+       "en": "The chatter is what makes the tea, Belal Bhai."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "monir_4",
+   "who": "tea",
+   "n": 4,
+   "title": {
+    "bn": "বৃষ্টিতে পুরো মহল্লা",
+    "en": "The whole mohalla in the rain"
+   },
+   "unlock": {
+    "days": [
+     "tea",
+     5
+    ]
+   },
+   "panels": [
+    {
+     "scene": "rain_night",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "ঝুম বৃষ্টি! আজ আর কেউ আসবে না…",
+       "en": "Pouring rain! Nobody will come today…"
+      }
+     ]
+    },
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "sultana",
+       "bn": "মনির, বাসায় কারেন্ট নেই। তোমার এখানে একটু বসি?",
+       "en": "Monir, the power's out at home. Can I sit here a while?"
+      },
+      {
+       "by": "haider",
+       "bn": "আমার জন্য এক কাপ আদা চা। বৃষ্টিতে এর চেয়ে ভালো কিছু নেই।",
+       "en": "A ginger tea for me. Nothing better in the rain."
+      },
+      {
+       "by": "monir",
+       "bn": "বসুন সবাই। আজ কেটলি থামবে না।",
+       "en": "Sit down, everyone. The kettle won't stop tonight."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "monir_5",
+   "who": "tea",
+   "n": 5,
+   "title": {
+    "bn": "ছোট ক্যাফের স্বপ্ন",
+    "en": "Dreaming of a café"
+   },
+   "unlock": {
+    "upgrade": [
+     "tea",
+     "fridge"
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "ফ্রিজও হলো। এবার একটা ছোট ক্যাফে, টেবিল-চেয়ার, দেয়ালে ছবি…",
+       "en": "A fridge too. Next a little café: tables, chairs, pictures on the wall…"
+      },
+      {
+       "by": "joya",
+       "bn": "মামা, ক্যাফের নাম দিন 'মামার আড্ডা'!",
+       "en": "Mama, call it 'Mama's Adda'!"
+      },
+      {
+       "by": "monir",
+       "bn": "নামটা মন্দ না। স্বপ্ন দেখতে তো টাকা লাগে না, মা।",
+       "en": "Not a bad name. Dreaming costs nothing, child."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "babu_1",
+   "who": "bus",
+   "n": 1,
+   "title": {
+    "bn": "প্রথম রুট",
+    "en": "The first route"
+   },
+   "unlock": {
+    "start": "bus"
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "ostad",
+       "bn": "বাবু, আজ থেকে তুই মিরপুর-মতিঝিল লাইনের কন্ডাক্টর।",
+       "en": "Babu, from today you're conductor on the Mirpur–Motijheel line."
+      },
+      {
+       "by": "babu",
+       "bn": "ওস্তাদ, ভাংতির ব্যাগটা খুব ভারী লাগছে…",
+       "en": "Ostad, this change bag feels so heavy…"
+      },
+      {
+       "by": "ostad",
+       "bn": "ভাংতিই কন্ডাক্টরের জান। গুনে দিবি, গুনে নিবি।",
+       "en": "Change is a conductor's life. Count it out, count it in."
+      }
+     ]
+    },
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "মিরপুর দশ! কাজীপাড়া! ফার্মগেট! উঠে পড়েন, উঠে পড়েন!",
+       "en": "Mirpur Ten! Kazipara! Farmgate! Hop on, hop on!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "babu_2",
+   "who": "bus",
+   "n": 2,
+   "title": {
+    "bn": "ওস্তাদের সাথে ঝগড়া",
+    "en": "A row with Ostad"
+   },
+   "unlock": {
+    "days": [
+     "bus",
+     2
+    ]
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "ostad",
+       "bn": "এত আস্তে ডাকলে যাত্রী উঠবে? জোরে ডাক!",
+       "en": "Call that softly and who'll get on? Shout!"
+      },
+      {
+       "by": "babu",
+       "bn": "ওস্তাদ, আপনি তো স্টপে না থেমেই টান দেন!",
+       "en": "Ostad, you pull away before the bus has even stopped!"
+      }
+     ]
+    },
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "ostad",
+       "bn": "ঠিক আছে, রাগ করিস না। দুজনে মিলেই তো বাসটা চলে।",
+       "en": "All right, don't sulk. It takes the two of us to run this bus."
+      },
+      {
+       "by": "babu",
+       "bn": "তাহলে মনির মামার দোকানে চা খাওয়ান!",
+       "en": "Then buy me a tea at Monir Mama's!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "babu_3",
+   "who": "bus",
+   "n": 3,
+   "title": {
+    "bn": "হারানো মানিব্যাগ",
+    "en": "The lost wallet"
+   },
+   "unlock": {
+    "days": [
+     "bus",
+     4
+    ]
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "পেছনের সিটে একটা মানিব্যাগ! ভেতরে অনেক টাকা…",
+       "en": "A wallet on the back seat! Lots of money in it…"
+      },
+      {
+       "by": "ostad",
+       "bn": "নাম-ঠিকানা কিছু আছে?",
+       "en": "Any name or address?"
+      },
+      {
+       "by": "babu",
+       "bn": "অফিসের কার্ড… কামাল হোসেন, মতিঝিল।",
+       "en": "An office card… Kamal Hossain, Motijheel."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "বাবু কী করবেন?",
+     "en": "What will Babu do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "কামাল ভাইকে ফিরিয়ে দিন",
+       "en": "Return it to Kamal Bhai"
+      },
+      "effects": {
+       "taka": 200,
+       "npc": [
+        "kamal",
+        3
+       ]
+      },
+      "lines": [
+       {
+        "by": "kamal",
+        "bn": "বাবু, তুমি আমার পুরো মাসের বেতন ফিরিয়ে দিলে! এই নাও, মিষ্টি খেয়ো।",
+        "en": "Babu, you've given me back a whole month's pay! Here, buy yourself some sweets."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "টাকাটা রেখে দিন",
+       "en": "Keep the money"
+      },
+      "effects": {
+       "taka": 500,
+       "npc": [
+        "kamal",
+        -3
+       ]
+      },
+      "lines": [
+       {
+        "by": "babu",
+        "bn": "টাকাটা পকেটে, কিন্তু মনটা কেমন ভারী লাগছে…",
+        "en": "The money's in my pocket, but my heart feels heavy…"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "babu_4",
+   "who": "bus",
+   "n": 4,
+   "title": {
+    "bn": "বাড়িতে টাকা পাঠানো",
+    "en": "Money for home"
+   },
+   "unlock": {
+    "earned": [
+     "bus",
+     2000
+    ]
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "মা, বিকাশে দুই হাজার টাকা পাঠালাম। ছোট ভাইয়ের বইগুলো কিনে দিও।",
+       "en": "Ma, I've sent two thousand by bKash. Buy my little brother his books."
+      },
+      {
+       "by": "babu_ma",
+       "bn": "বাবা, তুই ঠিকমতো খাস তো?",
+       "en": "Son, are you eating properly?"
+      },
+      {
+       "by": "babu",
+       "bn": "খাই মা। মনির মামার চা আর বনরুটি, রোজ!",
+       "en": "I am, Ma. Monir Mama's tea and a bun, every day!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "babu_5",
+   "who": "bus",
+   "n": 5,
+   "title": {
+    "bn": "নিজের বাসের স্বপ্ন",
+    "en": "A bus of his own"
+   },
+   "unlock": {
+    "days": [
+     "bus",
+     8
+    ]
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "ওস্তাদ, একদিন আমার নিজের বাস হবে। নাম দেব 'প্রাণের ঢাকা পরিবহন'!",
+       "en": "Ostad, one day I'll have my own bus. I'll call it 'Praner Dhaka Transport'!"
+      },
+      {
+       "by": "ostad",
+       "bn": "স্বপ্ন দেখ, বাবু। তবে ভাংতি গুনতে ভুলিস না।",
+       "en": "Dream away, Babu. Just don't forget to count the change."
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

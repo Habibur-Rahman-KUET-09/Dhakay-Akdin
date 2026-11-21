@@ -1,11 +1,14 @@
 ## What carries over from one day to the next (§৫, §৯.৪): Rahim Chacha's
 ## savings and his daughter's school fee, the mohalla's community fund and
 ## its projects, mohalla XP and level, upgrades bought, and a record of the
-## last days. Saved to user://save.json after every day, written to a new
+## last days; the stars (তারা) earned, the story read, how the named
+## neighbours feel, today's character and challenge, and the run of days
+## played (§৬, §৭). Saved to user://save.json after every day, written to a new
 ## file first and then moved over the old one, so a crash cannot spoil it.
 extends RefCounted
 
 const Balance = preload("res://scripts/rules/balance.gd")
+const Daily = preload("res://scripts/rules/daily.gd")
 
 const SCHEMA := 1
 const DEFAULT_PATH := "user://save.json"
@@ -21,6 +24,8 @@ const UPGRADE_LISTS := {"rickshaw": ["rickshaw", UPGRADES], "tea": ["tea_stall",
 var b: Balance
 var path := DEFAULT_PATH
 var data: Dictionary
+## The date to count as today ("YYYY-MM-DD"); "" for the phone's date.
+var today := ""
 
 
 func _init(balance: Balance, save_path := DEFAULT_PATH) -> void:
@@ -42,6 +47,14 @@ static func fresh() -> Dictionary:
 		"tea": {"days": 0, "bestDay": 0, "served": 0, "happy": 0, "earned": 0, "upgrades": []},
 		"bus": {"days": 0, "bestDay": 0, "riders": 0, "earned": 0, "upgrades": []},
 		"history": [],
+		"tara": 0,
+		"story": {"seen": []},
+		"npcs": {},
+		"log": [],
+		"daily": {"date": "", "featured": false, "challenge": false},
+		"streak": {"count": 0, "last": "", "best": 0},
+		"early": [],
+		"cosmetics": [],
 	}
 
 
@@ -86,9 +99,48 @@ func xp() -> int:
 	return int(data.mohalla.xp)
 
 
-## Unlocked at this mohalla level? (tea stall 2, bus 4…)
+## Unlocked at this mohalla level (tea stall 2, bus 4…), or early with stars?
 func unlocked(what: String) -> bool:
-	return level() >= int(b.n("unlocks." + what))
+	return level() >= int(b.n("unlocks." + what)) or (data.early as Array).has(what)
+
+
+## The characters that can be played: "rickshaw", "tea", "bus".
+func open_characters() -> Array:
+	var out := ["rickshaw"]
+	if unlocked("tea_stall"):
+		out.append("tea")
+	if unlocked("bus"):
+		out.append("bus")
+	return out
+
+
+## Opens a character before its level for 30 stars.
+func unlock_early(what: String) -> bool:
+	var cost := int(b.n("unlocks.early_unlock_tara"))
+	if unlocked(what) or int(data.tara) < cost:
+		return false
+	data.tara = int(data.tara) - cost
+	data.early.append(what)
+	return true
+
+
+func date() -> String:
+	return today if today != "" else Daily.today()
+
+
+## Today's state, started afresh on a new date.
+func daily() -> Dictionary:
+	if data.daily.get("date", "") != date():
+		data.daily = {"date": date(), "featured": false, "challenge": false}
+	return data.daily
+
+
+func featured() -> String:
+	return Daily.featured(date(), open_characters())
+
+
+func challenge() -> Dictionary:
+	return Daily.challenge(date(), open_characters())
 
 
 # --- Rahim Chacha's rickshaw ----------------------------------------------------
@@ -152,11 +204,13 @@ func fund_goal() -> int:
 ## Takes a day's result ({earned, trips, stars, fines, teas}) into the save and
 ## says what changed, for the end-of-day screen.
 func apply_day(result: Dictionary) -> Dictionary:
-	var earned: int = maxi(0, int(result.earned))
+	var out := {}
+	var earned := _featured("rickshaw", maxi(0, int(result.earned)), out)
 	var trips := int(result.trips)
 	var stars := float(result.stars)
 	var target := int(b.n("rickshaw.daily_target"))
-	var out := {"earned": earned, "met": earned >= target}
+	out.earned = earned
+	out.met = earned >= target
 	# A tenth to the mohalla's fund, the rest is Rahim Chacha's; whatever
 	# is over the day's target is put by for his daughter's school fee.
 	var fund_cut := _to_fund(earned, out)
@@ -178,6 +232,7 @@ func apply_day(result: Dictionary) -> Dictionary:
 	out.best = earned > int(data.rickshaw.bestDay) and earned > 0
 	if out.best:
 		data.rickshaw.bestDay = earned
+	_day_done("rickshaw", result, out)
 	_remember({"day": data.day, "who": "rickshaw", "earned": earned, "trips": trips, "stars": snappedf(stars, 0.1), "met": out.met})
 	out.day = data.day
 	return out
@@ -186,9 +241,10 @@ func apply_day(result: Dictionary) -> Dictionary:
 ## Takes a day at Monir Mama's tea stall ({earned, served, happy, lost,
 ## stars}) into the save: a tenth to the fund, the rest to the savings.
 func apply_tea_day(result: Dictionary) -> Dictionary:
-	var earned: int = maxi(0, int(result.earned))
+	var out := {}
+	var earned := _featured("tea", maxi(0, int(result.earned)), out)
 	var stars := float(result.stars)
-	var out := {"earned": earned}
+	out.earned = earned
 	var fund_cut := _to_fund(earned, out)
 	data.taka = int(data.taka) + earned - fund_cut
 	out.kept = earned - fund_cut
@@ -202,6 +258,7 @@ func apply_tea_day(result: Dictionary) -> Dictionary:
 	out.best = earned > int(tea.bestDay) and earned > 0
 	if out.best:
 		tea.bestDay = earned
+	_day_done("tea", result, out)
 	_remember({"day": data.day, "who": "tea", "earned": earned, "served": int(result.served), "stars": snappedf(stars, 0.1), "met": true})
 	out.day = data.day
 	return out
@@ -210,9 +267,10 @@ func apply_tea_day(result: Dictionary) -> Dictionary:
 ## Takes a day on Babu's bus ({earned, riders, stars}) into the save: a
 ## tenth to the fund, the rest to the savings.
 func apply_bus_day(result: Dictionary) -> Dictionary:
-	var earned: int = maxi(0, int(result.earned))
+	var out := {}
+	var earned := _featured("bus", maxi(0, int(result.earned)), out)
 	var stars := float(result.stars)
-	var out := {"earned": earned}
+	out.earned = earned
 	var fund_cut := _to_fund(earned, out)
 	data.taka = int(data.taka) + earned - fund_cut
 	out.kept = earned - fund_cut
@@ -225,6 +283,7 @@ func apply_bus_day(result: Dictionary) -> Dictionary:
 	out.best = earned > int(bus.bestDay) and earned > 0
 	if out.best:
 		bus.bestDay = earned
+	_day_done("bus", result, out)
 	_remember({"day": data.day, "who": "bus", "earned": earned, "riders": int(result.riders), "stars": snappedf(stars, 0.1), "met": true})
 	out.day = data.day
 	return out
@@ -252,6 +311,10 @@ func _gain_xp(stars: float, worked: bool, out: Dictionary) -> void:
 	if not worked:
 		gain = int(b.n("economy.xp_base") / 2)
 	out.xp = gain
+	_add_xp(gain, out)
+
+
+func _add_xp(gain: int, out: Dictionary) -> void:
 	var lvl := level()
 	var total := xp() + gain
 	var max_level := int(b.n("economy.max_level"))
@@ -267,3 +330,93 @@ func _remember(entry: Dictionary) -> void:
 	data.history.push_front(entry)
 	while data.history.size() > HISTORY:
 		data.history.pop_back()
+
+
+# --- Today's character, the challenge, the run of days (§৭) -----------------
+
+
+## Doubles the day's money on the first day played as today's character.
+func _featured(who: String, earned: int, out: Dictionary) -> int:
+	out.featured = false
+	var today_state := daily()
+	if not today_state.featured and featured() == who:
+		today_state.featured = true
+		out.featured = true
+		return earned * int(b.n("economy.featured_multiplier"))
+	return earned
+
+
+## After any day: the run of days played (stars for it, a special hood on
+## the seventh), the challenge (stars if met), the neighbours.
+func _day_done(who: String, result: Dictionary, out: Dictionary) -> void:
+	var today_state := daily()
+	var streak: Dictionary = data.streak
+	out.streak_stars = 0
+	out.streak_gift = ""
+	if streak.last != date():
+		streak.count = int(streak.count) + 1 if streak.last == Daily.yesterday(date()) else 1
+		streak.last = date()
+		streak.best = maxi(int(streak.best), int(streak.count))
+		var rewards: Array = b.at("tara.streak")
+		var step := (int(streak.count) - 1) % (rewards.size() + 1)
+		if step < rewards.size():
+			out.streak_stars = int(rewards[step])
+			data.tara = int(data.tara) + out.streak_stars
+		elif not (data.cosmetics as Array).has("festive_hood"):
+			# The seventh day: a festive hood for Rahim Chacha's rickshaw.
+			data.cosmetics.append("festive_hood")
+			out.streak_gift = "festive_hood"
+		else:
+			out.streak_stars = int(rewards.back())
+			data.tara = int(data.tara) + out.streak_stars
+	out.streak = int(streak.count)
+	out.challenge = false
+	var c := challenge()
+	if not today_state.challenge and Daily.met(c, who, result.get("stats", {})):
+		today_state.challenge = true
+		data.tara = int(data.tara) + int(b.n("tara.daily_challenge"))
+		out.challenge = true
+	apply_npcs(result.get("npcs", []), who)
+
+
+# --- The story (§৬.২) ---------------------------------------------------------
+
+
+func seen(chapter_id: String) -> bool:
+	return (data.story.seen as Array).has(chapter_id)
+
+
+## A chapter read to the end: XP and stars, and what a choice in it did
+## ({taka, npc: [id, change]}).
+func finish_chapter(chapter_id: String, effects := {}) -> Dictionary:
+	var out := {"xp": 0, "tara": 0}
+	if seen(chapter_id):
+		return out
+	data.story.seen.append(chapter_id)
+	out.xp = int(b.n("economy.xp_chapter_bonus"))
+	_add_xp(out.xp, out)
+	out.tara = int(b.n("tara.chapter"))
+	data.tara = int(data.tara) + out.tara
+	if effects.has("taka"):
+		data.taka = int(data.taka) + int(effects.taka)
+	if effects.has("npc"):
+		apply_npcs([{"id": effects.npc[0], "delta": int(effects.npc[1]), "what": "story"}], "story")
+	return out
+
+
+# --- The neighbours (§৬.১) ----------------------------------------------------
+
+
+## How someone feels about the mohalla, −5 to 5.
+func relation(id: String) -> int:
+	return int(data.npcs.get(id, 0))
+
+
+## Takes what happened with neighbours today ([{id, delta, what}]) into
+## their feelings and the mohalla's notebook (the last 30).
+func apply_npcs(entries: Array, who: String) -> void:
+	for e in entries:
+		data.npcs[e.id] = clampi(relation(e.id) + int(e.delta), -5, 5)
+		data.log.push_front({"day": int(data.day), "who": who, "id": e.id, "delta": int(e.delta), "what": e.what})
+	while data.log.size() > 30:
+		data.log.pop_back()

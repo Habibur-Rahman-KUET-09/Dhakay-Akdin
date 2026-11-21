@@ -76,6 +76,13 @@ var rain_seconds := 60.0
 var hot := false
 var weather := RandomNumberGenerator.new()
 var _weights := {}
+## Things sold by kind (for the day's challenge).
+var sold_items := {}
+## The named neighbours who may stop by today (set by the scene), how they
+## feel (id -> -5..5), and what happened with them: [{id, delta, what}].
+var npc_pool: Array = []
+var relations := {}
+var npc_log: Array = []
 var _next_in := 2.0
 var _next_id := 0
 
@@ -181,6 +188,8 @@ func update(dt: float) -> Array:
 		if c.left <= 0.0:
 			customers.erase(c)
 			lost += 1
+			if c.get("npc", "") != "":
+				npc_log.append({"id": c.npc, "delta": -1, "what": "waited"})
 			events.append(Event.LEFT)
 	_next_in -= dt
 	if _next_in <= 0.0:
@@ -236,9 +245,12 @@ func _arrive(regular := "") -> bool:
 	for it in items:
 		bill += price(it)
 	_next_id += 1
+	var npc := ""
+	if regular == "" and not npc_pool.is_empty() and rng.randf() < 0.2:
+		npc = npc_pool.pop_back()
 	customers.append({
 		"id": _next_id, "seat": seat, "kind": kind, "items": items.duplicate(), "ordered": items,
-		"patience": patience, "left": patience, "bill": bill,
+		"patience": patience, "left": patience, "bill": bill, "npc": npc,
 	})
 	return true
 
@@ -344,6 +356,7 @@ func give() -> Array:
 	who.items.erase(item)
 	money += price(item)
 	sold += 1
+	sold_items[item] = int(sold_items.get(item, 0)) + 1
 	var events := [Event.GAVE]
 	if who.items.is_empty():
 		customers.erase(who)
@@ -356,7 +369,16 @@ func give() -> Array:
 			tip = maxi(1, roundi(who.bill * b.n("tea_stall.happy_tip_share")))
 			money += tip
 			tips += tip
-		last_served = {"kind": who.kind, "bill": who.bill, "tip": tip, "happy": glad}
+		# A neighbour who thinks well of the stall leaves a bit more.
+		var npc: String = who.get("npc", "")
+		var thanks := npc != "" and int(relations.get(npc, 0)) >= 3
+		if thanks:
+			tip += 20
+			money += 20
+			tips += 20
+		if npc != "" and glad:
+			npc_log.append({"id": npc, "delta": 1, "what": "served"})
+		last_served = {"kind": who.kind, "bill": who.bill, "tip": tip, "happy": glad, "npc": npc, "thanks": thanks}
 		events.append(Event.SERVED)
 	return events
 

@@ -18,6 +18,8 @@ const Traffic = preload("res://scripts/world/traffic.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
 const Reveal = preload("res://scripts/world/reveal.gd")
+const Neighbours = preload("res://scripts/rules/neighbours.gd")
+const DayLines = preload("res://scripts/ui/day_lines.gd")
 const Weather = preload("res://scripts/world/weather.gd")
 
 ## Where the bench and its four seats are, in the stall's own space
@@ -35,6 +37,7 @@ const STEP_COLOURS := {
 }
 
 var strings := Strings.new()
+var neighbours := Neighbours.new()
 var b: Balance
 var day: TeaDay
 var progress: Progress
@@ -74,6 +77,10 @@ func _ready() -> void:
 	b = Balance.new()
 	progress = Progress.new(b)
 	day = TeaDay.new(b, -1, progress.data.tea.upgrades)
+	var ids := neighbours.ids()
+	ids.shuffle()
+	day.npc_pool = ids.slice(0, 6)
+	day.relations = progress.data.npcs
 	set_process(false)
 	var loading := _loading_screen()
 	await _step("map")
@@ -468,6 +475,8 @@ func _handle(events: Array) -> void:
 			_say(_rahim_line(), Look.MAGENTA, 5.0)
 		elif last.kind == "babu":
 			_say(strings.t("babuLine", {"level": int(b.n("unlocks.bus"))}), Look.SKY, 5.0)
+		elif last.get("thanks", false):
+			_say(strings.t("npcThanks", {"name": neighbours.name_of(last.npc, strings.lang)}), Look.PARROT, 3.0)
 		elif last.happy:
 			_say(strings.t("servedHappy", {"bill": last.bill, "tip": last.tip}), Look.PARROT)
 		else:
@@ -543,7 +552,7 @@ func _refresh() -> void:
 		if c.kind == "rahim":
 			rahim_here = true
 		card.visible = true
-		_card_titles[i].text = strings.t("kind_" + c.kind)
+		_card_titles[i].text = strings.t("kind_" + c.kind) if c.get("npc", "") == "" else neighbours.name_of(c.npc, strings.lang)
 		var names := PackedStringArray()
 		for it in c.items:
 			names.append(strings.t("item_" + it))
@@ -657,7 +666,8 @@ func _end_day() -> void:
 	set_process(false)
 	_rain_sound.stop()
 	_drops.emitting = false
-	var result := {"earned": day.money, "served": day.served, "happy": day.happy, "lost": day.lost, "stars": day.stars()}
+	var stats := {"happy": day.happy, "none_lost": 1 if day.lost == 0 and day.served >= 10 else 0, "milk_tea": int(day.sold_items.get("milk_tea", 0))}
+	var result := {"earned": day.money, "served": day.served, "happy": day.happy, "lost": day.lost, "stars": day.stars(), "stats": stats, "npcs": day.npc_log}
 	var got := progress.apply_tea_day(result)
 	progress.save()
 	CrashWatch.stop()
@@ -671,6 +681,7 @@ func _end_day() -> void:
 	if day.tips > 0:
 		lines.append(strings.t("teaTips", {"n": day.tips}))
 	lines.append(strings.t("teaRating", {"stars": "%.1f" % day.stars()}))
+	lines.append_array(DayLines.lines(got, strings))
 	lines.append(strings.t("teaKept", {"n": got.kept}))
 	lines.append(strings.t("gainFund", {"n": got.fund}))
 	lines.append(strings.t("gainXp", {"n": got.xp}))

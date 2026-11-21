@@ -978,5 +978,189 @@
  "owned_loud_voice": {
   "bn": "কেনা আছে: জোরালো গলা",
   "en": "Owned: a loud voice"
+ },
+ "npcThanks": {
+  "bn": "{name}: \"আপনাদের ব্যবহার সবসময় ভালো!\" +২০ টাকা",
+  "en": "{name}: \"You're always so good to me!\" +Tk 20"
+ },
+ "featuredDone": {
+  "bn": "আজকের চরিত্র: আয় দ্বিগুণ!",
+  "en": "Today's character: double money!"
+ },
+ "challengeDone": {
+  "bn": "আজকের চ্যালেঞ্জ পূরণ! +৩ তারা",
+  "en": "Today's challenge met! +3 stars"
+ },
+ "streakStars": {
+  "bn": "টানা {n} দিন খেলছেন: +{stars} তারা",
+  "en": "{n} days running: +{stars} stars"
+ },
+ "streakGift": {
+  "bn": "টানা ৭ দিন! রহিম চাচার রিকশায় উৎসবের হুড",
+  "en": "7 days running! A festive hood for Rahim Chacha's rickshaw"
+ },
+ "starsAndStreak": {
+  "bn": "তারা: {stars} · টানা {n} দিন",
+  "en": "Stars: {stars} · {n} days running"
+ },
+ "todayTitle": {
+  "bn": "আজকের দিন",
+  "en": "Today"
+ },
+ "featuredToday": {
+  "bn": "আজকের চরিত্র: {name} (প্রথম দিনে আয় দ্বিগুণ)",
+  "en": "Today's character: {name} (double money on the first day)"
+ },
+ "featuredUsed": {
+  "bn": "আজকের চরিত্র: {name} (দ্বিগুণ আয় নেওয়া হয়েছে)",
+  "en": "Today's character: {name} (double money taken)"
+ },
+ "challengeLine": {
+  "bn": "চ্যালেঞ্জ ({name}): {what} · +৩ তারা",
+  "en": "Challenge ({name}): {what} · +3 stars"
+ },
+ "challengeMet": {
+  "bn": "পূরণ হয়েছে!",
+  "en": "done!"
+ },
+ "ch_r_good": {
+  "bn": "{goal} জন যাত্রীকে ৪ তারা বা বেশি সার্ভিস দিন",
+  "en": "Give {goal} passengers a ride worth 4 stars or more"
+ },
+ "ch_r_clean": {
+  "bn": "কোনো জরিমানা ছাড়া অন্তত ৩টা ট্রিপ",
+  "en": "At least 3 trips without a fine"
+ },
+ "ch_r_money": {
+  "bn": "এক দিনে {goal} টাকা আয়",
+  "en": "Earn {goal} taka in a day"
+ },
+ "ch_t_happy": {
+  "bn": "{goal} জন কাস্টমারকে খুশি করে বিদায়",
+  "en": "Send {goal} customers away happy"
+ },
+ "ch_t_none_lost": {
+  "bn": "অন্তত ১০ জন, কেউ যেন রেগে না যায়",
+  "en": "At least 10 served, none leaving angry"
+ },
+ "ch_t_milk": {
+  "bn": "{goal} কাপ দুধ চা বিক্রি",
+  "en": "Sell {goal} milk teas"
+ },
+ "ch_b_no_slip": {
+  "bn": "অন্তত ২০ যাত্রী, কেউ যেন ভাড়া না দিয়ে না নামে",
+  "en": "At least 20 riders, nobody slipping off unpaid"
+ },
+ "ch_b_on_time": {
+  "bn": "দুই ট্রিপই সময়মতো",
+  "en": "Both trips on time"
+ },
+ "ch_b_riders": {
+  "bn": "এক দিনে {goal} জন যাত্রী",
+  "en": "{goal} passengers in a day"
+ },
+ "newChapter": {
+  "bn": "নতুন অধ্যায় এসেছে!",
+  "en": "A new chapter!"
+ },
+ "storyChapter": {
+  "bn": "অধ্যায় {n}: {title}",
+  "en": "Chapter {n}: {title}"
+ },
+ "readChapter": {
+  "bn": "পড়ুন",
+  "en": "Read"
+ },
+ "storyBook": {
+  "bn": "গল্প ({n}/{all})",
+  "en": "Story ({n}/{all})"
+ },
+ "storyTitle": {
+  "bn": "গল্পের খাতা",
+  "en": "The story so far"
+ },
+ "chapterLocked": {
+  "bn": "অধ্যায় {n}: এখনো খোলেনি",
+  "en": "Chapter {n}: not yet open"
+ },
+ "readAgain": {
+  "bn": "আবার পড়ুন",
+  "en": "Read again"
+ },
+ "storySkip": {
+  "bn": "এড়িয়ে যান",
+  "en": "Skip"
+ },
+ "storyTap": {
+  "bn": "পরের লাইনের জন্য ট্যাপ করুন",
+  "en": "Tap for the next line"
+ },
+ "storyChoice": {
+  "bn": "আপনার সিদ্ধান্ত",
+  "en": "Your choice"
+ },
+ "notebook": {
+  "bn": "মহল্লার খাতা",
+  "en": "Mohalla notebook"
+ },
+ "notebookHelp": {
+  "bn": "প্রতিবেশীরা মনে রাখেন কে কেমন ব্যবহার করল। যাঁরা খুশি, তাঁরা বখশিশ বেশি দেন।",
+  "en": "The neighbours remember how they were treated. Those who are pleased tip more."
+ },
+ "notMet": {
+  "bn": "দেখা হয়নি",
+  "en": "not met"
+ },
+ "mood": {
+  "bn": "মন {n}",
+  "en": "mood {n}"
+ },
+ "lately": {
+  "bn": "সম্প্রতি",
+  "en": "Lately"
+ },
+ "logLine": {
+  "bn": "{name}: {what} ({n})",
+  "en": "{name}: {what} ({n})"
+ },
+ "log_good_ride": {
+  "bn": "আরামের রিকশা যাত্রা",
+  "en": "a comfortable rickshaw ride"
+ },
+ "log_bad_ride": {
+  "bn": "দেরির রিকশা যাত্রা",
+  "en": "a slow rickshaw ride"
+ },
+ "log_haggled": {
+  "bn": "দরদামে মনোমালিন্য",
+  "en": "a falling-out over the fare"
+ },
+ "log_waited": {
+  "bn": "চায়ের জন্য বসে থেকে চলে গেলেন",
+  "en": "gave up waiting for tea"
+ },
+ "log_served": {
+  "bn": "খুশি মনে চা খেলেন",
+  "en": "enjoyed a quick cup of tea"
+ },
+ "log_student_fare": {
+  "bn": "বাসে ছাত্র ভাড়া",
+  "en": "a student fare on the bus"
+ },
+ "log_short_change": {
+  "bn": "বাসে ভাংতি নিয়ে তর্ক",
+  "en": "an argument over change on the bus"
+ },
+ "log_story": {
+  "bn": "গল্পে বাবুর সিদ্ধান্ত",
+  "en": "Babu's choice in the story"
+ },
+ "unlockEarly": {
+  "bn": "{n} তারায় খুলুন",
+  "en": "Open for {n} stars"
+ },
+ "close": {
+  "bn": "বন্ধ",
+  "en": "Close"
  }
 }

@@ -3,6 +3,7 @@ extends "res://tests/check.gd"
 
 const Progress = preload("res://scripts/rules/progress.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
+const Daily = preload("res://scripts/rules/daily.gd")
 
 const PATH := "user://test_save.json"
 
@@ -10,7 +11,12 @@ const PATH := "user://test_save.json"
 func _fresh() -> Progress:
 	if FileAccess.file_exists(PATH):
 		DirAccess.remove_absolute(PATH)
-	return Progress.new(Balance.new(), PATH)
+	var p := Progress.new(Balance.new(), PATH)
+	# A fixed date, with today's double money already used, so the numbers
+	# below are the plain ones.
+	p.today = "2026-11-02"
+	p.daily().featured = true
+	return p
 
 
 func test_a_good_day_is_shared_out() -> void:
@@ -132,3 +138,87 @@ func test_bus_upgrades() -> void:
 	p.data.taka = 1000
 	check(p.buy("notebook", "bus"), "bought")
 	eq(p.next_upgrade("bus"), "change_bag", "then the bag")
+
+
+
+# --- Week 10: today's character, challenge, streak, story, neighbours ---------
+
+
+func test_todays_character_doubles_the_first_day() -> void:
+	var p := _fresh()
+	p.data.daily = {"date": "", "featured": false, "challenge": false}
+	eq(p.featured(), "rickshaw", "only the rickshaw open: it is today's")
+	var got := p.apply_day({"earned": 300, "trips": 3, "stars": 4.0, "fines": 0})
+	check(got.featured, "today's character")
+	eq(got.earned, 600, "double money")
+	got = p.apply_day({"earned": 300, "trips": 3, "stars": 4.0, "fines": 0})
+	eq(got.earned, 300, "only the first day")
+
+
+func test_streak_and_its_stars() -> void:
+	var p := _fresh()
+	var stars := []
+	for d in ["2026-11-02", "2026-11-03", "2026-11-04"]:
+		p.today = d
+		p.daily().featured = true
+		stars.append(p.apply_day({"earned": 100, "trips": 1, "stars": 3.0, "fines": 0}).streak_stars)
+	eq(stars, [5, 5, 10], "stars for days one, two, three")
+	eq(p.data.streak.count, 3, "three days running")
+	p.today = "2026-11-06"
+	p.daily().featured = true
+	p.apply_day({"earned": 100, "trips": 1, "stars": 3.0, "fines": 0})
+	eq(p.data.streak.count, 1, "a day missed: start again")
+	eq(p.data.streak.best, 3, "the best run kept")
+
+
+func test_seventh_day_brings_the_festive_hood() -> void:
+	var p := _fresh()
+	for i in 7:
+		p.today = Time.get_date_string_from_unix_time(Daily.day_number("2026-11-02") * 86400 + i * 86400)
+		p.daily().featured = true
+		p.apply_day({"earned": 100, "trips": 1, "stars": 3.0, "fines": 0})
+	check(p.data.cosmetics.has("festive_hood"), "a festive hood on the seventh day")
+	eq(p.data.tara, 5 + 5 + 10 + 10 + 10 + 15, "stars on the six days before")
+
+
+func test_challenge_met_gives_stars() -> void:
+	var p := _fresh()
+	var c := p.challenge()
+	eq(c.who, "rickshaw", "a rickshaw challenge while only the rickshaw is open")
+	var before := int(p.data.tara)
+	var stats := {c.stat: c.goal}
+	var got := p.apply_day({"earned": 100, "trips": 1, "stars": 3.0, "fines": 0, "stats": stats})
+	check(got.challenge, "met")
+	eq(int(p.data.tara) - before, 3 + got.streak_stars, "3 stars for it")
+	check(not p.apply_day({"earned": 100, "trips": 1, "stars": 3.0, "fines": 0, "stats": stats}).challenge, "once a day")
+
+
+func test_early_unlock_with_stars() -> void:
+	var p := _fresh()
+	check(not p.unlocked("bus"), "the bus is for level 4")
+	check(not p.unlock_early("bus"), "no stars yet")
+	p.data.tara = 35
+	check(p.unlock_early("bus"), "30 stars")
+	check(p.unlocked("bus") and p.open_characters().has("bus"), "open now")
+	eq(p.data.tara, 5, "paid")
+
+
+func test_a_chapter_read() -> void:
+	var p := _fresh()
+	var got := p.finish_chapter("babu_3", {"taka": 200, "npc": ["kamal", 3]})
+	eq(got.xp, 100, "100 XP")
+	eq(got.tara, 5, "5 stars")
+	check(p.seen("babu_3"), "marked read")
+	eq(p.data.taka, 200, "the choice's money")
+	eq(p.relation("kamal"), 3, "Kamal Bhai remembers")
+	eq(p.finish_chapter("babu_3").xp, 0, "only once")
+
+
+func test_neighbours_remember() -> void:
+	var p := _fresh()
+	p.apply_tea_day({"earned": 100, "served": 5, "happy": 5, "lost": 0, "stars": 5.0,
+		"npcs": [{"id": "rafiq", "delta": 1, "what": "served"}, {"id": "rafiq", "delta": 1, "what": "served"}]})
+	eq(p.relation("rafiq"), 2, "Rafiq Chacha likes the stall")
+	eq(p.data.log[0].who, "tea", "noted in the mohalla's notebook")
+	p.apply_npcs([{"id": "rafiq", "delta": -9, "what": "left"}], "tea")
+	eq(p.relation("rafiq"), -5, "no lower than -5")

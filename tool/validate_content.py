@@ -85,7 +85,9 @@ def content_texts():
 
         def walk(v, where):
             if isinstance(v, dict):
-                if set(v) == {'bn', 'en'}:
+                # A text in both languages: {bn, en}, maybe with more keys
+                # beside (a story line's speaker, a person's role).
+                if 'bn' in v and 'en' in v and isinstance(v['bn'], (str, list)):
                     if isinstance(v['bn'], str) and isinstance(v['en'], str) \
                             and set(re.findall(r'\{(\w+)\}', v['bn'])) != set(re.findall(r'\{(\w+)\}', v['en'])):
                         err(rel, f'{where}: placeholders differ between bn and en')
@@ -94,6 +96,9 @@ def content_texts():
                         if not all(isinstance(t, str) and t.strip() for t in texts):
                             err(rel, f'{where}: {lang} text missing')
                         out.extend((f'{rel} {where}.{lang}', t) for t in texts if isinstance(t, str))
+                    for k, x in v.items():
+                        if k not in ('bn', 'en'):
+                            walk(x, f'{where}.{k}')
                     return
                 for k, x in v.items():
                     walk(x, f'{where}.{k}')
