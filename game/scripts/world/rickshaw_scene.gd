@@ -110,14 +110,17 @@ func _ready() -> void:
 
 ## The bell, a few horn players placed on passing traffic, the road's hum.
 func _sounds() -> void:
+	print("[sounds] bell")
 	_bell = AudioStreamPlayer.new()
 	_bell.stream = Sounds.bell()
 	add_child(_bell)
+	print("[sounds] hum")
 	var hum := AudioStreamPlayer.new()
 	hum.stream = Sounds.street_hum()
 	hum.volume_db = -10.0
-	hum.autoplay = true
 	add_child(hum)
+	hum.play()
+	print("[sounds] horns")
 	_horn_sounds = {
 		"cng": Sounds.horn(560.0, 700.0, 0.35),
 		"bus": Sounds.horn(290.0, 370.0, 0.9),
@@ -178,6 +181,7 @@ func _loading_screen() -> CanvasLayer:
 
 ## Lets a frame pass and notes the next step in the log.
 func _step(what: String) -> void:
+	CrashWatch.start("rickshaw: " + what)
 	print("[rickshaw] ", what, " ", Time.get_ticks_msec(), " ms, ", int(OS.get_static_memory_usage() / 1048576), " MB")
 	await get_tree().process_frame
 

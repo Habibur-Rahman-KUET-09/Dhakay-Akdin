@@ -5,6 +5,9 @@ config_version=5
 
 [application]
 
+; Write each log line at once, so a crash on a phone does not lose the end.
+run/flush_stdout_on_print=true
+
 config/name="Dhakar Ekdin"
 config/version="0.2.0"
 run/main_scene="res://scenes/main.tscn"
