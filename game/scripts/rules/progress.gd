@@ -14,6 +14,9 @@ const PROJECTS := ["street_lights", "drain_cleaning", "bus_shelter"]
 const UPGRADES := ["new_rickshaw", "battery_rickshaw"]
 ## The stall grows in this order (§৪.৩); the move to a shop comes with the story.
 const TEA_UPGRADES := ["bench", "second_kettle", "awning", "fridge"]
+const BUS_UPGRADES := ["notebook", "change_bag", "loud_voice"]
+## Each character's upgrades, and where their prices are in the balance.
+const UPGRADE_LISTS := {"rickshaw": ["rickshaw", UPGRADES], "tea": ["tea_stall", TEA_UPGRADES], "bus": ["bus", BUS_UPGRADES]}
 
 var b: Balance
 var path := DEFAULT_PATH
@@ -91,22 +94,23 @@ func unlocked(what: String) -> bool:
 # --- Rahim Chacha's rickshaw ----------------------------------------------------
 
 
-## Upgrades for Rahim Chacha's rickshaw ("rickshaw", the default) or
-## Monir Mama's stall ("tea"), bought from the shared savings.
+## Upgrades for Rahim Chacha's rickshaw ("rickshaw", the default), Monir
+## Mama's stall ("tea") or Babu's bus ("bus"), bought from the shared
+## savings.
 func has_upgrade(id: String, who := "rickshaw") -> bool:
 	return data[who].upgrades.has(id)
 
 
 ## The next upgrade on sale; "" when all are bought.
 func next_upgrade(who := "rickshaw") -> String:
-	for id in (TEA_UPGRADES if who == "tea" else UPGRADES):
+	for id in UPGRADE_LISTS[who][1]:
 		if not has_upgrade(id, who):
 			return id
 	return ""
 
 
 func price(id: String, who := "rickshaw") -> int:
-	return int(b.n("%s.upgrades.%s.cost" % ["tea_stall" if who == "tea" else "rickshaw", id]))
+	return int(b.n("%s.upgrades.%s.cost" % [UPGRADE_LISTS[who][0], id]))
 
 
 func buy(id: String, who := "rickshaw") -> bool:

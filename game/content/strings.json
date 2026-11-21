@@ -890,5 +890,93 @@
  "busHistoryLine": {
   "bn": "দিন {day}: বাস · {money} টাকা · {riders} জন",
   "en": "Day {day}: bus · Tk {money} · {riders} riders"
+ },
+ "seatElder": {
+  "bn": "বয়স্কদের আসন",
+  "en": "Elderly seats"
+ },
+ "seatWomen": {
+  "bn": "মহিলা আসন",
+  "en": "Women's seats"
+ },
+ "fix_elder": {
+  "bn": "মুরুব্বি দাঁড়িয়ে! সিট ছাড়ান",
+  "en": "An elder is standing! Free his seat"
+ },
+ "fix_women": {
+  "bn": "মহিলা আসনে পুরুষ! উঠিয়ে দিন",
+  "en": "A man in a women's seat! Move him"
+ },
+ "fixed_elder": {
+  "bn": "মুরুব্বিকে বসালেন",
+  "en": "The elder has a seat"
+ },
+ "fixed_women": {
+  "bn": "মহিলা যাত্রী বসলেন",
+  "en": "She has her seat"
+ },
+ "crowded": {
+  "bn": "ভিড়! যাত্রীরা বিরক্ত হচ্ছেন",
+  "en": "Crowded! Passengers are getting cross"
+ },
+ "atDoor": {
+  "bn": "একজন ভাড়া না দিয়ে নামছে!",
+  "en": "Someone is slipping out without paying!"
+ },
+ "catchDoor": {
+  "bn": "ধরুন! ভাড়া না দিয়ে নামছে",
+  "en": "Catch them! Not paid"
+ },
+ "caught": {
+  "bn": "ধরলেন! ভাড়া আদায় হলো",
+  "en": "Caught! Fare paid"
+ },
+ "checkerFine": {
+  "bn": "চেকার উঠলেন! ভাড়া না নেওয়ায় জরিমানা {n} টাকা",
+  "en": "The checker! Fines for fares not taken: Tk {n}"
+ },
+ "checkerClean": {
+  "bn": "চেকার উঠলেন, সবার ভাড়া নেওয়া আছে। সাবাস!",
+  "en": "The checker: every fare taken. Well done!"
+ },
+ "tripBack": {
+  "bn": "ট্রিপ শেষ! এবার ফেরার পথে, {stop} পর্যন্ত",
+  "en": "Trip done! Now back to {stop}"
+ },
+ "busDayOver": {
+  "bn": "দুই ট্রিপ শেষ!",
+  "en": "Both trips done!"
+ },
+ "busCaught": {
+  "bn": "দরজায় ধরেছেন {n} জনকে",
+  "en": "Caught at the door: {n}"
+ },
+ "busFines": {
+  "bn": "চেকারের জরিমানা: {n} টাকা",
+  "en": "Checker's fines: Tk {n}"
+ },
+ "buy_notebook": {
+  "bn": "হিসাবের খাতা · {n} টাকা (কেউ ভাড়া লুকাতে পারবে না)",
+  "en": "Notebook · Tk {n} (no one hides from the fare)"
+ },
+ "buy_change_bag": {
+  "bn": "বড় ভাংতির ব্যাগ · {n} টাকা (শুরুতে ৪০০ টাকা ভাংতি)",
+  "en": "Bigger change bag · Tk {n} (400 in change to start)"
+ },
+ "buy_loud_voice": {
+  "bn": "জোরালো গলা · {n} টাকা (ডাক সহজে নিখুঁত)",
+  "en": "Loud voice · Tk {n} (perfect calls come easier)"
+ },
+ "owned_notebook": {
+  "bn": "কেনা আছে: হিসাবের খাতা",
+  "en": "Owned: a notebook"
+ },
+ "owned_change_bag": {
+  "bn": "কেনা আছে: বড় ভাংতির ব্যাগ",
+  "en": "Owned: a bigger change bag"
+ },
+ "owned_loud_voice": {
+  "bn": "কেনা আছে: জোরালো গলা",
+  "en": "Owned: a loud voice"
  }
 }

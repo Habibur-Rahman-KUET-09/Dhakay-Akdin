@@ -11,7 +11,8 @@ func _bus(seed_value := 1) -> BusDay:
 
 ## A rider waiting to pay `fare` with `note`.
 func _rider(t: BusDay, fare: int, note: int, kind := "normal") -> int:
-	t.riders.append({"id": 900, "from": 0, "to": 5, "fare": fare, "kind": kind, "note": note, "paid": false, "owed": 0})
+	t.riders.append({"id": 900, "from": 0, "to": 5, "fare": fare, "kind": kind, "note": note, "paid": false, "owed": 0,
+		"woman": false, "evader": false, "seat": 23})
 	return 900
 
 
@@ -119,12 +120,17 @@ func test_a_whole_trip() -> void:
 	var t := _bus(4)
 	var got := []
 	var i := 0
-	while not t.over and i < 20000:
+	while not t.over and i < 40000:
 		var e := t.update(0.05)
 		got.append_array(e)
 		if e.has(BusDay.Event.CALL_OPEN):
 			t.call_t = 0.5 / 1.3
 			t.call_stop()
+		# Catch anyone slipping out, and put seat problems right.
+		while not t.at_door.is_empty():
+			t.catch()
+		for problem in t.problems():
+			t.fix(problem)
 		# Take every fare, with the right change when there is some.
 		for r in t.unpaid():
 			t.ask(r.id)
@@ -136,9 +142,124 @@ func test_a_whole_trip() -> void:
 			else:
 				t.later()
 		i += 1
-	check(t.over and got.has(BusDay.Event.TRIP_OVER), "reached Motijheel")
-	eq(t.stop_i, 8, "the last stop")
+	check(t.over and got.has(BusDay.Event.DAY_OVER), "the day is done")
+	eq(got.count(BusDay.Event.TRIP_OVER), 2, "two trips")
+	eq(t.stop_id(t.stop_i), "mirpur10", "back at Mirpur 10")
 	check(t.boarded > 15, "many got on (%d)" % t.boarded)
 	eq(t.slipped, 0, "nobody slipped off: every fare was taken")
 	check(t.earned() > 200, "a good day's fares (%d)" % t.earned())
 	check(t.riders.is_empty(), "everyone off")
+
+
+# --- Week 9: seats, crowding, slipping out, the checker, two trips, upgrades
+
+
+## A rider for seat tests.
+func _person(t: BusDay, id: int, kind: String, woman: bool, seat: int) -> Dictionary:
+	var r := {"id": id, "from": 0, "to": 8, "fare": 35, "kind": kind, "note": 50, "paid": true, "owed": 0,
+		"woman": woman, "evader": false, "seat": seat}
+	t.riders.append(r)
+	return r
+
+
+func test_an_elder_standing_while_his_seat_is_taken() -> void:
+	var t := _bus()
+	t.riders.clear()
+	var young := _person(t, 1, "normal", false, BusDay.ELDER_SEATS[0])
+	_person(t, 2, "normal", false, BusDay.ELDER_SEATS[1])
+	var old := _person(t, 3, "elder", false, BusDay.SEATS)
+	eq(t.problems(), ["elder"], "an elder stands while others have the elder seats")
+	t.update(10.0)
+	check(t.rating < 5.0, "the passengers grumble")
+	eq(t.fix("elder"), [BusDay.Event.SEATED], "Babu moves the young man")
+	check(BusDay.ELDER_SEATS.has(old.seat), "the elder sits")
+	eq(young.seat, BusDay.SEATS, "the young man stands")
+	eq(t.problems(), [], "all right now")
+
+
+func test_a_man_in_a_womens_seat() -> void:
+	var t := _bus()
+	t.riders.clear()
+	_person(t, 1, "normal", false, BusDay.WOMEN_SEATS[0])
+	var woman := _person(t, 2, "normal", true, BusDay.SEATS + 1)
+	eq(t.problems(), ["women"], "a woman stands while a man has her seat")
+	t.fix("women")
+	eq(woman.seat, BusDay.WOMEN_SEATS[0], "she sits")
+
+
+func test_seats_are_given_out_sensibly() -> void:
+	var t := _bus()
+	t.riders.clear()
+	var elder := {"kind": "elder", "woman": false}
+	check(BusDay.ELDER_SEATS.has(t._place_for(elder)), "an elder to the elder seats")
+	var woman := {"kind": "normal", "woman": true}
+	check(BusDay.WOMEN_SEATS.has(t._place_for(woman)), "a woman to the women's seats")
+	var man := {"kind": "normal", "woman": false}
+	var seat := t._place_for(man)
+	check(not BusDay.WOMEN_SEATS.has(seat) and not BusDay.ELDER_SEATS.has(seat), "a man to an ordinary seat")
+
+
+func test_crowding_costs_rating() -> void:
+	var t := _bus()
+	t.riders.clear()
+	for i in 32:
+		_person(t, 100 + i, "normal", false, i if i < 24 else -1)
+	t.update(10.0)
+	check(t.rating < 5.0, "over 30 aboard: grumbling")
+
+
+func test_slipping_out_at_the_door() -> void:
+	var t := _bus()
+	t.riders.clear()
+	t.riders.append({"id": 1, "from": 0, "to": 1, "fare": 10, "kind": "normal", "note": 20, "paid": false, "owed": 0,
+		"woman": false, "evader": true, "seat": 5})
+	eq(t.unpaid(), [], "keeps out of Babu's way")
+	t.at_stop = false
+	t.travel_left = 0.01
+	t.called = true
+	var got := t.update(0.05)
+	check(got.has(BusDay.Event.AT_DOOR), "makes for the door")
+	var before := t.bag_value()
+	check(t.catch().has(BusDay.Event.CAUGHT), "caught")
+	eq(t.bag_value(), before + 10, "paid 10")
+	# And one who gets away.
+	var u := _bus()
+	u.riders.clear()
+	u.riders.append({"id": 1, "from": 0, "to": 1, "fare": 10, "kind": "normal", "note": 20, "paid": false, "owed": 0,
+		"woman": false, "evader": true, "seat": 5})
+	u.at_stop = false
+	u.travel_left = 0.01
+	u.called = true
+	u.update(0.05)
+	for i in 60:
+		u.update(0.05)
+	eq(u.slipped, 1, "got away")
+
+
+func test_the_notebook_shows_who_has_not_paid() -> void:
+	var t := BusDay.new(Balance.new(), 1, ["notebook"])
+	t.riders.clear()
+	t.riders.append({"id": 1, "from": 0, "to": 3, "fare": 15, "kind": "normal", "note": 20, "paid": false, "owed": 0,
+		"woman": false, "evader": true, "seat": 5})
+	eq(t.unpaid().size(), 1, "noted down: can be asked")
+
+
+func test_the_checker_fines_fares_not_taken() -> void:
+	var t := _bus()
+	t.riders.clear()
+	_person(t, 1, "normal", false, 8).paid = false
+	_person(t, 2, "normal", false, 9)
+	t.checker_at = 1
+	t.at_stop = false
+	t.travel_left = 0.01
+	t.called = true
+	var got := t.update(0.05)
+	check(got.has(BusDay.Event.CHECKER), "the checker gets on")
+	eq(t.last_fine, 20, "20 for the one who has not paid")
+	eq(t.earned(), -20, "out of the day's money")
+
+
+func test_upgrades_bag_and_voice() -> void:
+	var t := BusDay.new(Balance.new(), 1, ["change_bag", "loud_voice"])
+	eq(t.bag_value(), 400, "a bigger bag: 400 of change")
+	near(t.perfect_zone(), 0.12, "a louder voice: a wider perfect call", 1e-6)

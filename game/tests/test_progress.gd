@@ -123,3 +123,12 @@ func test_a_day_on_the_bus() -> void:
 	eq(p.data.taka, 450, "the rest saved")
 	eq(p.data.bus.riders, 30, "riders counted")
 	eq(p.data.history[0].who, "bus", "the record says whose day it was")
+
+
+func test_bus_upgrades() -> void:
+	var p := _fresh()
+	eq(p.next_upgrade("bus"), "notebook", "a notebook first")
+	eq(p.price("change_bag", "bus"), 1800, "the bigger bag: 1800")
+	p.data.taka = 1000
+	check(p.buy("notebook", "bus"), "bought")
+	eq(p.next_upgrade("bus"), "change_bag", "then the bag")

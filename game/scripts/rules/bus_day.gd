@@ -1,13 +1,19 @@
-## Babu's trip on a local bus (§৪.২), Mirpur 10 to Motijheel through nine
-## stops. Before each stop he calls its name: tap while the moving marker
-## is in the middle of the bar for two more passengers, near it for one.
-## Everyone who gets on owes a fare (10 taka, 5 more a stop, 35 at most)
-## and pays with a note; Babu gives change from his bag, note by note.
-## Short change starts an argument; too much is his own money gone. With
-## no change in the bag he can owe it till their stop, or ask round for
-## change (time). Students offer half. A passenger whose fare was never
-## asked gets off without paying. On time at the end: a bonus. No drawing
-## here, so it can be tested.
+## Babu's day on a local bus (§৪.২): Mirpur 10 to Motijheel through nine
+## stops, and back again in the afternoon. Before each stop he calls its
+## name: tap while the moving marker is in the middle of the bar for two
+## more passengers, near it for one. Everyone who gets on owes a fare (10
+## taka, 5 more a stop, 35 at most) and pays with a note; Babu gives change
+## from his bag, note by note. Short change starts an argument; too much
+## is his own money gone. With no change he can owe it till their stop, or
+## ask round for change (time). Students offer half.
+## Seats: two at the front for the elderly, four for women; when one of
+## them stands while someone else has their seat, Babu has to move that
+## someone, or the passengers grumble (and over 30 aboard, the crowding
+## does too). A few try to slip off at their stop without paying: catch
+## them at the door. A ticket checker gets on now and then: everyone not
+## yet asked for their fare costs a fine. On time at the end of a trip: a
+## bonus. Upgrades: a notebook (no one can hide from the fare), a bigger
+## change bag, a louder voice. No drawing here, so it can be tested.
 extends RefCounted
 
 const Balance = preload("res://scripts/rules/balance.gd")
@@ -18,7 +24,7 @@ enum Event {
 	ARRIVED, ## at a stop (stop_i)
 	BOARDED, ## someone got on
 	ALIGHTED, ## someone got off
-	SLIPPED, ## someone got off without having been asked to pay
+	SLIPPED, ## someone got off without paying
 	OWED_PAID, ## change owed was given at their stop
 	OWED_SHORT, ## change owed could not be given: they went off angry
 	DEPARTED, ## the bus pulls away
@@ -26,24 +32,42 @@ enum Event {
 	ARGUMENT, ## short change: an argument
 	OVERPAID, ## too much change: Babu's loss
 	SWAPPED, ## change got from the other passengers
-	TRIP_OVER,
+	AT_DOOR, ## someone is slipping out without paying: catch them
+	CAUGHT, ## caught at the door: paid
+	CHECKER, ## the ticket checker got on (last_fine: what it cost)
+	SEATED, ## a seat problem put right
+	TRIP_OVER, ## the end of a trip (trip: which)
+	DAY_OVER,
 }
 
 ## Notes in use, smallest first.
 const NOTES := [5, 10, 20, 50, 100, 500]
 ## What a note is broken into when Babu asks round for change.
 const BREAK := {500: [100, 100, 100, 100, 50, 20, 20, 10], 100: [50, 20, 20, 10], 50: [20, 20, 10], 20: [10, 5, 5]}
+## Seat numbers (models.gd bus_seats: front row first, left to right):
+## the elderly's and the women's; seats run 0–23, standing places 24–33.
+const ELDER_SEATS := [0, 1]
+const WOMEN_SEATS := [2, 3, 6, 7]
+const SEATS := 24
+const STANDING := 10
+## How long someone slipping out waits at the door.
+const DOOR_S := 2.5
 
 var b: Balance
 var rng := RandomNumberGenerator.new()
 var route: Array = []
-## The last stop reached (0 at the start, standing at Mirpur 10).
+var upgrades: Array = []
+## Which trip of the day (1, 2), and how many there are.
+var trip := 1
+var trips := 2
+## The last stop reached (0 at the start of a trip).
 var stop_i := 0
 var at_stop := true
 var travel_left := 0.0
 var dwell_left := 0.0
 var clock := 0.0
-## The time the trip should take, for the bonus.
+var trip_clock := 0.0
+## The time a trip should take, for the bonus.
 var target_time := 0.0
 var over := false
 ## Calling the next stop: open in the last seconds before it.
@@ -52,40 +76,63 @@ var called := false
 var call_t := 0.0
 var last_call := ""
 var extra_boarders := 0
-## On the bus: {id, from, to, fare, kind ("normal" | "student"), note,
-## paid, owed}.
+## On the bus: {id, from, to, fare, kind ("normal" | "student" |
+## "elder"), woman, evader, note, paid, owed, seat}.
 var riders: Array = []
 ## The one whose fare is being taken, or {}.
 var asking := {}
 ## The fare agreed with them (half for a student if Babu agrees).
 var asking_fare := 0
+## Slipping out at this stop: [{rider, left}].
+var at_door: Array = []
+## The stop on this trip where the checker gets on, or -1.
+var checker_at := -1
+var last_fine := 0
 ## The change bag: note -> count.
 var bag := {}
 var bag_start := 0
 var rating := 5.0
 var boarded := 0
 var slipped := 0
+var caught := 0
 var arguments := 0
 var overpaid := 0
+var fines := 0
 var bonus := 0
-## Seconds an argument holds everything up.
+## Seconds an argument (or asking round) holds everything up.
 var locked_left := 0.0
 var _next_id := 0
 
 
-func _init(balance: Balance, seed_value := -1) -> void:
+func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
 	b = balance
+	upgrades = owned
 	if seed_value >= 0:
 		rng.seed = seed_value
 	else:
 		rng.randomize()
-	route = b.at("bus.route")
-	# The change bag: small notes worth start_change (200: 4×5, 5×10, 4×20, 1×50).
-	bag = {5: 4, 10: 5, 20: 4, 50: 1, 100: 0, 500: 0}
+	route = (b.at("bus.route") as Array).duplicate()
+	trips = int(b.n("bus.trips_per_day"))
+	# The change bag: small notes worth 200 (4×5, 5×10, 4×20, 1×50); twice
+	# that with the bigger bag.
+	var k := 2 if has("change_bag") else 1
+	bag = {5: 4 * k, 10: 5 * k, 20: 4 * k, 50: 1 * k, 100: 0, 500: 0}
 	bag_start = bag_value()
 	var between: Array = b.at("bus.seconds_between_stops")
 	var per_stop := (float(between[0]) + float(between[1])) / 2.0 + b.n("bus.dwell_s") + 4.0 * b.n("bus.dwell_per_person_s")
 	target_time = (per_stop + 1.0) * (route.size() - 1) + 6.0
+	_start_trip()
+
+
+func has(upgrade: String) -> bool:
+	return upgrades.has(upgrade)
+
+
+func _start_trip() -> void:
+	stop_i = 0
+	at_stop = true
+	trip_clock = 0.0
+	checker_at = rng.randi_range(2, route.size() - 2) if rng.randf() < 0.5 else -1
 	_board_at(0, rng.randi_range(2, 4))
 	dwell_left = b.n("bus.dwell_s") + 1.0
 
@@ -101,9 +148,9 @@ func bag_value() -> int:
 	return total
 
 
-## What the trip has made: the bag's growth, and the bonus.
+## What the day has made: the bag's growth, bonuses, less fines.
 func earned() -> int:
-	return bag_value() - bag_start + bonus
+	return bag_value() - bag_start + bonus - fines
 
 
 ## Fare from stop a to stop b.
@@ -118,8 +165,15 @@ func marker() -> float:
 	return x if x <= 1.0 else 2.0 - x
 
 
+## The middle of the bar that makes a perfect call (wider with a loud voice).
+func perfect_zone() -> float:
+	return b.n("bus.perfect_zone") * (b.n("bus.upgrades.loud_voice.perfect_zone") if has("loud_voice") else 1.0)
+
+
+## Riders whose fare is still to take. Those meaning to slip out keep
+## out of Babu's way, unless he keeps a notebook.
 func unpaid() -> Array:
-	return riders.filter(func(r): return not r.paid)
+	return riders.filter(func(r): return not r.paid and (not r.evader or has("notebook")))
 
 
 func update(dt: float) -> Array:
@@ -127,14 +181,24 @@ func update(dt: float) -> Array:
 		return []
 	var events := []
 	clock += dt
+	trip_clock += dt
+	_grumble(dt)
 	if locked_left > 0.0:
 		locked_left -= dt
 		return events
 	if at_stop:
+		for d in at_door.duplicate():
+			d.left -= dt
+			if d.left <= 0.0:
+				at_door.erase(d)
+				riders.erase(d.rider)
+				slipped += 1
+				events.append(Event.SLIPPED)
+				events.append(Event.ALIGHTED)
 		dwell_left -= dt
-		if dwell_left <= 0.0:
+		if dwell_left <= 0.0 and at_door.is_empty():
 			if stop_i >= route.size() - 1:
-				_finish(events)
+				_end_trip(events)
 				return events
 			at_stop = false
 			var between: Array = b.at("bus.seconds_between_stops")
@@ -157,6 +221,18 @@ func update(dt: float) -> Array:
 	return events
 
 
+## The passengers grumble while an old man or a woman stands with their
+## seat taken, and while the bus is packed.
+func _grumble(dt: float) -> void:
+	var drain := 0.0
+	if not problems().is_empty():
+		drain += 0.03 * problems().size()
+	if riders.size() > int(b.n("bus.crowded_above")):
+		drain += 0.02
+	if drain > 0.0:
+		rating = clampf(rating - drain * dt, 1.0, 5.0)
+
+
 ## Babu calls the stop: how close the marker is to the middle decides how
 ## many more people get on.
 func call_stop() -> Array:
@@ -165,7 +241,7 @@ func call_stop() -> Array:
 	call_open = false
 	called = true
 	var off := absf(marker() - 0.5)
-	if off <= b.n("bus.perfect_zone"):
+	if off <= perfect_zone():
 		last_call = "perfect"
 		extra_boarders = int(b.n("bus.call_perfect_extra"))
 	elif off <= b.n("bus.good_zone"):
@@ -184,14 +260,19 @@ func _arrive(events: Array) -> void:
 		last_call = "miss"
 	events.append(Event.ARRIVED)
 	var moved := 0
-	# Off: those for this stop. Unasked, they slip off without paying.
+	# Off: those for this stop. Unasked, they slip off without paying;
+	# those who meant to make for the door, and can be caught there.
 	for r in riders.duplicate():
 		if r.to != stop_i:
 			continue
-		riders.erase(r)
-		moved += 1
 		if asking.get("id", -1) == r.id:
 			asking = {}
+		if not r.paid and r.evader:
+			at_door.append({"rider": r, "left": DOOR_S})
+			events.append(Event.AT_DOOR)
+			continue
+		riders.erase(r)
+		moved += 1
 		if not r.paid:
 			slipped += 1
 			events.append(Event.SLIPPED)
@@ -206,33 +287,136 @@ func _arrive(events: Array) -> void:
 		events.append(Event.ALIGHTED)
 	rating = clampf(rating, 1.0, 5.0)
 	# On: more at the big stops, and more for a good call. Not at the end.
+	var before := _next_id
 	if stop_i < route.size() - 1:
 		var range_of: Array = b.at("bus.boarders")
 		var n := rng.randi_range(int(range_of[0]), int(range_of[1]))
 		if (b.at("bus.busy_stops") as Array).has(stop_id(stop_i)):
 			n += 2
 		n += extra_boarders
-		n = mini(n, int(b.n("bus.seats")) + int(b.n("bus.standing")) - riders.size())
+		n = mini(n, SEATS + STANDING - riders.size())
 		moved += _board_at(stop_i, n)
 		for i in n:
 			events.append(Event.BOARDED)
+	# The checker: a fine for everyone on before this stop who has not paid.
+	if stop_i == checker_at:
+		var due := 0
+		for r in riders:
+			if not r.paid and r.id <= before:
+				due += int(b.n("bus.checker_fine"))
+		last_fine = due
+		fines += due
+		events.append(Event.CHECKER)
 	dwell_left = b.n("bus.dwell_s") + moved * b.n("bus.dwell_per_person_s")
 
 
-## n people get on at stop i, each for a later stop.
+## n people get on at stop i, each for a later stop, and find a place.
 func _board_at(i: int, n: int) -> int:
 	for k in n:
 		_next_id += 1
 		var to := rng.randi_range(i + 1, route.size() - 1)
 		var f := fare(i, to)
-		var kind := "student" if rng.randf() < b.n("bus.student_chance") else "normal"
-		riders.append({
+		var roll := rng.randf()
+		var kind := "normal"
+		if roll < b.n("bus.student_chance"):
+			kind = "student"
+		elif roll < b.n("bus.student_chance") + 0.12:
+			kind = "elder"
+		var r := {
 			"id": _next_id, "from": i, "to": to, "fare": f, "kind": kind,
-			"note": _note_for(f if kind == "normal" else int(f * b.n("bus.student_share"))),
-			"paid": false, "owed": 0,
-		})
+			"woman": rng.randf() < 0.35, "evader": rng.randf() < b.n("bus.evader_chance"),
+			"note": _note_for(f if kind != "student" else int(f * b.n("bus.student_share"))),
+			"paid": false, "owed": 0, "seat": -1,
+		}
+		r.seat = _place_for(r)
+		riders.append(r)
 		boarded += 1
 	return n
+
+
+func _taken() -> Dictionary:
+	var out := {}
+	for r in riders:
+		if r.seat >= 0:
+			out[r.seat] = r
+	return out
+
+
+## Where someone gets on to: the elderly to their seats, women to theirs,
+## then any ordinary seat; a man takes a special seat only when nothing
+## else is free; otherwise standing.
+func _place_for(r: Dictionary) -> int:
+	var taken := _taken()
+	var order := []
+	if r.kind == "elder":
+		order = ELDER_SEATS.duplicate()
+	if r.woman:
+		order += WOMEN_SEATS
+	for s in SEATS:
+		if not ELDER_SEATS.has(s) and not WOMEN_SEATS.has(s):
+			order.append(s)
+	if not r.woman and r.kind != "elder":
+		order += WOMEN_SEATS + ELDER_SEATS
+	for s in order:
+		if not taken.has(s):
+			return s
+	for s in range(SEATS, SEATS + STANDING):
+		if not taken.has(s):
+			return s
+	return -1
+
+
+## Seat problems now: "elder" (an elderly passenger standing while
+## someone else sits in an elder seat), "women" (a woman standing while a
+## man sits in a women's seat).
+func problems() -> Array:
+	var out := []
+	var standing := riders.filter(func(r): return r.seat >= SEATS or r.seat < 0)
+	if standing.any(func(r): return r.kind == "elder") \
+			and riders.any(func(r): return ELDER_SEATS.has(r.seat) and r.kind != "elder"):
+		out.append("elder")
+	if standing.any(func(r): return r.woman) \
+			and riders.any(func(r): return WOMEN_SEATS.has(r.seat) and not r.woman):
+		out.append("women")
+	return out
+
+
+## Babu moves whoever has the wrong seat to stand, and gives it to the
+## one who should have it.
+func fix(problem: String) -> Array:
+	var seats: Array = ELDER_SEATS if problem == "elder" else WOMEN_SEATS
+	var wrong: Dictionary = {}
+	var right: Dictionary = {}
+	for r in riders:
+		var belongs: bool = r.kind == "elder" if problem == "elder" else r.woman
+		if seats.has(r.seat) and not belongs and wrong.is_empty():
+			wrong = r
+		elif (r.seat >= SEATS or r.seat < 0) and belongs and right.is_empty():
+			right = r
+	if wrong.is_empty() or right.is_empty():
+		return []
+	var seat: int = wrong.seat
+	wrong.seat = right.seat
+	right.seat = seat
+	rating = clampf(rating + 0.1, 1.0, 5.0)
+	return [Event.SEATED]
+
+
+## Catches the one slipping out at the door: they pay the fare, exactly.
+func catch() -> Array:
+	if at_door.is_empty():
+		return []
+	var d: Dictionary = at_door.pop_front()
+	var r: Dictionary = d.rider
+	riders.erase(r)
+	var left := int(r.fare)
+	for note in [20, 10, 5]:
+		while left >= note:
+			bag[note] = int(bag.get(note, 0)) + 1
+			left -= note
+	caught += 1
+	rating = clampf(rating + 0.1, 1.0, 5.0)
+	return [Event.CAUGHT, Event.ALIGHTED]
 
 
 ## What someone pays with: the exact fare sometimes, mostly the next note
@@ -369,9 +553,18 @@ func _collect() -> void:
 	asking = {}
 
 
-func _finish(events: Array) -> void:
-	over = true
-	if clock <= target_time:
-		bonus = int(b.n("bus.on_time_bonus"))
+## The end of a trip: a bonus if on time; then the way back, or home.
+func _end_trip(events: Array) -> void:
+	if trip_clock <= target_time:
+		bonus += int(b.n("bus.on_time_bonus"))
 	riders.clear()
+	at_door.clear()
+	asking = {}
 	events.append(Event.TRIP_OVER)
+	if trip < trips:
+		trip += 1
+		route.reverse()
+		_start_trip()
+	else:
+		over = true
+		events.append(Event.DAY_OVER)

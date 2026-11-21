@@ -1,7 +1,9 @@
 ## Babu's local bus (§৪.২), from inside: the camera stands at the back
 ## looking up the aisle, past the seats, to the windscreen and the street
-## going by. Mirpur 10 to Motijheel. Before each stop, call it; take every
-## fare and give the right change from the bag (bus_day.gd has the rules).
+## going by. Mirpur 10 to Motijheel and back. Before each stop, call it;
+## take every fare and give the right change from the bag; see the elderly
+## and women to their seats; catch whoever slips out at the door
+## (bus_day.gd has the rules).
 extends Node3D
 
 const BusDay = preload("res://scripts/rules/bus_day.gd")
@@ -36,10 +38,8 @@ var _stop_sign: Node3D
 var _stop_label: Label3D
 var _speed := 0.0
 var _distance := 0.0
-## People on the bus by rider id: their mesh; and where each seat or
-## standing place is taken.
+## People on the bus by rider id: their mesh.
 var _people := {}
-var _seat_of := {}
 var _seats: Array[Vector2] = []
 var _standing: Array[Vector2] = []
 var _sitter_mesh: ArrayMesh
@@ -70,13 +70,21 @@ var _giving := {}
 var _thump: AudioStreamPlayer
 var _ding: AudioStreamPlayer
 var _frames_logged := 0
+## Where each rider is drawn: their seat number, so a move is noticed.
+var _spot_of := {}
+var _problem_row: HBoxContainer
+var _problem_buttons := {}
+var _crowd_label: Label
+var _door_button: Button
+var _checker: MeshInstance3D
+var _checker_left := 0.0
 
 
 func _ready() -> void:
 	strings.lang = Strings.saved_lang()
 	b = Balance.new()
 	progress = Progress.new(b)
-	bus = BusDay.new(b)
+	bus = BusDay.new(b, -1, progress.data.bus.upgrades)
 	set_process(false)
 	var loading := _loading_screen()
 	await _step("environment")
@@ -90,6 +98,28 @@ func _ready() -> void:
 	add_child(inside)
 	_seats = Models.bus_seats()
 	_standing = Models.bus_standing()
+	# Signs over the front windows: the elder seats (left), the women's (right).
+	for sign_at in [[Vector3(-1.1, 2.0, -1.6), "seatElder"], [Vector3(1.1, 2.0, -1.4), "seatWomen"]]:
+		var board := Label3D.new()
+		board.text = strings.t(sign_at[1])
+		board.font = Look.font(Look.BOLD)
+		board.font_size = 40
+		board.outline_size = 8
+		board.modulate = Color.WHITE
+		board.outline_modulate = Color("1C4E9B")
+		board.pixel_size = 0.005
+		board.alpha_cut = Label3D.ALPHA_CUT_DISCARD
+		board.position = sign_at[0]
+		add_child(board)
+	# The ticket checker, by the door when he gets on.
+	_checker = MeshInstance3D.new()
+	_checker.mesh = Models.person()
+	var checker_paint := Models.traffic_material(PackedColorArray([Color("F2F2F2"), Color("1A1A1A")]), false)
+	checker_paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
+	_checker.material_override = checker_paint
+	_checker.position = Vector3(-0.1, 0.02, -2.4)
+	_checker.visible = false
+	add_child(_checker)
 	_sitter_mesh = Models.bench_sitter()
 	_stander_mesh = Models.person()
 	await _step("street")
@@ -292,8 +322,9 @@ func _stop_name(i: int) -> String:
 # --- People on the bus -------------------------------------------------------
 
 
-## Seats the riders and lets off those who left: front seats first, then
-## standing in the aisle.
+## Draws the riders where the rules put them (seats 0–23, standing
+## places after), and lets off those who left. Whoever is slipping out
+## stands at the door.
 func _sync_people() -> void:
 	var here := {}
 	for r in bus.riders:
@@ -302,32 +333,48 @@ func _sync_people() -> void:
 		if not here.has(id):
 			(_people[id] as Node3D).queue_free()
 			_people.erase(id)
-			_seat_of.erase(id)
+			_spot_of.erase(id)
+	var leaving := {}
+	for d in bus.at_door:
+		leaving[d.rider.id] = true
 	for r in bus.riders:
-		if _people.has(r.id):
+		var spot: int = -2 if leaving.has(r.id) else int(r.seat)
+		if _people.has(r.id) and _spot_of.get(r.id, -3) == spot:
 			continue
-		var taken := {}
-		for id in _seat_of:
-			taken[_seat_of[id]] = true
-		var spot := -1
-		for i in _seats.size() + _standing.size():
-			if not taken.has(i):
-				spot = i
-				break
-		var person := MeshInstance3D.new()
+		var person: MeshInstance3D = _people.get(r.id)
+		if person == null:
+			person = MeshInstance3D.new()
+			person.material_override = _paint_for(r)
+			add_child(person)
+			_people[r.id] = person
+		_spot_of[r.id] = spot
 		var seated := spot >= 0 and spot < _seats.size()
 		person.mesh = _sitter_mesh if seated else _stander_mesh
-		var paint := Models.traffic_material(PackedColorArray([_palette[r.id * 5 % 8], _palette[8 + r.id * 3 % 8]]), false)
-		paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
-		person.material_override = paint
-		if spot < 0:
-			person.visible = false
-		else:
+		person.visible = spot != -1
+		if spot == -2:
+			# At the door, front left, looking out.
+			person.position = Vector3(-0.85, 0.02, -2.9)
+			person.rotation.y = PI / 2
+		elif spot >= 0:
 			var p: Vector2 = _seats[spot] if seated else _standing[spot - _seats.size()]
 			person.position = Vector3(p.x, 0.0 if seated else 0.02, p.y + (0.05 if seated else 0.0))
-		add_child(person)
-		_people[r.id] = person
-		_seat_of[r.id] = spot
+			person.rotation.y = 0.0
+
+
+## Clothes: women in a bright kameez (top and bottom one colour), the
+## elderly in a white panjabi, everyone else from the street's colours.
+func _paint_for(r: Dictionary) -> ShaderMaterial:
+	var paint: ShaderMaterial
+	var id := int(r.id)
+	if r.kind == "elder":
+		paint = Models.traffic_material(PackedColorArray([Color("F4F1E8"), Color("E6E2D6")]), false)
+	elif r.woman:
+		var c: Color = [Color("C2185B"), Color("F6B800"), Color("6A1B9A"), Color("0F7C8C"), Color("E2432A")][id % 5]
+		paint = Models.traffic_material(PackedColorArray([c, c.darkened(0.15)]), false)
+	else:
+		paint = Models.traffic_material(PackedColorArray([_palette[id * 5 % 8], _palette[8 + id * 3 % 8]]), false)
+	paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
+	return paint
 
 
 # --- The screen ----------------------------------------------------------------
@@ -373,6 +420,21 @@ func _build_hud() -> void:
 	_route_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_route_bar.draw.connect(_draw_route)
 	top.add_child(_route_bar)
+	# Seat problems: a button for each.
+	_problem_row = HBoxContainer.new()
+	_problem_row.add_theme_constant_override("separation", 6)
+	for problem in ["elder", "women"]:
+		var fix := Look.button(strings.t("fix_" + problem), Look.YELLOW.darkened(0.25), 14)
+		fix.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		fix.pressed.connect(_on_fix.bind(problem))
+		fix.visible = false
+		_problem_row.add_child(fix)
+		_problem_buttons[problem] = fix
+	top.add_child(_problem_row)
+	_crowd_label = Look.label(strings.t("crowded"), 14, true, Look.VERMILION)
+	_crowd_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_crowd_label.visible = false
+	top.add_child(_crowd_label)
 	# Calling the stop: a bar with a marker running to and fro.
 	_call_box = PanelContainer.new()
 	_call_box.add_theme_stylebox_override("panel", Look.card(Color.WHITE, 14, 3))
@@ -408,6 +470,11 @@ func _build_hud() -> void:
 	_notice_box.add_child(_notice)
 	_notice_box.visible = false
 	bottom.add_child(_notice_box)
+	_door_button = Look.button(strings.t("catchDoor"), Look.VERMILION, 20)
+	_door_button.custom_minimum_size = Vector2(0, 64)
+	_door_button.pressed.connect(_on_catch)
+	_door_button.visible = false
+	bottom.add_child(_door_button)
 	_fare_box = _build_fare_panel()
 	_fare_box.visible = false
 	bottom.add_child(_fare_box)
@@ -525,6 +592,9 @@ func _process(dt: float) -> void:
 			_notice_box.visible = false
 	if _call_box.visible:
 		_call_bar.queue_redraw()
+	if _checker_left > 0.0:
+		_checker_left -= dt
+		_checker.visible = _checker_left > 0.0
 	_refresh()
 
 
@@ -550,8 +620,40 @@ func _handle(events: Array) -> void:
 		_say(strings.t("owedShort"), Look.VERMILION, 3.0)
 	if events.has(BusDay.Event.DEPARTED):
 		_sync_people()
-	if events.has(BusDay.Event.TRIP_OVER):
+	if events.has(BusDay.Event.AT_DOOR):
+		_say(strings.t("atDoor"), Look.VERMILION, 2.5)
+		_sync_people()
+	if events.has(BusDay.Event.CHECKER):
+		_checker.visible = true
+		_checker_left = 4.0
+		if bus.last_fine > 0:
+			_say(strings.t("checkerFine", {"n": bus.last_fine}), Look.VERMILION, 4.0)
+		else:
+			_say(strings.t("checkerClean"), Look.PARROT, 4.0)
+	if events.has(BusDay.Event.DAY_OVER):
 		_end_trip()
+	elif events.has(BusDay.Event.TRIP_OVER):
+		# The way back: the route turns round.
+		_say(strings.t("tripBack", {"stop": _stop_name(bus.route.size() - 1)}), Look.SKY, 4.0)
+		_stop_label.text = _stop_name(0)
+		_stop_sign.position.z = -2.5
+		_close_fare()
+		_sync_people()
+
+
+func _on_fix(problem: String) -> void:
+	if bus.fix(problem).has(BusDay.Event.SEATED):
+		_say(strings.t("fixed_" + problem), Look.PARROT, 2.0)
+		_sync_people()
+	_refresh()
+
+
+func _on_catch() -> void:
+	if bus.catch().has(BusDay.Event.CAUGHT):
+		_ding.play()
+		_say(strings.t("caught"), Look.PARROT, 2.0)
+		_sync_people()
+	_refresh()
 
 
 func _on_call() -> void:
@@ -654,6 +756,11 @@ func _refresh() -> void:
 	_route_bar.queue_redraw()
 	var waiting := bus.unpaid().size()
 	_unpaid_label.text = strings.t("faresDue", {"n": waiting})
+	var now := bus.problems()
+	for problem in _problem_buttons:
+		(_problem_buttons[problem] as Button).visible = now.has(problem)
+	_crowd_label.visible = bus.riders.size() > int(b.n("bus.crowded_above"))
+	_door_button.visible = not bus.at_door.is_empty()
 	_next_button.disabled = waiting == 0 or _fare_box.visible
 	if _fare_box.visible:
 		if bus.asking.is_empty():
@@ -699,7 +806,7 @@ func _draw_call() -> void:
 	var h := _call_bar.size.y
 	_call_bar.draw_rect(Rect2(0, 6, w, h - 12), Color("E8E0CF"))
 	var good := b.n("bus.good_zone")
-	var perfect := b.n("bus.perfect_zone")
+	var perfect := bus.perfect_zone()
 	_call_bar.draw_rect(Rect2(w * (0.5 - good), 6, w * good * 2.0, h - 12), Look.YELLOW)
 	_call_bar.draw_rect(Rect2(w * (0.5 - perfect), 6, w * perfect * 2.0, h - 12), Look.PARROT)
 	var x := w * bus.marker()
@@ -726,6 +833,10 @@ func _end_trip() -> void:
 		lines.append(strings.t("busArguments", {"n": bus.arguments}))
 	if bus.overpaid > 0:
 		lines.append(strings.t("busOverpaid", {"n": bus.overpaid}))
+	if bus.caught > 0:
+		lines.append(strings.t("busCaught", {"n": bus.caught}))
+	if bus.fines > 0:
+		lines.append(strings.t("busFines", {"n": bus.fines}))
 	lines.append(strings.t("busRatingLine", {"stars": "%.1f" % bus.rating}))
 	lines.append(strings.t("teaKept", {"n": got.kept}))
 	lines.append(strings.t("gainFund", {"n": got.fund}))
@@ -750,7 +861,7 @@ func _end_trip() -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
 	panel.add_child(col)
-	var title := Look.label(strings.t("tripOver"), 26, true)
+	var title := Look.label(strings.t("busDayOver"), 26, true)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(title)
 	for line in lines:

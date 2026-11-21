@@ -235,7 +235,22 @@ func _bus_card() -> Control:
 		if h.get("who", "") == "bus":
 			box.add_child(Look.label(s.t("busLastDay", {"money": int(h.earned), "riders": int(h.get("riders", 0))}), 15))
 			break
+	var next := progress.next_upgrade("bus")
+	if next != "":
+		var cost := progress.price(next, "bus")
+		var buy := Look.button(s.t("buy_" + next, {"n": cost}), Look.SKY if int(progress.data.taka) >= cost else Color("9E9E9E"), 15)
+		buy.disabled = int(progress.data.taka) < cost
+		buy.pressed.connect(_buy_for.bind(next, "bus"))
+		box.add_child(buy)
+	for id in progress.data.bus.upgrades:
+		box.add_child(Look.label(s.t("owned_" + id), 14, false, Look.SKY.darkened(0.2)))
 	return panel
+
+
+func _buy_for(id: String, who: String) -> void:
+	if progress.buy(id, who):
+		progress.save()
+		_build()
 
 
 func _board_bus() -> void:
