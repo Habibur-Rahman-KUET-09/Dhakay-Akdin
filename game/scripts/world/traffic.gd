@@ -88,7 +88,7 @@ func _place(a: Dictionary, dt: float, snap := false) -> void:
 	var pos := d.position()
 	var f := Vector3(RoadMap.DX[d.heading], 0, RoadMap.DY[d.heading])
 	var left := Vector3(f.z, 0, -f.x)
-	var target := Vector3((pos.x + 0.5) * City.T, 0, (pos.y + 0.5) * City.T) + left * a.side
+	var target: Vector3 = Vector3((pos.x + 0.5) * City.T, 0, (pos.y + 0.5) * City.T) + left * a.side
 	if a.kind == "person":
 		target.y = 0.15 + absf(sin(Time.get_ticks_msec() / 180.0 + a.phase)) * 0.05
 	var yaw := -d.heading * PI / 2
