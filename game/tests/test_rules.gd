@@ -240,3 +240,137 @@ func test_traffic_ahead_holds_the_rickshaw_back() -> void:
 	s.room = 0.5
 	s.update(0.1)
 	near(s.speed_now, 0.5, "half the road free: half speed")
+
+
+# --- The day with passengers (day.gd, fares.gd) --------------------------
+
+const Day = preload("res://scripts/rules/day.gd")
+const Fares = preload("res://scripts/rules/fares.gd")
+const Balance = preload("res://scripts/rules/balance.gd")
+
+
+func test_fares_and_ratings() -> void:
+	var f := Fares.new(Balance.new())
+	eq(f.fair(30), 65, "20 + 30 x 1.5 = 65")
+	eq(f.fair(0), 20, "the base fare")
+	eq(f.counter(65), 80, "1.2 x 65 = 78, rounded to 80")
+	eq(f.stars(10.0, 10.0, 0, "normal"), 5.0, "on time")
+	eq(f.stars(11.5, 10.0, 0, "normal"), 4.0, "15% late: one star off")
+	eq(f.stars(12.5, 10.0, 0, "normal"), 3.0, "25% late: two off")
+	eq(f.stars(10.0, 10.0, 2, "normal"), 4.0, "two flooded tiles: one off")
+	eq(f.stars(30.0, 10.0, 0, "normal"), 1.0, "never below one")
+	eq(f.stars(11.5, 10.0, 0, "elder"), 4.5, "elders give half a star more")
+	eq(f.tip(5.0), 10, "a tip for five stars")
+	eq(f.tip(4.5), 0, "none below")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4
+	for i in 50:
+		var t := f.pick_type(rng)
+		check(Fares.TYPES.has(t), "a known type")
+		var o := f.offer(t, 65, rng)
+		check(o % 5 == 0 and o >= 35 and o <= 75, "offer %d in range for %s" % [o, t])
+
+
+func _mirpur() -> RoadMap:
+	return RoadMap.load_area("mirpur")
+
+
+func test_the_day_keeps_passengers_waiting() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 3)
+	check(d.waiting.size() >= 3 and d.waiting.size() <= 5, "3 to 5 waiting (%d)" % d.waiting.size())
+	for w in d.waiting:
+		check(d.map.is_road(w.at), "waiting on a road")
+		check(w.tiles >= 8, "a real trip")
+		eq(d.map.distance(w.at, w.place.at), w.tiles, "fare distance is the legal route")
+	check(d.riding.is_empty(), "nobody aboard yet")
+	check(d.waiting.any(func(w): return w.at == d.destination), "the arrow points at a passenger")
+
+
+func test_bargain_ride_and_get_paid() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 5)
+	var w: Dictionary = d.waiting[0]
+	# Pull up beside the passenger.
+	d.driver.cell = w.at
+	d.driver.progress = 0.0
+	var events := d.update(0.01)
+	check(events.has(Day.OFFER), "stopping beside them opens the bargaining")
+	eq(d.offer_for, w, "talking to them")
+	d.accept()
+	eq(d.riding.fare, w.offer, "rides at the offered fare")
+	eq(d.destination, w.place.at, "the arrow points at the drop-off")
+	# Drive the route, swiping each turn a tile ahead.
+	d.pedal = true
+	d.accel = 100.0
+	var got := []
+	var i := 0
+	while i < 6000 and d.trips == 0:
+		var path = d.map.route(d.driver.cell, d.destination)
+		if path == null or path.is_empty():
+			break
+		var h := d.driver.heading
+		var first := _dir(d.driver.cell, path[0])
+		if first != h:
+			d.swipe((first - h + 4) % 4)
+		elif path.size() > 1:
+			d.swipe((_dir(path[0], path[1]) - h + 4) % 4)
+		got.append_array(d.update(0.05))
+		i += 1
+	eq(d.trips, 1, "delivered")
+	check(got.has(Day.DELIVERED), "delivered event")
+	check(d.money + d.fines >= w.offer, "paid at least the fare (%d, fines %d)" % [d.money, d.fines])
+	check(d.riding.is_empty(), "the passenger got off")
+
+
+func test_counter_offer_and_refusal() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 9)
+	var w: Dictionary = d.waiting[0]
+	d.driver.cell = w.at
+	d.update(0.01)
+	d.refuse()
+	check(d.offer_for.is_empty() and w.refused, "said no: they stay, refused")
+	check(d.waiting.has(w), "still waiting")
+	d.update(0.01)
+	check(d.offer_for.is_empty(), "not asked again while still beside them")
+	var agreed := 0
+	for seed_value in 20:
+		var e := Day.new(_mirpur(), Balance.new(), 100 + seed_value)
+		var p: Dictionary = e.waiting[0]
+		e.driver.cell = p.at
+		e.update(0.01)
+		if e.counter():
+			agreed += 1
+			eq(e.riding.fare, e.fares.counter(p.fair), "rides at the counter fare")
+		else:
+			check(not e.waiting.has(p), "said no to the counter: walked off")
+	check(agreed > 0 and agreed < 20, "some agree, some walk off (%d of 20)" % agreed)
+
+
+func test_the_day_ends_and_red_lights_fine() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 2)
+	eq(d.hour(), 7.0, "7 in the morning")
+	var events := d.update(d.day_seconds / 2.0)
+	near(d.hour(), 14.0, "half way: 2 pm")
+	events = d.update(d.day_seconds)
+	check(events.has(Day.DAY_OVER) and d.over, "the day is over")
+	eq(d.update(1.0), [], "nothing happens after")
+	# A red light at a signal tile, for one road through it.
+	var p := Vector2i(-1, -1)
+	for r in d.map.roads():
+		if d.map.kind_at(r) == RoadMap.Kind.SIGNAL:
+			p = r
+			break
+	check(p.x >= 0, "the map has a signal")
+	var e := Day.new(_mirpur(), Balance.new(), 2)
+	check(e.red_at(p, RoadMap.N) != e.red_at(p, RoadMap.E), "one road red, the other green")
+	var red := RoadMap.N if e.red_at(p, RoadMap.N) else RoadMap.E
+	e.driver.cell = RoadMap.step(p, RoadMap.opposite(red))
+	e.driver.heading = red
+	e.driver.moving = true
+	e.driver.progress = 0.99
+	e.speed_now = 1.0
+	e.pedal = true
+	var before := e.money
+	var got := e.update(0.05)
+	if e.driver.cell == p:
+		check(got.has(Day.FINED), "fined for running the red")
+		eq(e.money, before - 50, "50 taka")

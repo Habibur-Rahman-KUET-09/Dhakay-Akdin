@@ -1,0 +1,230 @@
+## Rahim Chacha's working day (§৪.১): 7 am to 9 pm in a few minutes,
+## passengers waiting by the road with an offer, bargaining, the trip, the
+## rating and the tip, fines for running a red light. Driving itself is the
+## shift's (shift.gd). No drawing here, so it can be tested.
+extends "res://scripts/rules/shift.gd"
+
+const Fares = preload("res://scripts/rules/fares.gd")
+const Balance = preload("res://scripts/rules/balance.gd")
+const Signals = preload("res://scripts/rules/signals.gd")
+
+## Events added to the driver's (which run 0-4).
+const OFFER := 10
+const OFFER_GONE := 11
+const BOARDED := 12
+const DECLINED := 13
+const DELIVERED := 14
+const FINED := 15
+const DAY_OVER := 16
+
+var fares: Fares
+var balance: Balance
+## Passengers waiting by the road: {at, place, type, tiles, fair, offer, refused}.
+var waiting: Array = []
+## The passenger aboard: {place, at, type, fare, since, eta, flooded}; or {}.
+var riding := {}
+## The waiting passenger Rahim Chacha has stopped beside; or {}.
+var offer_for := {}
+## The last finished trip, for the HUD: {fare, tip, stars}.
+var last_trip := {}
+var money := 0
+var trips := 0
+var stars_sum := 0.0
+var fines := 0
+## Seconds since 7 am, and the length of the day.
+var clock := 0.0
+var day_seconds := 240.0
+var over := false
+var signal_cycle := 12.0
+var _want_waiting := 4
+var _next_id := 1
+
+
+func _init(road_map: RoadMap, b: Balance, seed_value := -1) -> void:
+	balance = b
+	fares = Fares.new(b)
+	super(road_map, b.n("rickshaw.speed_tiles_per_s"), b.n("rickshaw.waterlog_speed"), 8, seed_value)
+	accel = b.n("rickshaw.accel_tiles_per_s2")
+	coast = b.n("rickshaw.coast_decel")
+	braking = b.n("rickshaw.brake_decel")
+	day_seconds = b.n("rickshaw.day_seconds")
+	signal_cycle = b.n("rickshaw.signal_cycle_s")
+	var range_of: Array = b.at("rickshaw.waiting_passengers")
+	_want_waiting = rng.randi_range(int(range_of[0]), int(range_of[1]))
+	_top_up()
+	_aim()
+
+
+## The hour of the day, 7.0 to 21.0.
+func hour() -> float:
+	return lerpf(balance.n("rickshaw.start_hour"), balance.n("rickshaw.end_hour"), clampf(clock / day_seconds, 0.0, 1.0))
+
+
+func average_stars() -> float:
+	return stars_sum / trips if trips > 0 else 0.0
+
+
+func update(dt: float) -> Array:
+	if over:
+		return []
+	clock += dt
+	var events := super(dt)
+	_talk(events)
+	if clock >= day_seconds:
+		over = true
+		events.append(DAY_OVER)
+	return events
+
+
+## Whether the signal at p shows red to someone going `heading` now.
+func red_at(p: Vector2i, heading: int) -> bool:
+	return map.kind_at(p) == RoadMap.Kind.SIGNAL and Signals.red_for(p, heading, clock, signal_cycle)
+
+
+func _entered(events: Array) -> void:
+	# Into a junction against the red light: a fine.
+	if red_at(driver.cell, driver.heading):
+		var fine := int(balance.n("rickshaw.red_light_fine"))
+		money -= fine
+		fines += fine
+		events.append(FINED)
+	if not riding.is_empty():
+		if map.kind_at(driver.cell) == RoadMap.Kind.FLOOD:
+			riding.flooded += 1
+		if driver.cell == riding.at:
+			_deliver(events)
+	_aim()
+
+
+## Stopping beside a waiting passenger opens the bargaining; driving off
+## ends it. A passenger said no to stays until Rahim Chacha has gone.
+func _talk(events: Array) -> void:
+	for w in waiting:
+		if w.refused and _near(w.at) > 2:
+			w.refused = false
+	if not offer_for.is_empty():
+		if _near(offer_for.at) > 1:
+			offer_for = {}
+			events.append(OFFER_GONE)
+		return
+	if not riding.is_empty() or speed_now > 0.6:
+		return
+	for w in waiting:
+		if not w.refused and _near(w.at) <= 1:
+			offer_for = w
+			events.append(OFFER)
+			return
+
+
+func _near(p: Vector2i) -> int:
+	return absi(p.x - driver.cell.x) + absi(p.y - driver.cell.y)
+
+
+## Takes the passenger at the fare they offered.
+func accept() -> void:
+	if not offer_for.is_empty():
+		_board(offer_for, offer_for.offer)
+
+
+## Asks for more: the passenger may agree (at the counter fare) or walk
+## off. Returns whether they agreed.
+func counter() -> bool:
+	if offer_for.is_empty():
+		return false
+	var w: Dictionary = offer_for
+	if fares.accepts_counter(w.type, rng):
+		_board(w, fares.counter(w.fair))
+		return true
+	waiting.erase(w)
+	offer_for = {}
+	_top_up()
+	_aim()
+	return false
+
+
+## Says no: the passenger stays, Rahim Chacha moves on.
+func refuse() -> void:
+	if not offer_for.is_empty():
+		offer_for.refused = true
+		offer_for = {}
+
+
+func _board(w: Dictionary, fare: int) -> void:
+	waiting.erase(w)
+	offer_for = {}
+	riding = {
+		"place": w.place, "at": w.place.at, "type": w.type, "fare": fare,
+		"since": clock, "eta": fares.eta(w.tiles, base_speed), "flooded": 0,
+	}
+	_top_up()
+	_aim()
+
+
+func _deliver(events: Array) -> void:
+	var given := fares.stars(clock - riding.since, riding.eta, riding.flooded, riding.type)
+	var tip := fares.tip(given)
+	money += riding.fare + tip
+	trips += 1
+	stars_sum += given
+	last_trip = {"fare": riding.fare, "tip": tip, "stars": given}
+	riding = {}
+	delivered += 1
+	events.append(DELIVERED)
+	_top_up()
+
+
+## Keeps a few passengers waiting by the road, a short ride away.
+func _top_up() -> void:
+	if map == null or map.places.is_empty():
+		return
+	var roads := map.roads()
+	var tries := 0
+	while waiting.size() < _want_waiting and tries < 60:
+		tries += 1
+		var at: Vector2i = roads[rng.randi() % roads.size()]
+		var k := map.kind_at(at)
+		if k != RoadMap.Kind.ROAD and k != RoadMap.Kind.MAIN_ROAD:
+			continue
+		var d := _near(at)
+		if d < 4 or d > 18 or waiting.any(func(o): return absi(o.at.x - at.x) + absi(o.at.y - at.y) < 3):
+			continue
+		var dist := map.distances_from(at)
+		var choices := map.places.filter(func(pl): return dist.has(pl.at) and dist[pl.at] >= min_trip)
+		if choices.is_empty():
+			continue
+		var place_to: Dictionary = choices[rng.randi() % choices.size()]
+		var tiles: int = dist[place_to.at]
+		var who := fares.pick_type(rng)
+		var fair_fare := fares.fair(tiles)
+		_next_id += 1
+		waiting.append({
+			"id": _next_id, "at": at, "place": place_to, "type": who, "tiles": tiles,
+			"fair": fair_fare, "offer": fares.offer(who, fair_fare, rng), "refused": false,
+		})
+
+
+## Where the arrow points: the drop-off with a passenger aboard, else the
+## nearest waiting passenger.
+func _aim() -> void:
+	if riding.has("at"):
+		destination = riding.at
+		place = riding.place
+	elif not waiting.is_empty():
+		var best: Dictionary = waiting[0]
+		for w in waiting:
+			if _near(w.at) < _near(best.at):
+				best = w
+		destination = best.at
+		place = {}
+	else:
+		destination = driver.cell
+		place = {}
+	_measure()
+
+
+## Without passengers (tests of plain driving), behave as before.
+func _pick() -> void:
+	if fares == null:
+		super()
+	else:
+		_aim()

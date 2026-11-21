@@ -76,17 +76,16 @@ static func build(map: RoadMap, palette: PackedColorArray) -> Node3D:
 				continue
 			var inward := Vector3(RoadMap.DX[d], 0, RoadMap.DY[d])
 			var along := Vector3(-inward.z, 0, inward.x)
-			var edge := centre(p) + inward * (T / 2 - 1.3)
 			var n := noise(p, 120 + d)
 			var colours := Color(0, 0, floor(noise(p, 130 + d) * 8), 8 + floor(noise(p, 131 + d) * 8))
 			if k == RoadMap.Kind.ROAD and n < 0.07:
-				# A row of three rickshaws, noses to the road, riders away.
-				for i in 3:
-					var at := edge + along * (i - 1) * 1.35
-					var tilt := Basis(Vector3.UP, (noise(p, 140 + i) - 0.5) * 0.3)
-					parked.append([Transform3D(tilt * _facing(-inward), at), Color(0, 0, floor(noise(p, 150 + i) * 8), 8 + floor(noise(p, 151 + i) * 8))])
-			elif n < 0.1:
-				carts.append([Transform3D(_facing(along), edge + inward * 0.2), colours])
+				# One or two rickshaws parked end to end along the edge of the
+				# lane, clear of the traffic.
+				for i in 1 + int(noise(p, 145) * 2):
+					var at := centre(p) + inward * (T / 2 - 0.72) + along * (i - 0.5) * 2.7
+					parked.append([Transform3D(_facing(along), at), Color(0, 0, floor(noise(p, 150 + i) * 8), 8 + floor(noise(p, 151 + i) * 8))])
+			elif k == RoadMap.Kind.ROAD and n < 0.1:
+				carts.append([Transform3D(_facing(along), centre(p) + inward * (T / 2 - 0.75)), colours])
 			elif n < 0.24:
 				# Someone waiting at a shop front, facing the road.
 				var spot := centre(p) + inward * (T / 2 + PAVEMENT * 0.5) + along * (noise(p, 160 + d) - 0.5) * 3.0

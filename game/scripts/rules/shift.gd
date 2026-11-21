@@ -75,14 +75,19 @@ func update(dt: float) -> Array:
 	# Stopped at a junction or a dead end: the rickshaw stands still.
 	if not driver.moving:
 		speed_now = 0.0
-	if not events.has(Driver.Event.ENTERED):
-		return events
+	if events.has(Driver.Event.ENTERED):
+		_entered(events)
+	return events
+
+
+## A new tile was entered. Here: reaching the destination picks another
+## (the day with passengers, day.gd, does more).
+func _entered(events: Array) -> void:
 	if driver.cell == destination:
 		delivered += 1
 		_pick()
 		events.append(Driver.Event.ARRIVED)
 	_measure()
-	return events
 
 
 func _measure() -> void:

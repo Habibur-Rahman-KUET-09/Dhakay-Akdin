@@ -9,10 +9,14 @@ const RoadMap = preload("res://scripts/rules/road_map.gd")
 const Driver = preload("res://scripts/rules/driver.gd")
 const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
+const Signals = preload("res://scripts/rules/signals.gd")
 
 ## Sideways from the middle of the road: vehicles keep left; people walk
 ## on the pavement.
-const KEEP_LEFT := 1.4
+## Small vehicles keep 1 m left of the middle, clear of the oncoming lane
+## and of rickshaws parked at the edge; buses (main roads only) 1.4 m.
+const KEEP_LEFT := 1.0
+const BUS_LEFT := 1.4
 const PAVEMENT_SIDE := City.T / 2 + City.PAVEMENT * 0.5
 
 ## Colours swapped into the models (indices 0–7 bright, 8–15 darker).
@@ -32,6 +36,11 @@ var focus: Driver
 ## street round the player is always busy.
 const NEAR := 13
 var _recycle_left := 0.0
+## The day's clock and the signal cycle, set by the scene, for red lights.
+var clock := 0.0
+var signal_cycle := 12.0
+## How long before a vehicle stuck at a crossing pushes through anyway.
+const CROSSING_PATIENCE := 3.0
 ## Who is where on the road this frame: cell -> [[heading, progress, length]].
 var _lanes := {}
 ## Vehicle lengths in tiles (a tile is 6 m).
@@ -73,13 +82,17 @@ func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 20, "ricks
 		for i in counts[kind]:
 			var start: Vector2i = pool[rng.randi() % pool.size()]
 			var d := Driver.new(map, rng.randf_range(speeds[kind][0], speeds[kind][1]), start)
-			var side := KEEP_LEFT if kind != "person" else PAVEMENT_SIDE * (1.0 if rng.randf() < 0.5 else -1.0)
+			var side := KEEP_LEFT
+			if kind == "bus":
+				side = BUS_LEFT
+			elif kind == "person":
+				side = PAVEMENT_SIDE * (1.0 if rng.randf() < 0.5 else -1.0)
 			var a_colour := rng.randi_range(0, 7)
 			var b_colour := rng.randi_range(8, 15) if kind != "bus" else rng.randi_range(0, 7)
 			var agent := {
 				"kind": kind, "driver": d, "mm": mm, "i": i, "side": side,
 				"phase": rng.randf() * TAU, "a": a_colour, "b": b_colour, "at": Vector3.ZERO, "yaw": 0.0,
-				"speed": d.speed,
+				"speed": d.speed, "wait": 0.0,
 			}
 			_agents.append(agent)
 			_place(agent, 0.0, true)
@@ -101,7 +114,19 @@ func _process(dt: float) -> void:
 		if a.kind != "person":
 			# Keep a gap to whoever is ahead in the same lane: slow, then stop.
 			var gap := gap_ahead(d, LENGTH[a.kind])
-			d.speed = a.speed * clampf((gap - 0.12) / 0.5, 0.0, 1.0)
+			var go := clampf((gap - 0.12) / 0.5, 0.0, 1.0)
+			# Near the end of a tile: stop for red, and for anyone crossing the
+			# junction ahead (but not forever, or the town would lock up).
+			if d.progress > 0.45:
+				if red_ahead(d):
+					go = 0.0
+				elif crossing_blocked(d):
+					a.wait += dt
+					if a.wait < CROSSING_PATIENCE:
+						go = 0.0
+				else:
+					a.wait = 0.0
+			d.speed = a.speed * go
 		var events := d.update(dt)
 		if events.has(Driver.Event.ENTERED):
 			_steer(a, rng.randf() < 0.35)
@@ -154,6 +179,20 @@ func gap_ahead(d: Driver, length := 0.45) -> float:
 			return best
 		cell = RoadMap.step(cell, d.heading)
 	return best
+
+
+## Someone in the tile ahead of d going across its way.
+func crossing_blocked(d: Driver) -> bool:
+	for o in _lanes.get(d.next_cell(), []):
+		if o[0] % 2 != d.heading % 2:
+			return true
+	return false
+
+
+## The tile ahead of d is a signal showing red to d.
+func red_ahead(d: Driver) -> bool:
+	var next := d.next_cell()
+	return map.kind_at(next) == RoadMap.Kind.SIGNAL and Signals.red_for(next, d.heading, clock, signal_cycle)
 
 
 ## A vehicle waiting right behind d, for an impatient horn; else INF.

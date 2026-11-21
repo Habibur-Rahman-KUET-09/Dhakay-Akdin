@@ -122,5 +122,121 @@
  "loading": {
   "bn": "মিরপুর সাজানো হচ্ছে…",
   "en": "Setting up Mirpur…"
+ },
+ "toPassenger": {
+  "bn": "যাত্রী আর {tiles} ব্লক দূরে",
+  "en": "Passenger {tiles} blocks away"
+ },
+ "offerTitle": {
+  "bn": "{place} যাবেন? ৳{fare}",
+  "en": "To {place}? ৳{fare}"
+ },
+ "type_normal": {
+  "bn": "সাধারণ যাত্রী",
+  "en": "An ordinary passenger"
+ },
+ "type_miser": {
+  "bn": "দামাদামিতে পাকা",
+  "en": "A hard bargainer"
+ },
+ "type_hurry": {
+  "bn": "অফিসে যাচ্ছেন, তাড়া আছে",
+  "en": "Late for the office"
+ },
+ "type_elder": {
+  "bn": "বয়স্ক মানুষ, যত্ন করে নিয়ে যান",
+  "en": "An elderly passenger: go gently"
+ },
+ "agree": {
+  "bn": "রাজি",
+  "en": "Agree"
+ },
+ "counter": {
+  "bn": "৳{fare} দেন",
+  "en": "Ask ৳{fare}"
+ },
+ "refuse": {
+  "bn": "মানা",
+  "en": "No"
+ },
+ "counterNo": {
+  "bn": "যাত্রী রাজি হলেন না, চলে গেলেন",
+  "en": "They said no and walked off"
+ },
+ "boarded": {
+  "bn": "যাত্রী উঠলেন: {place}, ৳{fare}",
+  "en": "Aboard: {place}, ৳{fare}"
+ },
+ "delivered": {
+  "bn": "পৌঁছে দিলেন! ৳{fare}{tip} · রেটিং {stars}/৫",
+  "en": "Delivered! ৳{fare}{tip} · rating {stars}/5"
+ },
+ "tipText": {
+  "bn": " + বখশিশ ৳{tip}",
+  "en": " + tip ৳{tip}"
+ },
+ "redLight": {
+  "bn": "লাল বাতি পার হলেন! জরিমানা ৳{fine}",
+  "en": "Ran a red light! Fine ৳{fine}"
+ },
+ "morning": {
+  "bn": "সকাল",
+  "en": "Morning"
+ },
+ "noon": {
+  "bn": "দুপুর",
+  "en": "Midday"
+ },
+ "afternoon": {
+  "bn": "বিকাল",
+  "en": "Afternoon"
+ },
+ "evening": {
+  "bn": "সন্ধ্যা",
+  "en": "Evening"
+ },
+ "night": {
+  "bn": "রাত",
+  "en": "Night"
+ },
+ "clock": {
+  "bn": "{part} {h}:{m}",
+  "en": "{h}:{m} {part}"
+ },
+ "dayOver": {
+  "bn": "দিন শেষ",
+  "en": "Day over"
+ },
+ "earned": {
+  "bn": "আজকের আয়: ৳{money}",
+  "en": "Earned today: ৳{money}"
+ },
+ "tripsDone": {
+  "bn": "ট্রিপ: {trips}",
+  "en": "Trips: {trips}"
+ },
+ "avgRating": {
+  "bn": "গড় রেটিং: {stars}/৫",
+  "en": "Average rating: {stars}/5"
+ },
+ "finesPaid": {
+  "bn": "জরিমানা: ৳{fines}",
+  "en": "Fines: ৳{fines}"
+ },
+ "targetMet": {
+  "bn": "লক্ষ্য ৳{target} পূরণ হয়েছে!",
+  "en": "Target ৳{target} reached!"
+ },
+ "targetMissed": {
+  "bn": "লক্ষ্য ছিল ৳{target}, কাল আবার চেষ্টা",
+  "en": "The target was ৳{target}; try again tomorrow"
+ },
+ "again": {
+  "bn": "আবার খেলুন",
+  "en": "Play again"
+ },
+ "toMohalla": {
+  "bn": "মহল্লায় ফিরুন",
+  "en": "Back to the mohalla"
  }
 }

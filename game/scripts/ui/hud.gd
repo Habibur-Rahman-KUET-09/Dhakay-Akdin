@@ -9,6 +9,10 @@ const RoadMap = preload("res://scripts/rules/road_map.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 
 signal back_pressed
+signal offer_accept
+signal offer_counter
+signal offer_refuse
+signal again_pressed
 
 var s: Strings
 var map: RoadMap
@@ -36,6 +40,11 @@ var bell_button: Panel
 var brake_button: Panel
 var _speed: Label
 var _pedal_down := false
+var _offer_box: PanelContainer
+var _offer_title: Label
+var _offer_sub: Label
+var _counter_button: Button
+var _end_layer: Control
 var _brake_down := false
 
 
@@ -139,6 +148,93 @@ func _ready() -> void:
 	_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_notice_box.add_child(_notice)
 	bottom.add_child(_notice_box)
+	_build_offer(root)
+
+
+## The bargaining panel: where the passenger is going, their offer, and
+## three buttons (agree, ask for more, no). Hidden until needed.
+func _build_offer(root: Control) -> void:
+	_offer_box = PanelContainer.new()
+	_offer_box.add_theme_stylebox_override("panel", Look.card(Color.WHITE, 16, 3))
+	_offer_box.set_anchors_preset(Control.PRESET_CENTER)
+	_offer_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_offer_box.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_offer_box.custom_minimum_size = Vector2(380, 0)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	_offer_box.add_child(col)
+	_offer_title = Look.label("", 20, true)
+	_offer_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(_offer_title)
+	_offer_sub = Look.label("", 15)
+	_offer_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(_offer_sub)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var agree := Look.button(s.t("agree"), Look.PARROT, 17)
+	agree.pressed.connect(func(): offer_accept.emit())
+	row.add_child(agree)
+	_counter_button = Look.button("", Look.YELLOW.darkened(0.15), 17)
+	_counter_button.pressed.connect(func(): offer_counter.emit())
+	row.add_child(_counter_button)
+	var no := Look.button(s.t("refuse"), Look.VERMILION, 17)
+	no.pressed.connect(func(): offer_refuse.emit())
+	row.add_child(no)
+	col.add_child(row)
+	_offer_box.visible = false
+	root.add_child(_offer_box)
+
+
+func show_offer(title: String, sub: String, counter_text: String) -> void:
+	_offer_title.text = title
+	_offer_sub.text = sub
+	_counter_button.text = counter_text
+	_offer_box.visible = true
+
+
+func hide_offer() -> void:
+	_offer_box.visible = false
+
+
+## Where the offer buttons are, so touches there are not taken for swipes.
+func offer_rect() -> Rect2:
+	return _offer_box.get_global_rect() if _offer_box.visible else Rect2()
+
+
+## The end of the day: the takings and two ways on.
+func show_day_end(lines: Array, good: bool) -> void:
+	_end_layer = ColorRect.new()
+	(_end_layer as ColorRect).color = Color(0, 0, 0, 0.45)
+	_end_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(_end_layer)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Look.card(Look.CREAM, 18, 3))
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	panel.custom_minimum_size = Vector2(400, 0)
+	_end_layer.add_child(panel)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	panel.add_child(col)
+	var title := Look.label(s.t("dayOver"), 28, true)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(title)
+	for i in lines.size():
+		var l := Look.label(lines[i], 18, i == lines.size() - 1, (Look.PARROT if good else Look.VERMILION) if i == lines.size() - 1 else Look.OUTLINE)
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		col.add_child(l)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 10)
+	var again := Look.button(s.t("again"), Look.MAGENTA, 18)
+	again.pressed.connect(func(): again_pressed.emit())
+	row.add_child(again)
+	var home := Look.button(s.t("toMohalla"), Look.OUTLINE, 18)
+	home.pressed.connect(func(): back_pressed.emit())
+	row.add_child(home)
+	col.add_child(row)
 
 
 func _round_button(text: String, size: Vector2, colour: Color) -> Panel:
@@ -217,9 +313,10 @@ func _draw_arrow() -> void:
 
 ## target: the place name and tiles left (or a note when there is no legal
 ## way); angle: clockwise from straight ahead; notice: "" for the hint.
-func refresh(target: String, trips: int, angle: float, notice: String, notice_colour: Color, me: Vector2, goal: Vector2i) -> void:
+func refresh(target: String, status: String, angle: float, notice: String, notice_colour: Color, me: Vector2, goal: Vector2i) -> void:
 	_target.text = target
-	_trips.text = s.t("rickshawTrips", {"count": trips})
+	if _trips.text != status:
+		_trips.text = status
 	if absf(angle - _angle) > 0.01:
 		_angle = angle
 		_arrow.queue_redraw()

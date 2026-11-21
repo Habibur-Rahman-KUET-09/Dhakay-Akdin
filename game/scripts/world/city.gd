@@ -599,12 +599,6 @@ static func _features(map: RoadMap, town: Node3D) -> void:
 				town.add_child(_box(Vector3(2.0, 0.1, 1.4), side + Vector3(0, 2.0, 0), Look.PARROT))
 				town.add_child(_box(Vector3(1.4, 0.4, 0.4), side + Vector3(0, 0.2, 0.0) - _inward(map, p) * 0.9, Color("8B5A2B")))
 				town.add_child(_sign("চা", side + Vector3(0, 2.6, 0), 36, Look.PARROT))
-			elif k == RoadMap.Kind.SIGNAL:
-				var side := _side(map, p)
-				town.add_child(_cylinder(0.12, 4.0, side + Vector3(0, 2.0, 0), Color("333333")))
-				town.add_child(_box(Vector3(0.45, 1.2, 0.45), side + Vector3(0, 4.3, 0), Color("222222")))
-				town.add_child(_box(Vector3(0.47, 0.32, 0.47), side + Vector3(0, 4.6, 0), Look.VERMILION))
-				town.add_child(_box(Vector3(0.47, 0.32, 0.47), side + Vector3(0, 4.0, 0), Look.PARROT))
 			elif k == RoadMap.Kind.HOME:
 				# Home is a door in the wall beside the lane, with its name over it.
 				var side := _side(map, p)

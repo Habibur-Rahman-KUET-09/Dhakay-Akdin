@@ -267,6 +267,14 @@ static func rickshaw(passenger := false, rider := true) -> ArrayMesh:
 	return b.commit()
 
 
+## A passenger sitting on the rickshaw seat (shirt PAINT_A, trousers
+## PAINT_B), to show on Rahim Chacha's rickshaw during a trip.
+static func seated_passenger() -> ArrayMesh:
+	var b := Builder.new()
+	_body(b, Vector3(0, 1.04, 0.66), true, false)
+	return b.commit()
+
+
 ## A fruit seller's van (a flat three-wheeled cart): a plank bed piled with
 ## bananas, oranges, apples and green coconuts, under a faded umbrella.
 static func fruit_cart() -> ArrayMesh:

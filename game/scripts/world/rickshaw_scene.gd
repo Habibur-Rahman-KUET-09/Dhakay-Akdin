@@ -1,11 +1,12 @@
-## Rahim Chacha on the real Mirpur map in 3D (§৪.১): the camera rides
-## behind the rickshaw, so swipes are turns. Left or right: the next
-## junction. Down: turn round now. Up: straight on.
+## Rahim Chacha's day on the real Mirpur map in 3D (§৪.১): passengers to
+## find and bargain with, trips against the clock, from 7 am to 9 pm. The
+## camera rides behind the rickshaw, so swipes are turns. Left or right:
+## the next junction. Down: turn round now. Up: straight on.
 extends Node3D
 
 const RoadMap = preload("res://scripts/rules/road_map.gd")
 const Driver = preload("res://scripts/rules/driver.gd")
-const Shift = preload("res://scripts/rules/shift.gd")
+const Day = preload("res://scripts/rules/day.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
@@ -15,16 +16,28 @@ const Hud = preload("res://scripts/ui/hud.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
+const SignalLights = preload("res://scripts/world/signal_lights.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
 const CAMERA_BACK := 6.2
 const CAMERA_UP := 3.9
 ## Bangladesh drives on the left.
-const KEEP_LEFT := 1.2
+const KEEP_LEFT := 1.0
 
 var strings := Strings.new()
-var shift: Shift
+var shift: Day
+var signals: SignalLights
+## People waiting by the road, by passenger id.
+var _waiting_nodes := {}
+var _person_mesh: ArrayMesh
+var _rider_seat: MeshInstance3D
+var _palette := PackedColorArray()
+var _crossing_wait := 0.0
+var _sun: DirectionalLight3D
+var _sky: ProceduralSkyMaterial
+var _env: Environment
+var _target_money := 600
 var rickshaw: Node3D
 ## The rickshaw body's material: paints hood and body, pedals the legs.
 var _paint: ShaderMaterial
@@ -55,10 +68,8 @@ func _ready() -> void:
 	strings.lang = Strings.saved_lang()
 	var map: RoadMap = RoadMap.load_area("mirpur")
 	var b := Balance.new()
-	shift = Shift.new(map, b.n("rickshaw.speed_tiles_per_s"), b.n("rickshaw.waterlog_speed"))
-	shift.accel = b.n("rickshaw.accel_tiles_per_s2")
-	shift.coast = b.n("rickshaw.coast_decel")
-	shift.braking = b.n("rickshaw.brake_decel")
+	shift = Day.new(map, b)
+	_target_money = int(b.n("rickshaw.daily_target"))
 	# Built a step per frame behind a loading screen, so a slow phone keeps
 	# responding, and the log shows which step a crash happened in.
 	set_process(false)
@@ -68,15 +79,19 @@ func _ready() -> void:
 	await _step("town")
 	add_child(City.build(map, strings.lang))
 	await _step("clutter")
-	var palette := PackedColorArray()
 	for hex in Traffic.PALETTE:
-		palette.append(Color(hex))
-	add_child(Clutter.build(map, palette))
+		_palette.append(Color(hex))
+	add_child(Clutter.build(map, _palette))
+	signals = SignalLights.new()
+	add_child(signals)
+	signals.setup(map)
 	await _step("traffic")
 	traffic = Traffic.new()
 	add_child(traffic)
 	traffic.setup(map, map.home)
 	traffic.focus = shift.driver
+	traffic.signal_cycle = shift.signal_cycle
+	_person_mesh = Models.person()
 	await _step("sounds")
 	_sounds()
 	await _step("rickshaw and hud")
@@ -87,6 +102,14 @@ func _ready() -> void:
 	var plain := Models.material()
 	for w in rickshaw.get_meta("wheels"):
 		(w as MeshInstance3D).material_override = plain
+	# A passenger on the seat, shown during a trip.
+	_rider_seat = MeshInstance3D.new()
+	_rider_seat.mesh = Models.seated_passenger()
+	var seat_paint := Models.traffic_material(PackedColorArray([Color("1C4E9B"), Color("37474F")]), false)
+	seat_paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
+	_rider_seat.material_override = seat_paint
+	_rider_seat.visible = false
+	rickshaw.add_child(_rider_seat)
 	add_child(rickshaw)
 	marker = _marker()
 	add_child(marker)
@@ -99,7 +122,12 @@ func _ready() -> void:
 	hud = Hud.new()
 	hud.setup(strings, map)
 	hud.back_pressed.connect(_go_home)
+	hud.again_pressed.connect(_play_again)
+	hud.offer_accept.connect(_on_accept)
+	hud.offer_counter.connect(_on_counter)
+	hud.offer_refuse.connect(_on_refuse)
 	add_child(hud)
+	_sync_waiting()
 	_yaw = _yaw_for(shift.driver.heading)
 	_place_marker()
 	_follow(0.0, true)
@@ -217,6 +245,8 @@ func _environment() -> void:
 	env.fog_enabled = true
 	env.fog_light_color = Color("D8D5C8")
 	env.fog_density = 0.011
+	_env = env
+	_sky = sky_mat
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -227,6 +257,7 @@ func _environment() -> void:
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 35.0
 	add_child(sun)
+	_sun = sun
 
 
 ## A tall glowing post where the passenger is going.
@@ -277,10 +308,20 @@ func _process(dt: float) -> void:
 		print("[alive] ", Time.get_ticks_msec(), " ms, ", Engine.get_frames_per_second(), " fps")
 	var gap := traffic.gap_ahead(shift.driver)
 	shift.room = clampf((gap - 0.12) / 0.5, 0.0, 1.0)
+	# Someone crossing the junction ahead: wait for them (a little while).
+	if shift.driver.progress > 0.45 and traffic.crossing_blocked(shift.driver):
+		_crossing_wait += dt
+		if _crossing_wait < Traffic.CROSSING_PATIENCE:
+			shift.room = 0.0
+	else:
+		_crossing_wait = 0.0
 	var events := shift.update(dt)
-	if events.has(Driver.Event.ARRIVED):
-		_place_marker()
-		_say(strings.t("rickshawArrived"), Look.PARROT)
+	traffic.clock = shift.clock
+	signals.update_lights(shift.clock, shift.signal_cycle)
+	_day_light()
+	_handle(events)
+	if not is_processing():
+		return
 	if events.has(Driver.Event.WRONG_WAY):
 		_say(strings.t("rickshawWrongWay"), Look.VERMILION)
 	if events.has(Driver.Event.WAITING):
@@ -340,11 +381,164 @@ func _update_hud() -> void:
 	var angle := ahead.angle_to(to) if to.length() > 0.01 else 0.0
 	var target := strings.t("rickshawNoRoute")
 	if shift.remaining >= 0:
-		var place_label := RoadMap.place_name(shift.place, strings.lang) if not shift.place.is_empty() else ""
-		target = strings.t("rickshawToPlace", {"place": place_label, "tiles": shift.remaining}) if place_label != "" \
-			else strings.t("rickshawToGo", {"tiles": shift.remaining})
+		if not shift.riding.is_empty():
+			target = strings.t("rickshawToPlace", {"place": RoadMap.place_name(shift.riding.place, strings.lang), "tiles": shift.remaining})
+		else:
+			target = strings.t("toPassenger", {"tiles": shift.remaining})
 	hud.show_controls(shift.pedal, shift.brake, shift.speed_now * City.T * 3.6)
-	hud.refresh(target, shift.delivered, angle, _notice, _notice_colour, me, shift.destination)
+	var status := "%s\n৳%d" % [_clock_text(), shift.money]
+	hud.refresh(target, status, angle, _notice, _notice_colour, me, shift.destination)
+
+
+## "সকাল 9:15" from the day's clock.
+func _clock_text() -> String:
+	var hour := shift.hour()
+	var h := int(hour)
+	var m := int((hour - h) * 60.0)
+	var part := "morning"
+	if h >= 20:
+		part = "night"
+	elif h >= 18:
+		part = "evening"
+	elif h >= 15:
+		part = "afternoon"
+	elif h >= 12:
+		part = "noon"
+	var h12 := h % 12
+	if h12 == 0:
+		h12 = 12
+	return strings.t("clock", {"part": strings.t(part), "h": h12, "m": "%02d" % m})
+
+
+## What the day's events mean on screen.
+func _handle(events: Array) -> void:
+	if events.has(Day.OFFER):
+		var w: Dictionary = shift.offer_for
+		hud.show_offer(
+			strings.t("offerTitle", {"place": RoadMap.place_name(w.place, strings.lang), "fare": w.offer}),
+			strings.t("type_" + w.type),
+			strings.t("counter", {"fare": shift.fares.counter(w.fair)}))
+	if events.has(Day.OFFER_GONE):
+		hud.hide_offer()
+	if events.has(Day.DELIVERED):
+		var t: Dictionary = shift.last_trip
+		var tip_text := strings.t("tipText", {"tip": t.tip}) if t.tip > 0 else ""
+		_say(strings.t("delivered", {"fare": t.fare, "tip": tip_text, "stars": _stars(t.stars)}), Look.PARROT, 3.5)
+		_rider_seat.visible = false
+		_bell.play()
+		_place_marker()
+		_sync_waiting()
+	if events.has(Day.FINED):
+		_say(strings.t("redLight", {"fine": int(shift.balance.n("rickshaw.red_light_fine"))}), Look.VERMILION, 3.0)
+	if events.has(Day.DAY_OVER):
+		_end_day()
+
+
+static func _stars(x: float) -> String:
+	return str(int(x)) if is_equal_approx(x, roundf(x)) else "%.1f" % x
+
+
+func _on_accept() -> void:
+	shift.accept()
+	_boarded()
+
+
+func _on_counter() -> void:
+	if shift.counter():
+		_boarded()
+	else:
+		hud.hide_offer()
+		_say(strings.t("counterNo"), Look.VERMILION, 2.5)
+		_place_marker()
+		_sync_waiting()
+
+
+func _on_refuse() -> void:
+	shift.refuse()
+	hud.hide_offer()
+
+
+func _boarded() -> void:
+	hud.hide_offer()
+	_rider_seat.visible = true
+	_say(strings.t("boarded", {"place": RoadMap.place_name(shift.riding.place, strings.lang), "fare": shift.riding.fare}), Look.SKY, 2.5)
+	_place_marker()
+	_sync_waiting()
+
+
+## People waiting by the road, with where they want to go and their offer.
+func _sync_waiting() -> void:
+	var keep := {}
+	for w in shift.waiting:
+		keep[w.id] = true
+		if _waiting_nodes.has(w.id):
+			continue
+		var node := Node3D.new()
+		var spot := City._side(shift.map, w.at)
+		node.position = spot + Vector3(0, 0.15, 0)
+		var face := City.centre(w.at) - spot
+		node.rotation.y = atan2(-face.x, -face.z)
+		var body := MeshInstance3D.new()
+		body.mesh = _person_mesh
+		var paint := Models.traffic_material(PackedColorArray([_palette[randi() % 8], _palette[8 + randi() % 8]]), false)
+		paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
+		body.material_override = paint
+		node.add_child(body)
+		var label := Label3D.new()
+		label.text = "%s\n৳%d" % [RoadMap.place_name(w.place, strings.lang), w.offer]
+		label.font = Look.font(Look.BOLD)
+		label.font_size = 40
+		label.outline_size = 12
+		label.modulate = Look.OUTLINE
+		label.outline_modulate = Look.YELLOW
+		label.pixel_size = 0.012
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		label.alpha_cut = Label3D.ALPHA_CUT_DISCARD
+		label.position = Vector3(0, 2.4, 0)
+		node.add_child(label)
+		add_child(node)
+		_waiting_nodes[w.id] = node
+	for id in _waiting_nodes.keys():
+		if not keep.has(id):
+			_waiting_nodes[id].queue_free()
+			_waiting_nodes.erase(id)
+
+
+## Morning sun to evening glow to night: the light follows the clock.
+func _day_light() -> void:
+	var h := shift.hour()
+	var noon := clampf(1.0 - absf(h - 12.5) / 6.5, 0.0, 1.0)
+	var dusk := clampf((h - 16.5) / 3.0, 0.0, 1.0)
+	var night := clampf((h - 19.0) / 2.0, 0.0, 1.0)
+	_sun.light_color = Color("FFE2B8").lerp(Color("FFF6E6"), noon).lerp(Color("FF9A4D"), dusk).lerp(Color("8FA3D6"), night)
+	_sun.light_energy = lerpf(0.55, 0.85, noon) * lerpf(1.0, 0.35, night)
+	_sun.rotation_degrees.x = -lerpf(18.0, 60.0, noon)
+	_env.ambient_light_energy = lerpf(0.35, 0.18, night)
+	_env.ambient_light_color = Color("F3E9D8").lerp(Color("F2C9A0"), dusk).lerp(Color("5A6A90"), night)
+	_sky.sky_top_color = Color("9DB4C6").lerp(Color("C9876A"), dusk).lerp(Color("1E2A44"), night)
+	_sky.sky_horizon_color = Color("E2DED2").lerp(Color("F0B27A"), dusk).lerp(Color("3A4566"), night)
+	_env.fog_light_color = Color("D8D5C8").lerp(Color("E5B48C"), dusk).lerp(Color("2E3650"), night)
+
+
+func _end_day() -> void:
+	set_process(false)
+	hud.hide_offer()
+	shift.pedal = false
+	var lines := [
+		strings.t("earned", {"money": shift.money}),
+		strings.t("tripsDone", {"trips": shift.trips}),
+		strings.t("avgRating", {"stars": _stars(snappedf(shift.average_stars(), 0.1))}),
+	]
+	if shift.fines > 0:
+		lines.append(strings.t("finesPaid", {"fines": shift.fines}))
+	var met := shift.money >= _target_money
+	lines.append(strings.t("targetMet" if met else "targetMissed", {"target": _target_money}))
+	hud.show_day_end(lines, met)
+
+
+func _play_again() -> void:
+	CrashWatch.start("rickshaw")
+	get_tree().reload_current_scene()
 
 
 ## Touches are read finger by finger: a finger on the pedal or brake holds
@@ -355,7 +549,9 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var finger: int = event.index
 		if event.pressed:
-			if hud.bell_rect().has_point(event.position):
+			if hud.offer_rect().has_point(event.position):
+				pass
+			elif hud.bell_rect().has_point(event.position):
 				_bell.play()
 			elif hud.pedal_rect().has_point(event.position):
 				_pedal_fingers[finger] = true
