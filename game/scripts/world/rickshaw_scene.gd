@@ -59,23 +59,27 @@ func _ready() -> void:
 	shift.accel = b.n("rickshaw.accel_tiles_per_s2")
 	shift.coast = b.n("rickshaw.coast_decel")
 	shift.braking = b.n("rickshaw.brake_decel")
-	print("[rickshaw] environment")
+	# Built a step per frame behind a loading screen, so a slow phone keeps
+	# responding, and the log shows which step a crash happened in.
+	set_process(false)
+	var loading := _loading_screen()
+	await _step("environment")
 	_environment()
-	print("[rickshaw] town")
+	await _step("town")
 	add_child(City.build(map, strings.lang))
-	print("[rickshaw] clutter")
+	await _step("clutter")
 	var palette := PackedColorArray()
 	for hex in Traffic.PALETTE:
 		palette.append(Color(hex))
 	add_child(Clutter.build(map, palette))
-	print("[rickshaw] traffic")
+	await _step("traffic")
 	traffic = Traffic.new()
 	add_child(traffic)
 	traffic.setup(map, map.home)
 	traffic.focus = shift.driver
-	print("[rickshaw] sounds")
+	await _step("sounds")
 	_sounds()
-	print("[rickshaw] ready")
+	await _step("rickshaw and hud")
 	# Rahim Chacha's own rickshaw: yellow hood, magenta body.
 	rickshaw = Models.player_rickshaw(Look.YELLOW, Look.MAGENTA)
 	_paint = Models.traffic_material(PackedColorArray([Look.YELLOW, Look.MAGENTA]), false)
@@ -99,6 +103,9 @@ func _ready() -> void:
 	_yaw = _yaw_for(shift.driver.heading)
 	_place_marker()
 	_follow(0.0, true)
+	await _step("done")
+	loading.queue_free()
+	set_process(true)
 
 
 ## The bell, a few horn players placed on passing traffic, the road's hum.
@@ -150,6 +157,29 @@ func _honk(dt: float) -> void:
 			h.volume_db = -4.0 if kind == "bus" else -8.0
 			h.play()
 			return
+
+
+func _loading_screen() -> CanvasLayer:
+	var layer := CanvasLayer.new()
+	layer.layer = 10
+	var bg := ColorRect.new()
+	bg.color = Look.CREAM
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(bg)
+	var text := Look.label(strings.t("loading"), 22, true)
+	text.set_anchors_preset(Control.PRESET_CENTER)
+	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	text.autowrap_mode = TextServer.AUTOWRAP_OFF
+	text.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	layer.add_child(text)
+	add_child(layer)
+	return layer
+
+
+## Lets a frame pass and notes the next step in the log.
+func _step(what: String) -> void:
+	print("[rickshaw] ", what, " ", Time.get_ticks_msec(), " ms, ", int(OS.get_static_memory_usage() / 1048576), " MB")
+	await get_tree().process_frame
 
 
 func _go_home() -> void:
@@ -305,6 +335,8 @@ func _update_hud() -> void:
 ## Touches are read finger by finger: a finger on the pedal or brake holds
 ## it; any other finger can swipe a turn at the same time.
 func _input(event: InputEvent) -> void:
+	if not is_processing():
+		return
 	if event is InputEventScreenTouch:
 		var finger: int = event.index
 		if event.pressed:

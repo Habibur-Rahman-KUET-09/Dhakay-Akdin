@@ -118,5 +118,9 @@
  "copied": {
   "bn": "কপি হয়েছে",
   "en": "Copied"
+ },
+ "loading": {
+  "bn": "মিরপুর সাজানো হচ্ছে…",
+  "en": "Setting up Mirpur…"
  }
 }

@@ -54,12 +54,17 @@ static func noise(p: Vector2i, salt := 0) -> float:
 static func build(map: RoadMap, lang: String) -> Node3D:
 	var town := Node3D.new()
 	town.name = "Town"
+	print("[town] ground and roads")
 	town.add_child(_ground(map))
 	town.add_child(_roads(map))
+	print("[town] blocks")
 	town.add_child(_blocks(map))
+	print("[town] poles and wires")
 	town.add_child(_poles_and_wires(map))
+	print("[town] features and banners")
 	_features(map, town)
 	_banners(map, town)
+	print("[town] place names")
 	for pl in map.places:
 		var s := _sign(RoadMap.place_name(pl, lang), centre(pl.at, 10.0), 64)
 		s.visibility_range_end = 110.0
