@@ -90,7 +90,7 @@ func test_mirpur_every_road_reaches_every_other() -> void:
 		i += 1
 		for d in 4:
 			var n := RoadMap.step(c, d)
-			if not seen.has(n) and m.move(n, RoadMap.opposite(d)) == RoadMap.Move.OK:
+			if m.is_road(n) and not seen.has(n) and m.move(n, RoadMap.opposite(d)) == RoadMap.Move.OK:
 				seen[n] = true
 				queue.append(n)
 	eq(seen.size(), roads.size(), "home reachable from every road")
