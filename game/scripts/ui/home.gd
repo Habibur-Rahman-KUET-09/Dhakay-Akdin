@@ -312,7 +312,7 @@ func _graphics_row() -> Control:
 	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(title)
 	for level in ["high", "low"]:
-		var on := Graphics.level() == level
+		var on: bool = Graphics.level() == level
 		var pick := Look.button(s.t("graphics_" + level), Look.MAGENTA if on else Color("B9B2A6"), 15)
 		pick.name = "Graphics_" + level
 		pick.pressed.connect(_set_graphics.bind(level))
