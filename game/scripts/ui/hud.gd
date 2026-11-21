@@ -127,6 +127,7 @@ func _ready() -> void:
 	_speed.add_theme_constant_override("outline_size", 6)
 	controls.add_child(_speed)
 	pedal_button = _round_button(s.t("pedal"), PEDAL_SIZE, Look.PARROT)
+	pedal_button.size_flags_vertical = Control.SIZE_SHRINK_END
 	controls.add_child(pedal_button)
 	bottom.add_child(controls)
 	var credit := Look.label(map.credit, 11)

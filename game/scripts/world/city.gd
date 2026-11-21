@@ -579,10 +579,10 @@ static func _features(map: RoadMap, town: Node3D) -> void:
 				town.add_child(_box(Vector3(1.6, 1.0, 0.2), centre(p, 6.2), Look.PARROT))
 			elif k == RoadMap.Kind.TEA:
 				var side := _side(map, p)
-				town.add_child(_box(Vector3(2.0, 2.2, 1.6), side + Vector3(0, 1.1, 0), Color("6B4A2B")))
-				town.add_child(_box(Vector3(2.6, 0.12, 2.2), side + Vector3(0, 2.3, 0), Look.PARROT))
-				town.add_child(_box(Vector3(1.6, 0.45, 0.5), side + Vector3(0, 0.25, 0), Color("8B5A2B")))
-				town.add_child(_sign("চা", side + Vector3(0, 3.0, 0), 48, Look.PARROT))
+				town.add_child(_box(Vector3(1.6, 1.9, 0.9), side + Vector3(0, 0.95, 0), Color("6B4A2B")))
+				town.add_child(_box(Vector3(2.0, 0.1, 1.4), side + Vector3(0, 2.0, 0), Look.PARROT))
+				town.add_child(_box(Vector3(1.4, 0.4, 0.4), side + Vector3(0, 0.2, 0.0) - _inward(map, p) * 0.9, Color("8B5A2B")))
+				town.add_child(_sign("চা", side + Vector3(0, 2.6, 0), 36, Look.PARROT))
 			elif k == RoadMap.Kind.SIGNAL:
 				var side := _side(map, p)
 				town.add_child(_cylinder(0.12, 4.0, side + Vector3(0, 2.0, 0), Color("333333")))
@@ -590,10 +590,12 @@ static func _features(map: RoadMap, town: Node3D) -> void:
 				town.add_child(_box(Vector3(0.47, 0.32, 0.47), side + Vector3(0, 4.6, 0), Look.VERMILION))
 				town.add_child(_box(Vector3(0.47, 0.32, 0.47), side + Vector3(0, 4.0, 0), Look.PARROT))
 			elif k == RoadMap.Kind.HOME:
+				# Home is a door in the wall beside the lane, with its name over it.
 				var side := _side(map, p)
-				town.add_child(_box(Vector3(2.6, 2.6, 2.2), side + Vector3(0, 1.3, 0), Color("B5651D")))
-				town.add_child(_box(Vector3(3.0, 0.15, 2.6), side + Vector3(0, 2.7, 0), Color("8C8C8C")))
-				town.add_child(_sign("বাড়ি", side + Vector3(0, 3.4, 0), 48, Look.MAGENTA))
+				town.add_child(_box(Vector3(1.0, 2.1, 0.3), side + Vector3(0, 1.05, 0), Color("6B3E1E")))
+				var home_sign := _sign("বাড়ি", side + Vector3(0, 2.5, 0), 26, Look.MAGENTA)
+				home_sign.visibility_range_end = 40.0
+				town.add_child(home_sign)
 
 
 ## Cloth banners hung across some straight stretches of road, lettered on
@@ -631,8 +633,16 @@ static func _banners(map: RoadMap, town: Node3D) -> void:
 static func _side(map: RoadMap, p: Vector2i) -> Vector3:
 	for d in 4:
 		if not map.is_road(RoadMap.step(p, d)):
-			return centre(p) + Vector3(RoadMap.DX[d], 0, RoadMap.DY[d]) * (T * 0.5 - 1.2)
+			return centre(p) + Vector3(RoadMap.DX[d], 0, RoadMap.DY[d]) * (T * 0.5 + PAVEMENT * 0.5)
 	return centre(p) + Vector3(T * 0.3, 0, T * 0.3)
+
+
+## From the road tile p towards the building beside it.
+static func _inward(map: RoadMap, p: Vector2i) -> Vector3:
+	for d in 4:
+		if not map.is_road(RoadMap.step(p, d)):
+			return Vector3(RoadMap.DX[d], 0, RoadMap.DY[d])
+	return Vector3.ZERO
 
 
 ## Text in the town. Billboards turn to face the camera; flat ones (shop
