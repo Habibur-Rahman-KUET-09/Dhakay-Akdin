@@ -41,7 +41,10 @@ func setup(the_story: Story, the_chapter: Dictionary, strings: Strings) -> void:
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Fill the screen whatever it sits in (the home screen, or the window).
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if get_parent() is Window:
+		size = get_viewport_rect().size
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg := ColorRect.new()
 	bg.color = Color("1D1A1A")
