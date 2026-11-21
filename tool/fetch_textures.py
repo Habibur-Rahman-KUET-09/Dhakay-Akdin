@@ -5,8 +5,8 @@
 
 For each slot below it asks the Poly Haven API for textures whose
 categories or tags match, takes the most downloaded one, and saves its
-1k diffuse (colour) map as game/textures/<slot>.jpg (the game uses them
-resized to 512 px: run tool/fetch_textures.py, then resize). game/textures/
+1k diffuse (colour) map, resized to 512 px, as game/textures/<slot>.jpg
+(needs Pillow). game/textures/
 SOURCES.json records which asset each file came from. Run by the
 textures workflow, which has open internet.
 
@@ -76,8 +76,12 @@ def main():
             print(f'{slot}: {aid} has no 1k jpg diffuse', file=sys.stderr)
             continue
         req = urllib.request.Request(url, headers=UA)
-        with urllib.request.urlopen(req, timeout=120) as r, open(os.path.join(OUT, f'{slot}.jpg'), 'wb') as f:
+        path = os.path.join(OUT, f'{slot}.jpg')
+        with urllib.request.urlopen(req, timeout=120) as r, open(path, 'wb') as f:
             f.write(r.read())
+        # 512 px is plenty on a phone and keeps the APK small.
+        from PIL import Image
+        Image.open(path).convert('RGB').resize((512, 512), Image.LANCZOS).save(path, quality=82, optimize=True)
         taken.add(aid)
         sources[slot] = {'asset': aid, 'name': assets[aid].get('name'), 'url': f'https://polyhaven.com/a/{aid}', 'license': 'CC0'}
         print(f'{slot}: {aid} ({assets[aid].get("name")})')
