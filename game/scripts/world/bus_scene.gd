@@ -72,6 +72,7 @@ var _note_buttons := {}
 var _giving := {}
 var _thump: AudioStreamPlayer
 var _ding: AudioStreamPlayer
+var _coin: AudioStreamPlayer
 var _frames_logged := 0
 ## Where each rider is drawn: their seat number, so a move is noticed.
 var _spot_of := {}
@@ -320,6 +321,10 @@ func _sounds() -> void:
 	_ding.stream = load("res://sounds/bell.wav")
 	_ding.volume_db = -10.0
 	add_child(_ding)
+	_coin = AudioStreamPlayer.new()
+	_coin.stream = load("res://sounds/coin.wav")
+	_coin.volume_db = -6.0
+	add_child(_coin)
 
 
 func _stop_name(i: int) -> String:
@@ -731,7 +736,7 @@ func _on_give() -> void:
 		_say(strings.t("overpaid", {"n": bus.overpaid}), Look.VERMILION, 2.5)
 		_close_fare()
 	elif got.has(BusDay.Event.SETTLED):
-		_ding.play()
+		_coin.play()
 		_say(strings.t("settled"), Look.PARROT, 1.5)
 		_close_fare()
 	_refresh()

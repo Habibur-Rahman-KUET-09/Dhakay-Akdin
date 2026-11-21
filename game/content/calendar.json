@@ -1,0 +1,164 @@
+{
+ "about": "The year in Dhaka. months: for each month, how much likelier rain is than balance.json's chance (x), how much likelier a hot day, and the chance of a foggy winter morning. festivals: fixed-date days (Eid moves with the moon, so it is not here), with a greeting, an extra tip per ride, and the colours the lanes are decked in.",
+ "months": [
+  {
+   "month": "January",
+   "rain": 0.1,
+   "hot": 0.0,
+   "fog": 0.6
+  },
+  {
+   "month": "February",
+   "rain": 0.15,
+   "hot": 0.2,
+   "fog": 0.2
+  },
+  {
+   "month": "March",
+   "rain": 0.3,
+   "hot": 1.2,
+   "fog": 0.0
+  },
+  {
+   "month": "April",
+   "rain": 0.7,
+   "hot": 2.0,
+   "fog": 0.0
+  },
+  {
+   "month": "May",
+   "rain": 1.0,
+   "hot": 2.0,
+   "fog": 0.0
+  },
+  {
+   "month": "June",
+   "rain": 2.0,
+   "hot": 1.0,
+   "fog": 0.0
+  },
+  {
+   "month": "July",
+   "rain": 2.4,
+   "hot": 0.6,
+   "fog": 0.0
+  },
+  {
+   "month": "August",
+   "rain": 2.4,
+   "hot": 0.6,
+   "fog": 0.0
+  },
+  {
+   "month": "September",
+   "rain": 2.0,
+   "hot": 0.8,
+   "fog": 0.0
+  },
+  {
+   "month": "October",
+   "rain": 1.0,
+   "hot": 0.8,
+   "fog": 0.0
+  },
+  {
+   "month": "November",
+   "rain": 0.3,
+   "hot": 0.3,
+   "fog": 0.1
+  },
+  {
+   "month": "December",
+   "rain": 0.1,
+   "hot": 0.0,
+   "fog": 0.6
+  }
+ ],
+ "festivals": [
+  {
+   "id": "ekushe",
+   "date": "02-21",
+   "name": {
+    "bn": "অমর একুশে",
+    "en": "Ekushe February"
+   },
+   "greeting": {
+    "bn": "আজ শহীদ দিবস। খালি পায়ে শহীদ মিনারে ফুল দিতে যাচ্ছে মানুষ।",
+    "en": "Martyrs' Day: people walk barefoot to the Shaheed Minar with flowers."
+   },
+   "tip": 0,
+   "colours": [
+    "1B1B1B",
+    "F4F1E8"
+   ]
+  },
+  {
+   "id": "falgun",
+   "date": "02-14",
+   "name": {
+    "bn": "পহেলা ফাল্গুন",
+    "en": "Pohela Falgun"
+   },
+   "greeting": {
+    "bn": "বসন্ত এসেছে! হলুদ শাড়ি, ফুলের মালা, খুশি যাত্রী।",
+    "en": "Spring is here: yellow saris, flower garlands, cheerful riders."
+   },
+   "tip": 10,
+   "colours": [
+    "F6C445",
+    "F08A24"
+   ]
+  },
+  {
+   "id": "shadhinota",
+   "date": "03-26",
+   "name": {
+    "bn": "স্বাধীনতা দিবস",
+    "en": "Independence Day"
+   },
+   "greeting": {
+    "bn": "স্বাধীনতা দিবসের শুভেচ্ছা! পতাকায় সেজেছে শহর।",
+    "en": "Happy Independence Day! The town is dressed in flags."
+   },
+   "tip": 10,
+   "colours": [
+    "006A4E",
+    "F42A41"
+   ]
+  },
+  {
+   "id": "boishakh",
+   "date": "04-14",
+   "name": {
+    "bn": "পহেলা বৈশাখ",
+    "en": "Pohela Boishakh"
+   },
+   "greeting": {
+    "bn": "শুভ নববর্ষ! আজ সবাই একটু বেশি বকশিশ দেয়।",
+    "en": "Happy New Year! Everyone tips a little more today."
+   },
+   "tip": 20,
+   "colours": [
+    "F42A41",
+    "F4F1E8"
+   ]
+  },
+  {
+   "id": "bijoy",
+   "date": "12-16",
+   "name": {
+    "bn": "বিজয় দিবস",
+    "en": "Victory Day"
+   },
+   "greeting": {
+    "bn": "বিজয় দিবসের শুভেচ্ছা! লাল-সবুজে ছেয়ে গেছে রাস্তা।",
+    "en": "Happy Victory Day! The streets are red and green."
+   },
+   "tip": 20,
+   "colours": [
+    "006A4E",
+    "F42A41"
+   ]
+  }
+ ]
+}

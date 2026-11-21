@@ -1330,5 +1330,37 @@
  "areaLocked": {
   "bn": "পুরান ঢাকা খোলে মহল্লা লেভেল {level}-এ",
   "en": "Old Dhaka opens at mohalla level {level}"
+ },
+ "fogMorning": {
+  "bn": "শীতের সকাল, ঘন কুয়াশা। সাবধানে চালান!",
+  "en": "A winter morning, thick fog. Ride carefully!"
+ },
+ "festivalTip": {
+  "bn": "আজ প্রতি ট্রিপে বকশিশ +{n} টাকা",
+  "en": "{n} taka extra tip every ride today"
+ },
+ "seasonMonsoon": {
+  "bn": "বর্ষাকাল: বৃষ্টি হবে প্রায়ই, রাস্তায় পানি জমে।",
+  "en": "Monsoon: rain most days, water on the roads."
+ },
+ "seasonWinter": {
+  "bn": "শীতকাল: সকালে কুয়াশা পড়ে।",
+  "en": "Winter: foggy mornings."
+ },
+ "seasonHot": {
+  "bn": "গরমকাল: কড়া রোদ, ঠান্ডা পানীয়ের চাহিদা বেশি।",
+  "en": "Hot season: fierce sun, cold drinks sell well."
+ },
+ "music": {
+  "bn": "গান:",
+  "en": "Music:"
+ },
+ "musicOn": {
+  "bn": "চালু",
+  "en": "On"
+ },
+ "musicOff": {
+  "bn": "বন্ধ",
+  "en": "Off"
  }
 }

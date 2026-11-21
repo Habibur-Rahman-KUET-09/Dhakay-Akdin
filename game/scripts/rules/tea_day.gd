@@ -12,6 +12,7 @@
 extends RefCounted
 
 const Balance = preload("res://scripts/rules/balance.gd")
+const Calendar = preload("res://scripts/rules/calendar.gd")
 
 enum Event {
 	ARRIVED, ## someone sat down
@@ -75,6 +76,9 @@ var rain_at := -1.0
 var rain_seconds := 60.0
 var hot := false
 var weather := RandomNumberGenerator.new()
+## Today's festival (when the scene gives the date): happy customers tip
+## half the festival's extra.
+var festival := {}
 var _weights := {}
 ## Things sold by kind (for the day's challenge).
 var sold_items := {}
@@ -87,7 +91,7 @@ var _next_in := 2.0
 var _next_id := 0
 
 
-func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
+func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") -> void:
 	b = balance
 	upgrades = owned
 	if seed_value >= 0:
@@ -106,10 +110,18 @@ func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
 	if has_second:
 		kettle2 = kettle_size
 	_weights = ORDER_WEIGHTS.duplicate()
-	if weather.randf() < b.n("tea_stall.rain_chance_per_day"):
+	# The month makes rain or heat likelier (the monsoon, April's heat).
+	var rain_chance := b.n("tea_stall.rain_chance_per_day")
+	var hot_chance := b.n("tea_stall.hot_chance_per_day")
+	if date != "":
+		var calendar := Calendar.new()
+		rain_chance = calendar.rain_chance(rain_chance, date)
+		hot_chance = calendar.hot_chance(hot_chance, date)
+		festival = calendar.festival(date)
+	if weather.randf() < rain_chance:
 		rain_at = weather.randf_range(0.15, 0.75) * day_seconds
 		rain_seconds = b.n("tea_stall.rain_seconds")
-	elif weather.randf() < b.n("tea_stall.hot_chance_per_day"):
+	elif weather.randf() < hot_chance:
 		hot = true
 	if upgrades.has("fridge"):
 		menu["cold_drink"] = {"price": int(b.n("tea_stall.upgrades.fridge.price")), "steps": ["fridge"]}
@@ -366,7 +378,7 @@ func give() -> Array:
 		var tip := 0
 		if glad:
 			happy += 1
-			tip = maxi(1, roundi(who.bill * b.n("tea_stall.happy_tip_share")))
+			tip = maxi(1, roundi(who.bill * b.n("tea_stall.happy_tip_share"))) + roundi(float(festival.get("tip", 0)) * 0.5)
 			money += tip
 			tips += tip
 		# A neighbour who thinks well of the stall leaves a bit more.

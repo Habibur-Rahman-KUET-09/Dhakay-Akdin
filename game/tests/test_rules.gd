@@ -505,3 +505,53 @@ func test_rain_spreads_the_water_and_softens_bargains() -> void:
 		if Day.new(_mirpur(), Balance.new(), s).rain_at >= 0.0:
 			wet_days += 1
 	check(wet_days > 5 and wet_days < 40, "rain on some days (%d of 50)" % wet_days)
+
+
+func test_the_year_in_dhaka() -> void:
+	var cal = load("res://scripts/rules/calendar.gd").new()
+	eq(cal.month_of("2026-07-10"), 7, "July")
+	eq(cal.month_of("nonsense"), 0, "an unreadable date")
+	check(cal.rain_chance(0.4, "2026-07-10") > 0.4, "the monsoon rains more")
+	check(cal.rain_chance(0.4, "2026-12-10") < 0.4, "December hardly rains")
+	eq(cal.rain_chance(0.4, ""), 0.4, "no date, the usual chance")
+	eq(cal.festival("2027-04-14").get("id", ""), "boishakh", "Pohela Boishakh")
+	eq(cal.festival("2026-12-16").get("id", ""), "bijoy", "Victory Day")
+	check(cal.festival("2026-11-21").is_empty(), "an ordinary day")
+
+
+func test_monsoon_days_rain_more_and_winter_mornings_are_foggy() -> void:
+	var wet := 0
+	var dry := 0
+	var fog := 0
+	for i in 40:
+		if Day.new(_mirpur(), Balance.new(), 500 + i, "2026-07-20").rain_at >= 0.0:
+			wet += 1
+		if Day.new(_mirpur(), Balance.new(), 500 + i, "2026-12-20").rain_at >= 0.0:
+			dry += 1
+		var winter := Day.new(_mirpur(), Balance.new(), 500 + i, "2026-01-05")
+		if winter.foggy:
+			fog += 1
+			eq(winter.fog(), 1.0, "thickest at dawn")
+			winter.clock = winter.day_seconds * 0.5
+			eq(winter.fog(), 0.0, "gone by midday")
+	check(wet > dry + 15, "July rains more than December (%d to %d)" % [wet, dry])
+	check(fog > 10, "some foggy January mornings (%d)" % fog)
+	check(not Day.new(_mirpur(), Balance.new(), 3, "2026-07-20").foggy, "no fog in July")
+
+
+func test_a_festival_adds_to_every_tip() -> void:
+	var plain := Day.new(_mirpur(), Balance.new(), 5)
+	var fest := Day.new(_mirpur(), Balance.new(), 5, "2026-04-14")
+	eq(fest.festival.get("id", ""), "boishakh", "Pohela Boishakh")
+	for d in [plain, fest]:
+		var w: Dictionary = d.waiting[0]
+		d.driver.cell = w.at
+		d.driver.progress = 0.0
+		d.update(0.01)
+		d.accept()
+		# Straight to the drop-off: the same ride on both days.
+		d._deliver([])
+	check(not plain.last_trip.is_empty() and not fest.last_trip.is_empty(), "both trips done")
+	if not plain.last_trip.is_empty() and not fest.last_trip.is_empty():
+		eq(int(fest.last_trip.tip) - int(plain.last_trip.tip), 20, "20 taka more")
+

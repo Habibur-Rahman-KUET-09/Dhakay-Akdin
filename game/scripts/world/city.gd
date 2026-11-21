@@ -52,7 +52,9 @@ static func noise(p: Vector2i, salt := 0) -> float:
 
 
 ## skip: a tea stall tile left empty (the tea stall scene builds its own).
-static func build(map: RoadMap, lang: String, skip := Vector2i(-1, -1)) -> Node3D:
+## `festival` (from content/calendar.json, or {}) decks the lanes in its
+## colours and puts its name on the banners.
+static func build(map: RoadMap, lang: String, skip := Vector2i(-1, -1), festival := {}) -> Node3D:
 	var town := Node3D.new()
 	town.name = "Town"
 	print("[town] ground and roads")
@@ -64,7 +66,9 @@ static func build(map: RoadMap, lang: String, skip := Vector2i(-1, -1)) -> Node3
 	town.add_child(_poles_and_wires(map))
 	print("[town] features and banners")
 	_features(map, town, skip)
-	_banners(map, town)
+	_banners(map, town, festival)
+	if not festival.is_empty():
+		_bunting(map, town, festival)
 	print("[town] place names")
 	for pl in map.places:
 		var s := _sign(RoadMap.place_name(pl, lang), centre(pl.at, 10.0), 64)
@@ -618,8 +622,11 @@ static func _features(map: RoadMap, town: Node3D, skip := Vector2i(-1, -1)) -> v
 
 ## Cloth banners hung across some straight stretches of road, lettered on
 ## both sides: admissions, discounts, flats for sale.
-static func _banners(map: RoadMap, town: Node3D) -> void:
+static func _banners(map: RoadMap, town: Node3D, festival := {}) -> void:
 	var list: Array = JSON.parse_string(FileAccess.get_file_as_string("res://content/shops.json")).banners
+	if not festival.is_empty():
+		# Most banners greet the day.
+		list = [festival.name, festival.name, festival.name] + list
 	var cloth_at: Array[Transform3D] = []
 	var cloth_colour: Array[Color] = []
 	for p in map.roads():
@@ -644,6 +651,34 @@ static func _banners(map: RoadMap, town: Node3D) -> void:
 			l.visibility_range_end = 60.0
 			town.add_child(l)
 	town.add_child(_multi(BoxMesh.new(), cloth_at, cloth_colour))
+
+
+## Strings of little paper flags across the lanes in the festival's
+## colours, sagging between the buildings.
+static func _bunting(map: RoadMap, town: Node3D, festival: Dictionary) -> void:
+	var colours: Array[Color] = []
+	for hex in festival.colours:
+		colours.append(Color(hex))
+	var flag_at: Array[Transform3D] = []
+	var flag_colour: Array[Color] = []
+	var flags := 9
+	for p in map.roads():
+		if noise(p, 120) > 0.2:
+			continue
+		var ew := map.is_road(RoadMap.step(p, RoadMap.E)) and map.is_road(RoadMap.step(p, RoadMap.W))
+		var ns := map.is_road(RoadMap.step(p, RoadMap.N)) and map.is_road(RoadMap.step(p, RoadMap.S))
+		if ew == ns:
+			continue
+		var face := Vector3(1, 0, 0) if ew else Vector3(0, 0, 1)
+		var across := Vector3(0, 0, 1) if ew else Vector3(1, 0, 0)
+		var mid := centre(p, 6.0)
+		for i in flags:
+			var k := float(i) / float(flags - 1)
+			var at := mid + across * (k - 0.5) * (T - 0.4) - Vector3(0, 0.7 * sin(PI * k), 0)
+			flag_at.append(Transform3D(Basis(across * 0.38, Vector3.UP * 0.5, face * 0.02), at))
+			flag_colour.append(colours[i % colours.size()])
+	if not flag_at.is_empty():
+		town.add_child(_multi(BoxMesh.new(), flag_at, flag_colour))
 
 
 ## A spot at the edge of a road tile, beside a building, for things that

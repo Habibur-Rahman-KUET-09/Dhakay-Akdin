@@ -76,7 +76,7 @@ func _ready() -> void:
 	strings.lang = Strings.saved_lang()
 	b = Balance.new()
 	progress = Progress.new(b)
-	day = TeaDay.new(b, -1, progress.data.tea.upgrades)
+	day = TeaDay.new(b, -1, progress.data.tea.upgrades, progress.date())
 	var ids := neighbours.ids()
 	ids.shuffle()
 	day.npc_pool = ids.slice(0, 6)
@@ -89,7 +89,7 @@ func _ready() -> void:
 	await _step("environment")
 	_environment()
 	await _step("town")
-	var town := City.build(map, strings.lang, tile)
+	var town := City.build(map, strings.lang, tile, day.festival)
 	add_child(town)
 	await _step("clutter")
 	for hex in Traffic.PALETTE:
@@ -124,7 +124,9 @@ func _ready() -> void:
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
-	if day.hot:
+	if not day.festival.is_empty():
+		_say(str(day.festival.greeting.get(strings.lang, day.festival.greeting.en)), Look.MAGENTA, 6.0)
+	elif day.hot:
 		_say(strings.t("teaHotFridge" if day.has("fridge") else "teaHot"), Look.VERMILION, 4.0)
 
 
@@ -318,7 +320,8 @@ func _sounds() -> void:
 	_drops = Weather.rain_drops()
 	add_child(_drops)
 	_ding = AudioStreamPlayer.new()
-	_ding.stream = load("res://sounds/bell.wav")
+	# A served customer pays: coins in the tin.
+	_ding.stream = load("res://sounds/coin.wav")
 	_ding.volume_db = -8.0
 	add_child(_ding)
 

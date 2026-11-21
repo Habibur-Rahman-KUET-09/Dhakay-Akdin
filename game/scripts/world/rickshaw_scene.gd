@@ -15,6 +15,7 @@ const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
+const Music = preload("res://scripts/ui/music.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
@@ -77,6 +78,8 @@ var _frames_logged := 0
 var _police: Node3D
 var _police_left := 0.0
 var _whistle: AudioStreamPlayer
+## Coins for a fare paid.
+var _coin: AudioStreamPlayer
 ## Rain: how hard (0–1, eased), the drops, the sound, the water that
 ## spreads on the roads.
 var _rain_k := 0.0
@@ -92,7 +95,8 @@ func _ready() -> void:
 	# where he rides (Mirpur, or Old Dhaka once the mohalla is level 5).
 	progress = Progress.new(b)
 	var map: RoadMap = RoadMap.load_area(progress.rickshaw_area())
-	shift = Day.new(map, b)
+	# The date brings the month's weather and any festival.
+	shift = Day.new(map, b, -1, progress.date())
 	_target_money = int(b.n("rickshaw.daily_target"))
 	shift.base_speed *= progress.speed_factor()
 	shift.energy_factor = progress.energy_factor()
@@ -108,7 +112,7 @@ func _ready() -> void:
 	await _step("environment")
 	_environment()
 	await _step("town")
-	var town := City.build(map, strings.lang)
+	var town := City.build(map, strings.lang, Vector2i(-1, -1), shift.festival)
 	add_child(town)
 	await _step("clutter")
 	for hex in Traffic.PALETTE:
@@ -205,6 +209,15 @@ func _ready() -> void:
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
+	if not shift.festival.is_empty():
+		_say(str(shift.festival.greeting.get(strings.lang, shift.festival.greeting.en)), Look.MAGENTA, 6.0)
+		# A festival: the tune plays softly under the street.
+		if Music.wanted():
+			var tune := Music.new()
+			tune.volume_db = -16.0
+			add_child(tune)
+	elif shift.foggy:
+		_say(strings.t("fogMorning"), Look.SKY, 4.0)
 
 
 ## The bell, horn players for passing traffic, the road's hum: WAV files
@@ -242,6 +255,10 @@ func _sounds() -> void:
 	_rain_sound.volume_db = -60.0
 	add_child(_rain_sound)
 	_rain_sound.finished.connect(_rain_again)
+	_coin = AudioStreamPlayer.new()
+	_coin.stream = load("res://sounds/coin.wav")
+	_coin.volume_db = -4.0
+	add_child(_coin)
 
 
 func _rain_again() -> void:
@@ -542,6 +559,7 @@ func _handle(events: Array) -> void:
 	if events.has(Day.OFFER_GONE):
 		hud.hide_offer()
 	if events.has(Day.DELIVERED):
+		_coin.play()
 		var t: Dictionary = shift.last_trip
 		var tip_text := strings.t("tipText", {"tip": t.tip}) if t.tip > 0 else ""
 		var said := strings.t("delivered", {"fare": t.fare, "tip": tip_text, "stars": _stars(t.stars)})
@@ -769,6 +787,13 @@ func _day_light() -> void:
 		_sky.sky_horizon_color = _sky.sky_horizon_color.lerp(Color("9DA4AA"), r * 0.8)
 		_env.fog_light_color = _env.fog_light_color.lerp(Color("8F979E"), r * 0.8)
 	_env.fog_density = lerpf(0.011, 0.028, _rain_k)
+	# A winter morning's fog: white, thick at dawn, gone by mid-morning.
+	var fog := shift.fog()
+	if fog > 0.0:
+		_env.fog_density = maxf(_env.fog_density, lerpf(0.011, 0.05, fog))
+		_env.fog_light_color = _env.fog_light_color.lerp(Color("E8E8E4"), fog)
+		_sky.sky_horizon_color = _sky.sky_horizon_color.lerp(Color("EDEDEA"), fog)
+		_sun.light_energy *= lerpf(1.0, 0.6, fog)
 
 
 func _end_day() -> void:

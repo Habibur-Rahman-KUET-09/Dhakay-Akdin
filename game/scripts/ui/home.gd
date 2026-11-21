@@ -16,6 +16,8 @@ const Story = preload("res://scripts/rules/story.gd")
 const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const StoryPlayer = preload("res://scripts/ui/story_player.gd")
 const Cloud = preload("res://scripts/ui/cloud.gd")
+const Calendar = preload("res://scripts/rules/calendar.gd")
+const Music = preload("res://scripts/ui/music.gd")
 
 var s := Strings.new()
 var b := Balance.new()
@@ -27,6 +29,7 @@ var neighbours := Neighbours.new()
 ## Where to go once an opening chapter has been read.
 var _then_scene := ""
 var cloud: Cloud
+var music: Music
 
 
 func _ready() -> void:
@@ -39,6 +42,9 @@ func _ready() -> void:
 	progress = Progress.new(b)
 	cloud = Cloud.new()
 	add_child(cloud)
+	music = Music.new()
+	music.volume_db = -6.0
+	add_child(music)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build()
 	_backup()
@@ -54,7 +60,7 @@ func _backup() -> void:
 
 func _build() -> void:
 	for c in get_children():
-		if c != cloud:
+		if c != cloud and c != music:
 			c.queue_free()
 	var bg := ColorRect.new()
 	bg.color = Look.CREAM
@@ -112,6 +118,7 @@ func _build() -> void:
 	col.add_child(_book_row())
 	col.add_child(_cloud_card())
 	col.add_child(_graphics_row())
+	col.add_child(_music_row())
 	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 13)
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(version)
@@ -187,6 +194,26 @@ func _today_card() -> Control:
 		var done: bool = progress.daily().challenge
 		var text := s.t("challengeLine", {"name": s.t(_name_key(c.who)), "what": s.t("ch_" + c.id, {"goal": int(c.goal)})})
 		box.add_child(Look.label(text + (" · " + s.t("challengeMet") if done else ""), 15, done, Look.PARROT.darkened(0.2) if done else Look.OUTLINE))
+	# The festival today, or else what the season brings.
+	var calendar := Calendar.new()
+	var date := progress.date()
+	var fest := calendar.festival(date)
+	if not fest.is_empty():
+		var line := str(fest.name.get(s.lang, fest.name.en))
+		if int(fest.tip) > 0:
+			line += " · " + s.t("festivalTip", {"n": int(fest.tip)})
+		box.add_child(Look.label(line, 15, true, Look.MAGENTA))
+	else:
+		var season := ""
+		var m := Calendar.month_of(date)
+		if m >= 6 and m <= 9:
+			season = "seasonMonsoon"
+		elif m == 12 or m == 1:
+			season = "seasonWinter"
+		elif m == 4 or m == 5:
+			season = "seasonHot"
+		if season != "":
+			box.add_child(Look.label(s.t(season), 14))
 	return panel
 
 
@@ -783,6 +810,29 @@ func _graphics_row() -> Control:
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(help)
 	return box
+
+
+## The tune on or off.
+func _music_row() -> Control:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 8)
+	var title := Look.label(s.t("music"), 15, true)
+	title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(title)
+	for value in [true, false]:
+		var picked: bool = Music.wanted() == value
+		var pick := Look.button(s.t("musicOn" if value else "musicOff"), Look.MAGENTA if picked else Color("B9B2A6"), 15)
+		pick.name = "Music_" + ("on" if value else "off")
+		pick.pressed.connect(_set_music.bind(value))
+		row.add_child(pick)
+	return row
+
+
+func _set_music(value: bool) -> void:
+	music.switch(value)
+	_build()
 
 
 func _set_graphics(level: String) -> void:

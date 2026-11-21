@@ -10,6 +10,7 @@ extends "res://scripts/rules/shift.gd"
 const Fares = preload("res://scripts/rules/fares.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
 const Signals = preload("res://scripts/rules/signals.gd")
+const Calendar = preload("res://scripts/rules/calendar.gd")
 
 ## Events added to the driver's (which run 0-4).
 const OFFER := 10
@@ -77,6 +78,11 @@ var raining := false
 var rain_at := -1.0
 var rain_seconds := 60.0
 var weather := RandomNumberGenerator.new()
+## The month's weather and the date's festival (when the scene gives the
+## date): rain likelier in the monsoon, fog on winter mornings, and on a
+## festival day an extra tip every ride.
+var foggy := false
+var festival := {}
 ## Trips rated 4 stars or more (for the day's challenge).
 var good_trips := 0
 ## The named neighbours who may need a ride today (set by the scene), how
@@ -86,7 +92,7 @@ var relations := {}
 var npc_log: Array = []
 
 
-func _init(road_map: RoadMap, b: Balance, seed_value := -1) -> void:
+func _init(road_map: RoadMap, b: Balance, seed_value := -1, date := "") -> void:
 	balance = b
 	fares = Fares.new(b)
 	super(road_map, b.n("rickshaw.speed_tiles_per_s"), b.n("rickshaw.waterlog_speed"), 8, seed_value)
@@ -107,8 +113,22 @@ func _init(road_map: RoadMap, b: Balance, seed_value := -1) -> void:
 		weather.seed = seed_value + 7
 	else:
 		weather.randomize()
-	if weather.randf() < b.n("rickshaw.rain_chance_per_day"):
+	var chance := b.n("rickshaw.rain_chance_per_day")
+	var calendar := Calendar.new()
+	if date != "":
+		chance = calendar.rain_chance(chance, date)
+		festival = calendar.festival(date)
+	if weather.randf() < chance:
 		rain_at = weather.randf_range(0.15, 0.75) * day_seconds
+	if date != "":
+		foggy = weather.randf() < calendar.fog_chance(date)
+
+
+## How thick the morning fog is, 1 at dawn thinning to 0 by mid-morning.
+func fog() -> float:
+	if not foggy:
+		return 0.0
+	return clampf(1.0 - clock / (0.3 * day_seconds), 0.0, 1.0)
 
 
 ## The hour of the day, 7.0 to 21.0.
@@ -325,6 +345,8 @@ func _deliver(events: Array) -> void:
 	var thanks := npc != "" and int(relations.get(npc, 0)) >= 3
 	if thanks:
 		tip += 20
+	# A festival puts everyone in a giving mood.
+	tip += int(festival.get("tip", 0))
 	if npc != "":
 		if given >= 4.5:
 			npc_log.append({"id": npc, "delta": 1, "what": "good_ride"})
