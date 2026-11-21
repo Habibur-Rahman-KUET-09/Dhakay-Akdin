@@ -1,9 +1,10 @@
-## The mohalla screen (§৩, §৫): where the days add up. The day number,
-## mohalla level and XP, Rahim Chacha's savings and his daughter's school
-## fee, the community fund and its project, the rickshaw upgrades on sale,
-## the last few days, and the characters (Rahim Chacha can work). Stars
-## and the run of days played, today's character and challenge, the story
-## chapters waiting to be read, the neighbours' notebook (§৬, §৭).
+## The mohalla screen (§৩, §৫): where the days add up. At the top the
+## day, savings, stars and the run of days, with the mohalla's level; then
+## today (the challenge, a festival or the season) and a chapter waiting
+## to be read; then the characters as tabs, one open at a time with its
+## way into the day, its last day and what it can buy; the mohalla fund;
+## and the story book, the neighbours' notebook and the recent days.
+## Language, graphics, music and the online copy are under Settings.
 extends Control
 
 const Look = preload("res://scripts/ui/look.gd")
@@ -30,6 +31,10 @@ var neighbours := Neighbours.new()
 var _then_scene := ""
 var cloud: Cloud
 var music: Music
+## The character whose panel is open ("" until the page first opens on
+## today's character), and whether the settings are showing.
+var _tab := ""
+var _settings_open := false
 
 
 func _ready() -> void:
@@ -62,6 +67,8 @@ func _build() -> void:
 	for c in get_children():
 		if c != cloud and c != music:
 			c.queue_free()
+	if _tab == "":
+		_tab = progress.featured()
 	var bg := ColorRect.new()
 	bg.color = Look.CREAM
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -75,54 +82,352 @@ func _build() -> void:
 	var margin := MarginContainer.new()
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 18)
-	margin.add_theme_constant_override("margin_top", 24)
+		margin.add_theme_constant_override("margin_" + side, 16)
+	margin.add_theme_constant_override("margin_top", 18)
 	margin.add_theme_constant_override("margin_bottom", 20)
 	scroll.add_child(margin)
 	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 12)
+	col.add_theme_constant_override("separation", 14)
 	margin.add_child(col)
 
-	var top := HBoxContainer.new()
-	var title := Look.label(s.t("appTitle"), 32, true)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(title)
-	var lang := Button.new()
-	lang.name = "Language"
-	lang.text = "English" if s.lang == "bn" else "বাংলা"
-	lang.flat = true
-	lang.add_theme_color_override("font_color", Look.MAGENTA)
-	lang.pressed.connect(_switch_language)
-	top.add_child(lang)
-	col.add_child(top)
-
+	col.add_child(_header())
 	if _crash != "":
 		col.add_child(_crash_card())
 	col.add_child(_mohalla_card())
-	col.add_child(_today_card())
 	var waiting := story.waiting(progress.data)
 	if not waiting.is_empty():
 		col.add_child(_chapter_card(waiting[0]))
-	col.add_child(_rickshaw_card())
+	col.add_child(_today_card())
+	col.add_child(_section(s.t("whoToday")))
+	col.add_child(_tabs())
+	col.add_child(_character_panel(_tab))
 	col.add_child(_fund_card())
-	if progress.unlocked("tea_stall"):
-		col.add_child(_tea_card())
-	else:
-		col.add_child(_other("teaName", "teaRole", Look.PARROT, "tea_stall"))
-	if progress.unlocked("bus"):
-		col.add_child(_bus_card())
-	else:
-		col.add_child(_other("busName", "busRole", Look.SKY, "bus"))
-	if not progress.data.history.is_empty():
-		col.add_child(_history_card())
-	col.add_child(_book_row())
-	col.add_child(_cloud_card())
-	col.add_child(_graphics_row())
-	col.add_child(_music_row())
-	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 13)
+	col.add_child(_more_row())
+	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 12, false, Color("8A8178"))
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(version)
 	_let_scroll(margin)
+	if _settings_open:
+		_settings()
+
+
+## The name of the game and the way to the settings.
+func _header() -> Control:
+	var top := HBoxContainer.new()
+	var title := Look.label(s.t("appTitle"), 30, true, Look.MAGENTA)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(title)
+	var gear := Look.button(s.t("settings"), Look.OUTLINE, 14)
+	gear.name = "Settings"
+	gear.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	gear.pressed.connect(_open_settings)
+	top.add_child(gear)
+	return top
+
+
+## A small heading between the parts of the page.
+func _section(text: String) -> Control:
+	var l := Look.label(text, 15, true, Color("6B6259"))
+	return l
+
+
+## The mohalla at a glance: four numbers side by side, then the level.
+func _mohalla_card() -> Control:
+	var panel := _panel(Color("FFF0C9"))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	var chips := HBoxContainer.new()
+	chips.add_theme_constant_override("separation", 6)
+	chips.add_child(_chip(s.t("chipDay"), str(int(progress.data.day) + 1), Look.OUTLINE))
+	chips.add_child(_chip(s.t("chipSaved"), s.t("takaN", {"n": int(progress.data.taka)}), Look.PARROT.darkened(0.2)))
+	chips.add_child(_chip(s.t("chipStars"), str(int(progress.data.tara)), Look.MAGENTA))
+	chips.add_child(_chip(s.t("chipStreak"), s.t("daysN", {"n": int(progress.data.streak.count)}), Look.SKY.darkened(0.2)))
+	box.add_child(chips)
+	var row := HBoxContainer.new()
+	var lvl := Look.label(s.t("levelN", {"level": progress.level()}), 16, true)
+	lvl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(lvl)
+	var xp := Look.label("%d / %d XP" % [progress.xp(), progress.to_next(progress.level())], 13)
+	xp.autowrap_mode = TextServer.AUTOWRAP_OFF
+	xp.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(xp)
+	box.add_child(row)
+	box.add_child(_bar(progress.xp(), progress.to_next(progress.level()), Look.MAGENTA))
+	return panel
+
+
+## One number with its name above it.
+func _chip(caption: String, value: String, colour: Color) -> Control:
+	var chip := PanelContainer.new()
+	var style := Look.card(Color.WHITE, 12, 0)
+	style.content_margin_left = 4
+	style.content_margin_right = 4
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	chip.add_theme_stylebox_override("panel", style)
+	chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 0)
+	chip.add_child(box)
+	var top := Look.label(caption, 12, false, Color("6B6259"))
+	top.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(top)
+	var big := Look.label(value, 17, true, colour)
+	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	big.autowrap_mode = TextServer.AUTOWRAP_OFF
+	big.clip_text = true
+	box.add_child(big)
+	return chip
+
+
+## Today: the challenge, and the festival or the season.
+func _today_card() -> Control:
+	var panel := _panel(Color("E8F1FB"))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("todayTitle"), 16, true))
+	var c := progress.challenge()
+	if not c.is_empty():
+		var done: bool = progress.daily().challenge
+		var text := s.t("challengeLine", {"name": s.t(_name_key(c.who)), "what": s.t("ch_" + c.id, {"goal": int(c.goal)})})
+		box.add_child(Look.label(text + (" · " + s.t("challengeMet") if done else ""), 14, done, Look.PARROT.darkened(0.2) if done else Look.OUTLINE))
+	var calendar := Calendar.new()
+	var date := progress.date()
+	var fest := calendar.festival(date)
+	if not fest.is_empty():
+		var line := str(fest.name.get(s.lang, fest.name.en))
+		if int(fest.tip) > 0:
+			line += " · " + s.t("festivalTip", {"n": int(fest.tip)})
+		box.add_child(Look.label(line, 14, true, Look.MAGENTA))
+	else:
+		var season := ""
+		var m := Calendar.month_of(date)
+		if m >= 6 and m <= 9:
+			season = "seasonMonsoon"
+		elif m == 12 or m == 1:
+			season = "seasonWinter"
+		elif m == 4 or m == 5:
+			season = "seasonHot"
+		if season != "":
+			box.add_child(Look.label(s.t(season), 13))
+	return panel
+
+
+func _name_key(who: String) -> String:
+	return {"rickshaw": "rickshawName", "tea": "teaName", "bus": "busName"}[who]
+
+
+## Each character's colour.
+func _colour_of(who: String) -> Color:
+	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT, "bus": Look.SKY}[who]
+
+
+## What opens a character ("tea_stall" for the tea stall).
+func _unlock_of(who: String) -> String:
+	return {"rickshaw": "", "tea": "tea_stall", "bus": "bus"}[who]
+
+
+## The three characters as tabs: the one picked filled in its colour,
+## today's double-money one marked, the shut ones with their level.
+func _tabs() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	var open := progress.open_characters()
+	var featured := progress.featured()
+	var used: bool = progress.daily().featured
+	for who in ["rickshaw", "tea", "bus"]:
+		var second := s.t("tab_" + who)
+		if not open.has(who):
+			second = s.t("tabLocked", {"level": int(b.n("unlocks." + _unlock_of(who)))})
+		elif who == featured and not used:
+			second = s.t("tabDouble")
+		var picked: bool = who == _tab
+		var colour := _colour_of(who)
+		var tab := Look.button(s.t(_name_key(who)) + "\n" + second, colour if picked else Color.WHITE, 14)
+		tab.name = "Tab_" + who
+		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tab.custom_minimum_size = Vector2(0, 58)
+		if not picked:
+			var ink: Color = colour.darkened(0.15) if open.has(who) else Color("9E958B")
+			for state in ["font_color", "font_hover_color", "font_pressed_color"]:
+				tab.add_theme_color_override(state, ink)
+		tab.pressed.connect(_pick_tab.bind(who))
+		row.add_child(tab)
+	return row
+
+
+func _pick_tab(who: String) -> void:
+	_tab = who
+	_build()
+
+
+## The picked character: who they are, how their last day went, what
+## they are saving for, the way to start the day, and what to buy next.
+func _character_panel(who: String) -> Control:
+	var panel := PanelContainer.new()
+	var style := Look.card(Color.WHITE, 16, 3)
+	style.border_color = _colour_of(who)
+	style.content_margin_top = 12
+	style.content_margin_bottom = 14
+	panel.add_theme_stylebox_override("panel", style)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	row.add_child(_dot(_colour_of(who)))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_child(Look.label(s.t(_name_key(who)), 20, true))
+	text.add_child(Look.label(s.t({"rickshaw": "rickshawRole", "tea": "teaRole", "bus": "busRole"}[who]), 14))
+	row.add_child(text)
+	box.add_child(row)
+	if not progress.open_characters().has(who):
+		_locked_body(box, who)
+		return panel
+	if who == progress.featured() and not progress.daily().featured:
+		box.add_child(Look.label(s.t("doubleToday"), 14, true, Look.MAGENTA))
+	if who == "rickshaw":
+		box.add_child(_area_row())
+	# The last day as this character (the newest such record).
+	for h in progress.data.history:
+		if h.get("who", "rickshaw") != who:
+			continue
+		if who == "rickshaw":
+			box.add_child(Look.label(s.t("lastDay", {"money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.stars}), 14))
+			box.add_child(Look.label(s.t("bestDay", {"money": int(progress.data.rickshaw.bestDay)}), 13))
+		elif who == "tea":
+			box.add_child(Look.label(s.t("teaLastDay", {"money": int(h.earned), "served": int(h.served)}), 14))
+		else:
+			box.add_child(Look.label(s.t("busLastDay", {"money": int(h.earned), "riders": int(h.get("riders", 0))}), 14))
+		break
+	if who == "rickshaw":
+		var school := int(progress.data.rickshaw.school)
+		box.add_child(Look.label(s.t("schoolFee", {"n": school, "goal": progress.school_goal()}), 14, true))
+		box.add_child(_bar(school, progress.school_goal(), Look.SKY))
+		box.add_child(Look.label(s.t("schoolHelp"), 12, false, Color("6B6259")))
+	var start := Look.button(s.t("startDay", {"n": int(progress.data.day) + 1}), _colour_of(who), 20)
+	start.name = {"rickshaw": "Drive", "tea": "OpenStall", "bus": "Board"}[who]
+	start.custom_minimum_size = Vector2(0, 60)
+	start.pressed.connect(_start.bind(who, {"rickshaw": "res://scenes/rickshaw.tscn", "tea": "res://scenes/tea.tscn", "bus": "res://scenes/bus.tscn"}[who]))
+	box.add_child(start)
+	# What to buy next, from the shared savings, and what is bought.
+	var next := progress.next_upgrade(who)
+	if next != "":
+		var cost := progress.price(next, who)
+		var afford := int(progress.data.taka) >= cost
+		var buy := Look.button(s.t("buy_" + next, {"n": cost}), _colour_of(who) if afford else Color("B9B2A6"), 14)
+		buy.disabled = not afford
+		buy.pressed.connect(_buy_for.bind(next, who))
+		box.add_child(buy)
+	var owned: Array = progress.data[who].upgrades
+	if not owned.is_empty():
+		var names := PackedStringArray()
+		for id in owned:
+			var full := s.t("owned_" + id)
+			names.append(full.get_slice(":", 1).strip_edges() if full.contains(":") else full)
+		box.add_child(Look.label(s.t("ownedList", {"list": " · ".join(names)}), 13, false, _colour_of(who).darkened(0.25)))
+	return panel
+
+
+## A character not open yet: when they open, or the stars to open early.
+func _locked_body(box: VBoxContainer, who: String) -> void:
+	var unlock := _unlock_of(who)
+	box.add_child(Look.label(s.t("unlocksAt", {"level": int(b.n("unlocks." + unlock))}), 15, true, Color("6B6259")))
+	var cost := int(b.n("unlocks.early_unlock_tara"))
+	if int(progress.data.tara) >= cost:
+		var early := Look.button(s.t("unlockEarly", {"n": cost}), Look.MAGENTA, 16)
+		early.pressed.connect(_unlock_early.bind(unlock))
+		box.add_child(early)
+	else:
+		box.add_child(Look.label(s.t("earlyHelp", {"n": cost}), 13))
+
+
+## The community fund and the project it is filling.
+func _fund_card() -> Control:
+	var panel := _panel(Color("E7F4EC"))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("fundTitle"), 16, true))
+	var project: String = progress.data.fundProject
+	if project != "":
+		box.add_child(Look.label(s.t("fundProgress", {"project": s.t("project_" + project), "n": int(progress.data.fund), "goal": progress.fund_goal()}), 14))
+		box.add_child(_bar(int(progress.data.fund), progress.fund_goal(), Look.PARROT))
+	box.add_child(Look.label(s.t("fundHelp"), 12, false, Color("6B6259")))
+	var done := PackedStringArray()
+	for p in progress.data.mohalla.projectsDone:
+		done.append(s.t("project_" + p))
+	if not done.is_empty():
+		box.add_child(Look.label(s.t("projectsDone", {"list": " · ".join(done)}), 13, true, Look.PARROT.darkened(0.2)))
+	return panel
+
+
+## The story read so far, the neighbours' notebook and the last few days.
+func _more_row() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	var buttons := [
+		[s.t("storyBook", {"n": story.read(progress.data).size(), "all": story.chapters.size()}), Look.MAGENTA, _story_book],
+		[s.t("notebook"), Look.SKY, _notebook],
+		[s.t("recentDays"), Look.PARROT, _recent_days],
+	]
+	for spec in buttons:
+		var button := Look.button(spec[0], spec[1], 14)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size = Vector2(0, 50)
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		button.pressed.connect(spec[2])
+		row.add_child(button)
+	return row
+
+
+## The last ten days, newest first.
+func _recent_days() -> void:
+	var rows := []
+	if progress.data.history.is_empty():
+		rows.append(Look.label(s.t("noDaysYet"), 14))
+	for h in progress.data.history:
+		var line := s.t("historyLine", {"day": int(h.day), "money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.stars})
+		if h.get("who", "") == "tea":
+			line = s.t("teaHistoryLine", {"day": int(h.day), "money": int(h.earned), "served": int(h.get("served", 0))})
+		elif h.get("who", "") == "bus":
+			line = s.t("busHistoryLine", {"day": int(h.day), "money": int(h.earned), "riders": int(h.get("riders", 0))})
+		rows.append(Look.label(line, 14, false, Look.PARROT.darkened(0.3) if h.met else Look.OUTLINE))
+	_overlay(s.t("recentDays"), rows)
+
+
+## Settings, over the page: language, graphics, music, the online copy.
+func _open_settings() -> void:
+	_settings_open = true
+	_settings()
+
+
+func _settings() -> void:
+	var rows := []
+	var lang_row := HBoxContainer.new()
+	lang_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	lang_row.add_theme_constant_override("separation", 8)
+	var lang_title := Look.label(s.t("languageLabel"), 15, true)
+	lang_title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	lang_title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	lang_row.add_child(lang_title)
+	for code in ["bn", "en"]:
+		var pick := Look.button("বাংলা" if code == "bn" else "English", Look.MAGENTA if s.lang == code else Color("B9B2A6"), 15)
+		pick.name = "Language_" + code
+		pick.pressed.connect(_set_language.bind(code))
+		lang_row.add_child(pick)
+	rows.append(lang_row)
+	rows.append(_graphics_row())
+	rows.append(_music_row())
+	rows.append(_cloud_card())
+	_overlay(s.t("settings"), rows, _close_settings)
+
+
+func _close_settings() -> void:
+	_settings_open = false
 
 
 ## Cards, rows and labels stopped a finger dragging the page: the touch
@@ -157,68 +462,6 @@ func _bar(value: int, goal: int, colour: Color) -> Control:
 	bar.add_theme_stylebox_override("background", bg)
 	bar.add_theme_stylebox_override("fill", fill)
 	return bar
-
-
-## Day, level and XP, and the savings.
-func _mohalla_card() -> Control:
-	var panel := _panel(Color("FFF0C9"))
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
-	panel.add_child(box)
-	var row := HBoxContainer.new()
-	var day := Look.label(s.t("dayNumber", {"n": int(progress.data.day) + 1}), 22, true)
-	day.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(day)
-	var savings := Look.label(s.t("savings", {"n": int(progress.data.taka)}), 18, true, Look.PARROT.darkened(0.2))
-	savings.autowrap_mode = TextServer.AUTOWRAP_OFF
-	row.add_child(savings)
-	box.add_child(row)
-	box.add_child(Look.label(s.t("mohallaLevel", {"level": progress.level(), "xp": progress.xp(), "need": progress.to_next(progress.level())}), 15))
-	box.add_child(_bar(progress.xp(), progress.to_next(progress.level()), Look.MAGENTA))
-	box.add_child(Look.label(s.t("starsAndStreak", {"stars": int(progress.data.tara), "n": int(progress.data.streak.count)}), 15, true, Look.MAGENTA.darkened(0.1)))
-	return panel
-
-
-## Today: whose day pays double, and the challenge.
-func _today_card() -> Control:
-	var panel := _panel(Color("E8F1FB"))
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
-	panel.add_child(box)
-	box.add_child(Look.label(s.t("todayTitle"), 18, true))
-	var who := progress.featured()
-	var used: bool = progress.daily().featured
-	box.add_child(Look.label(s.t("featuredUsed" if used else "featuredToday", {"name": s.t(_name_key(who))}), 15))
-	var c := progress.challenge()
-	if not c.is_empty():
-		var done: bool = progress.daily().challenge
-		var text := s.t("challengeLine", {"name": s.t(_name_key(c.who)), "what": s.t("ch_" + c.id, {"goal": int(c.goal)})})
-		box.add_child(Look.label(text + (" · " + s.t("challengeMet") if done else ""), 15, done, Look.PARROT.darkened(0.2) if done else Look.OUTLINE))
-	# The festival today, or else what the season brings.
-	var calendar := Calendar.new()
-	var date := progress.date()
-	var fest := calendar.festival(date)
-	if not fest.is_empty():
-		var line := str(fest.name.get(s.lang, fest.name.en))
-		if int(fest.tip) > 0:
-			line += " · " + s.t("festivalTip", {"n": int(fest.tip)})
-		box.add_child(Look.label(line, 15, true, Look.MAGENTA))
-	else:
-		var season := ""
-		var m := Calendar.month_of(date)
-		if m >= 6 and m <= 9:
-			season = "seasonMonsoon"
-		elif m == 12 or m == 1:
-			season = "seasonWinter"
-		elif m == 4 or m == 5:
-			season = "seasonHot"
-		if season != "":
-			box.add_child(Look.label(s.t(season), 14))
-	return panel
-
-
-func _name_key(who: String) -> String:
-	return {"rickshaw": "rickshawName", "tea": "teaName", "bus": "busName"}[who]
 
 
 ## A new story chapter to read.
@@ -363,20 +606,6 @@ func _restore(save: Dictionary) -> void:
 	_build()
 
 
-## The story read so far, and the neighbours' notebook.
-func _book_row() -> Control:
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 8)
-	var tales := Look.button(s.t("storyBook", {"n": story.read(progress.data).size(), "all": story.chapters.size()}), Look.MAGENTA, 15)
-	tales.pressed.connect(_story_book)
-	row.add_child(tales)
-	var notes := Look.button(s.t("notebook"), Look.SKY, 15)
-	notes.pressed.connect(_notebook)
-	row.add_child(notes)
-	return row
-
-
 ## Plays a chapter over the screen; `then` is a scene to go to afterwards
 ## (an opening chapter before a character's first day), or "".
 func _play_chapter(id: String, then: String) -> void:
@@ -411,7 +640,7 @@ func _go(scene: String) -> void:
 
 
 ## A list over the screen: a title, rows, and a close button.
-func _overlay(title: String, rows: Array) -> void:
+func _overlay(title: String, rows: Array, on_close := Callable()) -> void:
 	var shade := ColorRect.new()
 	shade.color = Color(0, 0, 0, 0.5)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -433,6 +662,8 @@ func _overlay(title: String, rows: Array) -> void:
 	head.add_child(t)
 	var close := Look.button(s.t("close"), Look.OUTLINE, 14)
 	close.pressed.connect(shade.queue_free)
+	if on_close.is_valid():
+		close.pressed.connect(on_close)
 	head.add_child(close)
 	col.add_child(head)
 	var scroll := ScrollContainer.new()
@@ -505,50 +736,6 @@ func _notebook() -> void:
 	_overlay(s.t("notebook"), rows)
 
 
-## Rahim Chacha: the last day, the best day, the school fee, the rickshaw
-## upgrade on sale, and the way out to work.
-func _rickshaw_card() -> Control:
-	var panel := _panel()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
-	panel.add_child(box)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	row.add_child(_dot(Look.MAGENTA))
-	var text := VBoxContainer.new()
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text.add_child(Look.label(s.t("rickshawName"), 20, true))
-	text.add_child(Look.label(s.t("rickshawRole"), 14))
-	row.add_child(text)
-	var drive := Look.button(s.t("startDay", {"n": int(progress.data.day) + 1}))
-	drive.name = "Drive"
-	drive.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	drive.pressed.connect(_drive)
-	row.add_child(drive)
-	box.add_child(row)
-	box.add_child(_area_row())
-	# His last day (the newest record that is a rickshaw day).
-	for last in progress.data.history:
-		if last.get("who", "rickshaw") == "rickshaw":
-			box.add_child(Look.label(s.t("lastDay", {"money": int(last.earned), "trips": int(last.get("trips", 0)), "stars": last.stars}), 15))
-			box.add_child(Look.label(s.t("bestDay", {"money": int(progress.data.rickshaw.bestDay)}), 14))
-			break
-	var school := int(progress.data.rickshaw.school)
-	box.add_child(Look.label(s.t("schoolFee", {"n": school, "goal": progress.school_goal()}), 15, true))
-	box.add_child(_bar(school, progress.school_goal(), Look.SKY))
-	box.add_child(Look.label(s.t("schoolHelp"), 13))
-	var next := progress.next_upgrade()
-	if next != "":
-		var cost := progress.price(next)
-		var buy := Look.button(s.t("buy_" + next, {"n": cost}), Look.PARROT if progress.data.taka >= cost else Color("9E9E9E"), 15)
-		buy.disabled = int(progress.data.taka) < cost
-		buy.pressed.connect(_buy.bind(next))
-		box.add_child(buy)
-	for id in progress.data.rickshaw.upgrades:
-		box.add_child(Look.label(s.t("owned_" + id), 14, false, Look.PARROT.darkened(0.2)))
-	return panel
-
-
 ## Where Rahim Chacha rides today: Mirpur, or Old Dhaka once it is open.
 func _area_row() -> Control:
 	var box := VBoxContainer.new()
@@ -580,168 +767,16 @@ func _choose_area(area: String) -> void:
 		_build()
 
 
-## Monir Mama's tea stall, once the mohalla is big enough: the way in,
-## and how the last day there went.
-func _tea_card() -> Control:
-	var panel := _panel()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
-	panel.add_child(box)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	row.add_child(_dot(Look.PARROT))
-	var text := VBoxContainer.new()
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text.add_child(Look.label(s.t("teaName"), 20, true))
-	text.add_child(Look.label(s.t("teaRole"), 14))
-	row.add_child(text)
-	# The same words on every character's button: today's day.
-	var open := Look.button(s.t("startDay", {"n": int(progress.data.day) + 1}), Look.PARROT)
-	open.name = "OpenStall"
-	open.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	open.pressed.connect(_open_stall)
-	row.add_child(open)
-	box.add_child(row)
-	for h in progress.data.history:
-		if h.get("who", "") == "tea":
-			box.add_child(Look.label(s.t("teaLastDay", {"money": int(h.earned), "served": int(h.served)}), 15))
-			break
-	# What the stall can buy next, from the shared savings.
-	var next := progress.next_upgrade("tea")
-	if next != "":
-		var cost := progress.price(next, "tea")
-		var buy := Look.button(s.t("buy_" + next, {"n": cost}), Look.PARROT if int(progress.data.taka) >= cost else Color("9E9E9E"), 15)
-		buy.disabled = int(progress.data.taka) < cost
-		buy.pressed.connect(_buy_for_stall.bind(next))
-		box.add_child(buy)
-	for id in progress.data.tea.upgrades:
-		box.add_child(Look.label(s.t("owned_" + id), 14, false, Look.PARROT.darkened(0.2)))
-	return panel
-
-
-## Babu's bus, once the mohalla is big enough: the way on, and the last
-## day there.
-func _bus_card() -> Control:
-	var panel := _panel()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
-	panel.add_child(box)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	row.add_child(_dot(Look.SKY))
-	var text := VBoxContainer.new()
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text.add_child(Look.label(s.t("busName"), 20, true))
-	text.add_child(Look.label(s.t("busRole"), 14))
-	row.add_child(text)
-	var board := Look.button(s.t("startDay", {"n": int(progress.data.day) + 1}), Look.SKY)
-	board.name = "Board"
-	board.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	board.pressed.connect(_board_bus)
-	row.add_child(board)
-	box.add_child(row)
-	for h in progress.data.history:
-		if h.get("who", "") == "bus":
-			box.add_child(Look.label(s.t("busLastDay", {"money": int(h.earned), "riders": int(h.get("riders", 0))}), 15))
-			break
-	var next := progress.next_upgrade("bus")
-	if next != "":
-		var cost := progress.price(next, "bus")
-		var buy := Look.button(s.t("buy_" + next, {"n": cost}), Look.SKY if int(progress.data.taka) >= cost else Color("9E9E9E"), 15)
-		buy.disabled = int(progress.data.taka) < cost
-		buy.pressed.connect(_buy_for.bind(next, "bus"))
-		box.add_child(buy)
-	for id in progress.data.bus.upgrades:
-		box.add_child(Look.label(s.t("owned_" + id), 14, false, Look.SKY.darkened(0.2)))
-	return panel
-
-
 func _buy_for(id: String, who: String) -> void:
 	if progress.buy(id, who):
 		progress.save()
 		_build()
 
 
-func _board_bus() -> void:
-	_start("bus", "res://scenes/bus.tscn")
-
-
-func _buy_for_stall(id: String) -> void:
-	if progress.buy(id, "tea"):
-		progress.save()
-		_build()
-
-
-## The community fund and the project it is filling.
-func _fund_card() -> Control:
-	var panel := _panel(Color("E7F4EC"))
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
-	panel.add_child(box)
-	box.add_child(Look.label(s.t("fundTitle"), 18, true))
-	var project: String = progress.data.fundProject
-	if project != "":
-		box.add_child(Look.label(s.t("fundProgress", {"project": s.t("project_" + project), "n": int(progress.data.fund), "goal": progress.fund_goal()}), 15))
-		box.add_child(_bar(int(progress.data.fund), progress.fund_goal(), Look.PARROT))
-	box.add_child(Look.label(s.t("fundHelp"), 13))
-	for done in progress.data.mohalla.projectsDone:
-		box.add_child(Look.label(s.t("projectDone", {"project": s.t("project_" + done)}), 14, true, Look.PARROT.darkened(0.2)))
-	return panel
-
-
-func _other(name_key: String, role_key: String, colour: Color, unlock: String) -> Control:
-	var panel := _panel()
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	panel.add_child(row)
-	row.add_child(_dot(colour))
-	var text := VBoxContainer.new()
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text.add_child(Look.label(s.t(name_key), 18, true))
-	var level := int(b.n("unlocks." + unlock))
-	var role := s.t(role_key)
-	if not progress.unlocked(unlock):
-		role += " · " + s.t("unlocksAt", {"level": level})
-	text.add_child(Look.label(role, 14))
-	row.add_child(text)
-	var cost := int(b.n("unlocks.early_unlock_tara"))
-	if int(progress.data.tara) >= cost:
-		var early := Look.button(s.t("unlockEarly", {"n": cost}), Look.MAGENTA, 13)
-		early.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		early.pressed.connect(_unlock_early.bind(unlock))
-		row.add_child(early)
-	else:
-		var soon := Look.label(s.t("comingSoon"), 13)
-		soon.autowrap_mode = TextServer.AUTOWRAP_OFF
-		soon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(soon)
-	return panel
-
-
 func _unlock_early(what: String) -> void:
 	if progress.unlock_early(what):
 		progress.save()
 		_build()
-
-
-## The last five days, newest first.
-func _history_card() -> Control:
-	var panel := _panel()
-	var box := VBoxContainer.new()
-	panel.add_child(box)
-	box.add_child(Look.label(s.t("recentDays"), 17, true))
-	var shown := 0
-	for h in progress.data.history:
-		if shown >= 5:
-			break
-		shown += 1
-		var line := s.t("historyLine", {"day": int(h.day), "money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.stars})
-		if h.get("who", "") == "tea":
-			line = s.t("teaHistoryLine", {"day": int(h.day), "money": int(h.earned), "served": int(h.get("served", 0))})
-		elif h.get("who", "") == "bus":
-			line = s.t("busHistoryLine", {"day": int(h.day), "money": int(h.earned), "riders": int(h.get("riders", 0))})
-		box.add_child(Look.label(line, 14, false, Look.PARROT.darkened(0.3) if h.met else Look.OUTLINE))
-	return panel
 
 
 func _dot(colour: Color) -> Control:
@@ -772,20 +807,6 @@ func _crash_card() -> Control:
 func _copy_log(button: Button) -> void:
 	DisplayServer.clipboard_set(_crash)
 	button.text = s.t("copied")
-
-
-func _buy(id: String) -> void:
-	if progress.buy(id):
-		progress.save()
-		_build()
-
-
-func _drive() -> void:
-	_start("rickshaw", "res://scenes/rickshaw.tscn")
-
-
-func _open_stall() -> void:
-	_start("tea", "res://scenes/tea.tscn")
 
 
 ## Graphics: two buttons, the one in use filled in.
@@ -840,7 +861,7 @@ func _set_graphics(level: String) -> void:
 	_build()
 
 
-func _switch_language() -> void:
-	s.lang = "en" if s.lang == "bn" else "bn"
+func _set_language(code: String) -> void:
+	s.lang = code
 	Strings.save_lang(s.lang)
 	_build()

@@ -1362,5 +1362,85 @@
  "musicOff": {
   "bn": "বন্ধ",
   "en": "Off"
+ },
+ "settings": {
+  "bn": "সেটিংস",
+  "en": "Settings"
+ },
+ "whoToday": {
+  "bn": "আজ কে কাজে নামবে?",
+  "en": "Who works today?"
+ },
+ "chipDay": {
+  "bn": "দিন",
+  "en": "Day"
+ },
+ "chipSaved": {
+  "bn": "জমা",
+  "en": "Saved"
+ },
+ "chipStars": {
+  "bn": "তারা",
+  "en": "Stars"
+ },
+ "chipStreak": {
+  "bn": "টানা",
+  "en": "Streak"
+ },
+ "takaN": {
+  "bn": "{n} টাকা",
+  "en": "Tk {n}"
+ },
+ "daysN": {
+  "bn": "{n} দিন",
+  "en": "{n} days"
+ },
+ "levelN": {
+  "bn": "মহল্লা লেভেল {level}",
+  "en": "Mohalla level {level}"
+ },
+ "tab_rickshaw": {
+  "bn": "রিকশা",
+  "en": "Rickshaw"
+ },
+ "tab_tea": {
+  "bn": "চায়ের দোকান",
+  "en": "Tea stall"
+ },
+ "tab_bus": {
+  "bn": "লোকাল বাস",
+  "en": "Local bus"
+ },
+ "tabDouble": {
+  "bn": "আজ দ্বিগুণ",
+  "en": "Double today"
+ },
+ "tabLocked": {
+  "bn": "লেভেল {level}-এ",
+  "en": "At level {level}"
+ },
+ "doubleToday": {
+  "bn": "আজকের চরিত্র: প্রথম দিনে আয় দ্বিগুণ!",
+  "en": "Today's character: double money on the first day!"
+ },
+ "ownedList": {
+  "bn": "কেনা আছে: {list}",
+  "en": "Owned: {list}"
+ },
+ "earlyHelp": {
+  "bn": "{n} তারা জমলে আগেই খোলা যাবে।",
+  "en": "With {n} stars you can open it early."
+ },
+ "projectsDone": {
+  "bn": "হয়ে গেছে: {list}",
+  "en": "Done: {list}"
+ },
+ "noDaysYet": {
+  "bn": "এখনো কোনো দিন খেলা হয়নি।",
+  "en": "No days played yet."
+ },
+ "languageLabel": {
+  "bn": "ভাষা:",
+  "en": "Language:"
  }
 }

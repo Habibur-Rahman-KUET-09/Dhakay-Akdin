@@ -20,6 +20,14 @@ func _run() -> void:
 	root.add_child(home)
 	await _frames(20)
 	_save("1-home")
+	# The bottom of the page, then the settings over it.
+	var scroll: ScrollContainer = home.find_children("*", "ScrollContainer", true, false)[0]
+	scroll.scroll_vertical = 5000
+	await _frames(5)
+	_save("1b-home-bottom")
+	home._open_settings()
+	await _frames(5)
+	_save("1c-settings")
 	home.queue_free()
 	await _frames(2)
 	var drive = load("res://scenes/rickshaw.tscn").instantiate()
