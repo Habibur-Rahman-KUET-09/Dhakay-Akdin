@@ -413,7 +413,8 @@ func _build_hud() -> void:
 	hand_row.add_child(drop)
 	bottom.add_child(hand)
 	var grid := GridContainer.new()
-	grid.columns = 3
+	# Three across; four once the fridge makes ten, so it stays three rows.
+	grid.columns = 4 if day.steps().size() > 9 else 3
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
 	for step in day.steps():
