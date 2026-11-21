@@ -12,10 +12,14 @@ const Look = preload("res://scripts/ui/look.gd")
 const City = preload("res://scripts/world/city.gd")
 const RickshawModel = preload("res://scripts/world/rickshaw_model.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
+const Traffic = preload("res://scripts/world/traffic.gd")
 
 const SWIPE_PX := 36.0
-const CAMERA_BACK := 7.0
-const CAMERA_UP := 11.0
+## The camera rides just behind and above the rickshaw, at street level.
+const CAMERA_BACK := 5.5
+const CAMERA_UP := 3.4
+## Bangladesh drives on the left.
+const KEEP_LEFT := 1.2
 
 var strings := Strings.new()
 var shift: Shift
@@ -24,6 +28,7 @@ var camera: Camera3D
 var marker: Node3D
 var hud: Hud
 var _yaw := 0.0
+var _side := Vector3.ZERO
 var _notice := ""
 var _notice_colour := Look.OUTLINE
 var _notice_left := 0.0
@@ -38,13 +43,17 @@ func _ready() -> void:
 	shift = Shift.new(map, b.n("rickshaw.speed_tiles_per_s"), b.n("rickshaw.waterlog_speed"))
 	_environment()
 	add_child(City.build(map, strings.lang))
+	var traffic := Traffic.new()
+	add_child(traffic)
+	traffic.setup(map, map.home)
 	rickshaw = RickshawModel.build()
 	add_child(rickshaw)
 	marker = _marker()
 	add_child(marker)
 	camera = Camera3D.new()
-	camera.fov = 62
-	camera.far = 160
+	camera.fov = 68
+	camera.near = 0.2
+	camera.far = 220
 	add_child(camera)
 	camera.current = true
 	hud = Hud.new()
@@ -59,23 +68,23 @@ func _ready() -> void:
 func _environment() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color("C9DDEA")
+	env.background_color = Color("D3D4CC")
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color("F3E9D8")
 	env.ambient_light_energy = 0.35
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.fog_enabled = true
-	env.fog_light_color = Color("D9E1E4")
-	env.fog_density = 0.006
+	env.fog_light_color = Color("D8D5C8")
+	env.fog_density = 0.011
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-52, -35, 0)
+	sun.rotation_degrees = Vector3(-40, -35, 0)
 	sun.light_color = Color("FFF1D6")
 	sun.light_energy = 0.75
 	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 55.0
+	sun.directional_shadow_max_distance = 70.0
 	add_child(sun)
 
 
@@ -148,7 +157,10 @@ func _say(text: String, colour: Color, seconds := 2.0) -> void:
 func _follow(dt: float, snap := false) -> void:
 	var d := shift.driver
 	var pos := d.position()
-	rickshaw.position = Vector3((pos.x + 0.5) * City.T, 0, (pos.y + 0.5) * City.T)
+	var f := Vector3(RoadMap.DX[d.heading], 0, RoadMap.DY[d.heading])
+	var left := Vector3(f.z, 0, -f.x)
+	_side = _side.lerp(left * KEEP_LEFT, 1.0 if snap else minf(1.0, dt * 4.0))
+	rickshaw.position = Vector3((pos.x + 0.5) * City.T, 0, (pos.y + 0.5) * City.T) + _side
 	var want := _yaw_for(d.heading)
 	if snap:
 		rickshaw.rotation.y = want
@@ -161,7 +173,7 @@ func _follow(dt: float, snap := false) -> void:
 			w.rotate_x(-dt * d.speed * 4.0)
 	var forward := Vector3(-sin(_yaw), 0, -cos(_yaw))
 	camera.position = rickshaw.position - forward * CAMERA_BACK + Vector3.UP * CAMERA_UP
-	camera.look_at(rickshaw.position + forward * 3.0)
+	camera.look_at(rickshaw.position + forward * 8.0 + Vector3.UP * 1.2)
 
 
 func _update_hud() -> void:

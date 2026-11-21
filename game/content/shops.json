@@ -1,0 +1,29 @@
+{
+ "about": "Made-up shop names for signboards; any match with a real shop is chance. Most boards are in Bangla, some in English, as in Dhaka.",
+ "names": [
+  {"bn": "মায়ের দোয়া স্টোর", "en": "Mayer Doa Store"},
+  {"bn": "বিসমিল্লাহ হোটেল", "en": "Bismillah Hotel"},
+  {"bn": "ভাই ভাই ট্রেডার্স", "en": "Bhai Bhai Traders"},
+  {"bn": "নিউ মডার্ন টেইলার্স", "en": "New Modern Tailors"},
+  {"bn": "আল-মদিনা ফার্মেসি", "en": "Al-Madina Pharmacy"},
+  {"bn": "মোবাইল সার্ভিসিং সেন্টার", "en": "Mobile Servicing Centre"},
+  {"bn": "রহমান হার্ডওয়্যার", "en": "Rahman Hardware"},
+  {"bn": "জনতা ভ্যারাইটিজ", "en": "Janata Varieties"},
+  {"bn": "সততা মিষ্টান্ন ভাণ্ডার", "en": "Satata Sweets"},
+  {"bn": "দোয়েল কম্পিউটার", "en": "Doyel Computer"},
+  {"bn": "বাংলা হোটেল ও রেস্টুরেন্ট", "en": "Bangla Hotel & Restaurant"},
+  {"bn": "সুন্দরবন ফার্নিচার", "en": "Sundarban Furniture"},
+  {"bn": "নিউ ঢাকা সেলুন", "en": "New Dhaka Salon"},
+  {"bn": "আদর্শ লাইব্রেরি", "en": "Adarsha Library"},
+  {"bn": "মা ফ্লেক্সিলোড", "en": "Ma Flexiload"},
+  {"bn": "কাজী ইলেকট্রিক", "en": "Kazi Electric"},
+  {"bn": "পাঁচ ভাই চা ঘর", "en": "Panch Bhai Tea"},
+  {"bn": "রূপসী বিউটি পার্লার", "en": "Rupashi Beauty Parlour"},
+  {"bn": "সোনার বাংলা জুয়েলার্স", "en": "Sonar Bangla Jewellers"},
+  {"bn": "নূর বিরিয়ানি হাউস", "en": "Noor Biryani House"},
+  {"bn": "মেঘনা ক্লথ স্টোর", "en": "Meghna Cloth Store"},
+  {"bn": "আলিফ ডেন্টাল কেয়ার", "en": "Alif Dental Care"},
+  {"bn": "সাথী জেনারেল স্টোর", "en": "Sathi General Store"},
+  {"bn": "ফাতেমা ফটোকপি", "en": "Fatema Photocopy"}
+ ]
+}
