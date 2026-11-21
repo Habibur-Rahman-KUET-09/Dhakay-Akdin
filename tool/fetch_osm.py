@@ -2,6 +2,7 @@
 """Downloads the real streets and places of a game area from OpenStreetMap.
 
     python3 tool/fetch_osm.py mirpur
+    python3 tool/fetch_osm.py missing     # every area not yet fetched
 
 Writes tool/osm/<area>.json: roads (type, name, one-way, points) and named
 places (kind, name in Bangla and English, point). tool/build_map.py turns
@@ -21,6 +22,8 @@ import urllib.request
 AREAS = {
     # south, west, north, east: Mirpur 1 and the zoo to Mirpur 10 and 11.
     'mirpur': (23.792, 90.345, 23.816, 90.372),
+    # Old Dhaka: Lalbagh Fort to Sutrapur and Wari, down to Sadarghat.
+    'old_dhaka': (23.703, 90.383, 23.726, 90.423),
 }
 SERVERS = [
     'https://overpass-api.de/api/interpreter',
@@ -96,6 +99,15 @@ def simplify(raw):
 
 def main():
     area = sys.argv[1] if len(sys.argv) > 1 else 'mirpur'
+    if area == 'missing':
+        for a in AREAS:
+            if not os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'osm', f'{a}.json')):
+                save(a)
+        return
+    save(area)
+
+
+def save(area):
     bbox = AREAS[area]
     out = simplify(fetch(query(bbox)))
     out = {'area': area, 'bbox': bbox, 'source': 'OpenStreetMap contributors, ODbL 1.0',
