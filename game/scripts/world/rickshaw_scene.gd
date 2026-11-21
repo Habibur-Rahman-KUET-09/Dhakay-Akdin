@@ -54,6 +54,7 @@ var _stopped_for := 0.0
 var _bob := 0.0
 var _yaw := 0.0
 var _side := Vector3.ZERO
+var _back := CAMERA_BACK
 var _notice := ""
 var _notice_colour := Look.OUTLINE
 var _notice_left := 0.0
@@ -364,11 +365,20 @@ func _follow(dt: float, snap := false) -> void:
 	var pedalling := shift.pedal and d.moving
 	_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if pedalling else 0.0, 0.0, 1.0))
 	var forward := Vector3(-sin(_yaw), 0, -cos(_yaw))
+	# Behind the rickshaw may be a building: then the camera comes closer
+	# (and a little higher) until it stands over the road.
+	var back := CAMERA_BACK
+	for k in [1.0, 0.75, 0.5, 0.3]:
+		back = CAMERA_BACK * k
+		var at := rickshaw.position - forward * back
+		if shift.map.is_road(Vector2i(floori(at.x / City.T), floori(at.z / City.T))):
+			break
+	_back = back if snap else lerpf(_back, back, minf(1.0, dt * 6.0))
 	# A gentle sway with each push of the pedals.
 	if pedalling:
 		_bob += dt * d.speed * 9.0
 	var sway := Vector3(0, sin(_bob * 2.0) * 0.05, 0) + Vector3(-forward.z, 0, forward.x) * sin(_bob) * 0.04
-	camera.position = rickshaw.position - forward * CAMERA_BACK + Vector3.UP * CAMERA_UP + sway
+	camera.position = rickshaw.position - forward * _back + Vector3.UP * (CAMERA_UP + (CAMERA_BACK - _back) * 0.4) + sway
 	camera.look_at(rickshaw.position + forward * 8.0 + Vector3.UP * 1.2 + sway * 0.5)
 
 
@@ -386,7 +396,7 @@ func _update_hud() -> void:
 		else:
 			target = strings.t("toPassenger", {"tiles": shift.remaining})
 	hud.show_controls(shift.pedal, shift.brake, shift.speed_now * City.T * 3.6)
-	var status := "%s\n৳%d" % [_clock_text(), shift.money]
+	var status := "%s\n%s" % [_clock_text(), strings.t("taka", {"n": shift.money})]
 	hud.refresh(target, status, angle, _notice, _notice_colour, me, shift.destination)
 
 
@@ -485,7 +495,7 @@ func _sync_waiting() -> void:
 		body.material_override = paint
 		node.add_child(body)
 		var label := Label3D.new()
-		label.text = "%s\n৳%d" % [RoadMap.place_name(w.place, strings.lang), w.offer]
+		label.text = "%s\n%s" % [RoadMap.place_name(w.place, strings.lang), strings.t("taka", {"n": w.offer})]
 		label.font = Look.font(Look.BOLD)
 		label.font_size = 40
 		label.outline_size = 12

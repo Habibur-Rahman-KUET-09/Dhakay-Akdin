@@ -128,8 +128,8 @@
   "en": "Passenger {tiles} blocks away"
  },
  "offerTitle": {
-  "bn": "{place} যাবেন? ৳{fare}",
-  "en": "To {place}? ৳{fare}"
+  "bn": "{place} যাবেন? {fare} টাকা",
+  "en": "To {place}? Tk {fare}"
  },
  "type_normal": {
   "bn": "সাধারণ যাত্রী",
@@ -152,8 +152,8 @@
   "en": "Agree"
  },
  "counter": {
-  "bn": "৳{fare} দেন",
-  "en": "Ask ৳{fare}"
+  "bn": "{fare} টাকা চান",
+  "en": "Ask Tk {fare}"
  },
  "refuse": {
   "bn": "মানা",
@@ -164,20 +164,20 @@
   "en": "They said no and walked off"
  },
  "boarded": {
-  "bn": "যাত্রী উঠলেন: {place}, ৳{fare}",
-  "en": "Aboard: {place}, ৳{fare}"
+  "bn": "যাত্রী উঠলেন: {place}, {fare} টাকা",
+  "en": "Aboard: {place}, Tk {fare}"
  },
  "delivered": {
-  "bn": "পৌঁছে দিলেন! ৳{fare}{tip} · রেটিং {stars}/৫",
-  "en": "Delivered! ৳{fare}{tip} · rating {stars}/5"
+  "bn": "পৌঁছে দিলেন! {fare} টাকা{tip} · রেটিং {stars}/৫",
+  "en": "Delivered! Tk {fare}{tip} · rating {stars}/5"
  },
  "tipText": {
-  "bn": " + বখশিশ ৳{tip}",
-  "en": " + tip ৳{tip}"
+  "bn": " + বখশিশ {tip} টাকা",
+  "en": " + tip Tk {tip}"
  },
  "redLight": {
-  "bn": "লাল বাতি পার হলেন! জরিমানা ৳{fine}",
-  "en": "Ran a red light! Fine ৳{fine}"
+  "bn": "লাল বাতি পার হলেন! জরিমানা {fine} টাকা",
+  "en": "Ran a red light! Fine Tk {fine}"
  },
  "morning": {
   "bn": "সকাল",
@@ -208,8 +208,8 @@
   "en": "Day over"
  },
  "earned": {
-  "bn": "আজকের আয়: ৳{money}",
-  "en": "Earned today: ৳{money}"
+  "bn": "আজকের আয়: {money} টাকা",
+  "en": "Earned today: Tk {money}"
  },
  "tripsDone": {
   "bn": "ট্রিপ: {trips}",
@@ -220,16 +220,16 @@
   "en": "Average rating: {stars}/5"
  },
  "finesPaid": {
-  "bn": "জরিমানা: ৳{fines}",
-  "en": "Fines: ৳{fines}"
+  "bn": "জরিমানা: {fines} টাকা",
+  "en": "Fines: Tk {fines}"
  },
  "targetMet": {
-  "bn": "লক্ষ্য ৳{target} পূরণ হয়েছে!",
-  "en": "Target ৳{target} reached!"
+  "bn": "লক্ষ্য {target} টাকা পূরণ হয়েছে!",
+  "en": "Target Tk {target} reached!"
  },
  "targetMissed": {
-  "bn": "লক্ষ্য ছিল ৳{target}, কাল আবার চেষ্টা",
-  "en": "The target was ৳{target}; try again tomorrow"
+  "bn": "লক্ষ্য ছিল {target} টাকা, কাল আবার চেষ্টা",
+  "en": "The target was Tk {target}; try again tomorrow"
  },
  "again": {
   "bn": "আবার খেলুন",
@@ -238,5 +238,9 @@
  "toMohalla": {
   "bn": "মহল্লায় ফিরুন",
   "en": "Back to the mohalla"
+ },
+ "taka": {
+  "bn": "{n} টাকা",
+  "en": "Tk {n}"
  }
 }
