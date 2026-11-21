@@ -68,6 +68,19 @@ func _run() -> void:
 	root.add_child(reader)
 	await _frames(10)
 	_save("7-story")
+	reader.queue_free()
+	await _frames(2)
+	# Old Dhaka, once the mohalla reaches level 5: brick lanes, rickshaws.
+	save = load("res://scripts/rules/progress.gd").new(load("res://scripts/rules/balance.gd").new())
+	save.data.mohalla.level = 5
+	save.choose_area("old_dhaka")
+	save.save()
+	drive = load("res://scenes/rickshaw.tscn").instantiate()
+	root.add_child(drive)
+	drive.shift.pedal = true
+	await _frames(10)
+	await _seconds(6.0)
+	_save("8-old-dhaka")
 	quit(0)
 
 

@@ -87,12 +87,13 @@ var _rain_water: MeshInstance3D
 
 func _ready() -> void:
 	strings.lang = Strings.saved_lang()
-	var map: RoadMap = RoadMap.load_area("mirpur")
 	var b := Balance.new()
+	# What carries over from earlier days: a faster rickshaw, for one, and
+	# where he rides (Mirpur, or Old Dhaka once the mohalla is level 5).
+	progress = Progress.new(b)
+	var map: RoadMap = RoadMap.load_area(progress.rickshaw_area())
 	shift = Day.new(map, b)
 	_target_money = int(b.n("rickshaw.daily_target"))
-	# What carries over from earlier days: a faster rickshaw, for one.
-	progress = Progress.new(b)
 	shift.base_speed *= progress.speed_factor()
 	shift.energy_factor = progress.energy_factor()
 	# A few of the named neighbours may need a ride today.
@@ -120,7 +121,7 @@ func _ready() -> void:
 	await _step("traffic")
 	traffic = Traffic.new()
 	add_child(traffic)
-	traffic.setup(map, map.home)
+	traffic.setup(map, map.home, Traffic.counts_for(map.id))
 	traffic.focus = shift.driver
 	traffic.signal_cycle = shift.signal_cycle
 	_person_mesh = Models.person()

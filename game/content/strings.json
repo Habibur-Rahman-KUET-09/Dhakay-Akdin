@@ -1314,5 +1314,21 @@
  "cloudErr_INVALID_IDP_RESPONSE": {
   "bn": "Google থেকে ঠিক উত্তর আসেনি, একটু পরে আবার চেষ্টা করুন",
   "en": "Google's answer was not accepted: try again later"
+ },
+ "areaWhere": {
+  "bn": "কোথায় চালাবেন:",
+  "en": "Where to ride:"
+ },
+ "area_mirpur": {
+  "bn": "মিরপুর",
+  "en": "Mirpur"
+ },
+ "area_old_dhaka": {
+  "bn": "পুরান ঢাকা",
+  "en": "Old Dhaka"
+ },
+ "areaLocked": {
+  "bn": "পুরান ঢাকা খোলে মহল্লা লেভেল {level}-এ",
+  "en": "Old Dhaka opens at mohalla level {level}"
  }
 }

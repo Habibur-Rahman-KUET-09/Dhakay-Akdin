@@ -25,11 +25,12 @@ static func centre(p: Vector2i, y := 0.0) -> Vector3:
 
 
 ## Building tiles that hold a mosque instead of a block of flats: the one
-## nearest Shah Ali Mazar and a few others beside roads.
+## nearest Shah Ali Mazar (or Old Dhaka's Star Mosque) and a few others
+## beside roads, more of them in Old Dhaka.
 static func mosque_tiles(map: RoadMap) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	for pl in map.places:
-		if pl.id != "mazar":
+		if not ["mazar", "tara"].has(pl.id):
 			continue
 		var best := Vector2i(-1, -1)
 		var best_d := 1 << 30
@@ -44,7 +45,7 @@ static func mosque_tiles(map: RoadMap) -> Array[Vector2i]:
 	for y in map.height:
 		for x in map.width:
 			var p := Vector2i(x, y)
-			if map.kind_at(p) != RoadMap.Kind.BLOCK or noise(p, 300) > 0.006:
+			if map.kind_at(p) != RoadMap.Kind.BLOCK or noise(p, 300) > (0.012 if map.id == "old_dhaka" else 0.006):
 				continue
 			for d in 4:
 				if map.is_road(RoadMap.step(p, d)):

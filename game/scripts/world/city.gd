@@ -310,6 +310,11 @@ static func _blocks(map: RoadMap) -> Node3D:
 	roofs.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var shop_list = JSON.parse_string(FileAccess.get_file_as_string("res://content/shops.json"))
 	var names: Array = shop_list.names
+	# Old Dhaka: older, lower houses, most of them bare brick, and its own
+	# shops (bakarkhani, kacchi, printing presses) beside the usual ones.
+	var old := map.id == "old_dhaka"
+	if old:
+		names = (shop_list.old_dhaka as Array) + names.slice(0, 10)
 	var node := Node3D.new()
 	node.name = "Blocks"
 	var board_at: Array[Transform3D] = []
@@ -342,7 +347,7 @@ static func _blocks(map: RoadMap) -> Node3D:
 				crown_colour.append(Color("4E8A45").lerp(Color("2F6B34"), noise(p, 6)))
 				trunk_at.append(Transform3D(Basis.from_scale(Vector3(1, 1.6 * s, 1)), centre(p, 1.6 * s)))
 				continue
-			var floors := 2 + int(noise(p, 1) * 5) if not faces.is_empty() else 1 + int(noise(p, 1) * 3)
+			var floors := 2 + int(noise(p, 1) * (3 if old else 5)) if not faces.is_empty() else 1 + int(noise(p, 1) * 3)
 			var h := floors * FLOOR + 0.6
 			# The footprint: the tile, less the pavements on road sides and
 			# a narrow gap between neighbours.
@@ -352,7 +357,7 @@ static func _blocks(map: RoadMap) -> Node3D:
 			var z1 := (p.y + 1) * T - (PAVEMENT if faces.has(RoadMap.S) else 0.12)
 			var wall: Color = WALLS[int(noise(p, 2) * WALLS.size())]
 			# About one building in five is bare brick, never plastered.
-			var brick := noise(p, 8) < 0.2
+			var brick := noise(p, 8) < (0.55 if old else 0.2)
 			var skin := bricks if brick else walls
 			if brick:
 				wall = Color(0.95, 0.93, 0.9)
@@ -606,7 +611,7 @@ static func _features(map: RoadMap, town: Node3D, skip := Vector2i(-1, -1)) -> v
 				# Home is a door in the wall beside the lane, with its name over it.
 				var side := _side(map, p)
 				town.add_child(_box(Vector3(1.0, 2.1, 0.3), side + Vector3(0, 1.05, 0), Color("6B3E1E")))
-				var home_sign := _sign("বাড়ি", side + Vector3(0, 2.5, 0), 26, Look.MAGENTA)
+				var home_sign := _sign("গ্যারেজ" if map.id == "old_dhaka" else "বাড়ি", side + Vector3(0, 2.5, 0), 26, Look.MAGENTA)
 				home_sign.visibility_range_end = 40.0
 				town.add_child(home_sign)
 

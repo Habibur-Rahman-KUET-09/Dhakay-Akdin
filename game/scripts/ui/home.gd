@@ -499,6 +499,7 @@ func _rickshaw_card() -> Control:
 	drive.pressed.connect(_drive)
 	row.add_child(drive)
 	box.add_child(row)
+	box.add_child(_area_row())
 	# His last day (the newest record that is a rickshaw day).
 	for last in progress.data.history:
 		if last.get("who", "rickshaw") == "rickshaw":
@@ -519,6 +520,37 @@ func _rickshaw_card() -> Control:
 	for id in progress.data.rickshaw.upgrades:
 		box.add_child(Look.label(s.t("owned_" + id), 14, false, Look.PARROT.darkened(0.2)))
 	return panel
+
+
+## Where Rahim Chacha rides today: Mirpur, or Old Dhaka once it is open.
+func _area_row() -> Control:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var title := Look.label(s.t("areaWhere"), 14, true)
+	title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(title)
+	var here := progress.rickshaw_area()
+	for area in Progress.AREAS:
+		var is_open: bool = area == "mirpur" or progress.unlocked(area)
+		var colour: Color = Look.MAGENTA if area == here else Color("B9B2A6")
+		var pick := Look.button(s.t("area_" + area), colour, 14)
+		pick.name = "Area_" + area
+		pick.disabled = not is_open
+		pick.pressed.connect(_choose_area.bind(area))
+		row.add_child(pick)
+	box.add_child(row)
+	if not progress.unlocked("old_dhaka"):
+		box.add_child(Look.label(s.t("areaLocked", {"level": int(b.n("unlocks.old_dhaka"))}), 12))
+	return box
+
+
+func _choose_area(area: String) -> void:
+	if progress.choose_area(area):
+		progress.save()
+		_build()
 
 
 ## Monir Mama's tea stall, once the mohalla is big enough: the way in,

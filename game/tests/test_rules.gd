@@ -74,7 +74,17 @@ func test_main_roads_and_roundabouts() -> void:
 
 
 func test_mirpur_every_road_reaches_every_other() -> void:
-	var m: RoadMap = RoadMap.load_area("mirpur")
+	_whole("mirpur")
+
+
+func test_old_dhaka_every_road_reaches_every_other() -> void:
+	_whole("old_dhaka")
+
+
+## Every road of an area reachable from home and back, its places real
+## and one to a tile, with some one-way lanes.
+func _whole(area: String) -> void:
+	var m: RoadMap = RoadMap.load_area(area)
 	check(m != null, "loads")
 	if m == null:
 		return
@@ -284,6 +294,17 @@ func test_the_day_keeps_passengers_waiting() -> void:
 		eq(d.map.distance(w.at, w.place.at), w.tiles, "fare distance is the legal route")
 	check(d.riding.is_empty(), "nobody aboard yet")
 	check(d.waiting.any(func(w): return w.at == d.destination), "the arrow points at a passenger")
+
+
+func test_a_day_in_old_dhaka() -> void:
+	var d := Day.new(RoadMap.load_area("old_dhaka"), Balance.new(), 3)
+	check(d.waiting.size() >= 3, "passengers waiting in Old Dhaka")
+	for w in d.waiting:
+		check(d.map.is_road(w.at), "waiting on a road")
+		eq(d.map.distance(w.at, w.place.at), w.tiles, "fare distance is the legal route")
+	for i in 600:
+		d.update(0.1)
+	check(d.map.is_road(d.driver.cell), "a minute later, still on the road")
 
 
 func test_bargain_ride_and_get_paid() -> void:

@@ -47,6 +47,14 @@ var _lanes := {}
 const LENGTH := {"rickshaw": 0.45, "rickshaw_full": 0.45, "cng": 0.45, "bus": 1.5, "player": 0.45}
 
 
+## How many of each on an area's roads: Old Dhaka's lanes are full of
+## rickshaws and people, with few CNGs and hardly a bus.
+static func counts_for(area: String) -> Dictionary:
+	if area == "old_dhaka":
+		return {"rickshaw": 28, "rickshaw_full": 20, "cng": 5, "bus": 1, "person": 75}
+	return {"rickshaw": 20, "rickshaw_full": 14, "cng": 9, "bus": 4, "person": 60}
+
+
 func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 20, "rickshaw_full": 14, "cng": 9, "bus": 4, "person": 60}) -> void:
 	map = road_map
 	rng.seed = 2026

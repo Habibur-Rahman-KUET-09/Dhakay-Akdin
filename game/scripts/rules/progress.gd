@@ -55,6 +55,8 @@ static func fresh() -> Dictionary:
 		"streak": {"count": 0, "last": "", "best": 0},
 		"early": [],
 		"cosmetics": [],
+		# Where Rahim Chacha rides: "mirpur", or "old_dhaka" once open.
+		"area": "mirpur",
 	}
 
 
@@ -121,6 +123,26 @@ func unlock_early(what: String) -> bool:
 		return false
 	data.tara = int(data.tara) - cost
 	data.early.append(what)
+	return true
+
+
+## The rickshaw's areas: Mirpur always, Old Dhaka from its level.
+const AREAS := ["mirpur", "old_dhaka"]
+
+
+## Where today's ride is: the area chosen, if it is open.
+func rickshaw_area() -> String:
+	var a := str(data.area)
+	if a == "old_dhaka" and not unlocked("old_dhaka"):
+		return "mirpur"
+	return a if AREAS.has(a) else "mirpur"
+
+
+## Chooses where to ride; false if that area is not open yet.
+func choose_area(a: String) -> bool:
+	if not AREAS.has(a) or (a == "old_dhaka" and not unlocked("old_dhaka")):
+		return false
+	data.area = a
 	return true
 
 

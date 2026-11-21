@@ -2,7 +2,7 @@
 """Turns an area's real streets (tool/osm/<area>.json, from fetch_osm.py)
 into the game's tile map (app/assets/content/maps/<area>.json).
 
-    python3 tool/build_map.py mirpur [--png out.png]
+    python3 tool/build_map.py mirpur|old_dhaka [--png out.png]
 
 The real streets run at an angle, so the map is turned until the area's
 main road lies flat, then every street is laid on the grid: main roads
@@ -65,6 +65,45 @@ AREAS = {
             ('falpotti', 'ফলপট্টি', 'Falpotti', 23.8061, 90.3681),
             ('borobagh', 'বড়বাগ', 'Borobagh', 23.8025, 90.3621),
             ('agora', 'আগোরা, মিরপুর ১০', 'Agora, Mirpur 10', 23.8095, 90.3689),
+        ],
+    },
+    'old_dhaka': {
+        'name': {'bn': 'পুরান ঢাকা', 'en': 'Old Dhaka'},
+        # Laid east-west: Lalbagh at the left, Lakshmibazar at the right,
+        # the river (Sadarghat) along the bottom.
+        'axis': [(23.715, 90.388), (23.715, 90.413)],
+        'cell_m': 45,
+        'u': (-1350, 1600),
+        'v': (-1050, 1000),
+        # Overhead roads, not streets a rickshaw can ride.
+        'skip': ['Flyover', 'Bridge'],
+        'roundabouts': [],
+        'home': (23.7160, 90.3975),          # a rickshaw garage by Chawkbazar
+        'tea': [(23.7170, 90.3950), (23.7185, 90.4060), (23.7130, 90.4025),
+                (23.7095, 90.4135), (23.7195, 90.3900)],
+        'signals': [(23.7146, 90.4075), (23.7105, 90.4060)],
+        'flood': [(23.7192, 90.4074), (23.7190, 90.4050), (23.7153, 90.3954)],
+        'one_way_lanes': 14,
+        'places': [
+            ('lalbagh', 'লালবাগ কেল্লা', 'Lalbagh Fort', 23.7187, 90.3882),
+            ('dhakeshwari', 'ঢাকেশ্বরী মন্দির', 'Dhakeshwari Temple', 23.7225, 90.3897),
+            ('chawkbazar', 'চকবাজার', 'Chawkbazar', 23.7153, 90.3954),
+            ('hussaini', 'হোসেনী দালান', 'Hussaini Dalan', 23.7224, 90.3979),
+            ('bangshal', 'বংশাল', 'Bangshal', 23.7190, 90.4050),
+            ('nazira', 'নাজিরা বাজার', 'Nazira Bazar', 23.7192, 90.4074),
+            ('armanitola', 'আরমানিটোলা', 'Armanitola', 23.7140, 90.4016),
+            ('tara', 'তারা মসজিদ', 'Star Mosque', 23.7154, 90.4009),
+            ('islampur', 'ইসলামপুর', 'Islampur', 23.7103, 90.4068),
+            ('ahsan', 'আহসান মঞ্জিল', 'Ahsan Manzil', 23.7086, 90.4062),
+            ('sadarghat', 'সদরঘাট', 'Sadarghat', 23.7065, 90.4100),
+            ('bahadurshah', 'বাহাদুর শাহ পার্ক', 'Bahadur Shah Park', 23.7090, 90.4130),
+            ('jnu', 'জগন্নাথ বিশ্ববিদ্যালয়', 'Jagannath University', 23.7087, 90.4118),
+            ('shankhari', 'শাঁখারী বাজার', 'Shankhari Bazar', 23.7100, 90.4140),
+            ('lakshmibazar', 'লক্ষ্মীবাজার', 'Lakshmibazar', 23.7082, 90.4155),
+            ('babubazar', 'বাবুবাজার', 'Babubazar', 23.7108, 90.4028),
+            ('nayabazar', 'নয়াবাজার', 'Nayabazar', 23.7146, 90.4064),
+            ('sowarighat', 'সোয়ারীঘাট', 'Sowarighat', 23.7114, 90.3943),
+            ('roysaheb', 'রায়সাহেব বাজার', 'Roy Saheb Bazar', 23.7132, 90.4114),
         ],
     },
 }
@@ -143,7 +182,7 @@ def build(area):
             if f.inside(c) and kind.get(c) != 'M':
                 kind[c] = k
 
-    roads = data['roads']
+    roads = [r for r in data['roads'] if not any(k in (r['name'] or '') for k in a.get('skip', ()))]
     for r in roads:
         t = r['type'].replace('_link', '')
         if t in MAIN:

@@ -1,5 +1,5 @@
 {
- "about": "Made-up shop names for signboards; any match with a real shop is chance. Most boards are in Bangla, some in English, as in Dhaka.",
+ "about": "Made-up shop names for signboards; any match with a real shop is chance. Most boards are in Bangla, some in English, as in Dhaka. The old_dhaka list is for Old Dhaka's lanes.",
  "names": [
   {
    "bn": "মায়ের দোয়া স্টোর",
@@ -152,6 +152,64 @@
   {
    "bn": "সহজে টাকা পাঠান",
    "en": "Send money easily"
+  }
+ ],
+ "old_dhaka": [
+  {
+   "bn": "শাহী বাকরখানি ঘর",
+   "en": "Shahi Bakarkhani Ghar"
+  },
+  {
+   "bn": "আদি কাচ্চি ঘর",
+   "en": "Adi Kacchi Ghar"
+  },
+  {
+   "bn": "নবাবী মিষ্টান্ন ভাণ্ডার",
+   "en": "Nawabi Sweets"
+  },
+  {
+   "bn": "আল-মদিনা ছাপাখানা",
+   "en": "Al-Madina Press"
+  },
+  {
+   "bn": "শাঁখা শিল্পালয়",
+   "en": "Shankha Shilpalay"
+  },
+  {
+   "bn": "বাবুল কাপড় বিতান",
+   "en": "Babul Cloth Store"
+  },
+  {
+   "bn": "মামা হালিম",
+   "en": "Mama Haleem"
+  },
+  {
+   "bn": "ঢাকাই মশলা ঘর",
+   "en": "Dhakai Moshla Ghar"
+  },
+  {
+   "bn": "রাজ্জাক হার্ডওয়্যার",
+   "en": "Razzak Hardware"
+  },
+  {
+   "bn": "পুরান ঢাকা কাগজ ঘর",
+   "en": "Puran Dhaka Paper House"
+  },
+  {
+   "bn": "বিসমিল্লাহ মোরগ পোলাও",
+   "en": "Bismillah Morog Polao"
+  },
+  {
+   "bn": "নূর জর্দা ভাণ্ডার",
+   "en": "Noor Zarda Store"
+  },
+  {
+   "bn": "লালবাগ বই বিতান",
+   "en": "Lalbagh Boi Bitan"
+  },
+  {
+   "bn": "চকবাজার খেলনা ঘর",
+   "en": "Chawkbazar Toy House"
   }
  ]
 }

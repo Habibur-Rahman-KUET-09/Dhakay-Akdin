@@ -237,3 +237,15 @@ func test_the_online_copy_round_trips() -> void:
 	eq(Cloud.error_of({"code": 0}), "NETWORK", "no reply: no network")
 	eq(Cloud.error_of({"code": 400, "data": {"error": {"message": "WEAK_PASSWORD : Password should be at least 6 characters"}}}), "WEAK_PASSWORD", "sign-in errors by name")
 	eq(Cloud.error_of({"code": 403, "data": {"error": {"message": "Missing or insufficient permissions.", "status": "PERMISSION_DENIED"}}}), "PERMISSION_DENIED", "Firestore errors by status")
+
+
+func test_old_dhaka_opens_at_level_five() -> void:
+	var p := _fresh()
+	eq(p.rickshaw_area(), "mirpur", "Mirpur at first")
+	check(not p.choose_area("old_dhaka"), "Old Dhaka shut at level 1")
+	check(not p.choose_area("gulshan"), "no such area")
+	p.data.mohalla.level = 5
+	check(p.choose_area("old_dhaka"), "open at level 5")
+	eq(p.rickshaw_area(), "old_dhaka", "riding there now")
+	p.data.mohalla.level = 1
+	eq(p.rickshaw_area(), "mirpur", "an old save past its level falls back to Mirpur")
