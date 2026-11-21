@@ -15,6 +15,17 @@ var flood_speed := 0.5
 var min_trip := 8
 var rng := RandomNumberGenerator.new()
 
+## The player's pedal and brake (§৪.১, speed in the player's hands): the
+## rickshaw gathers speed while pedalling, rolls to a stop when not, and
+## stops quicker when braking. Rates in tiles per second per second.
+var pedal := false
+var brake := false
+var accel := 0.45
+var coast := 0.3
+var braking := 1.5
+## Current speed, tiles per second.
+var speed_now := 0.0
+
 var destination := Vector2i.ZERO
 ## The real place being driven to, when the map has places; else {}.
 var place := {}
@@ -48,7 +59,14 @@ func swipe(t: int) -> Array:
 
 
 func update(dt: float) -> Array:
-	driver.speed = base_speed * (flood_speed if on_flood() else 1.0)
+	var top := base_speed * (flood_speed if on_flood() else 1.0)
+	if brake:
+		speed_now = maxf(0.0, speed_now - braking * dt)
+	elif pedal:
+		speed_now = minf(top, speed_now + accel * dt) if speed_now <= top else maxf(top, speed_now - braking * dt)
+	else:
+		speed_now = maxf(0.0, speed_now - coast * dt)
+	driver.speed = speed_now
 	var events := driver.update(dt)
 	if not events.has(Driver.Event.ENTERED):
 		return events

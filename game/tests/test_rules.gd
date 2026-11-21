@@ -173,6 +173,8 @@ func test_destinations_are_real_places_far_enough() -> void:
 
 func test_reaching_the_destination_counts_and_picks_another() -> void:
 	var s := Shift.new(small(), 2.0, 0.5, 3, 1)
+	s.pedal = true
+	s.accel = 10.0
 	var events := []
 	var i := 0
 	# Drive the legal route, swiping each turn a tile ahead as a player would.
@@ -195,8 +197,30 @@ func test_reaching_the_destination_counts_and_picks_another() -> void:
 func test_a_waterlogged_road_halves_the_speed() -> void:
 	var m: RoadMap = RoadMap.parse("wet", PackedStringArray(["######", "#HW..#", "######"]))
 	var s := Shift.new(m, 2.0, 0.5, 1, 1)
-	s.update(0.01)
-	near(s.driver.speed, 1.0, "speed on the water")
+	s.pedal = true
+	s.accel = 100.0
+	s.update(0.05)
+	near(s.driver.speed, 1.0, "top speed on the water is half")
+
+
+func test_pedal_brake_and_coast() -> void:
+	var s := Shift.new(small(), 1.0, 0.5, 3, 1)
+	s.update(0.5)
+	near(s.speed_now, 0.0, "no pedalling, no moving")
+	eq(s.driver.cell, small().home, "still at home")
+	s.pedal = true
+	for i in 10:
+		s.update(0.1)
+	near(s.speed_now, minf(1.0, s.accel * 1.0), "gathers speed", 1e-3)
+	s.accel = 100.0
+	s.update(0.1)
+	near(s.speed_now, 1.0, "never above the top speed")
+	s.pedal = false
+	s.update(1.0)
+	near(s.speed_now, 1.0 - s.coast, "rolls on, slowing", 1e-3)
+	s.brake = true
+	s.update(1.0)
+	near(s.speed_now, 0.0, "the brake stops it")
 
 
 func _dir(a: Vector2i, b: Vector2i) -> int:

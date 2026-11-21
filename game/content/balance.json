@@ -19,7 +19,7 @@
           "interstitial_every_n_days": 3, "interstitial_per_day": 3, "no_interstitial_first_days": 3},
   "rickshaw": {
     "start_hour": 7, "end_hour": 21, "daily_target": 600,
-    "speed_tiles_per_s": 1.6,
+    "speed_tiles_per_s": 0.95, "accel_tiles_per_s2": 0.45, "coast_decel": 0.3, "brake_decel": 1.5,
     "fare_base": 20, "fare_per_tile": 1.5, "fare_round_to": 5,
     "counter_offer_factor": 1.2,
     "eta_slack": 1.3, "late_step": 0.10, "waterlog_star_penalty": 0.5, "five_star_tip": 10,

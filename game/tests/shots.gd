@@ -23,9 +23,10 @@ func _run() -> void:
 	await _frames(2)
 	var drive = load("res://scenes/rickshaw.tscn").instantiate()
 	root.add_child(drive)
+	drive.shift.pedal = true
 	await _frames(10)
 	_save("2-start")
-	await _seconds(3.0)
+	await _seconds(6.0)
 	_save("3-driving")
 	drive.shift.swipe(1)
 	await _seconds(4.0)

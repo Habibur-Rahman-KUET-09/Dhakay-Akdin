@@ -24,6 +24,17 @@ var _me := Vector2.ZERO
 var _goal := Vector2i.ZERO
 
 const MINI_PX := 3
+const PEDAL_SIZE := Vector2(132, 132)
+const BRAKE_SIZE := Vector2(104, 104)
+
+## The pedal (right) and brake (left) buttons. They do not take touches
+## themselves: the scene reads touches by finger, so one finger can pedal
+## while another swipes.
+var pedal_button: Panel
+var brake_button: Panel
+var _speed: Label
+var _pedal_down := false
+var _brake_down := false
 
 
 func setup(strings, road_map: RoadMap) -> void:
@@ -92,6 +103,23 @@ func _ready() -> void:
 	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(bottom)
+	var controls := HBoxContainer.new()
+	controls.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	brake_button = _round_button(s.t("brake"), BRAKE_SIZE, Look.VERMILION)
+	brake_button.size_flags_vertical = Control.SIZE_SHRINK_END
+	controls.add_child(brake_button)
+	_speed = Look.label("", 18, true)
+	_speed.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_speed.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_speed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_speed.size_flags_vertical = Control.SIZE_SHRINK_END
+	_speed.add_theme_color_override("font_color", Color.WHITE)
+	_speed.add_theme_color_override("font_outline_color", Look.OUTLINE)
+	_speed.add_theme_constant_override("outline_size", 6)
+	controls.add_child(_speed)
+	pedal_button = _round_button(s.t("pedal"), PEDAL_SIZE, Look.PARROT)
+	controls.add_child(pedal_button)
+	bottom.add_child(controls)
 	var credit := Look.label(map.credit, 11)
 	credit.add_theme_color_override("font_color", Look.OUTLINE.lerp(Color.WHITE, 0.2))
 	bottom.add_child(credit)
@@ -101,6 +129,50 @@ func _ready() -> void:
 	_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_notice_box.add_child(_notice)
 	bottom.add_child(_notice_box)
+
+
+func _round_button(text: String, size: Vector2, colour: Color) -> Panel:
+	var b := Panel.new()
+	b.custom_minimum_size = size
+	b.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_theme_stylebox_override("panel", Look.card(colour, int(size.x / 2), 4))
+	var l := Look.label(text, 18, true, Color.WHITE)
+	l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	l.set_anchors_preset(Control.PRESET_FULL_RECT)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	b.add_child(l)
+	b.set_meta("colour", colour)
+	return b
+
+
+## Shows a button pressed or not.
+func _press(b: Panel, down: bool) -> void:
+	var colour: Color = b.get_meta("colour")
+	b.add_theme_stylebox_override("panel", Look.card(colour.darkened(0.3) if down else colour, int(b.custom_minimum_size.x / 2), 4))
+	b.scale = Vector2.ONE * (0.94 if down else 1.0)
+	b.pivot_offset = b.size / 2
+
+
+## Where the buttons are, in the same coordinates as touch events.
+func pedal_rect() -> Rect2:
+	return pedal_button.get_global_rect().grow(16)
+
+
+func brake_rect() -> Rect2:
+	return brake_button.get_global_rect().grow(16)
+
+
+func show_controls(pedal: bool, brake: bool, kmh: float) -> void:
+	if pedal != _pedal_down:
+		_pedal_down = pedal
+		_press(pedal_button, pedal)
+	if brake != _brake_down:
+		_brake_down = brake
+		_press(brake_button, brake)
+	var text := s.t("kmh", {"n": roundi(kmh)})
+	if _speed.text != text:
+		_speed.text = text
 
 
 func _mini_image() -> Image:

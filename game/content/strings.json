@@ -64,8 +64,8 @@
   "en": "Trips {count}"
  },
  "rickshawHint": {
-  "bn": "মোড়ের আগেই বাঁয়ে বা ডানে সোয়াইপ করুন; নিচে সোয়াইপ করলে ঘুরে যাবেন",
-  "en": "Swipe left or right before the junction; swipe down to turn round"
+  "bn": "প্যাডেল চেপে ধরে চালান; মোড়ের আগে বাঁয়ে বা ডানে সোয়াইপ, নিচে সোয়াইপ করলে ঘুরে যাবেন",
+  "en": "Hold Pedal to ride; swipe left or right before a junction, down to turn round"
  },
  "rickshawWhichWay": {
   "bn": "কোন দিকে? বাঁয়ে না ডানে সোয়াইপ করুন",
@@ -86,5 +86,17 @@
  "back": {
   "bn": "ফিরুন",
   "en": "Back"
+ },
+ "pedal": {
+  "bn": "প্যাডেল",
+  "en": "Pedal"
+ },
+ "brake": {
+  "bn": "ব্রেক",
+  "en": "Brake"
+ },
+ "kmh": {
+  "bn": "{n} কিমি/ঘণ্টা",
+  "en": "{n} km/h"
  }
 }

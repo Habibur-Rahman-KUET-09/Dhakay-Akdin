@@ -34,8 +34,11 @@ var _side := Vector3.ZERO
 var _notice := ""
 var _notice_colour := Look.OUTLINE
 var _notice_left := 0.0
-var _touch_start := Vector2.ZERO
-var _touch_used := true
+var _pedal_fingers := {}
+var _brake_fingers := {}
+var _swipes := {}
+var _key_pedal := false
+var _key_brake := false
 
 
 func _ready() -> void:
@@ -43,6 +46,9 @@ func _ready() -> void:
 	var map: RoadMap = RoadMap.load_area("mirpur")
 	var b := Balance.new()
 	shift = Shift.new(map, b.n("rickshaw.speed_tiles_per_s"), b.n("rickshaw.waterlog_speed"))
+	shift.accel = b.n("rickshaw.accel_tiles_per_s2")
+	shift.coast = b.n("rickshaw.coast_decel")
+	shift.braking = b.n("rickshaw.brake_decel")
 	_environment()
 	add_child(City.build(map, strings.lang))
 	var traffic := Traffic.new()
@@ -179,7 +185,8 @@ func _follow(dt: float, snap := false) -> void:
 	if d.moving:
 		for w in rickshaw.get_meta("wheels"):
 			w.rotate_x(-dt * d.speed * City.T / 0.34)
-	_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if d.moving else 0.0, 0.0, 1.0))
+	var pedalling := shift.pedal and d.moving
+	_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if pedalling else 0.0, 0.0, 1.0))
 	var forward := Vector3(-sin(_yaw), 0, -cos(_yaw))
 	camera.position = rickshaw.position - forward * CAMERA_BACK + Vector3.UP * CAMERA_UP
 	camera.look_at(rickshaw.position + forward * 8.0 + Vector3.UP * 1.2)
@@ -197,21 +204,45 @@ func _update_hud() -> void:
 		var place_label := RoadMap.place_name(shift.place, strings.lang) if not shift.place.is_empty() else ""
 		target = strings.t("rickshawToPlace", {"place": place_label, "tiles": shift.remaining}) if place_label != "" \
 			else strings.t("rickshawToGo", {"tiles": shift.remaining})
+	hud.show_controls(shift.pedal, shift.brake, shift.speed_now * City.T * 3.6)
 	hud.refresh(target, shift.delivered, angle, _notice, _notice_colour, me, shift.destination)
 
 
-func _unhandled_input(event: InputEvent) -> void:
+## Touches are read finger by finger: a finger on the pedal or brake holds
+## it; any other finger can swipe a turn at the same time.
+func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
+		var finger: int = event.index
 		if event.pressed:
-			_touch_start = event.position
-			_touch_used = false
+			if hud.pedal_rect().has_point(event.position):
+				_pedal_fingers[finger] = true
+			elif hud.brake_rect().has_point(event.position):
+				_brake_fingers[finger] = true
+			else:
+				_swipes[finger] = {"start": event.position, "used": false}
+		else:
+			_pedal_fingers.erase(finger)
+			_brake_fingers.erase(finger)
+			_swipes.erase(finger)
+		_apply_controls()
 		return
-	if event is InputEventScreenDrag and not _touch_used:
-		var moved: Vector2 = event.position - _touch_start
-		if moved.length() >= SWIPE_PX:
-			_touch_used = true
-			_turn(_swipe_turn(moved))
+	if event is InputEventScreenDrag:
+		var swipe = _swipes.get(event.index)
+		if swipe != null and not swipe.used:
+			var moved: Vector2 = event.position - swipe.start
+			if moved.length() >= SWIPE_PX:
+				swipe.used = true
+				_turn(_swipe_turn(moved))
 		return
+	if event is InputEventKey and not event.echo:
+		if event.keycode == KEY_SPACE:
+			_key_pedal = event.pressed
+			_apply_controls()
+			return
+		if event.keycode == KEY_B:
+			_key_brake = event.pressed
+			_apply_controls()
+			return
 	if event.is_action_pressed("ui_left"):
 		_turn(Driver.LEFT)
 	elif event.is_action_pressed("ui_right"):
@@ -220,6 +251,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		_turn(Driver.BACK)
 	elif event.is_action_pressed("ui_up"):
 		_turn(Driver.AHEAD)
+
+
+func _apply_controls() -> void:
+	shift.pedal = _key_pedal or not _pedal_fingers.is_empty()
+	shift.brake = _key_brake or not _brake_fingers.is_empty()
 
 
 ## A finger's movement on screen as a turn: the camera looks ahead, so up
