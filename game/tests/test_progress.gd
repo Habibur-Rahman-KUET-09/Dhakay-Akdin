@@ -114,3 +114,12 @@ func test_tea_stall_upgrades() -> void:
 	check(p.buy("second_kettle", "tea"), "bought")
 	eq(p.data.taka, 500, "paid 800 + 1200")
 	eq(p.next_upgrade(), "new_rickshaw", "the rickshaw's own list is apart")
+
+
+func test_a_day_on_the_bus() -> void:
+	var p := _fresh()
+	var got := p.apply_bus_day({"earned": 500, "riders": 30, "stars": 4.4})
+	eq(got.fund, 50, "a tenth to the fund")
+	eq(p.data.taka, 450, "the rest saved")
+	eq(p.data.bus.riders, 30, "riders counted")
+	eq(p.data.history[0].who, "bus", "the record says whose day it was")

@@ -686,5 +686,209 @@
  "owned_fridge": {
   "bn": "কেনা আছে: ফ্রিজ",
   "en": "Owned: a fridge"
+ },
+ "stop_mirpur10": {
+  "bn": "মিরপুর ১০",
+  "en": "Mirpur 10"
+ },
+ "stop_kazipara": {
+  "bn": "কাজীপাড়া",
+  "en": "Kazipara"
+ },
+ "stop_shewrapara": {
+  "bn": "শেওড়াপাড়া",
+  "en": "Shewrapara"
+ },
+ "stop_agargaon": {
+  "bn": "আগারগাঁও",
+  "en": "Agargaon"
+ },
+ "stop_farmgate": {
+  "bn": "ফার্মগেট",
+  "en": "Farmgate"
+ },
+ "stop_karwan_bazar": {
+  "bn": "কারওয়ান বাজার",
+  "en": "Karwan Bazar"
+ },
+ "stop_shahbag": {
+  "bn": "শাহবাগ",
+  "en": "Shahbag"
+ },
+ "stop_press_club": {
+  "bn": "প্রেস ক্লাব",
+  "en": "Press Club"
+ },
+ "stop_motijheel": {
+  "bn": "মতিঝিল",
+  "en": "Motijheel"
+ },
+ "busLoading": {
+  "bn": "বাস ছাড়ছে…",
+  "en": "The bus is leaving…"
+ },
+ "busStart": {
+  "bn": "মিরপুর ১০ থেকে মতিঝিল! সবার ভাড়া তুলুন, ঠিকমতো ভাংতি দিন",
+  "en": "Mirpur 10 to Motijheel! Take every fare, give the right change"
+ },
+ "nextStop": {
+  "bn": "পরের স্টপ: {stop}",
+  "en": "Next stop: {stop}"
+ },
+ "atStopNow": {
+  "bn": "স্টপ: {stop}",
+  "en": "Stop: {stop}"
+ },
+ "busRating": {
+  "bn": "রেটিং {stars}/৫",
+  "en": "Rating {stars}/5"
+ },
+ "callTitle": {
+  "bn": "{stop} আসছে! ঠিক সময়ে ডাকুন",
+  "en": "{stop} is coming! Call it at the right moment"
+ },
+ "callButton": {
+  "bn": "ডাকুন!",
+  "en": "Call!"
+ },
+ "call_perfect": {
+  "bn": "দারুণ ডাক! আরও ২ জন উঠবে",
+  "en": "Great call! 2 more will get on"
+ },
+ "call_good": {
+  "bn": "ভালো ডাক! আরও ১ জন উঠবে",
+  "en": "Good call! 1 more will get on"
+ },
+ "call_miss": {
+  "bn": "ডাক কেউ শুনল না",
+  "en": "Nobody heard the call"
+ },
+ "atStop": {
+  "bn": "{stop}: উঠলেন {on} জন, নামলেন {off} জন",
+  "en": "{stop}: {on} on, {off} off"
+ },
+ "slipped": {
+  "bn": "{n} জন ভাড়া না দিয়েই নেমে গেলেন!",
+  "en": "{n} got off without paying!"
+ },
+ "owedShort": {
+  "bn": "ভাংতি ফেরত দিতে পারলেন না, যাত্রী রেগে নামলেন",
+  "en": "Could not give the change owed: an angry passenger"
+ },
+ "faresDue": {
+  "bn": "ভাড়া বাকি: {n} জন",
+  "en": "Fares to take: {n}"
+ },
+ "nextFare": {
+  "bn": "ভাড়া নিন",
+  "en": "Take a fare"
+ },
+ "fareTitle": {
+  "bn": "{stop} পর্যন্ত · ভাড়া {fare} টাকা",
+  "en": "To {stop} · fare Tk {fare}"
+ },
+ "paidWith": {
+  "bn": "দিলেন {note} টাকার নোট",
+  "en": "Paid with a Tk {note} note"
+ },
+ "studentAsks": {
+  "bn": "ছাত্র: অর্ধেক ভাড়া ({half} টাকা) দিতে চায়",
+  "en": "A student: wants to pay half (Tk {half})"
+ },
+ "studentHalf": {
+  "bn": "অর্ধেক নিন",
+  "en": "Take half"
+ },
+ "studentFull": {
+  "bn": "পুরো চান",
+  "en": "Ask for full"
+ },
+ "givingBack": {
+  "bn": "ফেরত দিচ্ছেন: {n} টাকা",
+  "en": "Giving back: Tk {n}"
+ },
+ "noteButton": {
+  "bn": "{note}\n{n}টা",
+  "en": "{note}\n×{n}"
+ },
+ "giveChange": {
+  "bn": "ফেরত দিন",
+  "en": "Give change"
+ },
+ "recount": {
+  "bn": "আবার গুনুন",
+  "en": "Recount"
+ },
+ "noChange": {
+  "bn": "ভাংতি নেই?",
+  "en": "No change?"
+ },
+ "payLater": {
+  "bn": "পরে দেব",
+  "en": "Owe it"
+ },
+ "askRound": {
+  "bn": "অন্যের থেকে ভাংতি",
+  "en": "Ask round"
+ },
+ "argument": {
+  "bn": "ভাংতি কম! যাত্রী তর্ক জুড়লেন",
+  "en": "Short change! An argument"
+ },
+ "overpaid": {
+  "bn": "বেশি ফেরত দিলেন, নিজের পকেট থেকে গেল (মোট {n} টাকা)",
+  "en": "Too much back: from your own pocket (Tk {n} so far)"
+ },
+ "settled": {
+  "bn": "ভাড়া নেওয়া হলো",
+  "en": "Fare taken"
+ },
+ "owing": {
+  "bn": "ভাংতি পরে দেবেন, যাত্রী খুশি নন",
+  "en": "Change owed: the passenger is not pleased"
+ },
+ "swapped": {
+  "bn": "অন্য যাত্রীদের থেকে ভাংতি নিচ্ছেন",
+  "en": "Getting change from the other passengers"
+ },
+ "tripOver": {
+  "bn": "মতিঝিল! ট্রিপ শেষ",
+  "en": "Motijheel! Trip over"
+ },
+ "busRiders": {
+  "bn": "যাত্রী: {n} জন",
+  "en": "Passengers: {n}"
+ },
+ "onTime": {
+  "bn": "সময়মতো পৌঁছানোর বোনাস: {n} টাকা",
+  "en": "On-time bonus: Tk {n}"
+ },
+ "busSlipped": {
+  "bn": "ভাড়া না দিয়ে নেমেছেন {n} জন",
+  "en": "{n} got off without paying"
+ },
+ "busArguments": {
+  "bn": "ভাংতি নিয়ে তর্ক: {n} বার",
+  "en": "Arguments over change: {n}"
+ },
+ "busOverpaid": {
+  "bn": "বেশি ফেরত: {n} টাকা",
+  "en": "Too much change: Tk {n}"
+ },
+ "busRatingLine": {
+  "bn": "যাত্রীদের রেটিং: {stars}/৫",
+  "en": "Passengers' rating: {stars}/5"
+ },
+ "openBus": {
+  "bn": "বাসে উঠুন",
+  "en": "Board the bus"
+ },
+ "busLastDay": {
+  "bn": "শেষ দিন: {money} টাকা, {riders} জন যাত্রী",
+  "en": "Last day: Tk {money}, {riders} passengers"
+ },
+ "busHistoryLine": {
+  "bn": "দিন {day}: বাস · {money} টাকা · {riders} জন",
+  "en": "Day {day}: bus · Tk {money} · {riders} riders"
  }
 }

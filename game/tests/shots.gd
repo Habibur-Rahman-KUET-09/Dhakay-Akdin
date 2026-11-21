@@ -47,6 +47,16 @@ func _run() -> void:
 	tea._on_step("kettle")
 	await _frames(3)
 	_save("5-tea-stall")
+	tea.queue_free()
+	await _frames(2)
+	# Babu's bus: on the way, a fare being taken.
+	var bus = load("res://scenes/bus.tscn").instantiate()
+	root.add_child(bus)
+	await _frames(20)
+	await _seconds(6.0)
+	bus._on_next_fare()
+	await _frames(3)
+	_save("6-bus")
 	quit(0)
 
 

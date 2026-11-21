@@ -74,7 +74,10 @@ func _build() -> void:
 		col.add_child(_tea_card())
 	else:
 		col.add_child(_other("teaName", "teaRole", Look.PARROT, "tea_stall"))
-	col.add_child(_other("busName", "busRole", Look.SKY, "bus"))
+	if progress.unlocked("bus"):
+		col.add_child(_bus_card())
+	else:
+		col.add_child(_other("busName", "busRole", Look.SKY, "bus"))
 	if not progress.data.history.is_empty():
 		col.add_child(_history_card())
 	col.add_child(_graphics_row())
@@ -207,6 +210,39 @@ func _tea_card() -> Control:
 	return panel
 
 
+## Babu's bus, once the mohalla is big enough: the way on, and the last
+## day there.
+func _bus_card() -> Control:
+	var panel := _panel()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	row.add_child(_dot(Look.SKY))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_child(Look.label(s.t("busName"), 20, true))
+	text.add_child(Look.label(s.t("busRole"), 14))
+	row.add_child(text)
+	var board := Look.button(s.t("openBus"), Look.SKY)
+	board.name = "Board"
+	board.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	board.pressed.connect(_board_bus)
+	row.add_child(board)
+	box.add_child(row)
+	for h in progress.data.history:
+		if h.get("who", "") == "bus":
+			box.add_child(Look.label(s.t("busLastDay", {"money": int(h.earned), "riders": int(h.get("riders", 0))}), 15))
+			break
+	return panel
+
+
+func _board_bus() -> void:
+	CrashWatch.start("bus")
+	get_tree().change_scene_to_file("res://scenes/bus.tscn")
+
+
 func _buy_for_stall(id: String) -> void:
 	if progress.buy(id, "tea"):
 		progress.save()
@@ -266,6 +302,8 @@ func _history_card() -> Control:
 		var line := s.t("historyLine", {"day": int(h.day), "money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.stars})
 		if h.get("who", "") == "tea":
 			line = s.t("teaHistoryLine", {"day": int(h.day), "money": int(h.earned), "served": int(h.get("served", 0))})
+		elif h.get("who", "") == "bus":
+			line = s.t("busHistoryLine", {"day": int(h.day), "money": int(h.earned), "riders": int(h.get("riders", 0))})
 		box.add_child(Look.label(line, 14, false, Look.PARROT.darkened(0.3) if h.met else Look.OUTLINE))
 	return panel
 

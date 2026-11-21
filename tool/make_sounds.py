@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes the game's placeholder street sounds as WAV files (no recordings
-yet): the rickshaw bell, CNG and bus horns, the road's hum, rain, and a
-traffic policeman's whistle.
+yet): the rickshaw bell, CNG and bus horns, the road's hum, rain, a
+traffic policeman's whistle and a bus conductor's knock.
 
     python3 tool/make_sounds.py
 
@@ -110,6 +110,22 @@ def whistle():
     return out
 
 
+def thump():
+    """A bus conductor's palm on the side of the bus, twice: a dull knock
+    on thin steel."""
+    rnd = random.Random(3)
+    out = []
+    for gap in (0.16, 0.0):
+        n = int(RATE * 0.12)
+        for i in range(n):
+            t = i / RATE
+            env = math.exp(-t * 38)
+            v = math.sin(2 * math.pi * 95 * t) * 0.8 + math.sin(2 * math.pi * 230 * t) * 0.3 + rnd.uniform(-1, 1) * 0.25 * math.exp(-t * 90)
+            out.append(v * env * 0.7)
+        out.extend([0.0] * int(RATE * gap))
+    return out
+
+
 if __name__ == '__main__':
     write('bell.wav', bell())
     write('horn_cng.wav', horn(560, 700, 0.35))
@@ -117,4 +133,5 @@ if __name__ == '__main__':
     write('hum.wav', hum(12))
     write('rain.wav', rain(8))
     write('whistle.wav', whistle())
+    write('thump.wav', thump())
     print('sounds written to', os.path.normpath(OUT))

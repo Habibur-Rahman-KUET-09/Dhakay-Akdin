@@ -652,6 +652,88 @@ static func bench_sitter() -> ArrayMesh:
 	return b.commit()
 
 
+# --- Inside Babu's bus -----------------------------------------------------
+
+
+## Seat positions inside the bus (x, z), front rows first: two seats each
+## side of the aisle, six rows. The front left two are for the elderly,
+## the front right four for women.
+static func bus_seats() -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for row in 6:
+		var z := -2.0 + row * 1.0
+		for x in [-0.85, -0.45, 0.45, 0.85]:
+			out.append(Vector2(x, z))
+	return out
+
+
+## Places to stand in the aisle, front first.
+static func bus_standing() -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for i in 10:
+		out.append(Vector2(0.12 if i % 2 == 0 else -0.12, -2.6 + i * 0.6))
+	return out
+
+
+## The inside of a Dhaka local bus, looking forward (-Z) from the back: a
+## ribbed floor, blue vinyl seats on steel frames, window pillars, the
+## ceiling rails, a battered dashboard and the driver's seat on the right,
+## the windscreen, and the door at the front left. Floor at y = 0.
+static func bus_interior() -> ArrayMesh:
+	var b := Builder.new()
+	var paint := Color("C62828")
+	var cream := Color("EFE6D2")
+	var steel := Color("8C9196")
+	# Floor with ribs, the back wall.
+	b.box(Vector3(2.4, 0.05, 9.0), Vector3(0, -0.025, 0), Color("3B3B3B"))
+	for i in 30:
+		b.box(Vector3(0.5, 0.012, 0.03), Vector3(0, 0.006, -4.3 + i * 0.3), Color("2A2A2A"))
+	b.box(Vector3(2.4, 2.3, 0.05), Vector3(0, 1.15, 4.5), cream)
+	# Side walls: a painted lower panel, pillars between the windows, a
+	# cream upper strip; the door gap at the front left.
+	for side in [-1, 1]:
+		var x: float = side * 1.2
+		for k in 9:
+			var z0 := -4.5 + k * 1.0
+			if side < 0 and k == 1:
+				continue
+			b.box(Vector3(0.05, 1.0, 1.0), Vector3(x, 0.5, z0 + 0.5), paint)
+			b.box(Vector3(0.06, 0.06, 1.0), Vector3(x, 1.0, z0 + 0.5), steel)
+		for k in 10:
+			b.box(Vector3(0.06, 0.95, 0.08), Vector3(x, 1.47, -4.5 + k * 1.0), cream.darkened(0.1))
+		b.box(Vector3(0.05, 0.35, 9.0), Vector3(x, 2.12, 0), cream)
+	b.box(Vector3(0.06, 2.0, 0.08), Vector3(-1.2, 1.0, -3.5), steel)
+	b.box(Vector3(0.06, 2.0, 0.08), Vector3(-1.2, 1.0, -2.5), steel)
+	# Ceiling and the two hand rails along it, with loops.
+	b.box(Vector3(2.4, 0.05, 9.0), Vector3(0, 2.3, 0), cream.darkened(0.05))
+	for x in [-0.32, 0.32]:
+		b.cyl(0.02, 8.6, Vector3(x, 2.0, 0), steel, Vector3(90, 0, 0), 6)
+		for k in 12:
+			b.box(Vector3(0.015, 0.18, 0.015), Vector3(x, 1.9, -4.0 + k * 0.7), Color("2B2B2B"))
+	# Seats: a frame, a blue cushion, a backrest; grab rail on top.
+	for p in bus_seats():
+		var at := Vector3(p.x, 0, p.y)
+		b.box(Vector3(0.38, 0.08, 0.42), at + Vector3(0, 0.45, 0), Color("1C4E9B"))
+		b.box(Vector3(0.38, 0.55, 0.06), at + Vector3(0, 0.75, 0.22), Color("1C4E9B"), Vector3(-8, 0, 0))
+		b.box(Vector3(0.36, 0.03, 0.03), at + Vector3(0, 1.05, 0.25), steel)
+		for dx in [-0.16, 0.16]:
+			b.box(Vector3(0.03, 0.42, 0.03), at + Vector3(dx, 0.21, 0), steel)
+	# Front: the driver's seat and wheel on the right, a dashboard covered
+	# in stickers, the windscreen frame, a route board over it.
+	b.box(Vector3(0.45, 0.5, 0.45), Vector3(0.7, 0.25, -3.9), Color("3B3B3B"))
+	b.box(Vector3(0.45, 0.6, 0.08), Vector3(0.7, 0.8, -3.7), Color("1C4E9B"))
+	b.box(Vector3(2.4, 0.9, 0.4), Vector3(0, 0.45, -4.45), Color("2B2B2B"))
+	b.cyl(0.2, 0.03, Vector3(0.7, 1.05, -4.25), Color("1A1A1A"), Vector3(60, 0, 0), 16)
+	for i in 5:
+		b.quad(Vector3(-0.9 + i * 0.3, 0.92, -4.26), Vector3(-0.75 + i * 0.3, 0.92, -4.26),
+			Vector3(-0.75 + i * 0.3, 0.84, -4.26), Vector3(-0.9 + i * 0.3, 0.84, -4.26),
+			[Color("F6B800"), Color("2E9E6B"), Color("E2432A"), Color("2D8BD6"), Color("C2185B")][i])
+	b.box(Vector3(2.4, 0.08, 0.08), Vector3(0, 0.95, -4.5), steel)
+	b.box(Vector3(2.4, 0.3, 0.08), Vector3(0, 2.15, -4.5), Color("1A1A1A"))
+	b.box(Vector3(0.08, 1.3, 0.08), Vector3(0, 1.55, -4.5), steel)
+	return b.commit()
+
+
 # --- CNG and bus -----------------------------------------------------------
 
 

@@ -37,6 +37,7 @@ static func fresh() -> Dictionary:
 		"mohalla": {"level": 1, "xp": 0, "projectsDone": []},
 		"rickshaw": {"days": 0, "school": 0, "bestDay": 0, "trips": 0, "earned": 0, "teas": 0, "upgrades": []},
 		"tea": {"days": 0, "bestDay": 0, "served": 0, "happy": 0, "earned": 0, "upgrades": []},
+		"bus": {"days": 0, "bestDay": 0, "riders": 0, "earned": 0, "upgrades": []},
 		"history": [],
 	}
 
@@ -198,6 +199,29 @@ func apply_tea_day(result: Dictionary) -> Dictionary:
 	if out.best:
 		tea.bestDay = earned
 	_remember({"day": data.day, "who": "tea", "earned": earned, "served": int(result.served), "stars": snappedf(stars, 0.1), "met": true})
+	out.day = data.day
+	return out
+
+
+## Takes a day on Babu's bus ({earned, riders, stars}) into the save: a
+## tenth to the fund, the rest to the savings.
+func apply_bus_day(result: Dictionary) -> Dictionary:
+	var earned: int = maxi(0, int(result.earned))
+	var stars := float(result.stars)
+	var out := {"earned": earned}
+	var fund_cut := _to_fund(earned, out)
+	data.taka = int(data.taka) + earned - fund_cut
+	out.kept = earned - fund_cut
+	_gain_xp(stars, int(result.riders) > 0, out)
+	data.day = int(data.day) + 1
+	var bus: Dictionary = data.bus
+	bus.days = int(bus.days) + 1
+	bus.riders = int(bus.riders) + int(result.riders)
+	bus.earned = int(bus.earned) + earned
+	out.best = earned > int(bus.bestDay) and earned > 0
+	if out.best:
+		bus.bestDay = earned
+	_remember({"day": data.day, "who": "bus", "earned": earned, "riders": int(result.riders), "stars": snappedf(stars, 0.1), "met": true})
 	out.day = data.day
 	return out
 
