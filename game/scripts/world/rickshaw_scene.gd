@@ -34,8 +34,7 @@ var hud: Hud
 var traffic: Traffic
 var _bell: AudioStreamPlayer
 var _horns: Array[AudioStreamPlayer] = []
-var _frames := 0
-var _alive_left := 1.0
+var _alive_left := 10.0
 var _horn_sounds: Dictionary = {}
 var _horn_left := 2.0
 var _stopped_for := 0.0
@@ -106,7 +105,6 @@ func _ready() -> void:
 	_follow(0.0, true)
 	await _step("done")
 	loading.queue_free()
-	RenderingServer.frame_post_draw.connect(_drawn)
 	set_process(true)
 
 
@@ -140,7 +138,6 @@ func _sounds() -> void:
 
 
 func _hum_again(hum: AudioStreamPlayer) -> void:
-	print("[sounds] hum again")
 	hum.play()
 
 
@@ -165,7 +162,6 @@ func _honk(dt: float) -> void:
 	var far := spot.distance_to(rickshaw.position)
 	for h in _horns:
 		if not h.playing:
-			print("[honk] ", kind, " at ", int(far), " m")
 			h.stream = _horn_sounds[kind]
 			h.volume_db = (-4.0 if kind == "bus" else -8.0) - far * 0.35
 			h.play()
@@ -196,13 +192,7 @@ func _step(what: String) -> void:
 	await get_tree().process_frame
 
 
-func _drawn() -> void:
-	if _frames <= 3:
-		print("[frame ", _frames, "] drawn")
-
-
 func _go_home() -> void:
-	RenderingServer.frame_post_draw.disconnect(_drawn)
 	CrashWatch.stop()
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
@@ -280,16 +270,11 @@ static func _yaw_for(d: int) -> float:
 
 
 func _process(dt: float) -> void:
-	# While a crash on phones is looked into: say what each of the first
-	# frames does, then that the game is alive once a second.
-	_frames += 1
-	var trace := _frames <= 3
+	# A line in the log every 10 s, with the frame rate, for crash reports.
 	_alive_left -= dt
 	if _alive_left <= 0.0:
-		_alive_left = 1.0
-		print("[alive] ", Time.get_ticks_msec(), " ms, frame ", _frames, ", ", Engine.get_frames_per_second(), " fps")
-	if trace:
-		print("[frame ", _frames, "] update")
+		_alive_left = 10.0
+		print("[alive] ", Time.get_ticks_msec(), " ms, ", Engine.get_frames_per_second(), " fps")
 	var gap := traffic.gap_ahead(shift.driver)
 	shift.room = clampf((gap - 0.12) / 0.5, 0.0, 1.0)
 	var events := shift.update(dt)
@@ -304,14 +289,8 @@ func _process(dt: float) -> void:
 		_notice_left -= dt
 		if _notice_left <= 0.0 or (_notice_left > 1e6 and shift.driver.moving):
 			_notice = ""
-	if trace:
-		print("[frame ", _frames, "] follow")
 	_follow(dt)
-	if trace:
-		print("[frame ", _frames, "] honk")
 	_honk(dt)
-	if trace:
-		print("[frame ", _frames, "] marker and hud")
 	var ring := marker.get_node("Ring") as Node3D
 	var k := fmod(Time.get_ticks_msec() / 1000.0, 1.2) / 1.2
 	ring.scale = Vector3.ONE * (1.0 + k)
