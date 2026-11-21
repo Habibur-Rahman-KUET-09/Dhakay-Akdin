@@ -1,0 +1,127 @@
+name: game
+
+# The 3D game (Godot): content check, rule tests, screenshots of the town,
+# and an Android APK on a GitHub pre-release.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: game-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT: 4.5.1-stable
+  GODOT_TEMPLATES: 4.5.1.stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Content
+        run: |
+          pip install --quiet fonttools
+          python3 tool/validate_content.py
+
+      - name: Godot
+        run: |
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/$GODOT/Godot_v${GODOT}_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT}_linux.x86_64" /usr/local/bin/godot
+          godot --headless --version
+
+      - name: Import
+        run: godot --headless --path game --import 2>&1 | tee import.log
+
+      # Fails on a failed test, and on any script error anywhere in the run.
+      - name: Tests
+        run: |
+          set -o pipefail
+          godot --headless --path game -s res://tests/run_tests.gd 2>&1 | tee test.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" test.log
+
+      # Pictures for review; a failure here does not stop the APK.
+      - name: Screenshots
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 > /dev/null
+          set -o pipefail
+          xvfb-run -a -s "-screen 0 540x960x24" godot --path game --rendering-driver opengl3 \
+            --resolution 540x960 -s res://tests/shots.gd -- "$PWD/dist" 2>&1 | tee shots.log
+          ! grep -E "SCRIPT ERROR|Parse Error" shots.log
+          ls -la dist
+
+      - name: Version
+        id: v
+        run: echo "version=0.2.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        id: templates
+        with:
+          path: ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES }}
+          key: godot-templates-${{ env.GODOT }}
+
+      - name: Export templates
+        if: steps.templates.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o t.tpz "https://github.com/godotengine/godot/releases/download/$GODOT/Godot_v${GODOT}_export_templates.tpz"
+          unzip -q t.tpz
+          mkdir -p ~/.local/share/godot/export_templates
+          mv templates ~/.local/share/godot/export_templates/$GODOT_TEMPLATES
+          rm t.tpz
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: APK
+        if: github.event_name != 'pull_request'
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: ${{ github.workspace }}/keys/dev.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: android
+          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ github.workspace }}/keys/dev.keystore
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+        run: |
+          v=${{ steps.v.outputs.version }}
+          mkdir -p ~/.config/godot
+          cat > ~/.config/godot/editor_settings-4.5.tres <<SETTINGS
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          SETTINGS
+          sed -i "s/^config\/version=.*/config\/version=\"$v\"/" game/project.godot
+          sed -i "s/^version\/name=.*/version\/name=\"$v\"/; s/^version\/code=.*/version\/code=$((3000 + ${{ github.run_number }}))/" game/export_presets.cfg
+          mkdir -p build dist
+          set -o pipefail
+          godot --headless --path game --export-release "Android" "$PWD/build/DhakarEkdin-$v.apk" 2>&1 | tee export.log
+          test -s "build/DhakarEkdin-$v.apk"
+          cp "build/DhakarEkdin-$v.apk" dist/
+          ls -la dist
+
+      - uses: softprops/action-gh-release@v2
+        if: github.event_name != 'pull_request'
+        with:
+          tag_name: v${{ steps.v.outputs.version }}
+          name: ঢাকার একদিন ${{ steps.v.outputs.version }} (3D)
+          prerelease: true
+          body: |
+            পরীক্ষামূলক 3D সংস্করণ। APK-টা নামান; বেশিরভাগ Android ফোনে চলবে। সাথে খেলার কয়েকটা screenshot।
+          files: dist/*

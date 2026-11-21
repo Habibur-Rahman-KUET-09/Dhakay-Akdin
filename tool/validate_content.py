@@ -20,8 +20,12 @@ import os
 import re
 import sys
 
-ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'app'))
-FONT = os.path.join(ROOT, 'assets', 'fonts', 'HindSiliguri-Regular.ttf')
+REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+ROOT = os.path.join(REPO, 'app')
+GAME = os.path.join(REPO, 'game')
+FONT = os.path.join(GAME, 'fonts', 'HindSiliguri-Regular.ttf')
+# Content folders: the 3D game's, and the Flutter app's while it remains.
+CONTENT = [d for d in (os.path.join(GAME, 'content'), os.path.join(ROOT, 'assets', 'content')) if os.path.isdir(d)]
 errors = []
 
 
@@ -30,7 +34,7 @@ def err(where, msg):
 
 
 def check_balance():
-    path = os.path.join(ROOT, 'assets', 'content', 'balance.json')
+    path = os.path.join(CONTENT[0], 'balance.json')
     b = json.load(open(path, encoding='utf-8'))
     for section in ('economy', 'unlocks', 'tara', 'ads', 'rickshaw', 'bus', 'tea_stall', 'fund_projects'):
         if section not in b:
@@ -75,12 +79,16 @@ def check_arb():
 
 def content_texts():
     out = []
-    for path in glob.glob(os.path.join(ROOT, 'assets', 'content', '**', '*.json'), recursive=True):
-        rel = os.path.relpath(path, ROOT)
+    paths = [p for d in CONTENT for p in glob.glob(os.path.join(d, '**', '*.json'), recursive=True)]
+    for path in paths:
+        rel = os.path.relpath(path, REPO)
 
         def walk(v, where):
             if isinstance(v, dict):
                 if set(v) == {'bn', 'en'}:
+                    if isinstance(v['bn'], str) and isinstance(v['en'], str) \
+                            and set(re.findall(r'\{(\w+)\}', v['bn'])) != set(re.findall(r'\{(\w+)\}', v['en'])):
+                        err(rel, f'{where}: placeholders differ between bn and en')
                     for lang in ('bn', 'en'):
                         texts = v[lang] if isinstance(v[lang], list) else [v[lang]]
                         if not all(isinstance(t, str) and t.strip() for t in texts):
@@ -116,8 +124,8 @@ MAP_TILES = set('#O.Mnesw' + 'WTPH')
 
 
 def check_maps():
-    for path in sorted(glob.glob(os.path.join(ROOT, 'assets', 'content', 'maps', '*.json'))):
-        rel = os.path.relpath(path, ROOT)
+    for path in sorted(p for d in CONTENT for p in glob.glob(os.path.join(d, 'maps', '*.json'))):
+        rel = os.path.relpath(path, REPO)
         m = json.load(open(path, encoding='utf-8'))
         rows = m.get('rows') or []
         if not rows:

@@ -21,7 +21,9 @@ import sys
 from collections import deque
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, '..', 'app', 'assets', 'content', 'maps')
+OUT = os.path.join(HERE, '..', 'game', 'content', 'maps')
+# The Flutter app's copy, while it remains.
+OLD_OUT = os.path.join(HERE, '..', 'app', 'assets', 'content', 'maps')
 
 MAIN = {'trunk', 'primary', 'secondary'}
 SIDE_MAIN = {'tertiary'}
@@ -409,6 +411,9 @@ def main():
     with open(path, 'w', encoding='utf-8') as fh:
         fh.write(json.dumps({k: v for k, v in m.items() if k != 'rows'}, ensure_ascii=False, indent=2)[:-2])
         fh.write(',\n  "rows": [\n' + ',\n'.join(f'    "{r}"' for r in m['rows']) + '\n  ]\n}\n')
+    if os.path.isdir(OLD_OUT):
+        import shutil
+        shutil.copy(path, os.path.join(OLD_OUT, f'{area}.json'))
     roads = sum(r.count('.') + r.count('M') for r in m['rows'])
     print(f'{path}: {len(m["rows"][0])}x{len(m["rows"])}, {roads} road tiles, {len(m["places"])} places')
     if '--png' in sys.argv:

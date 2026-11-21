@@ -1,0 +1,29 @@
+## Runs every test_* method in the test files and quits with 1 on failure:
+##   godot --headless --path game -s res://tests/run_tests.gd
+## CI also fails on any SCRIPT ERROR in the output, so a test that crashes
+## half way is caught too.
+extends SceneTree
+
+const FILES := ["res://tests/test_rules.gd", "res://tests/test_content.gd"]
+
+
+func _initialize() -> void:
+	var count := 0
+	var failed: Array[String] = []
+	for path in FILES:
+		var script = load(path)
+		if script == null:
+			failed.append("cannot load " + path)
+			continue
+		for m in script.get_script_method_list():
+			if not m.name.begins_with("test_"):
+				continue
+			var t = script.new()
+			t.current = "%s %s" % [path.get_file(), m.name]
+			t.call(m.name)
+			count += 1
+			failed.append_array(t.failures)
+	for f in failed:
+		printerr("FAIL " + f)
+	print("%d tests, %d failures" % [count, failed.size()])
+	quit(1 if failed.size() > 0 or count == 0 else 0)
