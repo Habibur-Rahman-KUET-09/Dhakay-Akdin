@@ -19,6 +19,11 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
 
+[debug]
+
+; Keep a log on phones too, so a crash can be read on the next start.
+file_logging/enable_file_logging=true
+
 [gui]
 
 theme/custom_font="res://fonts/HindSiliguri-Regular.ttf"
@@ -29,9 +34,9 @@ pointing/emulate_touch_from_mouse=true
 
 [internationalization]
 
-; Line-breaking dictionaries for Thai, Chinese and the like (~4 MB): Bangla
-; breaks at spaces and is shaped by HarfBuzz without them.
-locale/include_text_server_data=false
+; Text server (ICU) data, ~4 MB. Left out once to save space; put back while
+; a crash on phones is looked into.
+locale/include_text_server_data=true
 
 [rendering]
 

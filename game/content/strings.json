@@ -102,5 +102,21 @@
  "bell": {
   "bn": "টুংটাং",
   "en": "Ring"
+ },
+ "crashTitle": {
+  "bn": "আগেরবার গেম হঠাৎ বন্ধ হয়ে গিয়েছিল",
+  "en": "The game closed suddenly last time"
+ },
+ "crashHelp": {
+  "bn": "নিচের বোতাম চেপে log কপি করে ডেভেলপারকে পাঠান, তাহলে সমস্যা ধরা যাবে।",
+  "en": "Copy the log with the button below and send it to the developer."
+ },
+ "copyLog": {
+  "bn": "log কপি করুন",
+  "en": "Copy log"
+ },
+ "copied": {
+  "bn": "কপি হয়েছে",
+  "en": "Copied"
  }
 }

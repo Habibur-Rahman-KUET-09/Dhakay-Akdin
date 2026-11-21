@@ -15,6 +15,7 @@ const Hud = preload("res://scripts/ui/hud.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
 const Sounds = preload("res://scripts/world/sounds.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
+const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
@@ -58,17 +59,23 @@ func _ready() -> void:
 	shift.accel = b.n("rickshaw.accel_tiles_per_s2")
 	shift.coast = b.n("rickshaw.coast_decel")
 	shift.braking = b.n("rickshaw.brake_decel")
+	print("[rickshaw] environment")
 	_environment()
+	print("[rickshaw] town")
 	add_child(City.build(map, strings.lang))
+	print("[rickshaw] clutter")
 	var palette := PackedColorArray()
 	for hex in Traffic.PALETTE:
 		palette.append(Color(hex))
 	add_child(Clutter.build(map, palette))
+	print("[rickshaw] traffic")
 	traffic = Traffic.new()
 	add_child(traffic)
 	traffic.setup(map, map.home)
 	traffic.focus = shift.driver
+	print("[rickshaw] sounds")
 	_sounds()
+	print("[rickshaw] ready")
 	# Rahim Chacha's own rickshaw: yellow hood, magenta body.
 	rickshaw = Models.player_rickshaw(Look.YELLOW, Look.MAGENTA)
 	_paint = Models.traffic_material(PackedColorArray([Look.YELLOW, Look.MAGENTA]), false)
@@ -87,7 +94,7 @@ func _ready() -> void:
 	camera.current = true
 	hud = Hud.new()
 	hud.setup(strings, map)
-	hud.back_pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/main.tscn"))
+	hud.back_pressed.connect(_go_home)
 	add_child(hud)
 	_yaw = _yaw_for(shift.driver.heading)
 	_place_marker()
@@ -143,6 +150,11 @@ func _honk(dt: float) -> void:
 			h.volume_db = -4.0 if kind == "bus" else -8.0
 			h.play()
 			return
+
+
+func _go_home() -> void:
+	CrashWatch.stop()
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 
 func _environment() -> void:

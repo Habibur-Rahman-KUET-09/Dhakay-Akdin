@@ -5,12 +5,15 @@ extends Control
 const Look = preload("res://scripts/ui/look.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
+const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 
 var s := Strings.new()
+var _crash := ""
 
 
 func _ready() -> void:
 	s.lang = Strings.saved_lang()
+	_crash = CrashWatch.last_crash()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build()
 
@@ -56,6 +59,8 @@ func _build() -> void:
 	]
 	for p in people:
 		col.add_child(_card(p[0], p[1], p[2], p[3]))
+	if _crash != "":
+		col.add_child(_crash_card())
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -89,7 +94,7 @@ func _card(name_key: String, role_key: String, colour: Color, level: int) -> Con
 		var drive := Look.button(s.t("rickshawDrive"))
 		drive.name = "Drive"
 		drive.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		drive.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/rickshaw.tscn"))
+		drive.pressed.connect(_drive)
 		row.add_child(drive)
 	else:
 		var soon := Look.label(s.t("comingSoon"), 13)
@@ -97,6 +102,31 @@ func _card(name_key: String, role_key: String, colour: Color, level: int) -> Con
 		soon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(soon)
 	return panel
+
+
+## Shown after a run that ended suddenly: a note and a button that copies
+## the log, so the player can send it.
+func _crash_card() -> Control:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Look.card(Color("FDECEA"), 14, 2))
+	var box := VBoxContainer.new()
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("crashTitle"), 16, true, Look.VERMILION))
+	box.add_child(Look.label(s.t("crashHelp"), 14))
+	var copy := Look.button(s.t("copyLog"), Look.OUTLINE, 15)
+	copy.pressed.connect(_copy_log.bind(copy))
+	box.add_child(copy)
+	return panel
+
+
+func _copy_log(button: Button) -> void:
+	DisplayServer.clipboard_set(_crash)
+	button.text = s.t("copied")
+
+
+func _drive() -> void:
+	CrashWatch.start("rickshaw")
+	get_tree().change_scene_to_file("res://scenes/rickshaw.tscn")
 
 
 func _switch_language() -> void:
