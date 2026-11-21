@@ -107,6 +107,7 @@ static func build(map: RoadMap, palette: PackedColorArray) -> Node3D:
 				label.outline_modulate = Look.OUTLINE
 				label.pixel_size = 0.012
 				label.double_sided = false
+				label.alpha_cut = Label3D.ALPHA_CUT_DISCARD
 				label.width = 5.6 / label.pixel_size
 				label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				label.basis = _facing(-inward) * Basis(Vector3.UP, PI)

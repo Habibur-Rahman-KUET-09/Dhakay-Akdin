@@ -16,6 +16,7 @@
 | `tool/validate_content.py` | লেখা আর সংখ্যা যাচাই, বাংলা ফন্ট সব অক্ষর আঁকতে পারে কি না সহ |
 | `app/assets/content/maps/` | রিকশার ম্যাপ, আসল রাস্তা থেকে বানানো |
 | `tool/fetch_osm.py`, `.github/workflows/osm.yml` | OpenStreetMap থেকে এলাকার আসল রাস্তা আর জায়গা নামানো (`tool/osm/`) |
+| `tool/make_sounds.py` | রাস্তার শব্দ (ঘণ্টি, হর্ন, গুঞ্জন) WAV ফাইল হিসেবে বানায় `game/sounds/`-এ; আসল রেকর্ডিং পেলে একই নামে বদলানো যাবে |
 | `tool/build_map.py` | সেই রাস্তা থেকে খেলার ম্যাপ বানানো: `python3 tool/build_map.py mirpur` |
 | `.github/workflows/app.yml` | প্রতিটা push-এ analyze, test, APK আর GitHub pre-release |
 

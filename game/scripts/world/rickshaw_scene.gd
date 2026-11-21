@@ -13,7 +13,6 @@ const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
-const Sounds = preload("res://scripts/world/sounds.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 
@@ -111,31 +110,38 @@ func _ready() -> void:
 	set_process(true)
 
 
-## The bell, a few horn players placed on passing traffic, the road's hum.
+## The bell, horn players for passing traffic, the road's hum: WAV files
+## made by tool/make_sounds.py and imported like any recording. The hum is
+## replayed when it ends rather than looped.
 func _sounds() -> void:
 	print("[sounds] bell")
 	_bell = AudioStreamPlayer.new()
-	_bell.stream = Sounds.bell()
+	_bell.stream = load("res://sounds/bell.wav")
 	add_child(_bell)
 	print("[sounds] hum")
 	var hum := AudioStreamPlayer.new()
-	hum.stream = Sounds.street_hum()
+	hum.stream = load("res://sounds/hum.wav")
 	hum.volume_db = -10.0
 	add_child(hum)
+	hum.finished.connect(_hum_again.bind(hum))
 	hum.play()
 	print("[sounds] horns")
+	var bell: AudioStream = _bell.stream
 	_horn_sounds = {
-		"cng": Sounds.horn(560.0, 700.0, 0.35),
-		"bus": Sounds.horn(290.0, 370.0, 0.9),
-		"rickshaw": Sounds.bell(),
-		"rickshaw_full": Sounds.bell(),
+		"cng": load("res://sounds/horn_cng.wav"),
+		"bus": load("res://sounds/horn_bus.wav"),
+		"rickshaw": bell,
+		"rickshaw_full": bell,
 	}
-	# Plain players, quieter with distance (the 3D player is a suspect in a
-	# crash on Mali phones).
 	for i in 3:
 		var h := AudioStreamPlayer.new()
 		add_child(h)
 		_horns.append(h)
+
+
+func _hum_again(hum: AudioStreamPlayer) -> void:
+	print("[sounds] hum again")
+	hum.play()
 
 
 func _honk(dt: float) -> void:
@@ -229,7 +235,7 @@ func _environment() -> void:
 	sun.light_color = Color("FFF1D6")
 	sun.light_energy = 0.75
 	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 70.0
+	sun.directional_shadow_max_distance = 35.0
 	add_child(sun)
 
 

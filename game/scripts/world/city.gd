@@ -674,6 +674,8 @@ static func _sign(text: String, at: Vector3, size := 46, colour := Look.OUTLINE,
 	l.pixel_size = 0.012
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED if billboard else BaseMaterial3D.BILLBOARD_DISABLED
 	l.double_sided = billboard
+	# Cut-out rather than blended text: much cheaper to draw.
+	l.alpha_cut = Label3D.ALPHA_CUT_DISCARD
 	l.position = at
 	l.visibility_range_end = 80.0
 	return l
