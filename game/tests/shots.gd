@@ -106,7 +106,7 @@ func _run() -> void:
 				act.height = 0.6
 				act.strokes = [0.7, 0.6]
 			"stir":
-				act.wanted = 3
+				act.spoons_wanted = 3
 				act.spoons = 2
 				act.turns = 1.4
 			"paan":

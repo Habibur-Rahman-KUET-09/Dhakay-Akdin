@@ -583,7 +583,7 @@ func _by_hand(step: String) -> bool:
 		return true
 	if step == "sugar" and day.tray == ["cup", "kettle", "milk"]:
 		var stir := Stir.new()
-		stir.wanted = day.sugar_wanted()
+		stir.spoons_wanted = day.sugar_wanted()
 		_open(stir, "act_sugar", _sugared)
 		return true
 	if step == "betel_leaf" and day.tray.is_empty():

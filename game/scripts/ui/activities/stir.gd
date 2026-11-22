@@ -2,7 +2,7 @@
 ## then stir round the cup with a finger, three turns or so; "done".
 extends "res://scripts/ui/activity.gd"
 
-var wanted := 2
+var spoons_wanted := 2
 var spoons := 0
 var turns := 0.0
 var _last_angle := INF
@@ -49,12 +49,12 @@ func _touch(e) -> void:
 
 
 func _end() -> void:
-	finish(Rules.sugar_score(spoons, wanted, turns))
+	finish(Rules.sugar_score(spoons, spoons_wanted, turns))
 
 
 func _paint(c: Control) -> void:
 	var w := c.size.x
-	text_at(c, Vector2(w * 0.5, 16), s.t("sugarWish_%d" % clampi(wanted, 1, 3)), 18, Look.MAGENTA)
+	text_at(c, Vector2(w * 0.5, 16), s.t("sugarWish_%d" % clampi(spoons_wanted, 1, 3)), 18, Look.MAGENTA)
 	text_at(c, Vector2(w * 0.5, 44), s.t("sugarCount", {"n": spoons, "turns": floori(turns)}), 15)
 	var jar := _jar()
 	c.draw_rect(jar, Color("F6F1E4"))
