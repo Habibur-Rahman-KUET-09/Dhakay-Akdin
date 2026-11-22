@@ -21,6 +21,7 @@ const Calendar = preload("res://scripts/rules/calendar.gd")
 const Music = preload("res://scripts/ui/music.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
+const Activity = preload("res://scripts/ui/activity.gd")
 
 var s := Strings.new()
 var b := Balance.new()
@@ -425,6 +426,7 @@ func _settings() -> void:
 	rows.append(_graphics_row())
 	rows.append(_music_row())
 	rows.append(_voices_row())
+	rows.append(_toggle_row("hands", Activity.wanted(), _set_hands))
 	rows.append(_cloud_card())
 	# Who recorded the street sounds (their licences ask to be named).
 	var credits := Sfx.credits()
@@ -876,6 +878,29 @@ func _voices_row() -> Control:
 		pick.pressed.connect(_set_voices.bind(value))
 		row.add_child(pick)
 	return row
+
+
+## A setting with two buttons, on and off.
+func _toggle_row(key: String, on_now: bool, then: Callable) -> Control:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 8)
+	var title := Look.label(s.t(key), 15, true)
+	title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(title)
+	for value in [true, false]:
+		var picked: bool = on_now == value
+		var pick := Look.button(s.t("musicOn" if value else "musicOff"), Look.MAGENTA if picked else Color("B9B2A6"), 15)
+		pick.name = key.capitalize() + ("_on" if value else "_off")
+		pick.pressed.connect(then.bind(value))
+		row.add_child(pick)
+	return row
+
+
+func _set_hands(value: bool) -> void:
+	Activity.save_wanted(value)
+	_build()
 
 
 func _set_voices(value: bool) -> void:

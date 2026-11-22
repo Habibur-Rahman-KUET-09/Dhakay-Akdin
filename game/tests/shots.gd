@@ -89,6 +89,50 @@ func _run() -> void:
 	await _frames(10)
 	await _seconds(6.0)
 	_save("8-old-dhaka")
+	drive.queue_free()
+	await _frames(2)
+	# The hand activities, each as it opens (with a little done).
+	var lines = load("res://scripts/ui/strings.gd").new()
+	lines.lang = "bn"
+	var acts := {
+		"pour": "act_pour", "stir": "act_sugar", "paan": "act_paan", "stove": "act_stove", "haggle": "act_haggle",
+		"pump": "act_pump", "push": "act_push", "notes": "act_notes", "door": "act_door", "crowd": "act_crowd",
+	}
+	for name in acts:
+		var act = load("res://scripts/ui/activities/%s.gd" % name).new()
+		act.setup(lines, acts[name], acts[name] + "_hint")
+		match name:
+			"pour":
+				act.height = 0.6
+				act.strokes = [0.7, 0.6]
+			"stir":
+				act.wanted = 3
+				act.spoons = 2
+				act.turns = 1.4
+			"paan":
+				act.wants_zarda = false
+				act.on_leaf = ["areca"]
+			"stove":
+				act.filled = func(): return 0.4
+				act.on_fan = func(_s): return true
+			"haggle":
+				act.mood_of = func(a): return (a - 40) / 30.0
+				act.start(40, 100)
+				act.asked = 65
+			"pump":
+				act.pressure = 0.85
+			"push":
+				act.progress = 0.4
+			"notes":
+				act.notes = [50, 20, 100]
+				act.on_sort = func(_n): return true
+			"crowd":
+				act.waiting = 3
+		root.add_child(act)
+		await _frames(6)
+		_save("9-" + name)
+		act.queue_free()
+		await _frames(2)
 	quit(0)
 
 

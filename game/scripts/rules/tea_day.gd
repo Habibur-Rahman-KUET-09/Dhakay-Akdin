@@ -89,6 +89,14 @@ var relations := {}
 var npc_log: Array = []
 var _next_in := 2.0
 var _next_id := 0
+## The hand activities (on when the scene says so): how well each step of
+## the thing in hand was done (0–1; activities.gd), what each customer
+## wants in it (sugar spoons in milk tea, zarda in paan), and cups made
+## just right. Their own dice, so the rest plays the same.
+var interactive := false
+var perfect := 0
+var _quality: Array = []
+var _hand_rng := RandomNumberGenerator.new()
 
 
 func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") -> void:
@@ -97,9 +105,11 @@ func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") ->
 	if seed_value >= 0:
 		rng.seed = seed_value
 		weather.seed = seed_value + 7
+		_hand_rng.seed = seed_value + 13
 	else:
 		rng.randomize()
 		weather.randomize()
+		_hand_rng.randomize()
 	menu = (b.at("tea_stall.menu") as Dictionary).duplicate(true)
 	day_seconds = b.n("tea_stall.day_seconds")
 	kettle_size = int(b.n("tea_stall.kettle_cups"))
@@ -263,6 +273,9 @@ func _arrive(regular := "") -> bool:
 	customers.append({
 		"id": _next_id, "seat": seat, "kind": kind, "items": items.duplicate(), "ordered": items,
 		"patience": patience, "left": patience, "bill": bill, "npc": npc,
+		# Rahim Chacha takes two spoons; Babu chews his paan with zarda.
+		"sugar": 2 if regular == "rahim" else _hand_rng.randi_range(1, 3),
+		"zarda": true if regular == "babu" else _hand_rng.randf() < 0.5,
 	})
 	return true
 
@@ -307,8 +320,41 @@ func _wanted_further() -> bool:
 	return false
 
 
-## Taps a step at the counter.
-func tap(step: String) -> Array:
+## Who would get `item` if it were handed over now: the one who has
+## waited longest for it; {} if nobody.
+func next_for(item: String) -> Dictionary:
+	var who: Dictionary = {}
+	for c in customers:
+		if c.items.has(item) and (who.is_empty() or c.left < who.left):
+			who = c
+	return who
+
+
+## The spoons of sugar the next milk tea should have.
+func sugar_wanted() -> int:
+	return int(next_for("milk_tea").get("sugar", 2))
+
+
+## Whether the next paan should have zarda.
+func zarda_wanted() -> bool:
+	return bool(next_for("paan").get("zarda", false))
+
+
+## Fans the clay stove: a kettle on to fill fills `seconds` sooner. False
+## if none is filling.
+func fan(seconds: float) -> bool:
+	if refill_left > 0.0:
+		refill_left = maxf(0.0, refill_left - seconds)
+		return true
+	if refill2_left > 0.0:
+		refill2_left = maxf(0.0, refill2_left - seconds)
+		return true
+	return false
+
+
+## Taps a step at the counter; `quality` (0–1) is how well it was done by
+## hand, or −1 when it was just tapped.
+func tap(step: String, quality := -1.0) -> Array:
 	if over:
 		return []
 	var pour_from := 0
@@ -330,7 +376,10 @@ func tap(step: String) -> Array:
 	next.append(step)
 	if not _leads_somewhere(next):
 		tray.clear()
+		_quality.clear()
 		return [Event.WRONG_STEP]
+	if quality >= 0.0:
+		_quality.append(quality)
 	var events := []
 	if pour_from == 1:
 		kettle -= 1
@@ -359,6 +408,14 @@ func give() -> Array:
 	if item == "":
 		return []
 	tray.clear()
+	# How well it was made by hand (−1: not by hand at all).
+	var q := -1.0
+	if not _quality.is_empty():
+		q = 0.0
+		for x in _quality:
+			q += float(x)
+		q /= _quality.size()
+	_quality.clear()
 	var who: Dictionary = {}
 	for c in customers:
 		if c.items.has(item) and (who.is_empty() or c.left < who.left):
@@ -375,12 +432,22 @@ func give() -> Array:
 		served += 1
 		# Quick service (more than half their patience left): happy, and a tip.
 		var glad: bool = who.left >= who.patience * 0.5
+		# A badly made cup spoils it, however quick.
+		if q >= 0.0 and q < 0.35:
+			glad = false
 		var tip := 0
+		var just_right := glad and q >= 0.85
+		if just_right:
+			perfect += 1
+			tip += int(b.n("tea_stall.perfect_tip"))
+			money += int(b.n("tea_stall.perfect_tip"))
+			tips += int(b.n("tea_stall.perfect_tip"))
 		if glad:
 			happy += 1
-			tip = maxi(1, roundi(who.bill * b.n("tea_stall.happy_tip_share"))) + roundi(float(festival.get("tip", 0)) * 0.5)
-			money += tip
-			tips += tip
+			var t := maxi(1, roundi(who.bill * b.n("tea_stall.happy_tip_share"))) + roundi(float(festival.get("tip", 0)) * 0.5)
+			tip += t
+			money += t
+			tips += t
 		# A neighbour who thinks well of the stall leaves a bit more.
 		var npc: String = who.get("npc", "")
 		var thanks := npc != "" and int(relations.get(npc, 0)) >= 3
@@ -390,7 +457,7 @@ func give() -> Array:
 			tips += 20
 		if npc != "" and glad:
 			npc_log.append({"id": npc, "delta": 1, "what": "served"})
-		last_served = {"kind": who.kind, "bill": who.bill, "tip": tip, "happy": glad, "npc": npc, "thanks": thanks}
+		last_served = {"kind": who.kind, "bill": who.bill, "tip": tip, "happy": glad, "npc": npc, "thanks": thanks, "perfect": just_right}
 		events.append(Event.SERVED)
 	return events
 
@@ -398,3 +465,4 @@ func give() -> Array:
 ## Throws away what is in the tray.
 func discard() -> void:
 	tray.clear()
+	_quality.clear()

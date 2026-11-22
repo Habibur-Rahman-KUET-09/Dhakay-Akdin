@@ -22,6 +22,10 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
 
+[audio]
+
+driver/enable_input=true
+
 [debug]
 
 ; Keep a log on phones too, so a crash can be read on the next start.

@@ -11,6 +11,7 @@ const Fares = preload("res://scripts/rules/fares.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
 const Signals = preload("res://scripts/rules/signals.gd")
 const Calendar = preload("res://scripts/rules/calendar.gd")
+const Hands = preload("res://scripts/rules/activities.gd")
 
 ## Events added to the driver's (which run 0-4).
 const OFFER := 10
@@ -31,6 +32,11 @@ const RAIN_END := 21
 const TIRED := 22
 ## Energy gone: he goes home (DAY_OVER comes too).
 const WORN_OUT := 23
+## A tyre gone soft (slower until pumped).
+const FLAT := 24
+## Stuck in deep water in the rain (push to get out), and out again.
+const STUCK := 25
+const FREED := 26
 
 var fares: Fares
 var balance: Balance
@@ -67,6 +73,22 @@ var at_tea := false
 var teas := 0
 var tea_spent := 0
 var _tea_tiles: Array = []
+## The hand activities (scripts/ui/activities/), on when the scene says
+## so; the plain rule tests leave them off. A passenger's most they will
+## pay ("limit", hidden; their face shows how near it the asking is). A
+## soft tyre now and then after a trip; deep water in the rain to push
+## through; the bell clearing the way (rung twice, wider, but a passenger
+## aboard tires of it). Their own dice, so the rest plays the same.
+var interactive := false
+var flat := false
+var stuck := false
+var repairs := 0
+var clear_left := 0.0
+var _push := 0.0
+var _last_hand := -1
+var _pushed_at := Vector2i(-1, -1)
+var _last_ring := -10.0
+var _hand_rng := RandomNumberGenerator.new()
 ## The police: seconds still held, and what they have fined today.
 var held := 0.0
 var police_fines := 0
@@ -94,6 +116,10 @@ var npc_log: Array = []
 
 func _init(road_map: RoadMap, b: Balance, seed_value := -1, date := "") -> void:
 	balance = b
+	if seed_value >= 0:
+		_hand_rng.seed = seed_value + 13
+	else:
+		_hand_rng.randomize()
 	fares = Fares.new(b)
 	super(road_map, b.n("rickshaw.speed_tiles_per_s"), b.n("rickshaw.waterlog_speed"), 8, seed_value)
 	accel = b.n("rickshaw.accel_tiles_per_s2")
@@ -148,6 +174,15 @@ func update(dt: float) -> Array:
 	_weather(early)
 	_police_rest = maxf(0.0, _police_rest - dt)
 	speed_factor = balance.n("rickshaw.tired_speed") if energy < balance.n("rickshaw.tired_below") else 1.0
+	if flat:
+		speed_factor *= balance.n("rickshaw.flat_speed")
+	# The bell rung: people step aside for a moment.
+	if clear_left > 0.0:
+		clear_left -= dt
+		room = maxf(room, 0.75)
+	if stuck:
+		speed_factor = 0.0
+		speed_now = 0.0
 	# Held by the police: standing still, whatever the pedal says.
 	if held > 0.0:
 		held -= dt
@@ -263,6 +298,14 @@ func _entered(events: Array) -> void:
 		money -= fine
 		fines += fine
 		events.append(FINED)
+	# Deep water in the rain: the rickshaw sticks until pushed out.
+	if interactive and raining and map.kind_at(driver.cell) == RoadMap.Kind.FLOOD and driver.cell != _pushed_at:
+		stuck = true
+		_push = 0.0
+		_last_hand = -1
+		_pushed_at = driver.cell
+		speed_now = 0.0
+		events.append(STUCK)
 	if not riding.is_empty():
 		if wet(driver.cell):
 			riding.flooded += 1
@@ -319,6 +362,85 @@ func counter() -> bool:
 	return false
 
 
+## The most a passenger of this kind will pay: a little over the fair
+## fare for a miser, a lot for someone in a hurry; more in the rain.
+func _limit_for(type: String, fair_fare: int, offered: int) -> int:
+	var r: Array = balance.at("rickshaw.passengers.%s.haggle" % type)
+	var extra := _hand_rng.randf_range(float(r[0]), float(r[1]))
+	if raining:
+		extra += balance.n("rickshaw.haggle_rain_bonus")
+	return maxi(offered, fares.round_fare(fair_fare * (1.0 + extra)))
+
+
+## How the passenger takes being asked `asked`: 0 at their own offer,
+## 1 at the most they will pay, more past it (their face shows it).
+func mood(asked: int) -> float:
+	if offer_for.is_empty():
+		return 0.0
+	var lo := int(offer_for.offer)
+	var hi := int(offer_for.get("limit", lo))
+	if asked <= lo:
+		return 0.0
+	return float(asked - lo) / float(maxi(1, hi - lo))
+
+
+## Haggling by hand: asks `asked`. Up to their limit, they ride at it;
+## past it, they walk off. Returns whether they agreed.
+func haggle(asked: int) -> bool:
+	if offer_for.is_empty():
+		return false
+	var w: Dictionary = offer_for
+	if asked <= int(w.get("limit", w.offer)):
+		_board(w, maxi(asked, int(w.offer)))
+		return true
+	waiting.erase(w)
+	offer_for = {}
+	if w.get("npc", "") != "":
+		npc_log.append({"id": w.npc, "delta": -1, "what": "haggled"})
+	_top_up()
+	_aim()
+	return false
+
+
+## The bell: "single", or "double" when rung again straight away (clears
+## the way longer; a passenger aboard counts it).
+func ring() -> String:
+	var kind := "double" if clock - _last_ring <= 0.45 else "single"
+	_last_ring = clock
+	clear_left = 3.0 if kind == "double" else 1.5
+	if kind == "double" and not riding.is_empty():
+		riding["rings"] = int(riding.get("rings", 0)) + 1
+	return kind
+
+
+## Pumps the soft tyre to `pressure` (activities.gd pump_result): in the
+## green, mended; past it, it bursts (a new tube, paid for); short of it,
+## still soft.
+func pump(pressure: float) -> String:
+	var result := Hands.pump_result(pressure)
+	if result == "soft":
+		return result
+	flat = false
+	if result == "burst":
+		var cost := int(balance.n("rickshaw.tube_cost"))
+		money -= cost
+		repairs += cost
+	return result
+
+
+## A push on the stuck rickshaw with one hand (0 left, 1 right). Returns
+## [FREED] once it is out.
+func push(hand: int) -> Array:
+	if not stuck:
+		return []
+	_push += Hands.push_amount(hand, _last_hand)
+	_last_hand = hand
+	if _push >= 1.0:
+		stuck = false
+		return [FREED]
+	return []
+
+
 ## Says no: the passenger stays, Rahim Chacha moves on.
 func refuse() -> void:
 	if not offer_for.is_empty():
@@ -339,6 +461,9 @@ func _board(w: Dictionary, fare: int) -> void:
 
 func _deliver(events: Array) -> void:
 	var given := fares.stars(clock - riding.since, riding.eta, riding.flooded, riding.type)
+	# Rung at all the way: the passenger is fed up with the bell.
+	if int(riding.get("rings", 0)) > 3:
+		given = maxf(1.0, given - 0.5)
 	var tip := fares.tip(given)
 	# A neighbour who thinks well of the mohalla tips more.
 	var npc: String = riding.get("npc", "")
@@ -361,6 +486,10 @@ func _deliver(events: Array) -> void:
 	riding = {}
 	delivered += 1
 	events.append(DELIVERED)
+	# Now and then a tyre goes soft after a trip.
+	if interactive and not flat and _hand_rng.randf() < balance.n("rickshaw.flat_chance"):
+		flat = true
+		events.append(FLAT)
 	_top_up()
 
 
@@ -388,9 +517,11 @@ func _top_up() -> void:
 		var who := fares.pick_type(rng)
 		var fair_fare := fares.fair(tiles)
 		_next_id += 1
+		var offered := fares.offer(who, fair_fare, rng)
 		var w := {
 			"id": _next_id, "at": at, "place": place_to, "type": who, "tiles": tiles,
-			"fair": fair_fare, "offer": fares.offer(who, fair_fare, rng), "refused": false, "npc": "",
+			"fair": fair_fare, "offer": offered, "refused": false, "npc": "",
+			"limit": _limit_for(who, fair_fare, offered),
 		}
 		# Now and then one of the named neighbours.
 		if not npc_pool.is_empty() and rng.randf() < 0.25:

@@ -14,6 +14,7 @@ signal offer_counter
 signal offer_refuse
 signal again_pressed
 signal tea_pressed
+signal pump_pressed
 
 var s: Strings
 var map: RoadMap
@@ -52,6 +53,7 @@ var _energy_fill: StyleBoxFlat
 var _energy_text: Label
 var _energy_shown := -1
 var _tea_button: Button
+var _pump_button: Button
 
 
 func setup(strings: Strings, road_map: RoadMap) -> void:
@@ -152,6 +154,16 @@ func _ready() -> void:
 	_tea_button.pressed.connect(func(): tea_pressed.emit())
 	_tea_button.visible = false
 	root.add_child(_tea_button)
+	# A soft tyre: the pump.
+	_pump_button = Look.button(s.t("pumpButton"), Look.SKY.darkened(0.2), 18)
+	_pump_button.set_anchors_preset(Control.PRESET_CENTER)
+	_pump_button.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_pump_button.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_pump_button.offset_top = 180
+	_pump_button.offset_bottom = 180
+	_pump_button.pressed.connect(func(): pump_pressed.emit())
+	_pump_button.visible = false
+	root.add_child(_pump_button)
 
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
@@ -311,6 +323,14 @@ func _press(b: Panel, down: bool) -> void:
 func show_tea(shown: bool, price := 0) -> void:
 	_tea_button.text = s.t("teaButton", {"n": price})
 	_tea_button.visible = shown
+
+
+func show_pump(shown: bool) -> void:
+	_pump_button.visible = shown
+
+
+func pump_rect() -> Rect2:
+	return _pump_button.get_global_rect().grow(8) if _pump_button.visible else Rect2()
 
 
 func tea_rect() -> Rect2:

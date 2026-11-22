@@ -1450,5 +1450,293 @@
  "soundCredits": {
   "bn": "রাস্তার আসল শব্দ (Freesound থেকে):",
   "en": "Street recordings (from Freesound):"
+ },
+ "quick": {
+  "bn": "ঝটপট",
+  "en": "Quick"
+ },
+ "doneButton": {
+  "bn": "হয়েছে",
+  "en": "Done"
+ },
+ "hands": {
+  "bn": "হাতের কাজ:",
+  "en": "Hand activities:"
+ },
+ "act_pour": {
+  "bn": "চা টেনে ঢালুন",
+  "en": "The long pour"
+ },
+ "act_pour_hint": {
+  "bn": "উপরের কাপ আঙুলে ধরে উপরে-নিচে টানুন। যত লম্বা টান, তত ফেনা। বেশি উঁচু করলে ছলকে পড়বে!",
+  "en": "Drag the top cup up and down. Long strokes froth it; too high and it spills!"
+ },
+ "pourSpilled": {
+  "bn": "ইশ, ছলকে পড়ল!",
+  "en": "Oops, it spilled!"
+ },
+ "pourCount": {
+  "bn": "ফেনা: {n}/{all} টান",
+  "en": "Froth: {n}/{all} strokes"
+ },
+ "act_sugar": {
+  "bn": "চিনি আর চামচ",
+  "en": "Sugar and the spoon"
+ },
+ "act_sugar_hint": {
+  "bn": "বয়ামে ট্যাপ করে চিনি দিন, তারপর কাপে আঙুল ঘুরিয়ে নাড়ুন।",
+  "en": "Tap the jar for sugar, then stir round the cup with your finger."
+ },
+ "sugarWish_1": {
+  "bn": "কাস্টমার: চিনি কম (১ চামচ)",
+  "en": "Customer: little sugar (1 spoon)"
+ },
+ "sugarWish_2": {
+  "bn": "কাস্টমার: চিনি স্বাভাবিক (২ চামচ)",
+  "en": "Customer: normal sugar (2 spoons)"
+ },
+ "sugarWish_3": {
+  "bn": "কাস্টমার: চিনি বেশি (৩ চামচ)",
+  "en": "Customer: lots of sugar (3 spoons)"
+ },
+ "sugarCount": {
+  "bn": "চিনি: {n} চামচ · নাড়া: {turns} পাক",
+  "en": "Sugar: {n} spoons · stirred: {turns} turns"
+ },
+ "sugarJar": {
+  "bn": "চিনি",
+  "en": "Sugar"
+ },
+ "act_paan": {
+  "bn": "পান সাজান",
+  "en": "Fold a paan"
+ },
+ "act_paan_hint": {
+  "bn": "বাটি থেকে টেনে পাতায় দিন, তারপর পাতার উপর দিয়ে আড়াআড়ি সোয়াইপ করে ভাঁজ করুন।",
+  "en": "Drag from the bowls onto the leaf, then swipe across the leaf to fold it."
+ },
+ "paanWithZarda": {
+  "bn": "কাস্টমার: জর্দা দিয়ে",
+  "en": "Customer: with zarda"
+ },
+ "paanNoZarda": {
+  "bn": "কাস্টমার: জর্দা ছাড়া!",
+  "en": "Customer: no zarda!"
+ },
+ "paanFolded": {
+  "bn": "খিলি তৈরি!",
+  "en": "Folded!"
+ },
+ "paan_areca": {
+  "bn": "সুপারি",
+  "en": "Areca"
+ },
+ "paan_lime": {
+  "bn": "চুন",
+  "en": "Lime"
+ },
+ "paan_zarda": {
+  "bn": "জর্দা",
+  "en": "Zarda"
+ },
+ "act_stove": {
+  "bn": "চুলায় বাতাস",
+  "en": "Fan the stove"
+ },
+ "act_stove_hint": {
+  "bn": "ডানে-বাঁয়ে সোয়াইপ করে হাতপাখায় বাতাস দিন, কেটলি তাড়াতাড়ি ভরবে।",
+  "en": "Swipe left and right to fan the fire; the kettle fills sooner."
+ },
+ "blowMic": {
+  "bn": "মাইকে ফুঁ দিন",
+  "en": "Blow into the mic"
+ },
+ "blowHint": {
+  "bn": "ফোনের মাইকে জোরে ফুঁ দিন!",
+  "en": "Blow hard into the phone's microphone!"
+ },
+ "act_haggle": {
+  "bn": "দরদাম",
+  "en": "Haggling"
+ },
+ "act_haggle_hint": {
+  "bn": "আঙুল চেপে উপরে টানুন ভাড়া বাড়াতে, যাত্রীর মুখ দেখুন। ছেড়ে দিলেই ওই ভাড়া চাওয়া হবে।",
+  "en": "Hold and drag up to ask more, watching their face. Let go to ask."
+ },
+ "haggleButton": {
+  "bn": "দরদাম করুন",
+  "en": "Haggle"
+ },
+ "haggleFace_0": {
+  "bn": "খুশি মনে রাজি",
+  "en": "Happy with it"
+ },
+ "haggleFace_1": {
+  "bn": "ভুরু কুঁচকাচ্ছে…",
+  "en": "Frowning…"
+ },
+ "haggleFace_2": {
+  "bn": "রেগে যাচ্ছে! আর না!",
+  "en": "Getting cross! No more!"
+ },
+ "act_pump": {
+  "bn": "চাকায় পাম্প",
+  "en": "Pump the tyre"
+ },
+ "act_pump_hint": {
+  "bn": "হ্যান্ডেল টেনে নিচে নামান, আবার উপরে… কাঁটা সবুজ ঘরে এলে \"থামুন\"।",
+  "en": "Drag the handle down and up again… stop when the needle is in the green."
+ },
+ "pumpButton": {
+  "bn": "পাম্প দিন",
+  "en": "Pump the tyre"
+ },
+ "stopPump": {
+  "bn": "থামুন",
+  "en": "Stop"
+ },
+ "pumpState_soft": {
+  "bn": "আরও হাওয়া লাগবে",
+  "en": "Needs more air"
+ },
+ "pumpState_ok": {
+  "bn": "ঠিক আছে! এখন থামুন",
+  "en": "Just right! Stop now"
+ },
+ "pumpState_burst": {
+  "bn": "ফটাস!",
+  "en": "Bang!"
+ },
+ "flatTyre": {
+  "bn": "চাকার হাওয়া কমে গেছে! থেমে পাম্প দিন।",
+  "en": "The tyre's gone soft! Stop and pump it."
+ },
+ "stopToPump": {
+  "bn": "আগে রিকশা থামান",
+  "en": "Stop first"
+ },
+ "pumpOk": {
+  "bn": "চাকা টাইট!",
+  "en": "Tyre's good!"
+ },
+ "pumpSoft": {
+  "bn": "এখনো নরম, আরেকটু পাম্প দিন",
+  "en": "Still soft, pump some more"
+ },
+ "pumpBurst": {
+  "bn": "ফটাস! টিউব ফেটে গেছে, নতুন টিউব {n} টাকা",
+  "en": "Bang! The tube burst: a new one, Tk {n}"
+ },
+ "act_push": {
+  "bn": "পানিতে ঠেলুন",
+  "en": "Push through"
+ },
+ "act_push_hint": {
+  "bn": "নেমে ঠেলতে হবে! বাঁ-ডান পালা করে ট্যাপ করুন।",
+  "en": "Get down and push! Tap left and right by turns."
+ },
+ "hand_left": {
+  "bn": "বাঁ হাত",
+  "en": "Left hand"
+ },
+ "hand_right": {
+  "bn": "ডান হাত",
+  "en": "Right hand"
+ },
+ "stuckWater": {
+  "bn": "হাঁটুপানি! রিকশা আটকে গেছে",
+  "en": "Knee-deep! The rickshaw's stuck"
+ },
+ "freed": {
+  "bn": "বের হয়ে এসেছে!",
+  "en": "Out of it!"
+ },
+ "act_notes": {
+  "bn": "আঙুলের ফাঁকে নোট",
+  "en": "Notes between the fingers"
+ },
+ "act_notes_hint": {
+  "bn": "দুমড়ানো নোট আড়াআড়ি সোয়াইপ করে সোজা করুন, তারপর ঠিক আঙুলের ফাঁকে টেনে দিন।",
+  "en": "Swipe across a crumpled note to smooth it, then drag it between the right fingers."
+ },
+ "notesLeft": {
+  "bn": "হাতে আরও {n}টা নোট",
+  "en": "{n} notes left in hand"
+ },
+ "notesInHand": {
+  "bn": "হাতে {n}টা নোট: গোছান",
+  "en": "{n} notes in hand: sort"
+ },
+ "finger_0": {
+  "bn": "৫ / ১০",
+  "en": "5 / 10"
+ },
+ "finger_1": {
+  "bn": "২০",
+  "en": "20"
+ },
+ "finger_2": {
+  "bn": "৫০",
+  "en": "50"
+ },
+ "finger_3": {
+  "bn": "১০০+",
+  "en": "100+"
+ },
+ "act_door": {
+  "bn": "দরজায় ঝুলে ধরুন",
+  "en": "Hang on and grab"
+ },
+ "act_door_hint": {
+  "bn": "ফোন কাত করে (বা পাশে টেনে) সোজা থাকুন; সোজা থাকা অবস্থায় লোকটাকে ভেতরে টেনে আনুন।",
+  "en": "Tilt the phone (or drag sideways) to stay upright; while steady, drag the man inside."
+ },
+ "doorSteady": {
+  "bn": "সোজা আছেন, এখন ধরুন!",
+  "en": "Steady, grab him now!"
+ },
+ "doorHold": {
+  "bn": "হেলে যাচ্ছেন! সোজা হোন",
+  "en": "Leaning! Straighten up"
+ },
+ "act_crowd": {
+  "bn": "পিছে যান, পিছে যান!",
+  "en": "Move back, move back!"
+ },
+ "act_crowd_hint": {
+  "bn": "দরজার ভিড়ের মানুষকে টেনে ভেতরে পাঠান, বাইরের যাত্রী উঠতে পারবে।",
+  "en": "Drag the people by the door further in so those outside can get on."
+ },
+ "crowdLeft": {
+  "bn": "বাইরে আরও {n} জন",
+  "en": "{n} still outside"
+ },
+ "doorWord": {
+  "bn": "দরজা",
+  "en": "Door"
+ },
+ "doorJam": {
+  "bn": "দরজায় ভিড়! যাত্রী উঠতে পারছে না",
+  "en": "The door's jammed! People can't get on"
+ },
+ "slapPad": {
+  "bn": "বাসের গায়ে চাপড়",
+  "en": "Slap the bus"
+ },
+ "slapCall": {
+  "bn": "এক চাপড়: স্টপ ডাকুন",
+  "en": "One slap: call the stop"
+ },
+ "slapGo": {
+  "bn": "দুই চাপড়: চলেন ওস্তাদ!",
+  "en": "Two slaps: go, Ostad!"
+ },
+ "tooEarly": {
+  "bn": "আস্তে! লোক এখনো উঠতেছে",
+  "en": "Wait! People are still getting on"
+ },
+ "servedPerfect": {
+  "bn": "দারুণ চা! {bill} টাকা + বকশিশ {tip}",
+  "en": "Perfect tea! Tk {bill} + tip {tip}"
  }
 }

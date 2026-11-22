@@ -29,11 +29,12 @@
     "wrong_way_fine": 50, "red_light_fine": 50, "signal_cycle_s": 12, "wrong_way_stop_s": 5, "signal_wait_s": 3,
     "waterlog_speed": 0.5, "rain_counter_bonus": 0.2, "rain_chance_per_day": 0.4, "rain_seconds": 60,
     "waiting_passengers": [3, 5],
+    "haggle_rain_bonus": 0.15, "flat_chance": 0.1, "flat_speed": 0.55, "tube_cost": 30,
     "passengers": {
-      "normal": {"offer": [0.9, 1.0], "counter_accept": 0.6, "weight": 50},
-      "miser": {"offer": [0.6, 0.8], "counter_accept": 0.3, "weight": 20},
-      "hurry": {"offer": [1.0, 1.1], "counter_accept": 0.9, "weight": 20},
-      "elder": {"offer": [0.8, 0.9], "counter_accept": 0.5, "weight": 10}
+      "normal": {"offer": [0.9, 1.0], "counter_accept": 0.6, "weight": 50, "haggle": [0.1, 0.35]},
+      "miser": {"offer": [0.6, 0.8], "counter_accept": 0.3, "weight": 20, "haggle": [0.0, 0.1]},
+      "hurry": {"offer": [1.0, 1.1], "counter_accept": 0.9, "weight": 20, "haggle": [0.3, 0.6]},
+      "elder": {"offer": [0.8, 0.9], "counter_accept": 0.5, "weight": 10, "haggle": [0.05, 0.2]}
     },
     "upgrades": {
       "new_rickshaw": {"cost": 1500, "speed": 1.15},
@@ -45,7 +46,7 @@
     "crowded_above": 30, "seconds_between_stops": [12, 15],
     "fare_min": 10, "fare_per_stop": 5, "fare_max": 35,
     "student_share": 0.5, "evader_chance": 0.08, "checker_fine": 20, "on_time_bonus": 50,
-    "start_change": 200, "argument_s": 3,
+    "start_change": 200, "argument_s": 3, "go_wait_s": 3, "jam_standing": 6, "sort_all_s": 2,
     "call_perfect_extra": 2, "call_good_extra": 1,
     "route": ["mirpur10", "kazipara", "shewrapara", "agargaon", "farmgate", "karwan_bazar", "shahbag", "press_club", "motijheel"],
     "busy_stops": ["farmgate", "karwan_bazar", "shahbag"],
@@ -62,7 +63,7 @@
     "start_hour": 6, "end_hour": 23, "day_seconds": 300, "rush_hours": [[7, 9], [17, 20]],
     "arrival_every_s": 6, "rush_arrival_every_s": 3,
     "patience_s": {"normal": 12, "office": 8, "elder": 16},
-    "kettle_cups": 8, "kettle_refill_s": 5, "happy_tip_share": 0.10,
+    "kettle_cups": 8, "kettle_refill_s": 5, "happy_tip_share": 0.10, "perfect_tip": 3, "fan_s": 0.35,
     "rain_chance_per_day": 0.4, "rain_seconds": 60, "rain_arrivals": 0.5, "hot_chance_per_day": 0.3,
     "menu": {
       "liquor_tea": {"price": 10, "steps": ["cup", "kettle"]},

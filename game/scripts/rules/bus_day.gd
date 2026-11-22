@@ -38,6 +38,9 @@ enum Event {
 	SEATED, ## a seat problem put right
 	TRIP_OVER, ## the end of a trip (trip: which)
 	DAY_OVER,
+	TOO_EARLY, ## "go" slapped while people were still getting on
+	DOOR_JAM, ## the standing crowd blocks the door: push them back
+	PUSHED, ## one more got on after a push
 }
 
 ## Notes in use, smallest first.
@@ -107,6 +110,16 @@ var npc_pool: Array = []
 var relations := {}
 var npc_log: Array = []
 var _next_id := 0
+## The hand activities (on when the scene says so). Fares taken go to
+## `loose` (crumpled in his hand) until sorted between his fingers into
+## the bag; at a stop the bus waits for two slaps on its side to go (and
+## goes by itself, a little late, after go_wait_s); a crowd standing at
+## the door leaves people outside until pushed back.
+var interactive := false
+var loose: Array = []
+var jam_waiting := 0
+var _go := false
+var _go_wait := 0.0
 
 
 func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
@@ -150,6 +163,8 @@ func bag_value() -> int:
 	var total := 0
 	for note in bag:
 		total += int(note) * int(bag[note])
+	for note in loose:
+		total += int(note)
 	return total
 
 
@@ -205,6 +220,16 @@ func update(dt: float) -> Array:
 			if stop_i >= route.size() - 1:
 				_end_trip(events)
 				return events
+			# By hand, the bus waits for Babu's two slaps; Ostad goes on his
+			# own after a while, and the passengers notice.
+			if interactive and not _go:
+				_go_wait += dt
+				if _go_wait < b.n("bus.go_wait_s"):
+					return events
+				rating = clampf(rating - 0.05, 1.0, 5.0)
+			_go = false
+			_go_wait = 0.0
+			jam_waiting = 0
 			at_stop = false
 			var between: Array = b.at("bus.seconds_between_stops")
 			travel_left = rng.randf_range(float(between[0]), float(between[1]))
@@ -300,6 +325,12 @@ func _arrive(events: Array) -> void:
 			n += 2
 		n += extra_boarders
 		n = mini(n, SEATS + STANDING - riders.size())
+		# A crowd standing by the door: half wait outside until pushed in.
+		var standing := riders.filter(func(r): return r.seat >= SEATS).size()
+		if interactive and n > 1 and standing >= int(b.n("bus.jam_standing")):
+			jam_waiting = floori(n / 2.0)
+			n -= jam_waiting
+			events.append(Event.DOOR_JAM)
 		moved += _board_at(stop_i, n)
 		for i in n:
 			events.append(Event.BOARDED)
@@ -410,6 +441,50 @@ func fix(problem: String) -> Array:
 	right.seat = seat
 	rating = clampf(rating + 0.1, 1.0, 5.0)
 	return [Event.SEATED]
+
+
+## Two slaps on the side: go. At a stop with everyone on, the bus pulls
+## away; while people are still getting on, it is too early (they are
+## cross).
+func slap_go() -> Array:
+	if not at_stop:
+		return []
+	if dwell_left > 0.0 or not at_door.is_empty():
+		rating = clampf(rating - 0.1, 1.0, 5.0)
+		return [Event.TOO_EARLY]
+	_go = true
+	return []
+
+
+## Pushes the crowd at the door back: one more waiting outside gets on.
+func push_in() -> Array:
+	if jam_waiting <= 0 or not at_stop or riders.size() >= SEATS + STANDING:
+		return []
+	jam_waiting -= 1
+	_board_at(stop_i, 1)
+	dwell_left = maxf(dwell_left, 0.0) + b.n("bus.dwell_per_person_s")
+	return [Event.BOARDED, Event.PUSHED]
+
+
+## Puts one crumpled note (its value) from his hand into the bag, between
+## the right fingers. False if there is no such note loose.
+func sort_note(note: int) -> bool:
+	var i := loose.find(note)
+	if i < 0:
+		return false
+	loose.remove_at(i)
+	bag[note] = int(bag.get(note, 0)) + 1
+	return true
+
+
+## Sorts every loose note at once, at the cost of a few seconds.
+func sort_all() -> void:
+	if loose.is_empty():
+		return
+	for note in loose:
+		bag[note] = int(bag.get(note, 0)) + 1
+	loose.clear()
+	locked_left = maxf(locked_left, b.n("bus.sort_all_s"))
 
 
 ## Catches the one slipping out at the door: they pay the fare, exactly.
@@ -565,7 +640,10 @@ func swap() -> Array:
 
 func _collect() -> void:
 	var note := int(asking.note)
-	bag[note] = int(bag.get(note, 0)) + 1
+	if interactive:
+		loose.append(note)
+	else:
+		bag[note] = int(bag.get(note, 0)) + 1
 	asking.paid = true
 	asking = {}
 

@@ -14,6 +14,11 @@ const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
 const Music = preload("res://scripts/ui/music.gd")
+const Activity = preload("res://scripts/ui/activity.gd")
+const Hands = preload("res://scripts/rules/activities.gd")
+const Notes = preload("res://scripts/ui/activities/notes.gd")
+const Door = preload("res://scripts/ui/activities/door.gd")
+const Crowd = preload("res://scripts/ui/activities/crowd.gd")
 const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
@@ -78,6 +83,12 @@ var _ding: AudioStreamPlayer
 var _coin: AudioStreamPlayer
 ## Babu calling the stops, passengers, the checker.
 var _voice: Voice
+## The hand activity open, if any; the slap pad on the bus's side and the
+## times of the last slaps; the notes in his hand to sort.
+var _activity: Activity
+var _slap_button: Button
+var _slaps: Array = []
+var _notes_button: Button
 var _frames_logged := 0
 ## Where each rider is drawn: their seat number, so a move is noticed.
 var _spot_of := {}
@@ -94,6 +105,7 @@ func _ready() -> void:
 	b = Balance.new()
 	progress = Progress.new(b)
 	bus = BusDay.new(b, -1, progress.data.bus.upgrades)
+	bus.interactive = Activity.wanted()
 	var ids := neighbours.ids()
 	ids.shuffle()
 	bus.npc_pool = ids.slice(0, 6)
@@ -470,9 +482,9 @@ func _build_hud() -> void:
 	_call_bar.custom_minimum_size = Vector2(0, 34)
 	_call_bar.draw.connect(_draw_call)
 	call_col.add_child(_call_bar)
-	var call_button := Look.button(strings.t("callButton"), Look.MAGENTA, 20)
+	var call_button := Look.button(strings.t("callButton") if not bus.interactive else strings.t("slapCall"), Look.MAGENTA, 20)
 	call_button.custom_minimum_size = Vector2(0, 56)
-	call_button.pressed.connect(_on_call)
+	call_button.pressed.connect(_on_slap if bus.interactive else _on_call)
 	call_col.add_child(call_button)
 	_call_box.visible = false
 	top.add_child(_call_box)
@@ -514,6 +526,21 @@ func _build_hud() -> void:
 	_next_button.pressed.connect(_on_next_fare)
 	take.add_child(_next_button)
 	bottom.add_child(take)
+	# By hand: the notes in his fist to sort, and the bus's side to slap.
+	var hands := HBoxContainer.new()
+	hands.add_theme_constant_override("separation", 8)
+	_notes_button = Look.button("", Color("9E7B2F"), 16)
+	_notes_button.custom_minimum_size = Vector2(0, 56)
+	_notes_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_notes_button.pressed.connect(_sort_notes)
+	hands.add_child(_notes_button)
+	_slap_button = Look.button(strings.t("slapPad"), Look.SKY.darkened(0.25), 18)
+	_slap_button.custom_minimum_size = Vector2(0, 56)
+	_slap_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_slap_button.pressed.connect(_on_slap)
+	hands.add_child(_slap_button)
+	hands.visible = bus.interactive
+	bottom.add_child(hands)
 	_refresh()
 
 
@@ -595,7 +622,9 @@ func _process(dt: float) -> void:
 	if _frames_logged < 5:
 		_frames_logged += 1
 		print("[frame] ", _frames_logged, " ", Time.get_ticks_msec(), " ms")
-	var events := bus.update(dt)
+	# A hand activity open: the bus's clock runs slower meanwhile.
+	var pace := 0.35 if _activity != null and _activity.slow else 1.0
+	var events := bus.update(dt * pace)
 	_handle(events)
 	if not is_processing():
 		return
@@ -648,6 +677,15 @@ func _handle(events: Array) -> void:
 	if events.has(BusDay.Event.AT_DOOR):
 		_say(strings.t("atDoor"), Look.VERMILION, 2.5)
 		_voice.say("bus_door")
+		if bus.interactive and _activity == null:
+			_open(Door.new(), "act_door", _door_done)
+	if events.has(BusDay.Event.DOOR_JAM):
+		_say(strings.t("doorJam"), Look.VERMILION, 2.5)
+		if bus.interactive and _activity == null:
+			var crowd := Crowd.new()
+			crowd.on_push = bus.push_in
+			crowd.waiting = bus.jam_waiting
+			_open(crowd, "act_crowd", func(_score: float): _sync_people())
 		_sync_people()
 	if events.has(BusDay.Event.CHECKER):
 		_checker.visible = true
@@ -666,6 +704,62 @@ func _handle(events: Array) -> void:
 		_stop_sign.position.z = -2.5
 		_close_fare()
 		_sync_people()
+
+
+func _open(act: Activity, key: String, then: Callable) -> void:
+	act.setup(strings, key, key + "_hint")
+	act.done.connect(then)
+	act.tree_exited.connect(_closed)
+	_activity = act
+	_layer.add_child(act)
+
+
+func _closed() -> void:
+	_activity = null
+	_refresh()
+
+
+func _door_done(score: float) -> void:
+	if score >= 1.0:
+		_on_catch()
+
+
+## Slaps on the bus's side: one while the call is open calls the stop;
+## two quick ones at a stop tell Ostad to go.
+func _on_slap() -> void:
+	Activity.buzz(20)
+	if not bus.at_stop:
+		if bus.call_open:
+			_on_call()
+		else:
+			_thump.play()
+		return
+	_thump.play()
+	var now := Time.get_ticks_msec() / 1000.0
+	_slaps.append(now)
+	if _slaps.size() > 2:
+		_slaps.pop_front()
+	if Hands.slaps(_slaps) == "two":
+		_slaps.clear()
+		if bus.slap_go().has(BusDay.Event.TOO_EARLY):
+			_say(strings.t("tooEarly"), Look.VERMILION, 2.0)
+	_refresh()
+
+
+## The crumpled notes in his hand: sort them between his fingers.
+func _sort_notes() -> void:
+	if _activity != null or bus.loose.is_empty():
+		return
+	var act := Notes.new()
+	act.notes = bus.loose.duplicate()
+	act.on_sort = bus.sort_note
+	_open(act, "act_notes", _sorted.bind(act))
+
+
+func _sorted(_score: float, act: Notes) -> void:
+	if act.quick:
+		bus.sort_all()
+	_refresh()
 
 
 func _on_fix(problem: String) -> void:
@@ -795,6 +889,12 @@ func _refresh() -> void:
 		(_problem_buttons[problem] as Button).visible = now.has(problem)
 	_crowd_label.visible = bus.riders.size() > int(b.n("bus.crowded_above"))
 	_door_button.visible = not bus.at_door.is_empty()
+	if bus.interactive:
+		_notes_button.visible = not bus.loose.is_empty()
+		_notes_button.text = strings.t("notesInHand", {"n": bus.loose.size()})
+		var go := bus.at_stop and bus.dwell_left <= 0.0 and bus.at_door.is_empty()
+		_slap_button.text = strings.t("slapGo" if go else ("slapCall" if bus.call_open else "slapPad"))
+		_slap_button.add_theme_stylebox_override("normal", Look.card(Look.MAGENTA if go or bus.call_open else Look.SKY.darkened(0.25), 12, 3))
 	_next_button.disabled = waiting == 0 or _fare_box.visible
 	if _fare_box.visible:
 		if bus.asking.is_empty():

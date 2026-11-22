@@ -18,6 +18,10 @@ const Models = preload("res://scripts/world/models.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
 const Music = preload("res://scripts/ui/music.gd")
+const Activity = preload("res://scripts/ui/activity.gd")
+const Haggle = preload("res://scripts/ui/activities/haggle.gd")
+const Pump = preload("res://scripts/ui/activities/pump.gd")
+const Push = preload("res://scripts/ui/activities/push.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
@@ -82,6 +86,8 @@ var _police_left := 0.0
 var _whistle: AudioStreamPlayer
 ## Coins for a fare paid.
 var _coin: AudioStreamPlayer
+## The hand activity open, if any (haggling, the pump, pushing).
+var _activity: Activity
 ## Passengers, the policeman and Rahim Chacha talking.
 var _voice: Voice
 ## Rain: how hard (0–1, eased), the drops, the sound, the water that
@@ -101,6 +107,7 @@ func _ready() -> void:
 	var map: RoadMap = RoadMap.load_area(progress.rickshaw_area())
 	# The date brings the month's weather and any festival.
 	shift = Day.new(map, b, -1, progress.date())
+	shift.interactive = Activity.wanted()
 	_target_money = int(b.n("rickshaw.daily_target"))
 	shift.base_speed *= progress.speed_factor()
 	shift.energy_factor = progress.energy_factor()
@@ -174,6 +181,7 @@ func _ready() -> void:
 	hud.offer_counter.connect(_on_counter)
 	hud.offer_refuse.connect(_on_refuse)
 	hud.tea_pressed.connect(_on_tea)
+	hud.pump_pressed.connect(_on_pump)
 	add_child(hud)
 	_police = _police_man()
 	add_child(_police)
@@ -437,7 +445,9 @@ func _process(dt: float) -> void:
 			shift.room = 0.0
 	else:
 		_crossing_wait = 0.0
-	var events := shift.update(dt)
+	# A hand activity open: the street goes slower meanwhile.
+	var pace := 0.35 if _activity != null and _activity.slow else 1.0
+	var events := shift.update(dt * pace)
 	traffic.clock = shift.clock
 	signals.update_lights(shift.clock, shift.signal_cycle)
 	_day_light()
@@ -561,7 +571,7 @@ func _handle(events: Array) -> void:
 		hud.show_offer(
 			strings.t("offerTitle", {"place": RoadMap.place_name(w.place, strings.lang), "fare": w.offer}),
 			_who(w),
-			strings.t("counter", {"fare": shift.fares.counter(w.fair)}))
+			strings.t("haggleButton") if shift.interactive else strings.t("counter", {"fare": shift.fares.counter(w.fair)}))
 		# The passenger calls out, in the way of their kind.
 		_voice.say("hail_" + str(w.get("type", "normal")), true)
 	if events.has(Day.OFFER_GONE):
@@ -594,6 +604,12 @@ func _handle(events: Array) -> void:
 		hud.show_tea(false)
 	if events.has(Day.TIRED):
 		_say(strings.t("tired"), Look.YELLOW.darkened(0.2), 4.0)
+	if events.has(Day.FLAT):
+		_say(strings.t("flatTyre"), Look.YELLOW.darkened(0.3), 3.5)
+		hud.show_pump(true)
+	if events.has(Day.STUCK):
+		_say(strings.t("stuckWater"), Look.SKY, 2.5)
+		_push_out()
 	if events.has(Day.RAIN_START):
 		_say(strings.t("rainStart"), Look.SKY, 3.5)
 		_rain_sound.play()
@@ -718,6 +734,9 @@ func _on_accept() -> void:
 
 
 func _on_counter() -> void:
+	if shift.interactive:
+		_haggle()
+		return
 	_voice.say("rahim_counter", true)
 	if shift.counter():
 		_voice.say("counter_yes")
@@ -728,6 +747,102 @@ func _on_counter() -> void:
 		_say(strings.t("counterNo"), Look.VERMILION, 2.5)
 		_place_marker()
 		_sync_waiting()
+
+
+## Haggling face to face (the hand activity).
+func _haggle() -> void:
+	var w: Dictionary = shift.offer_for
+	if w.is_empty() or _activity != null:
+		return
+	var act := Haggle.new()
+	act.mood_of = shift.mood
+	act.start(int(w.offer), maxi(int(w.offer) + 50, shift.fares.round_fare(int(w.fair) * 1.8)))
+	_open(act, "act_haggle", _haggled.bind(act))
+
+
+func _haggled(_score: float, act: Haggle) -> void:
+	if shift.offer_for.is_empty():
+		return
+	if act.quick or act.asked <= int(shift.offer_for.offer):
+		_on_accept()
+		return
+	_voice.say("rahim_counter", true)
+	if shift.haggle(act.asked):
+		_voice.say("counter_yes")
+		_boarded()
+	else:
+		_voice.say("counter_no")
+		hud.hide_offer()
+		_say(strings.t("counterNo"), Look.VERMILION, 2.5)
+		_place_marker()
+		_sync_waiting()
+
+
+func _open(act: Activity, key: String, then: Callable) -> void:
+	act.setup(strings, key, key + "_hint")
+	act.done.connect(then)
+	act.tree_exited.connect(func(): _activity = null)
+	_activity = act
+	# Hands off the pedal while the fingers are busy.
+	_pedal_fingers.clear()
+	_brake_fingers.clear()
+	_swipes.clear()
+	_apply_controls()
+	hud.add_child(act)
+
+
+## The bell: once, or twice quickly to clear the way for longer.
+func _ring() -> void:
+	var kind := shift.ring()
+	_bell.play()
+	Activity.buzz(25 if kind == "double" else 12)
+
+
+## The soft tyre: stop, then pump it.
+func _on_pump() -> void:
+	if _activity != null:
+		return
+	if shift.speed_now > 0.3:
+		_say(strings.t("stopToPump"), Look.YELLOW.darkened(0.3), 2.0)
+		return
+	var act := Pump.new()
+	_open(act, "act_pump", _pumped.bind(act))
+
+
+func _pumped(_score: float, act: Pump) -> void:
+	if act.quick:
+		# Pumped without care: right enough, after a while.
+		shift.flat = false
+		shift.held = 3.0
+		hud.show_pump(false)
+		return
+	var result := shift.pump(act.pressure)
+	if result == "soft":
+		_say(strings.t("pumpSoft"), Look.YELLOW.darkened(0.3), 2.5)
+		return
+	hud.show_pump(false)
+	if result == "burst":
+		_say(strings.t("pumpBurst", {"n": int(shift.balance.n("rickshaw.tube_cost"))}), Look.VERMILION, 3.0)
+	else:
+		_say(strings.t("pumpOk"), Look.PARROT, 2.0)
+
+
+## Stuck in deep water: get down and push.
+func _push_out() -> void:
+	if _activity != null:
+		return
+	var act := Push.new()
+	act.on_push = shift.push
+	_open(act, "act_push", _pushed_out.bind(act))
+
+
+func _pushed_out(_score: float, act: Push) -> void:
+	if shift.stuck:
+		# Skipped: he wades it out slowly.
+		shift.stuck = false
+		shift.held = 4.0
+	if not act.quick:
+		_say(strings.t("freed"), Look.PARROT, 2.0)
 
 
 func _on_refuse() -> void:
@@ -866,15 +981,16 @@ func _play_again() -> void:
 ## Touches are read finger by finger: a finger on the pedal or brake holds
 ## it; any other finger can swipe a turn at the same time.
 func _input(event: InputEvent) -> void:
-	if not is_processing():
+	if not is_processing() or _activity != null:
 		return
 	if event is InputEventScreenTouch:
 		var finger: int = event.index
 		if event.pressed:
-			if hud.offer_rect().has_point(event.position) or hud.tea_rect().has_point(event.position):
+			if hud.offer_rect().has_point(event.position) or hud.tea_rect().has_point(event.position) \
+					or hud.pump_rect().has_point(event.position):
 				pass
 			elif hud.bell_rect().has_point(event.position):
-				_bell.play()
+				_ring()
 			elif hud.pedal_rect().has_point(event.position):
 				_pedal_fingers[finger] = true
 			elif hud.brake_rect().has_point(event.position):

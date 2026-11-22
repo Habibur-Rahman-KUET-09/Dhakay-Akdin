@@ -14,6 +14,11 @@ const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
 const Music = preload("res://scripts/ui/music.gd")
+const Activity = preload("res://scripts/ui/activity.gd")
+const Pour = preload("res://scripts/ui/activities/pour.gd")
+const Stir = preload("res://scripts/ui/activities/stir.gd")
+const Paan = preload("res://scripts/ui/activities/paan.gd")
+const Stove = preload("res://scripts/ui/activities/stove.gd")
 const City = preload("res://scripts/world/city.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
 const Models = preload("res://scripts/world/models.gd")
@@ -59,6 +64,8 @@ var _card_bars: Array[ProgressBar] = []
 var _seated := {}
 var _rahim_rickshaw: Node3D
 var _layer: CanvasLayer
+## The hand activity open over the counter, if any.
+var _activity: Activity
 var _status: Label
 var _tray: Label
 var _give: Button
@@ -83,6 +90,7 @@ func _ready() -> void:
 	b = Balance.new()
 	progress = Progress.new(b)
 	day = TeaDay.new(b, -1, progress.data.tea.upgrades, progress.date())
+	day.interactive = Activity.wanted()
 	var ids := neighbours.ids()
 	ids.shuffle()
 	day.npc_pool = ids.slice(0, 6)
@@ -479,7 +487,9 @@ func _process(dt: float) -> void:
 	if _alive_left <= 0.0:
 		_alive_left = 10.0
 		print("[alive] ", Time.get_ticks_msec(), " ms, ", Engine.get_frames_per_second(), " fps")
-	var events := day.update(dt)
+	# A hand activity open: the stall's clock runs slower meanwhile.
+	var pace := 0.35 if _activity != null and _activity.slow else 1.0
+	var events := day.update(dt * pace)
 	_handle(events)
 	if not is_processing():
 		return
@@ -509,6 +519,9 @@ func _handle(events: Array) -> void:
 			_say(strings.t("babuLine", {"level": int(b.n("unlocks.bus"))}), Look.SKY, 5.0)
 		elif last.get("thanks", false):
 			_say(strings.t("npcThanks", {"name": neighbours.name_of(last.npc, strings.lang)}), Look.PARROT, 3.0)
+		elif last.get("perfect", false):
+			_say(strings.t("servedPerfect", {"bill": last.bill, "tip": last.tip}), Look.PARROT)
+			_voice.say("tea_happy")
 		elif last.happy:
 			_say(strings.t("servedHappy", {"bill": last.bill, "tip": last.tip}), Look.PARROT)
 			_voice.say("tea_happy")
@@ -551,10 +564,82 @@ func _rahim_line() -> String:
 
 
 func _on_step(step: String) -> void:
-	if not is_processing():
+	if not is_processing() or _activity != null:
 		return
-	_handle(day.tap(step))
+	if day.interactive and _by_hand(step):
+		return
+	var got := day.tap(step)
+	_handle(got)
+	if day.interactive and got.has(TeaDay.Event.REFILLING):
+		_fan_stove()
 	_refresh()
+
+
+## The steps done by hand, when that makes sense now: pouring the tea
+## (cup in hand, tea in the kettle), the sugar, the whole paan.
+func _by_hand(step: String) -> bool:
+	if step == "kettle" and day.tray == ["cup"] and _tea_ready():
+		_open(Pour.new(), "act_pour", _poured)
+		return true
+	if step == "sugar" and day.tray == ["cup", "kettle", "milk"]:
+		var stir := Stir.new()
+		stir.wanted = day.sugar_wanted()
+		_open(stir, "act_sugar", _sugared)
+		return true
+	if step == "betel_leaf" and day.tray.is_empty():
+		var paan := Paan.new()
+		paan.wants_zarda = day.zarda_wanted()
+		_open(paan, "act_paan", _folded)
+		return true
+	return false
+
+
+## A kettle with tea in it, not filling.
+func _tea_ready() -> bool:
+	return (day.kettle > 0 and day.refill_left <= 0.0) or (day.has_second and day.kettle2 > 0 and day.refill2_left <= 0.0)
+
+
+func _open(act: Activity, key: String, then: Callable) -> void:
+	act.setup(strings, key, key + "_hint")
+	act.done.connect(then)
+	act.tree_exited.connect(_closed)
+	_activity = act
+	_layer.add_child(act)
+
+
+func _closed() -> void:
+	_activity = null
+	_refresh()
+
+
+func _poured(score: float) -> void:
+	_handle(day.tap("kettle", score))
+	_cup.play()
+
+
+func _sugared(score: float) -> void:
+	_handle(day.tap("sugar", score))
+
+
+func _folded(score: float) -> void:
+	for step in ["betel_leaf", "areca", "lime"]:
+		_handle(day.tap(step, score))
+
+
+## The kettle went on to fill: fan the stove (or blow on it) to hurry it.
+func _fan_stove() -> void:
+	var stove := Stove.new()
+	stove.on_fan = func(seconds: float): return day.fan(seconds)
+	stove.filled = _kettle_filled
+	stove.fan_s = b.n("tea_stall.fan_s")
+	_open(stove, "act_stove", func(_score: float): pass)
+
+
+## How far the filling kettle has got (1 once neither is filling).
+func _kettle_filled() -> float:
+	var full := b.n("tea_stall.kettle_refill_s")
+	var left := maxf(day.refill_left, day.refill2_left)
+	return 1.0 - clampf(left / full, 0.0, 1.0)
 
 
 func _on_give() -> void:
