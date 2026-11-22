@@ -62,3 +62,17 @@ func test_challenges_suit_whats_open() -> void:
 	check(not Daily.met(c, c.who, {c.stat: int(c.goal) - 1}), "not below it")
 	var other := "tea" if c.who != "tea" else "bus"
 	check(not Daily.met(c, other, {c.stat: c.goal}), "only as the right character")
+
+
+func test_every_speaker_has_a_voice() -> void:
+	var v = JSON.parse_string(FileAccess.get_file_as_string("res://content/voices.json"))
+	var story := Story.new()
+	for id in story.cast:
+		check(v.voices.has(id), "a voice for %s" % id)
+	for group in v.lines:
+		for line in v.lines[group]:
+			check(v.voices.has(line.by), "%s: a voice for %s" % [group, line.by])
+	# The game finds a story line's speech by the same name the tool gave it.
+	var Voice = load("res://scripts/ui/voice.gd")
+	eq(Voice.story_id("rahim", "সুমির মা, আজ থেকে মিরপুরের রাস্তায় রিকশা চালাব।"), "story_941206e428", "same name as tool/make_voices.py")
+	check(Voice.ids_of("no_such_group").is_empty(), "an unknown group says nothing")

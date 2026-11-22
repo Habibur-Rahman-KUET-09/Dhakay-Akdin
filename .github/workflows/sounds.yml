@@ -1,0 +1,52 @@
+name: sounds
+
+# Real street recordings from Freesound, kept in game/sounds/real/.
+# Runs when its inputs change, or by hand; commits what it made, then
+# starts a game build so the APK has it.
+on:
+  push:
+    branches: [main]
+    paths: [tool/fetch_sounds.py, .github/workflows/sounds.yml]
+  workflow_dispatch:
+    inputs:
+      again:
+        description: Fetch every sound again (not only missing ones)
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: media
+  cancel-in-progress: false
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Make
+        env:
+          FREESOUND_API_KEY: ${{ secrets.FREESOUND_API_KEY }}
+        run: |
+          command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+          python3 tool/fetch_sounds.py ${{ github.event.inputs.again == 'true' && '--again' || '' }}
+      - name: Commit and build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/sounds/real 2>/dev/null || true
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "Street sounds from Freesound"
+          git pull --rebase origin main
+          git push
+          # A push from here starts no workflow by itself: ask for the build.
+          gh workflow run game.yml --ref main

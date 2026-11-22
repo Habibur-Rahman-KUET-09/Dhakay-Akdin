@@ -2,13 +2,15 @@
 ## (a dawn yard, a street, the tea stall, the bus, a rainy night…, until
 ## real art arrives), the people in it standing along the bottom, and
 ## their lines one at a time below; tap for the next. A chapter may end in
-## a choice. Emits `finished` with the chapter's id and the chosen
-## effects.
+## a choice. In Bangla each line is also spoken, in its speaker's voice,
+## where its speech has been made. Emits `finished` with the chapter's id
+## and the chosen effects.
 extends Control
 
 const Look = preload("res://scripts/ui/look.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Story = preload("res://scripts/rules/story.gd")
+const Voice = preload("res://scripts/ui/voice.gd")
 
 signal finished(chapter_id: String, effects: Dictionary)
 
@@ -31,6 +33,7 @@ var _text: Label
 var _hint: Label
 var _choices: VBoxContainer
 var _t := 0.0
+var _voice: Voice
 
 
 func setup(the_story: Story, the_chapter: Dictionary, strings: Strings) -> void:
@@ -46,6 +49,8 @@ func _ready() -> void:
 	if get_parent() is Window:
 		size = get_viewport_rect().size
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_voice = Voice.new()
+	add_child(_voice)
 	var bg := ColorRect.new()
 	bg.color = Color("1D1A1A")
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -129,6 +134,8 @@ func _show() -> void:
 	_speaker_box.add_theme_stylebox_override("panel", Look.card(story.colour(line.by), 10, 0))
 	_text.text = line[s.lang]
 	_picture.queue_redraw()
+	if s.lang == "bn" and _voice != null:
+		_voice.play(Voice.story_id(line.by, line.bn), true)
 
 
 func _next() -> void:

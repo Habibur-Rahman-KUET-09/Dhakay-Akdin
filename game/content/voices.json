@@ -1,0 +1,497 @@
+{
+ "about": "Spoken lines, made into speech by tool/make_voices.py (Azure's Bangla voices from Bangladesh) and kept in game/voices/. voices: each speaker's voice, pitch and speed. lines: what is said, in groups the game picks from at random; the story's lines come from story.json and are spoken by their cast.",
+ "voices": {
+  "rahim": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-10%",
+   "rate": "-6%"
+  },
+  "monir": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-3%",
+   "rate": "+2%"
+  },
+  "babu": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+9%",
+   "rate": "+10%"
+  },
+  "rokeya": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "-4%",
+   "rate": "-4%"
+  },
+  "sumi": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "+24%",
+   "rate": "+6%"
+  },
+  "ostad": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-18%",
+   "rate": "-4%"
+  },
+  "babu_ma": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "-14%",
+   "rate": "-10%"
+  },
+  "rafiq": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-16%",
+   "rate": "-12%"
+  },
+  "belal": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+3%",
+   "rate": "+4%"
+  },
+  "sultana": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "-8%",
+   "rate": "+0%"
+  },
+  "haider": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-7%",
+   "rate": "-8%"
+  },
+  "joya": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "+12%",
+   "rate": "+6%"
+  },
+  "nasrin": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "+4%",
+   "rate": "+2%"
+  },
+  "rumana": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "-2%",
+   "rate": "-2%"
+  },
+  "kamal": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+1%",
+   "rate": "+0%"
+  },
+  "man": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+0%",
+   "rate": "+4%"
+  },
+  "man2": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-6%",
+   "rate": "+0%"
+  },
+  "woman": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "+0%",
+   "rate": "+4%"
+  },
+  "woman2": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "+8%",
+   "rate": "+8%"
+  },
+  "oldman": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-16%",
+   "rate": "-12%"
+  },
+  "oldwoman": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "-14%",
+   "rate": "-12%"
+  },
+  "student": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+14%",
+   "rate": "+14%"
+  },
+  "police": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-8%",
+   "rate": "+8%"
+  },
+  "checker": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-5%",
+   "rate": "+0%"
+  }
+ },
+ "lines": {
+  "hail_normal": [
+   {
+    "by": "man",
+    "bn": "মামা, যাবেন?"
+   },
+   {
+    "by": "woman",
+    "bn": "এই রিকশা, যাবেন?"
+   },
+   {
+    "by": "man2",
+    "bn": "মামা, খালি? চলেন।"
+   },
+   {
+    "by": "woman2",
+    "bn": "মামা, ভাড়া কত?"
+   }
+  ],
+  "hail_miser": [
+   {
+    "by": "man2",
+    "bn": "এত চাইলে হবে? কম রাখেন মামা।"
+   },
+   {
+    "by": "woman",
+    "bn": "ভাড়া ঠিক কইরা কন, বেশি দিমু না কিন্তু।"
+   },
+   {
+    "by": "man",
+    "bn": "আরে মামা, এইটুকু রাস্তা, এত টাকা!"
+   }
+  ],
+  "hail_hurry": [
+   {
+    "by": "student",
+    "bn": "মামা, জলদি চলেন, দেরি হইয়া গেছে!"
+   },
+   {
+    "by": "man",
+    "bn": "মামা, তাড়াতাড়ি, অফিস ধরতে হইবো!"
+   },
+   {
+    "by": "woman2",
+    "bn": "একটু জোরে চালাইয়েন মামা, খুব তাড়া।"
+   }
+  ],
+  "hail_elder": [
+   {
+    "by": "oldman",
+    "bn": "বাবা, একটু আস্তে নিয়া যাইবা?"
+   },
+   {
+    "by": "oldwoman",
+    "bn": "বাবা, আমারে একটু নামায়া দিবা?"
+   },
+   {
+    "by": "oldman",
+    "bn": "রিকশা, ও রিকশা! যাইবা নাকি?"
+   }
+  ],
+  "rahim_counter": [
+   {
+    "by": "rahim",
+    "bn": "আর দশটা টাকা বাড়ায় দেন মামা।"
+   },
+   {
+    "by": "rahim",
+    "bn": "এই ভাড়ায় পোষায় না মামা, একটু বাড়ান।"
+   },
+   {
+    "by": "rahim",
+    "bn": "রাস্তা তো লম্বা, আরেকটু দেন।"
+   }
+  ],
+  "counter_yes": [
+   {
+    "by": "man",
+    "bn": "আচ্ছা ঠিক আছে, চলেন।"
+   },
+   {
+    "by": "woman",
+    "bn": "হুম, চলেন তাইলে।"
+   },
+   {
+    "by": "man2",
+    "bn": "আচ্ছা যান, দিমুনে।"
+   }
+  ],
+  "counter_no": [
+   {
+    "by": "man2",
+    "bn": "না না, এত দিমু না! অন্য রিকশা নিমু।"
+   },
+   {
+    "by": "woman",
+    "bn": "ধুর, এত ভাড়া কেউ দেয়!"
+   },
+   {
+    "by": "man",
+    "bn": "থাক মামা, হাঁইটাই যামু।"
+   }
+  ],
+  "board": [
+   {
+    "by": "man",
+    "bn": "চলেন মামা।"
+   },
+   {
+    "by": "woman",
+    "bn": "চলেন।"
+   },
+   {
+    "by": "student",
+    "bn": "চলেন চলেন!"
+   }
+  ],
+  "thanks": [
+   {
+    "by": "man",
+    "bn": "ধন্যবাদ মামা, ভালো চালাইছেন।"
+   },
+   {
+    "by": "woman",
+    "bn": "মামা, এই নেন, ভালো থাইকেন।"
+   },
+   {
+    "by": "oldman",
+    "bn": "আল্লাহ তোমার ভালো করুক বাবা।"
+   },
+   {
+    "by": "student",
+    "bn": "থ্যাংকু মামা!"
+   }
+  ],
+  "grumble": [
+   {
+    "by": "man2",
+    "bn": "এত দেরি করলেন মামা!"
+   },
+   {
+    "by": "woman",
+    "bn": "পুরা রাস্তা ঘুরাইয়া আনলেন!"
+   },
+   {
+    "by": "man",
+    "bn": "পানিতে ভিজায়া দিলেন তো!"
+   }
+  ],
+  "rain": [
+   {
+    "by": "man",
+    "bn": "মামা, পর্দাটা দেন, বৃষ্টি আসতেছে!"
+   },
+   {
+    "by": "woman",
+    "bn": "ইশ, বৃষ্টি নামলো!"
+   }
+  ],
+  "police": [
+   {
+    "by": "police",
+    "bn": "এই রিকশা! উল্টা দিকে যাও ক্যান? সাইড করো!"
+   },
+   {
+    "by": "police",
+    "bn": "ওই মিয়া, রং সাইড! থামো!"
+   }
+  ],
+  "tea_order": [
+   {
+    "by": "man",
+    "bn": "মামা, এক কাপ চা দেন।"
+   },
+   {
+    "by": "man2",
+    "bn": "মামা, দুধ চা, চিনি কম।"
+   },
+   {
+    "by": "student",
+    "bn": "মামা, একটা লিকার চা আর একটা বন।"
+   },
+   {
+    "by": "woman",
+    "bn": "মামা, এক কাপ চা দিয়েন।"
+   },
+   {
+    "by": "oldman",
+    "bn": "এক কাপ কড়া কইরা চা দাও তো।"
+   }
+  ],
+  "tea_happy": [
+   {
+    "by": "man",
+    "bn": "আহ, ফার্স্টক্লাস চা!"
+   },
+   {
+    "by": "man2",
+    "bn": "মামা, চা-টা জোস হইছে।"
+   },
+   {
+    "by": "student",
+    "bn": "একদম জমে গেল মামা!"
+   },
+   {
+    "by": "oldman",
+    "bn": "বাহ, তোমার চায়ের তুলনা নাই।"
+   }
+  ],
+  "tea_angry": [
+   {
+    "by": "man2",
+    "bn": "ধুর শালা, এতক্ষণ বসায়া রাখে!"
+   },
+   {
+    "by": "man",
+    "bn": "ধুর! আর আসমু না এই দোকানে।"
+   },
+   {
+    "by": "student",
+    "bn": "ধুর মামা, ক্লাস মিস হইয়া যাইবো, গেলাম!"
+   },
+   {
+    "by": "woman",
+    "bn": "এতক্ষণ লাগে এক কাপ চা দিতে?"
+   }
+  ],
+  "tea_wrong": [
+   {
+    "by": "man",
+    "bn": "আরে মামা, এইটা তো চাই নাই!"
+   },
+   {
+    "by": "man2",
+    "bn": "কী বানাইতেছেন মামা, খেয়াল কইরা!"
+   }
+  ],
+  "monir_kettle": [
+   {
+    "by": "monir",
+    "bn": "কেটলি খালি! একটু দাঁড়ান, পানি গরম হইতেছে।"
+   },
+   {
+    "by": "monir",
+    "bn": "এক মিনিট ভাই, নতুন চা বসাইতেছি।"
+   }
+  ],
+  "tea_rain": [
+   {
+    "by": "man",
+    "bn": "বৃষ্টি নামছে, একটু বসি মামা।"
+   },
+   {
+    "by": "woman2",
+    "bn": "ইশ, ভিজা গেলাম!"
+   }
+  ],
+  "bus_board": [
+   {
+    "by": "babu",
+    "bn": "উঠেন উঠেন, খালি গাড়ি! পিছে যান, পিছে যান!"
+   },
+   {
+    "by": "babu",
+    "bn": "আস্তে উঠেন, ভিতরে চাপেন!"
+   }
+  ],
+  "bus_fare": [
+   {
+    "by": "man",
+    "bn": "ভাংতি নাই, পাঁচশো টাকার নোট।"
+   },
+   {
+    "by": "woman",
+    "bn": "ভাড়া কত? ছাত্রী, হাফ ভাড়া।"
+   },
+   {
+    "by": "student",
+    "bn": "মামা, স্টুডেন্ট, হাফ!"
+   }
+  ],
+  "bus_caught": [
+   {
+    "by": "man2",
+    "bn": "আরে ভাই, দিতেছি তো ভাড়া!"
+   },
+   {
+    "by": "man",
+    "bn": "এই নেন, এই নেন, পালাই নাই তো।"
+   }
+  ],
+  "bus_argument": [
+   {
+    "by": "man2",
+    "bn": "কী! এত ভাড়া! চিটিং পাইছেন?"
+   },
+   {
+    "by": "woman",
+    "bn": "ভাংতি ঠিক কইরা দেন ভাই!"
+   }
+  ],
+  "bus_door": [
+   {
+    "by": "man",
+    "bn": "ওস্তাদ, বাঁয়ে! নামবো নামবো!"
+   },
+   {
+    "by": "woman",
+    "bn": "আস্তে, আস্তে! নামতে দেন!"
+   }
+  ],
+  "checker": [
+   {
+    "by": "checker",
+    "bn": "টিকিট দেখি, টিকিট! কয়জন উঠছে, হিসাব দাও।"
+   }
+  ],
+  "stop_mirpur10": [
+   {
+    "by": "babu",
+    "bn": "মিরপুর দশ! মিরপুর দশ! মিরপুর দশ! নামেন, নামেন!"
+   }
+  ],
+  "stop_kazipara": [
+   {
+    "by": "babu",
+    "bn": "কাজীপাড়া! কাজীপাড়া! কাজীপাড়া! নামেন, নামেন!"
+   }
+  ],
+  "stop_shewrapara": [
+   {
+    "by": "babu",
+    "bn": "শেওড়াপাড়া! শেওড়াপাড়া! শেওড়াপাড়া! নামেন, নামেন!"
+   }
+  ],
+  "stop_agargaon": [
+   {
+    "by": "babu",
+    "bn": "আগারগাঁও! আগারগাঁও! আগারগাঁও! নামেন, নামেন!"
+   }
+  ],
+  "stop_farmgate": [
+   {
+    "by": "babu",
+    "bn": "ফার্মগেট! ফার্মগেট! ফার্মগেট! নামেন, নামেন!"
+   }
+  ],
+  "stop_karwan_bazar": [
+   {
+    "by": "babu",
+    "bn": "কারওয়ান বাজার! কারওয়ান বাজার! কারওয়ান বাজার! নামেন, নামেন!"
+   }
+  ],
+  "stop_shahbag": [
+   {
+    "by": "babu",
+    "bn": "শাহবাগ! শাহবাগ! শাহবাগ! নামেন, নামেন!"
+   }
+  ],
+  "stop_press_club": [
+   {
+    "by": "babu",
+    "bn": "প্রেসক্লাব! প্রেসক্লাব! প্রেসক্লাব! নামেন, নামেন!"
+   }
+  ],
+  "stop_motijheel": [
+   {
+    "by": "babu",
+    "bn": "মতিঝিল! মতিঝিল! মতিঝিল! নামেন, নামেন!"
+   }
+  ]
+ }
+}

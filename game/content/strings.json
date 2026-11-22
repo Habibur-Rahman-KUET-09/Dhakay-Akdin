@@ -1442,5 +1442,13 @@
  "languageLabel": {
   "bn": "ভাষা:",
   "en": "Language:"
+ },
+ "voices": {
+  "bn": "কথা:",
+  "en": "Voices:"
+ },
+ "soundCredits": {
+  "bn": "রাস্তার আসল শব্দ (Freesound থেকে):",
+  "en": "Street recordings (from Freesound):"
  }
 }

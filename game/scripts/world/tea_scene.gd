@@ -11,6 +11,9 @@ const Balance = preload("res://scripts/rules/balance.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
+const Sfx = preload("res://scripts/ui/sfx.gd")
+const Voice = preload("res://scripts/ui/voice.gd")
+const Music = preload("res://scripts/ui/music.gd")
 const City = preload("res://scripts/world/city.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
 const Models = preload("res://scripts/world/models.gd")
@@ -64,6 +67,9 @@ var _notice: Label
 var _notice_box: PanelContainer
 var _notice_left := 0.0
 var _ding: AudioStreamPlayer
+## The glass set down, and the customers and Monir Mama talking.
+var _cup: AudioStreamPlayer
+var _voice: Voice
 ## Rain: how hard (0–1, eased), the drops and their sound.
 var _rain_k := 0.0
 var _drops: CPUParticles3D
@@ -307,13 +313,13 @@ func _clear_signs(town: Node) -> void:
 
 func _sounds() -> void:
 	var hum := AudioStreamPlayer.new()
-	hum.stream = load("res://sounds/hum.wav")
+	hum.stream = Sfx.stream("hum")
 	hum.volume_db = -12.0
 	add_child(hum)
 	hum.finished.connect(hum.play)
 	hum.play()
 	_rain_sound = AudioStreamPlayer.new()
-	_rain_sound.stream = load("res://sounds/rain.wav")
+	_rain_sound.stream = Sfx.stream("rain")
 	_rain_sound.volume_db = -60.0
 	add_child(_rain_sound)
 	_rain_sound.finished.connect(_rain_again)
@@ -321,9 +327,28 @@ func _sounds() -> void:
 	add_child(_drops)
 	_ding = AudioStreamPlayer.new()
 	# A served customer pays: coins in the tin.
-	_ding.stream = load("res://sounds/coin.wav")
+	_ding.stream = Sfx.stream("coin")
 	_ding.volume_db = -8.0
 	add_child(_ding)
+	_cup = AudioStreamPlayer.new()
+	_cup.stream = Sfx.stream("cup", "bell")
+	_cup.volume_db = -10.0
+	add_child(_cup)
+	_voice = Voice.new()
+	add_child(_voice)
+	var tune := Music.new()
+	tune.track = "tune_tea" if day.festival.is_empty() else "tune_festival"
+	tune.volume_db = -18.0
+	add_child(tune)
+	# The talk of the bazar round the stall, where there is a recording.
+	var crowd_stream := Sfx.stream("crowd", "none")
+	if crowd_stream != null:
+		var crowd := AudioStreamPlayer.new()
+		crowd.stream = crowd_stream
+		crowd.volume_db = -16.0
+		add_child(crowd)
+		crowd.finished.connect(crowd.play)
+		crowd.play()
 
 
 # --- The screen --------------------------------------------------------------
@@ -469,9 +494,13 @@ func _process(dt: float) -> void:
 
 func _handle(events: Array) -> void:
 	if events.has(TeaDay.Event.ARRIVED):
+		var ordered := false
 		for c in day.customers:
 			if not _seated.has(c.id) and (c.kind == "rahim" or c.kind == "babu"):
 				_say(strings.t(c.kind + "Arrived"), Look.MAGENTA, 3.0)
+			elif not _seated.has(c.id) and not ordered:
+				ordered = true
+				_voice.say("tea_order")
 	if events.has(TeaDay.Event.SERVED):
 		var last: Dictionary = day.last_served
 		if last.kind == "rahim":
@@ -482,22 +511,29 @@ func _handle(events: Array) -> void:
 			_say(strings.t("npcThanks", {"name": neighbours.name_of(last.npc, strings.lang)}), Look.PARROT, 3.0)
 		elif last.happy:
 			_say(strings.t("servedHappy", {"bill": last.bill, "tip": last.tip}), Look.PARROT)
+			_voice.say("tea_happy")
 		else:
 			_say(strings.t("servedPlain", {"bill": last.bill}), Look.OUTLINE)
+		_cup.play()
 		_ding.play()
 	if events.has(TeaDay.Event.RAIN_START):
 		_say(strings.t("teaRainAwning" if day.has("awning") else "teaRain"), Look.SKY, 3.5)
+		_voice.say("tea_rain")
 		_rain_sound.play()
 	if events.has(TeaDay.Event.RAIN_END):
 		_say(strings.t("rainEnd"), Look.SKY, 2.0)
 	if events.has(TeaDay.Event.LEFT):
 		_say(strings.t("customerLeft"), Look.VERMILION)
+		# Kept waiting too long: off they go, cursing.
+		_voice.say("tea_angry", true)
 	if events.has(TeaDay.Event.WRONG_STEP):
 		_say(strings.t("wrongStep"), Look.VERMILION, 2.0)
+		_voice.say("tea_wrong")
 	if events.has(TeaDay.Event.NOBODY_WANTS):
 		_say(strings.t("nobodyWants"), Look.VERMILION, 2.0)
 	if events.has(TeaDay.Event.KETTLE_EMPTY):
 		_say(strings.t("kettleEmptyNote"), Look.YELLOW.darkened(0.3), 3.0)
+		_voice.say("monir_kettle")
 	if events.has(TeaDay.Event.KETTLE_FULL):
 		_say(strings.t("kettleFull", {"n": day.kettle_size}), Look.PARROT, 1.5)
 	if events.has(TeaDay.Event.DAY_OVER):

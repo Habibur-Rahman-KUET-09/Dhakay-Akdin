@@ -11,6 +11,8 @@ const Day = preload("res://scripts/rules/day.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
+const Sfx = preload("res://scripts/ui/sfx.gd")
+const Voice = preload("res://scripts/ui/voice.gd")
 const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
@@ -80,6 +82,8 @@ var _police_left := 0.0
 var _whistle: AudioStreamPlayer
 ## Coins for a fare paid.
 var _coin: AudioStreamPlayer
+## Passengers, the policeman and Rahim Chacha talking.
+var _voice: Voice
 ## Rain: how hard (0–1, eased), the drops, the sound, the water that
 ## spreads on the roads.
 var _rain_k := 0.0
@@ -211,11 +215,6 @@ func _ready() -> void:
 	set_process(true)
 	if not shift.festival.is_empty():
 		_say(str(shift.festival.greeting.get(strings.lang, shift.festival.greeting.en)), Look.MAGENTA, 6.0)
-		# A festival: the tune plays softly under the street.
-		if Music.wanted():
-			var tune := Music.new()
-			tune.volume_db = -16.0
-			add_child(tune)
 	elif shift.foggy:
 		_say(strings.t("fogMorning"), Look.SKY, 4.0)
 
@@ -226,11 +225,11 @@ func _ready() -> void:
 func _sounds() -> void:
 	print("[sounds] bell")
 	_bell = AudioStreamPlayer.new()
-	_bell.stream = load("res://sounds/bell.wav")
+	_bell.stream = Sfx.stream("bell")
 	add_child(_bell)
 	print("[sounds] hum")
 	var hum := AudioStreamPlayer.new()
-	hum.stream = load("res://sounds/hum.wav")
+	hum.stream = Sfx.stream("hum")
 	hum.volume_db = -10.0
 	add_child(hum)
 	hum.finished.connect(_hum_again.bind(hum))
@@ -238,8 +237,8 @@ func _sounds() -> void:
 	print("[sounds] horns")
 	var bell: AudioStream = _bell.stream
 	_horn_sounds = {
-		"cng": load("res://sounds/horn_cng.wav"),
-		"bus": load("res://sounds/horn_bus.wav"),
+		"cng": Sfx.stream("horn_cng"),
+		"bus": Sfx.stream("horn_bus"),
 		"rickshaw": bell,
 		"rickshaw_full": bell,
 	}
@@ -248,17 +247,24 @@ func _sounds() -> void:
 		add_child(h)
 		_horns.append(h)
 	_whistle = AudioStreamPlayer.new()
-	_whistle.stream = load("res://sounds/whistle.wav")
+	_whistle.stream = Sfx.stream("whistle")
 	add_child(_whistle)
 	_rain_sound = AudioStreamPlayer.new()
-	_rain_sound.stream = load("res://sounds/rain.wav")
+	_rain_sound.stream = Sfx.stream("rain")
 	_rain_sound.volume_db = -60.0
 	add_child(_rain_sound)
 	_rain_sound.finished.connect(_rain_again)
 	_coin = AudioStreamPlayer.new()
-	_coin.stream = load("res://sounds/coin.wav")
+	_coin.stream = Sfx.stream("coin")
 	_coin.volume_db = -4.0
 	add_child(_coin)
+	_voice = Voice.new()
+	add_child(_voice)
+	# Music softly under the street: the rickshaw's tune, or a festival's.
+	var tune := Music.new()
+	tune.track = "tune_rickshaw" if shift.festival.is_empty() else "tune_festival"
+	tune.volume_db = -18.0
+	add_child(tune)
 
 
 func _rain_again() -> void:
@@ -556,11 +562,17 @@ func _handle(events: Array) -> void:
 			strings.t("offerTitle", {"place": RoadMap.place_name(w.place, strings.lang), "fare": w.offer}),
 			_who(w),
 			strings.t("counter", {"fare": shift.fares.counter(w.fair)}))
+		# The passenger calls out, in the way of their kind.
+		_voice.say("hail_" + str(w.get("type", "normal")), true)
 	if events.has(Day.OFFER_GONE):
 		hud.hide_offer()
 	if events.has(Day.DELIVERED):
 		_coin.play()
 		var t: Dictionary = shift.last_trip
+		if float(t.stars) >= 4.0:
+			_voice.say("thanks", true)
+		elif float(t.stars) < 3.0:
+			_voice.say("grumble", true)
 		var tip_text := strings.t("tipText", {"tip": t.tip}) if t.tip > 0 else ""
 		var said := strings.t("delivered", {"fare": t.fare, "tip": tip_text, "stars": _stars(t.stars)})
 		if t.get("thanks", false):
@@ -574,6 +586,7 @@ func _handle(events: Array) -> void:
 		_say(strings.t("redLight", {"fine": int(shift.balance.n("rickshaw.red_light_fine"))}), Look.VERMILION, 3.0)
 	if events.has(Day.POLICE):
 		_say(strings.t("police", {"fine": int(shift.balance.n("rickshaw.wrong_way_fine"))}), Look.VERMILION, shift.held)
+		_voice.say("police", true)
 		_stop_by_police()
 	if events.has(Day.TEA_NEAR):
 		hud.show_tea(true, int(shift.balance.n("rickshaw.tea_cost")))
@@ -584,6 +597,8 @@ func _handle(events: Array) -> void:
 	if events.has(Day.RAIN_START):
 		_say(strings.t("rainStart"), Look.SKY, 3.5)
 		_rain_sound.play()
+		if not shift.riding.is_empty():
+			_voice.say("rain")
 	if events.has(Day.RAIN_END):
 		_say(strings.t("rainEnd"), Look.SKY, 2.5)
 	if events.has(Day.DAY_OVER):
@@ -698,13 +713,17 @@ static func _stars(x: float) -> String:
 
 func _on_accept() -> void:
 	shift.accept()
+	_voice.say("board")
 	_boarded()
 
 
 func _on_counter() -> void:
+	_voice.say("rahim_counter", true)
 	if shift.counter():
+		_voice.say("counter_yes")
 		_boarded()
 	else:
+		_voice.say("counter_no")
 		hud.hide_offer()
 		_say(strings.t("counterNo"), Look.VERMILION, 2.5)
 		_place_marker()

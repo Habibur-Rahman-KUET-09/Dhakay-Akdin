@@ -1,0 +1,46 @@
+name: voices
+
+# The spoken lines (Azure's Bangla voices): made from content/voices.json and the story, kept in game/voices/.
+# Runs when its inputs change, or by hand; commits what it made, then
+# starts a game build so the APK has it.
+on:
+  push:
+    branches: [main]
+    paths: [game/content/voices.json, game/content/story.json, tool/make_voices.py, .github/workflows/voices.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: media
+  cancel-in-progress: false
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Make
+        env:
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
+        run: python3 tool/make_voices.py
+      - name: Commit and build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/voices 2>/dev/null || true
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "Voices: new and changed lines"
+          git pull --rebase origin main
+          git push
+          # A push from here starts no workflow by itself: ask for the build.
+          gh workflow run game.yml --ref main

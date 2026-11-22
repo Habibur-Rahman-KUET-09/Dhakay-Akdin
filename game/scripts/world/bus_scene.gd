@@ -11,6 +11,9 @@ const Balance = preload("res://scripts/rules/balance.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
+const Sfx = preload("res://scripts/ui/sfx.gd")
+const Voice = preload("res://scripts/ui/voice.gd")
+const Music = preload("res://scripts/ui/music.gd")
 const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
@@ -73,6 +76,8 @@ var _giving := {}
 var _thump: AudioStreamPlayer
 var _ding: AudioStreamPlayer
 var _coin: AudioStreamPlayer
+## Babu calling the stops, passengers, the checker.
+var _voice: Voice
 var _frames_logged := 0
 ## Where each rider is drawn: their seat number, so a move is noticed.
 var _spot_of := {}
@@ -309,22 +314,28 @@ func _tiled(texture: Texture2D, scale: Vector2) -> StandardMaterial3D:
 
 func _sounds() -> void:
 	var hum := AudioStreamPlayer.new()
-	hum.stream = load("res://sounds/hum.wav")
+	hum.stream = Sfx.stream("bus_inside", "hum")
 	hum.volume_db = -6.0
 	add_child(hum)
 	hum.finished.connect(hum.play)
 	hum.play()
 	_thump = AudioStreamPlayer.new()
-	_thump.stream = load("res://sounds/thump.wav")
+	_thump.stream = Sfx.stream("thump")
 	add_child(_thump)
 	_ding = AudioStreamPlayer.new()
-	_ding.stream = load("res://sounds/bell.wav")
+	_ding.stream = Sfx.stream("bell")
 	_ding.volume_db = -10.0
 	add_child(_ding)
 	_coin = AudioStreamPlayer.new()
-	_coin.stream = load("res://sounds/coin.wav")
+	_coin.stream = Sfx.stream("coin")
 	_coin.volume_db = -6.0
 	add_child(_coin)
+	_voice = Voice.new()
+	add_child(_voice)
+	var tune := Music.new()
+	tune.track = "tune_bus"
+	tune.volume_db = -20.0
+	add_child(tune)
 
 
 func _stop_name(i: int) -> String:
@@ -625,6 +636,8 @@ func _handle(events: Array) -> void:
 		var off := events.count(BusDay.Event.ALIGHTED)
 		var on := events.count(BusDay.Event.BOARDED)
 		_say(strings.t("atStop", {"stop": _stop_name(bus.stop_i), "on": on, "off": off}), Look.SKY, 2.5)
+		if on > 0:
+			_voice.say("bus_board")
 		_sync_people()
 	if events.has(BusDay.Event.SLIPPED):
 		_say(strings.t("slipped", {"n": events.count(BusDay.Event.SLIPPED)}), Look.VERMILION, 3.0)
@@ -634,10 +647,12 @@ func _handle(events: Array) -> void:
 		_sync_people()
 	if events.has(BusDay.Event.AT_DOOR):
 		_say(strings.t("atDoor"), Look.VERMILION, 2.5)
+		_voice.say("bus_door")
 		_sync_people()
 	if events.has(BusDay.Event.CHECKER):
 		_checker.visible = true
 		_checker_left = 4.0
+		_voice.say("checker", true)
 		if bus.last_fine > 0:
 			_say(strings.t("checkerFine", {"n": bus.last_fine}), Look.VERMILION, 4.0)
 		else:
@@ -663,6 +678,7 @@ func _on_fix(problem: String) -> void:
 func _on_catch() -> void:
 	if bus.catch().has(BusDay.Event.CAUGHT):
 		_ding.play()
+		_voice.say("bus_caught", true)
 		_say(strings.t("caught"), Look.PARROT, 2.0)
 		_sync_people()
 	_refresh()
@@ -672,6 +688,8 @@ func _on_call() -> void:
 	if bus.call_stop().has(BusDay.Event.CALLED):
 		_call_box.visible = false
 		_thump.play()
+		# Babu shouts the stop's name.
+		_voice.say("stop_" + bus.stop_id(bus.stop_i + 1), true)
 		var stop := _stop_name(bus.stop_i + 1)
 		var shout := "%s! %s! %s!" % [stop, stop, stop]
 		var result := strings.t("call_" + bus.last_call)
@@ -684,6 +702,9 @@ func _on_next_fare() -> void:
 	if waiting.is_empty():
 		return
 	_open_fare(int(waiting[0].id))
+	# Now and then the passenger has something to say about it.
+	if randf() < 0.35:
+		_voice.say("bus_fare")
 
 
 func _open_fare(id: int) -> void:
@@ -731,6 +752,7 @@ func _on_give() -> void:
 	var got := bus.give(_giving)
 	if got.has(BusDay.Event.ARGUMENT):
 		_say(strings.t("argument"), Look.VERMILION, float(b.n("bus.argument_s")))
+		_voice.say("bus_argument", true)
 		_giving = {}
 	elif got.has(BusDay.Event.OVERPAID):
 		_say(strings.t("overpaid", {"n": bus.overpaid}), Look.VERMILION, 2.5)

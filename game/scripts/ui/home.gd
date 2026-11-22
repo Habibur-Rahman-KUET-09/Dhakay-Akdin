@@ -19,6 +19,8 @@ const StoryPlayer = preload("res://scripts/ui/story_player.gd")
 const Cloud = preload("res://scripts/ui/cloud.gd")
 const Calendar = preload("res://scripts/rules/calendar.gd")
 const Music = preload("res://scripts/ui/music.gd")
+const Voice = preload("res://scripts/ui/voice.gd")
+const Sfx = preload("res://scripts/ui/sfx.gd")
 
 var s := Strings.new()
 var b := Balance.new()
@@ -422,7 +424,14 @@ func _settings() -> void:
 	rows.append(lang_row)
 	rows.append(_graphics_row())
 	rows.append(_music_row())
+	rows.append(_voices_row())
 	rows.append(_cloud_card())
+	# Who recorded the street sounds (their licences ask to be named).
+	var credits := Sfx.credits()
+	if not credits.is_empty():
+		rows.append(Look.label(s.t("soundCredits"), 14, true))
+		for line in credits:
+			rows.append(Look.label(line, 12, false, Color("6B6259")))
 	_overlay(s.t("settings"), rows, _close_settings)
 
 
@@ -849,6 +858,29 @@ func _music_row() -> Control:
 		pick.pressed.connect(_set_music.bind(value))
 		row.add_child(pick)
 	return row
+
+
+## Voices (passengers, customers, the story) on or off.
+func _voices_row() -> Control:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 8)
+	var title := Look.label(s.t("voices"), 15, true)
+	title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(title)
+	for value in [true, false]:
+		var picked: bool = Voice.wanted() == value
+		var pick := Look.button(s.t("musicOn" if value else "musicOff"), Look.MAGENTA if picked else Color("B9B2A6"), 15)
+		pick.name = "Voices_" + ("on" if value else "off")
+		pick.pressed.connect(_set_voices.bind(value))
+		row.add_child(pick)
+	return row
+
+
+func _set_voices(value: bool) -> void:
+	Voice.save_wanted(value)
+	_build()
 
 
 func _set_music(value: bool) -> void:

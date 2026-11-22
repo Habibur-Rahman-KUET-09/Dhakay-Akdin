@@ -1,9 +1,14 @@
-## The game's tune (sounds/tune.wav, an original folk-style loop made by
-## tool/make_sounds.py), played over and over while it is wanted. Whether
-## the player wants it is kept in the settings file.
+## The game's music: original folk-style loops made by
+## tool/make_sounds.py (sounds/tune*.ogg), one for the home screen and one
+## for each place, played over and over while music is wanted. Whether the
+## player wants it is kept in the settings file.
 extends AudioStreamPlayer
 
 const SETTINGS := "user://settings.cfg"
+
+## Which tune: "tune" (home), "tune_rickshaw", "tune_tea", "tune_bus",
+## "tune_festival". Set before the player is added.
+var track := "tune"
 
 
 static func wanted() -> bool:
@@ -21,7 +26,7 @@ static func save_wanted(value: bool) -> void:
 
 
 func _ready() -> void:
-	stream = load("res://sounds/tune.wav")
+	stream = load("res://sounds/%s.ogg" % track)
 	finished.connect(_again)
 	if wanted():
 		play()
