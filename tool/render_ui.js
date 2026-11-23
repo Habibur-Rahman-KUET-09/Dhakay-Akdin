@@ -1,11 +1,11 @@
-// Draws the menu art (game/textures/ui/*.svg) as PNG files beside it, which
-// the game reads at run time: PNG decodes on every build of Godot, SVG only
-// where the export templates carry the SVG module.
+// Draws the menu art (tool/ui_art/*.svg) as PNG files in game/textures/ui/,
+// which Godot imports as textures for the menus.
 //   node tool/render_ui.js      (needs Playwright with Chromium)
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
+const SRC = path.join(__dirname, 'ui_art');
 const DIR = path.join(__dirname, '..', 'game', 'textures', 'ui');
 // Width in pixels to draw at; icons at 128 are scaled down in the game.
 const WIDTH = { mohalla: 1080, title_art: 1080, bunting: 1080, band: 104, rahim: 256, monir: 256, babu: 256 };
@@ -13,9 +13,9 @@ const WIDTH = { mohalla: 1080, title_art: 1080, bunting: 1080, band: 104, rahim:
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage();
-  for (const file of fs.readdirSync(DIR).filter((f) => f.endsWith('.svg')).sort()) {
+  for (const file of fs.readdirSync(SRC).filter((f) => f.endsWith('.svg')).sort()) {
     const name = file.slice(0, -4);
-    const svg = fs.readFileSync(path.join(DIR, file), 'utf8');
+    const svg = fs.readFileSync(path.join(SRC, file), 'utf8');
     const w0 = Number(/width="(\d+)"/.exec(svg)[1]);
     const h0 = Number(/height="(\d+)"/.exec(svg)[1]);
     const w = WIDTH[name] || 128;

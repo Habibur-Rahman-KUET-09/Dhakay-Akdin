@@ -70,19 +70,21 @@ const DISPLAY := "res://fonts/Galada-Regular.ttf"
 static var _icons := {}
 
 
-## An icon from textures/ui/ (drawn from the SVGs there by
-## tool/render_ui.js, kept as PNG so every build can read it), made `px`
-## wide at `density` pixels each (twice over for sharp phone screens).
-## Line icons are white: tint them with modulate.
+## An icon from textures/ui/ (PNG, drawn from tool/ui_art/ by
+## tool/render_ui.js and imported by Godot), made `px` wide at `density`
+## pixels each (twice over for sharp phone screens). Line icons are white:
+## tint them with modulate.
 static func icon_texture(name: String, px := 32, density := 2.0) -> Texture2D:
 	var key := "%s@%d@%.1f" % [name, px, density]
 	if _icons.has(key):
 		return _icons[key]
-	var img := Image.new()
-	var bytes := FileAccess.get_file_as_bytes("res://textures/ui/%s.png" % name)
-	if bytes.is_empty() or img.load_png_from_buffer(bytes) != OK:
+	var source := load("res://textures/ui/%s.png" % name) as Texture2D
+	var img: Image = source.get_image() if source != null else null
+	if img == null:
 		push_error("icon %s missing" % name)
 		img = Image.create(4, 4, false, Image.FORMAT_RGBA8)
+	if img.is_compressed():
+		img.decompress()
 	var w := maxi(1, int(round(px * density)))
 	if w < img.get_width():
 		img.resize(w, maxi(1, int(round(img.get_height() * float(w) / img.get_width()))), Image.INTERPOLATE_LANCZOS)
