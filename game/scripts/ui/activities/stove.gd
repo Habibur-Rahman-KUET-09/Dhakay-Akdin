@@ -1,5 +1,6 @@
-## The clay stove while the kettle fills: swipe to and fro to fan it (or
-## blow into the phone's microphone, if allowed) and it fills sooner.
+## The clay stove while the kettle fills: swipe to and fro to fan it and
+## it fills sooner. (Blowing into the microphone was taken out: the
+## microphone on Android was a suspect in a crash.)
 extends "res://scripts/ui/activity.gd"
 
 ## Fans the fire: seconds sooner (TeaDay.fan); and how full the kettle is
@@ -11,27 +12,14 @@ var _last_x := INF
 var _dir := 0
 var _travel := 0.0
 var _glow := 0.0
-var _mic: AudioStreamPlayer
-var _capture: AudioEffectCapture
 
 
 func _build() -> void:
 	slow = false
-	add_button("blowMic", Look.SKY, _start_mic)
 
 
 func _tick(dt: float) -> void:
 	_glow = maxf(0.0, _glow - dt * 1.5)
-	if _capture != null:
-		var n := _capture.get_frames_available()
-		if n > 0:
-			var buf := _capture.get_buffer(n)
-			var sum := 0.0
-			for v in buf:
-				sum += v.x * v.x
-			if sqrt(sum / n) > 0.08:
-				on_fan.call(dt * 2.5)
-				_glow = 1.0
 	if filled.is_valid() and float(filled.call()) >= 1.0:
 		finish(1.0)
 	elif t > 15.0:
@@ -56,34 +44,6 @@ func _touch(e) -> void:
 			_dir = d
 			_travel = 0.0
 		_travel += absf(dx)
-
-
-## Blowing instead of fanning: the microphone, through a quiet bus that
-## only measures how loud it is.
-func _start_mic() -> void:
-	if _mic != null:
-		return
-	if OS.get_name() == "Android":
-		OS.request_permissions()
-	var idx := AudioServer.get_bus_index("Blow")
-	if idx < 0:
-		AudioServer.add_bus()
-		idx = AudioServer.bus_count - 1
-		AudioServer.set_bus_name(idx, "Blow")
-		AudioServer.add_bus_effect(idx, AudioEffectCapture.new())
-		AudioServer.set_bus_volume_db(idx, -80.0)
-	_capture = AudioServer.get_bus_effect(idx, 0) as AudioEffectCapture
-	_mic = AudioStreamPlayer.new()
-	_mic.stream = AudioStreamMicrophone.new()
-	_mic.bus = "Blow"
-	add_child(_mic)
-	_mic.play()
-	set_hint(s.t("blowHint"))
-
-
-func _exit_tree() -> void:
-	if _mic != null:
-		_mic.stop()
 
 
 func _paint(c: Control) -> void:

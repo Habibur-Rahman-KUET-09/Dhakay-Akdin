@@ -24,7 +24,7 @@ window/handheld/orientation=1
 
 [audio]
 
-driver/enable_input=true
+driver/enable_input=false
 
 [debug]
 
