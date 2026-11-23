@@ -601,6 +601,7 @@ func _tea_ready() -> bool:
 
 
 func _open(act: Activity, key: String, then: Callable) -> void:
+	print("[tea] hands: ", key)
 	act.setup(strings, key, key + "_hint")
 	act.done.connect(then)
 	act.tree_exited.connect(_closed)
@@ -827,3 +828,17 @@ func _again() -> void:
 func _go_home() -> void:
 	CrashWatch.stop()
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
+
+
+## Leaving the app, or Android pausing it, goes in the log: the crash
+## report then tells a closed game from one that died.
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_PAUSED:
+			print("[app] paused ", Time.get_ticks_msec(), " ms")
+		NOTIFICATION_APPLICATION_RESUMED:
+			print("[app] resumed ", Time.get_ticks_msec(), " ms")
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			print("[app] closing ", Time.get_ticks_msec(), " ms")
+		NOTIFICATION_WM_GO_BACK_REQUEST:
+			print("[app] back button ", Time.get_ticks_msec(), " ms")

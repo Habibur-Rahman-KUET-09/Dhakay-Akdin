@@ -91,6 +91,7 @@ var _slap_button: Button
 var _slaps: Array = []
 var _notes_button: Button
 var _frames_logged := 0
+var _alive_left := 10.0
 ## Where each rider is drawn: their seat number, so a move is noticed.
 var _spot_of := {}
 var _problem_row: HBoxContainer
@@ -623,6 +624,10 @@ func _process(dt: float) -> void:
 	if _frames_logged < 5:
 		_frames_logged += 1
 		print("[frame] ", _frames_logged, " ", Time.get_ticks_msec(), " ms")
+	_alive_left -= dt
+	if _alive_left <= 0.0:
+		_alive_left = 10.0
+		print("[alive] ", Time.get_ticks_msec(), " ms, ", Engine.get_frames_per_second(), " fps")
 	# A hand activity open: the bus's clock runs slower meanwhile.
 	var pace := 0.35 if _activity != null and _activity.slow else 1.0
 	var events := bus.update(dt * pace)
@@ -708,6 +713,7 @@ func _handle(events: Array) -> void:
 
 
 func _open(act: Activity, key: String, then: Callable) -> void:
+	print("[bus] hands: ", key)
 	act.setup(strings, key, key + "_hint")
 	act.done.connect(then)
 	act.tree_exited.connect(_closed)
@@ -951,6 +957,7 @@ func _draw_call() -> void:
 
 
 func _end_trip() -> void:
+	print("[bus] day over ", Time.get_ticks_msec(), " ms")
 	set_process(false)
 	_call_box.visible = false
 	_fare_box.visible = false
@@ -995,3 +1002,17 @@ func _again() -> void:
 func _go_home() -> void:
 	CrashWatch.stop()
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
+
+
+## Leaving the app, or Android pausing it, goes in the log: the crash
+## report then tells a closed game from one that died.
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_PAUSED:
+			print("[app] paused ", Time.get_ticks_msec(), " ms")
+		NOTIFICATION_APPLICATION_RESUMED:
+			print("[app] resumed ", Time.get_ticks_msec(), " ms")
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			print("[app] closing ", Time.get_ticks_msec(), " ms")
+		NOTIFICATION_WM_GO_BACK_REQUEST:
+			print("[app] back button ", Time.get_ticks_msec(), " ms")

@@ -37,6 +37,7 @@ func setup(strings: Strings, balance: Balance, save: Progress, gained: Dictionar
 func _ready() -> void:
 	# Already in the tree here: anchors alone would keep today's (empty) size.
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	print("[day end] shown")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg := ColorRect.new()
 	bg.color = NIGHT

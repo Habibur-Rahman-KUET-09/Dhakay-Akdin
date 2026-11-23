@@ -780,6 +780,7 @@ func _haggled(_score: float, act: Haggle) -> void:
 
 
 func _open(act: Activity, key: String, then: Callable) -> void:
+	print("[rickshaw] hands: ", key)
 	act.setup(strings, key, key + "_hint")
 	act.done.connect(then)
 	act.tree_exited.connect(func(): _activity = null)
@@ -1049,3 +1050,17 @@ func _turn(t: int) -> void:
 		_say(strings.t("rickshawWrongWay"), Look.VERMILION)
 	elif _notice_left > 1e6 and shift.driver.moving:
 		_notice = ""
+
+
+## Leaving the app, or Android pausing it, goes in the log: the crash
+## report then tells a closed game from one that died.
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_PAUSED:
+			print("[app] paused ", Time.get_ticks_msec(), " ms")
+		NOTIFICATION_APPLICATION_RESUMED:
+			print("[app] resumed ", Time.get_ticks_msec(), " ms")
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			print("[app] closing ", Time.get_ticks_msec(), " ms")
+		NOTIFICATION_WM_GO_BACK_REQUEST:
+			print("[app] back button ", Time.get_ticks_msec(), " ms")
