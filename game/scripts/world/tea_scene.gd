@@ -487,7 +487,9 @@ func _process(dt: float) -> void:
 	_alive_left -= dt
 	if _alive_left <= 0.0:
 		_alive_left = 10.0
-		print("[alive] ", Time.get_ticks_msec(), " ms, ", Engine.get_frames_per_second(), " fps")
+		print("[alive] %d ms, %d fps, mem %.0f MB, video %.0f MB, nodes %d, objects %d" % [Time.get_ticks_msec(), Engine.get_frames_per_second(),
+			Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+			Performance.get_monitor(Performance.OBJECT_NODE_COUNT), Performance.get_monitor(Performance.OBJECT_COUNT)])
 	# A hand activity open: the stall's clock runs slower meanwhile.
 	var pace := 0.35 if _activity != null and _activity.slow else 1.0
 	var events := day.update(dt * pace)

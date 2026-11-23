@@ -627,7 +627,9 @@ func _process(dt: float) -> void:
 	_alive_left -= dt
 	if _alive_left <= 0.0:
 		_alive_left = 10.0
-		print("[alive] ", Time.get_ticks_msec(), " ms, ", Engine.get_frames_per_second(), " fps")
+		print("[alive] %d ms, %d fps, mem %.0f MB, video %.0f MB, nodes %d, objects %d" % [Time.get_ticks_msec(), Engine.get_frames_per_second(),
+			Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+			Performance.get_monitor(Performance.OBJECT_NODE_COUNT), Performance.get_monitor(Performance.OBJECT_COUNT)])
 	# A hand activity open: the bus's clock runs slower meanwhile.
 	var pace := 0.35 if _activity != null and _activity.slow else 1.0
 	var events := bus.update(dt * pace)
@@ -670,6 +672,7 @@ func _handle(events: Array) -> void:
 		_stop_label.text = _stop_name(bus.stop_i)
 		var off := events.count(BusDay.Event.ALIGHTED)
 		var on := events.count(BusDay.Event.BOARDED)
+		print("[bus] stop %d of %d, trip %d: %d off, %d on, %d riders" % [bus.stop_i, bus.route.size() - 1, bus.trip, off, on, bus.riders.size()])
 		_say(strings.t("atStop", {"stop": _stop_name(bus.stop_i), "on": on, "off": off}), Look.SKY, 2.5)
 		if on > 0:
 			_voice.say("bus_board")
@@ -704,6 +707,7 @@ func _handle(events: Array) -> void:
 	if events.has(BusDay.Event.DAY_OVER):
 		_end_trip()
 	elif events.has(BusDay.Event.TRIP_OVER):
+		print("[bus] trip over")
 		# The way back: the route turns round.
 		_say(strings.t("tripBack", {"stop": _stop_name(bus.route.size() - 1)}), Look.SKY, 4.0)
 		_stop_label.text = _stop_name(0)
