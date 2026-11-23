@@ -70,22 +70,22 @@ const DISPLAY := "res://fonts/Galada-Regular.ttf"
 static var _icons := {}
 
 
-## An icon from textures/ui/ (SVG, drawn at the size asked for, twice over
-## for sharp phone screens). Line icons are white: tint them with modulate.
-static func icon_texture(name: String, px := 32) -> Texture2D:
-	var key := "%s@%d" % [name, px]
+## An icon from textures/ui/ (drawn from the SVGs there by
+## tool/render_ui.js, kept as PNG so every build can read it), made `px`
+## wide at `density` pixels each (twice over for sharp phone screens).
+## Line icons are white: tint them with modulate.
+static func icon_texture(name: String, px := 32, density := 2.0) -> Texture2D:
+	var key := "%s@%d@%.1f" % [name, px, density]
 	if _icons.has(key):
 		return _icons[key]
 	var img := Image.new()
-	var bytes := FileAccess.get_file_as_bytes("res://textures/ui/%s.svg" % name)
-	var natural := 64.0
-	var head := bytes.get_string_from_utf8().substr(0, 160)
-	var m := RegEx.create_from_string("width=\"(\\d+)\"").search(head)
-	if m:
-		natural = float(m.get_string(1))
-	if bytes.is_empty() or img.load_svg_from_buffer(bytes, px * 2.0 / natural) != OK:
+	var bytes := FileAccess.get_file_as_bytes("res://textures/ui/%s.png" % name)
+	if bytes.is_empty() or img.load_png_from_buffer(bytes) != OK:
 		push_error("icon %s missing" % name)
 		img = Image.create(4, 4, false, Image.FORMAT_RGBA8)
+	var w := maxi(1, int(round(px * density)))
+	if w < img.get_width():
+		img.resize(w, maxi(1, int(round(img.get_height() * float(w) / img.get_width()))), Image.INTERPOLATE_LANCZOS)
 	var tex := ImageTexture.create_from_image(img)
 	_icons[key] = tex
 	return tex
@@ -217,8 +217,8 @@ static func bar(value: int, goal: int, colour: Color, height := 16) -> ProgressB
 ## A painted strip of diamonds, as along a rickshaw's hood.
 static func band(height := 22) -> TextureRect:
 	var r := TextureRect.new()
-	# The tile is 26 x 22 at 2x: drawn as is, so load it at the band's height.
-	r.texture = icon_texture("band", int(round(height * 52.0 / 88.0)))
+	# Tiles are drawn as they are: one pixel each, as tall as the band.
+	r.texture = icon_texture("band", int(round(height * 104.0 / 88.0)), 1.0)
 	r.stretch_mode = TextureRect.STRETCH_TILE
 	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	r.custom_minimum_size = Vector2(0, height)
@@ -231,3 +231,17 @@ static func band(height := 22) -> TextureRect:
 static func true_colours(b: Button) -> void:
 	for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
 		b.add_theme_color_override(state, Color.WHITE)
+
+
+## Room to leave at the top and bottom of a full screen (x: top, y:
+## bottom), in the viewport's pixels: the phone's notch and gesture bar,
+## if it reports them, plus a little air either way.
+static func safe_insets(vp: Viewport, air := Vector2(18, 14)) -> Vector2:
+	var out := air
+	var win := DisplayServer.window_get_size()
+	var safe := DisplayServer.get_display_safe_area()
+	if win.y > 0 and safe.size.y > 0:
+		var k := vp.get_visible_rect().size.y / float(win.y)
+		out.x += clampf(safe.position.y * k, 0.0, 80.0)
+		out.y += clampf((win.y - safe.end.y) * k, 0.0, 80.0)
+	return out

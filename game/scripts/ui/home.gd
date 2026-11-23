@@ -136,8 +136,11 @@ func _close_sheet() -> void:
 
 
 func _title_page() -> void:
+	var room := Look.safe_insets(get_viewport())
 	var col := VBoxContainer.new()
 	col.set_anchors_preset(Control.PRESET_FULL_RECT)
+	col.offset_top = room.x
+	col.offset_bottom = -room.y
 	col.add_theme_constant_override("separation", 0)
 	add_child(col)
 	col.add_child(Look.band(24))
@@ -249,7 +252,7 @@ func _top_bar() -> Control:
 	style.border_width_bottom = 3
 	style.content_margin_left = 12
 	style.content_margin_right = 12
-	style.content_margin_top = 12
+	style.content_margin_top = 4 + Look.safe_insets(get_viewport()).x
 	style.content_margin_bottom = 10
 	panel.add_theme_stylebox_override("panel", style)
 	var row := HBoxContainer.new()
@@ -320,7 +323,7 @@ func _nav() -> Control:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Look.OUTLINE
 	style.content_margin_top = 8
-	style.content_margin_bottom = 12
+	style.content_margin_bottom = 4 + Look.safe_insets(get_viewport()).y
 	style.content_margin_left = 4
 	style.content_margin_right = 4
 	panel.add_theme_stylebox_override("panel", style)
@@ -713,10 +716,10 @@ func _start_sheet(who: String) -> void:
 	style.content_margin_left = 18
 	style.content_margin_right = 18
 	style.content_margin_top = 18
-	style.content_margin_bottom = 18
+	style.content_margin_bottom = 4 + Look.safe_insets(get_viewport()).y
 	panel.add_theme_stylebox_override("panel", style)
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	panel.offset_top = 90
+	panel.offset_top = 80 + Look.safe_insets(get_viewport()).x
 	shade.add_child(panel)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 14)
@@ -1540,8 +1543,9 @@ func _overlay(title: String, rows: Array, on_close := Callable()) -> void:
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel.offset_left = 14
 	panel.offset_right = -14
-	panel.offset_top = 36
-	panel.offset_bottom = -36
+	var room := Look.safe_insets(get_viewport())
+	panel.offset_top = 18 + room.x
+	panel.offset_bottom = -(18 + room.y)
 	shade.add_child(panel)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 12)

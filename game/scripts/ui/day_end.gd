@@ -56,7 +56,8 @@ func _ready() -> void:
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for side in ["left", "right"]:
 		margin.add_theme_constant_override("margin_" + side, 16)
-	margin.add_theme_constant_override("margin_top", 26)
+	var room := Look.safe_insets(get_viewport())
+	margin.add_theme_constant_override("margin_top", 8 + room.x)
 	margin.add_theme_constant_override("margin_bottom", 12)
 	scroll.add_child(margin)
 	var page := VBoxContainer.new()
@@ -77,7 +78,7 @@ func _ready() -> void:
 	for side in ["left", "right"]:
 		pad.add_theme_constant_override("margin_" + side, 16)
 	pad.add_theme_constant_override("margin_top", 8)
-	pad.add_theme_constant_override("margin_bottom", 18)
+	pad.add_theme_constant_override("margin_bottom", 4 + room.y)
 	pad.add_child(buttons)
 	col.add_child(pad)
 	var home := Look.chunky(s.t("toMohalla"), Look.YELLOW, Look.OUTLINE, 24, 7, 22)
