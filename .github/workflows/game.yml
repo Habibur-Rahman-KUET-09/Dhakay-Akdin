@@ -18,6 +18,8 @@ concurrency:
 env:
   GODOT: 4.5.1-stable
   GODOT_TEMPLATES: 4.5.1.stable
+  # Whether the web build can go to Firebase Hosting (a service account key).
+  HAS_HOSTING: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
 
 jobs:
   build:
@@ -156,6 +158,27 @@ jobs:
             cp "build/PranerDhaka-$v-$abi.apk" dist/
           done
           ls -la dist
+
+      # The same game for a browser, on Firebase Hosting (<project>.web.app)
+      # when the repository has a service account key for it.
+      - name: Web
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p build/web
+          set -o pipefail
+          godot --headless --path game --export-release "Web" "$PWD/build/web/index.html" 2>&1 | tee export-web.log
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" export-web.log; then exit 1; fi
+          test -s build/web/index.html && test -s build/web/index.wasm && test -s build/web/index.pck
+          ls -la build/web
+
+      - name: Firebase Hosting
+        if: github.event_name != 'pull_request' && env.HAS_HOSTING == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          channelId: live
 
       - uses: softprops/action-gh-release@v2
         if: github.event_name != 'pull_request'
