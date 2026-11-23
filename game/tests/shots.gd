@@ -117,6 +117,28 @@ func _run() -> void:
 	_save("6-bus")
 	bus.queue_free()
 	await _frames(2)
+	# A whole day on the bus, ten times as fast, to its end screen: a
+	# Pixel 8 Pro died near the end of one. A day that never ends, or a
+	# crash, fails the run.
+	Engine.time_scale = 10.0
+	bus = load("res://scenes/bus.tscn").instantiate()
+	root.add_child(bus)
+	var started := Time.get_ticks_msec()
+	var ended := false
+	while Time.get_ticks_msec() - started < 150000:
+		await process_frame
+		if bus.bus.over:
+			ended = true
+			break
+	Engine.time_scale = 1.0
+	print("[shots] bus day over: %s after %.1f s" % [ended, (Time.get_ticks_msec() - started) / 1000.0])
+	await _frames(10)
+	_save("6b-bus-day-end")
+	if not ended:
+		quit(1)
+		return
+	bus.queue_free()
+	await _frames(2)
 	# A story chapter: Rahim Chacha's first day.
 	var strings = load("res://scripts/ui/strings.gd").new()
 	strings.lang = "bn"
