@@ -26,6 +26,7 @@ const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
 const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
+const DayEnd = preload("res://scripts/ui/day_end.gd")
 
 ## How fast the street goes by, metres a second, between stops.
 const SPEED := 9.0
@@ -960,10 +961,7 @@ func _end_trip() -> void:
 	# And a copy online, if this build has it (not waited for).
 	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
 	CrashWatch.stop()
-	var lines := [
-		strings.t("earned", {"money": earned}),
-		strings.t("busRiders", {"n": bus.boarded}),
-	]
+	var lines := [strings.t("busRiders", {"n": bus.boarded})]
 	if bus.bonus > 0:
 		lines.append(strings.t("onTime", {"n": bus.bonus}))
 	if bus.slipped > 0:
@@ -976,48 +974,17 @@ func _end_trip() -> void:
 		lines.append(strings.t("busCaught", {"n": bus.caught}))
 	if bus.fines > 0:
 		lines.append(strings.t("busFines", {"n": bus.fines}))
-	lines.append(strings.t("busRatingLine", {"stars": "%.1f" % bus.rating}))
-	lines.append_array(DayLines.lines(got, strings))
-	lines.append(strings.t("teaKept", {"n": got.kept}))
-	lines.append(strings.t("gainFund", {"n": got.fund}))
-	lines.append(strings.t("gainXp", {"n": got.xp}))
-	if got.level_up:
-		lines.append(strings.t("levelUp", {"level": progress.level()}))
-	if got.best:
-		lines.append(strings.t("newBest"))
-	if got.project != "":
-		lines.append(strings.t("projectFinished", {"project": strings.t("project_" + got.project)}))
-	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.45)
-	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_layer.add_child(shade)
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", Look.card(Look.CREAM, 18, 3))
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	panel.custom_minimum_size = Vector2(400, 0)
-	shade.add_child(panel)
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 8)
-	panel.add_child(col)
-	var title := Look.label(strings.t("busDayOver"), 26, true)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(title)
-	for line in lines:
-		var l := Look.label(line, 17)
-		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		col.add_child(l)
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 10)
-	var again := Look.button(strings.t("nextDay"), Look.MAGENTA, 18)
-	again.pressed.connect(_again)
-	row.add_child(again)
-	var home := Look.button(strings.t("toMohalla"), Look.PARROT, 18)
-	home.pressed.connect(_go_home)
-	row.add_child(home)
-	col.add_child(row)
+	var end := DayEnd.new()
+	end.setup(strings, b, progress, got, {
+		"title": strings.t("busDayOver"),
+		"stars": bus.rating,
+		"sub": strings.t("busRatingLine", {"stars": "%.1f" % bus.rating}),
+		"money": earned,
+		"lines": lines,
+	})
+	end.home_pressed.connect(_go_home)
+	end.again_pressed.connect(_again)
+	_layer.add_child(end)
 
 
 func _again() -> void:

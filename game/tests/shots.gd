@@ -16,20 +16,70 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	# A few days in, so the menus have numbers in them.
+	var Balance = load("res://scripts/rules/balance.gd")
+	var Progress = load("res://scripts/rules/progress.gd")
+	var start_save = Progress.new(Balance.new())
+	start_save.data.day = 12
+	start_save.data.taka = 2450
+	start_save.data.tara = 34
+	start_save.data.streak.count = 5
+	start_save.data.mohalla.level = 3
+	start_save.data.mohalla.xp = 60
+	start_save.data.fund = 1640
+	start_save.data.rickshaw.school = 1850
+	start_save.data.tea.upgrades = ["bench"]
+	start_save.data.history = [
+		{"day": 11, "who": "rickshaw", "earned": 640, "trips": 9, "stars": 4.2, "met": true},
+		{"day": 10, "who": "tea", "earned": 410, "served": 22, "met": false},
+	]
+	start_save.save()
 	var home = load("res://scenes/main.tscn").instantiate()
 	root.add_child(home)
 	await _frames(20)
+	_save("0-title")
+	home.enter()
+	await _frames(5)
 	_save("1-home")
-	# The bottom of the page, then the settings over it.
+	# The bottom of the page, then each page and sheet.
 	var scroll: ScrollContainer = home.find_children("*", "ScrollContainer", true, false)[0]
 	scroll.scroll_vertical = 5000
 	await _frames(5)
 	_save("1b-home-bottom")
+	home.open_sheet("rickshaw")
+	await _frames(5)
+	_save("1c-ready-rickshaw")
+	home.open_sheet("tea")
+	await _frames(5)
+	_save("1d-ready-tea")
+	home.open_sheet("bus")
+	await _frames(5)
+	_save("1e-locked-bus")
+	for page in ["shop", "fund", "story", "people"]:
+		home.show_page(page)
+		await _frames(5)
+		_save("1f-" + page)
+	home.show_page("hub")
 	home._open_settings()
 	await _frames(5)
-	_save("1c-settings")
+	_save("1g-settings")
 	home.queue_free()
 	await _frames(2)
+	# The end of a day: a level up, a record, the challenge done.
+	var words = load("res://scripts/ui/strings.gd").new()
+	words.lang = "bn"
+	var end = load("res://scripts/ui/day_end.gd").new()
+	var bal = Balance.new()
+	end.setup(words, bal, Progress.new(bal), {"kept": 533, "school": 70, "fund": 67, "xp": 130, "level_up": true, "best": true, "project": "", "challenge": true, "featured": true},
+		{"title": words.t("dayOver"), "stars": 4.2, "sub": words.t("avgRating", {"stars": "4.2"}), "money": 670,
+		"lines": [words.t("tripsDone", {"trips": 11}), words.t("teaLine", {"n": 2, "money": 40})], "kept_label": words.t("gainKeptLabel"),
+		"extras": [words.t("targetMet", {"target": 600})], "good": true})
+	root.add_child(end)
+	await _frames(5)
+	_save("1h-day-end")
+	end.queue_free()
+	await _frames(2)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://save.json"))
 	var drive = load("res://scenes/rickshaw.tscn").instantiate()
 	root.add_child(drive)
 	drive.shift.pedal = true

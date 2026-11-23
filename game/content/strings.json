@@ -1738,5 +1738,349 @@
  "servedPerfect": {
   "bn": "দারুণ চা! {bill} টাকা + বকশিশ {tip}",
   "en": "Perfect tea! Tk {bill} + tip {tip}"
+ },
+ "titleKicker": {
+  "bn": "রিকশা · চা · বাস",
+  "en": "Rickshaw · Tea · Bus"
+ },
+ "titleTagline": {
+  "bn": "ঢাকার পথে পথে একদিন: আয় করুন, মহল্লা গড়ুন",
+  "en": "A day on Dhaka's streets: earn, and build up the mohalla"
+ },
+ "playGame": {
+  "bn": "খেলা শুরু",
+  "en": "Play"
+ },
+ "titleStatus": {
+  "bn": "চলমান: দিন {n} · মহল্লা লেভেল {level}",
+  "en": "Saved: day {n} · mohalla level {level}"
+ },
+ "titleNew": {
+  "bn": "নতুন খেলা",
+  "en": "A new game"
+ },
+ "levelShort": {
+  "bn": "লেভেল",
+  "en": "Level"
+ },
+ "nav_hub": {
+  "bn": "মহল্লা",
+  "en": "Mohalla"
+ },
+ "nav_shop": {
+  "bn": "দোকান",
+  "en": "Shop"
+ },
+ "nav_fund": {
+  "bn": "তহবিল",
+  "en": "Fund"
+ },
+ "nav_story": {
+  "bn": "গল্প",
+  "en": "Story"
+ },
+ "nav_people": {
+  "bn": "প্রতিবেশী",
+  "en": "Neighbours"
+ },
+ "lockedPlate": {
+  "bn": "{name} · লেভেল {level}",
+  "en": "{name} · level {level}"
+ },
+ "todayChallenge": {
+  "bn": "আজকের চ্যালেঞ্জ ({name}) · +৩ তারা",
+  "en": "Today's challenge ({name}) · +3 stars"
+ },
+ "playDay": {
+  "bn": "দিন {n} খেলুন",
+  "en": "Play day {n}"
+ },
+ "dayN": {
+  "bn": "দিন {n}",
+  "en": "Day {n}"
+ },
+ "whereTitle": {
+  "bn": "কোথায় চালাবেন",
+  "en": "Where to ride"
+ },
+ "todayDhaka": {
+  "bn": "আজকের ঢাকা",
+  "en": "Dhaka today"
+ },
+ "chip_monsoon": {
+  "bn": "বর্ষা: বৃষ্টি নামতে পারে, যাত্রীরা দরদামে নরম",
+  "en": "Monsoon: rain likely, passengers bargain softer"
+ },
+ "chip_winter": {
+  "bn": "শীত: সকালে কুয়াশা, সাবধানে চালান",
+  "en": "Winter: morning fog, go carefully"
+ },
+ "chip_hot": {
+  "bn": "গরম: কড়া রোদ, ঠান্ডা পানীয়ের চাহিদা বেশি",
+  "en": "Hot: fierce sun, cold drinks sell well"
+ },
+ "chip_fair": {
+  "bn": "আকাশ পরিষ্কার: রাস্তায় লোক বেশি",
+  "en": "Clear skies: busy streets"
+ },
+ "chipDouble": {
+  "bn": "আজ {name}র দিন: আয় দ্বিগুণ",
+  "en": "Today is {name}'s day: double money"
+ },
+ "season_monsoon": {
+  "bn": "বর্ষা",
+  "en": "Monsoon"
+ },
+ "season_winter": {
+  "bn": "শীত",
+  "en": "Winter"
+ },
+ "season_hot": {
+  "bn": "গরম",
+  "en": "Hot season"
+ },
+ "season_fair": {
+  "bn": "পরিষ্কার আকাশ",
+  "en": "Clear skies"
+ },
+ "seasonFair": {
+  "bn": "আজ আকাশ পরিষ্কার: রাস্তায় লোকজন বেশি।",
+  "en": "Clear skies today: the streets are busy."
+ },
+ "goalTarget": {
+  "bn": "দিনের লক্ষ্য",
+  "en": "Today's target"
+ },
+ "plusStars": {
+  "bn": "+{n} তারা",
+  "en": "+{n} stars"
+ },
+ "schoolTitle": {
+  "bn": "সুমির স্কুল ফি",
+  "en": "Sumi's school fee"
+ },
+ "start_rickshaw": {
+  "bn": "রাস্তায় নামুন",
+  "en": "Hit the road"
+ },
+ "start_tea": {
+  "bn": "দোকান খুলুন",
+  "en": "Open the stall"
+ },
+ "start_bus": {
+  "bn": "বাসে উঠুন",
+  "en": "Board the bus"
+ },
+ "playLength": {
+  "bn": "খেলায় প্রায় {n} মিনিট",
+  "en": "About {n} minutes of play"
+ },
+ "tip_rickshaw": {
+  "bn": "দরদামের সময় যাত্রীর মুখ দেখুন: বিরক্ত হলে আর দাম বাড়াবেন না।",
+  "en": "Watch the passenger's face while bargaining: once they frown, ask no more."
+ },
+ "tip_tea": {
+  "bn": "সকাল ৭টা থেকে ৯টা আর বিকেল ৫টা থেকে ৮টায় ভিড় বেশি: কেটলি ভরা রাখুন।",
+  "en": "Rush hours are 7 to 9 and 5 to 8: keep the kettle full."
+ },
+ "tip_bus": {
+  "bn": "স্টপ আসার ঠিক আগে ডাকুন, আর ভাংতি গুনে ফেরত দিন।",
+  "en": "Call each stop just before it comes, and count the change back."
+ },
+ "shopHelp": {
+  "bn": "সব কেনাকাটা জমানো টাকা থেকে হয়।",
+  "en": "Everything is bought from the savings."
+ },
+ "owned": {
+  "bn": "কেনা আছে",
+  "en": "Owned"
+ },
+ "needMore": {
+  "bn": "আরও {n} টাকা লাগবে",
+  "en": "Tk {n} more needed"
+ },
+ "up_new_rickshaw": {
+  "bn": "নতুন রিকশা",
+  "en": "New rickshaw"
+ },
+ "up_battery_rickshaw": {
+  "bn": "ব্যাটারি রিকশা",
+  "en": "Battery rickshaw"
+ },
+ "up_bench": {
+  "bn": "নতুন বেঞ্চ",
+  "en": "New bench"
+ },
+ "up_second_kettle": {
+  "bn": "দ্বিতীয় কেটলি",
+  "en": "Second kettle"
+ },
+ "up_awning": {
+  "bn": "ছাউনি",
+  "en": "Awning"
+ },
+ "up_fridge": {
+  "bn": "ফ্রিজ",
+  "en": "Fridge"
+ },
+ "up_notebook": {
+  "bn": "হিসাবের খাতা",
+  "en": "Notebook"
+ },
+ "up_change_bag": {
+  "bn": "বড় ভাংতির ব্যাগ",
+  "en": "Bigger change bag"
+ },
+ "up_loud_voice": {
+  "bn": "জোরালো গলা",
+  "en": "Loud voice"
+ },
+ "upHelp_new_rickshaw": {
+  "bn": "১৫% দ্রুত চলে",
+  "en": "15% faster"
+ },
+ "upHelp_battery_rickshaw": {
+  "bn": "৫০% দ্রুত, ক্লান্তি অর্ধেক",
+  "en": "50% faster, half as tiring"
+ },
+ "upHelp_bench": {
+  "bn": "কাস্টমার বেশি, ধৈর্যও বেশি",
+  "en": "More customers, more patient"
+ },
+ "upHelp_second_kettle": {
+  "bn": "একটা ভরার সময় অন্যটায় চা",
+  "en": "One pours while one fills"
+ },
+ "upHelp_awning": {
+  "bn": "বৃষ্টিতেও কাস্টমার আসে",
+  "en": "Customers come in the rain"
+ },
+ "upHelp_fridge": {
+  "bn": "ঠান্ডা পানীয় ২৫ টাকা, গরমে বেশি চলে",
+  "en": "Cold drinks at Tk 25, big in the heat"
+ },
+ "upHelp_notebook": {
+  "bn": "কেউ ভাড়া লুকাতে পারবে না",
+  "en": "No one hides from the fare"
+ },
+ "upHelp_change_bag": {
+  "bn": "শুরুতেই ৪০০ টাকা ভাংতি",
+  "en": "Tk 400 in change to start"
+ },
+ "upHelp_loud_voice": {
+  "bn": "ডাক সহজে নিখুঁত হয়",
+  "en": "Perfect calls come easier"
+ },
+ "fundPageTitle": {
+  "bn": "আমাদের মহল্লা",
+  "en": "Our mohalla"
+ },
+ "projectNow": {
+  "bn": "এখন জমছে",
+  "en": "Saving now"
+ },
+ "projectNext": {
+  "bn": "পরে",
+  "en": "Later"
+ },
+ "chaptersRead": {
+  "bn": "{n}/{all} অধ্যায়",
+  "en": "{n}/{all} chapters"
+ },
+ "mood_good": {
+  "bn": "খুশি",
+  "en": "Happy"
+ },
+ "mood_ok": {
+  "bn": "মোটামুটি",
+  "en": "So-so"
+ },
+ "mood_bad": {
+  "bn": "রাগ করে আছেন",
+  "en": "Upset"
+ },
+ "earnedTitle": {
+  "bn": "আজকের আয়",
+  "en": "Today's earnings"
+ },
+ "xpTitle": {
+  "bn": "মহল্লা XP",
+  "en": "Mohalla XP"
+ },
+ "toSavings": {
+  "bn": "জমায় গেল",
+  "en": "To savings"
+ },
+ "nowOpen_tea_stall": {
+  "bn": "মনির মামার চায়ের দোকান খুলেছে",
+  "en": "Monir Mama's tea stall is open"
+ },
+ "nowOpen_bus": {
+  "bn": "বাবুর বাস খুলেছে",
+  "en": "Babu's bus is open"
+ },
+ "nowOpen_old_dhaka": {
+  "bn": "পুরান ঢাকা খুলেছে",
+  "en": "Old Dhaka is open"
+ },
+ "ratingOf": {
+  "bn": "রেটিং {stars}/৫",
+  "en": "Rating {stars}/5"
+ },
+ "month_1": {
+  "bn": "জানুয়ারি",
+  "en": "January"
+ },
+ "month_2": {
+  "bn": "ফেব্রুয়ারি",
+  "en": "February"
+ },
+ "month_3": {
+  "bn": "মার্চ",
+  "en": "March"
+ },
+ "month_4": {
+  "bn": "এপ্রিল",
+  "en": "April"
+ },
+ "month_5": {
+  "bn": "মে",
+  "en": "May"
+ },
+ "month_6": {
+  "bn": "জুন",
+  "en": "June"
+ },
+ "month_7": {
+  "bn": "জুলাই",
+  "en": "July"
+ },
+ "month_8": {
+  "bn": "আগস্ট",
+  "en": "August"
+ },
+ "month_9": {
+  "bn": "সেপ্টেম্বর",
+  "en": "September"
+ },
+ "month_10": {
+  "bn": "অক্টোবর",
+  "en": "October"
+ },
+ "month_11": {
+  "bn": "নভেম্বর",
+  "en": "November"
+ },
+ "month_12": {
+  "bn": "ডিসেম্বর",
+  "en": "December"
+ },
+ "projectIsDone": {
+  "bn": "হয়ে গেছে",
+  "en": "Done"
+ },
+ "gainKeptLabel": {
+  "bn": "চাচার পকেটে",
+  "en": "In his pocket"
  }
 }

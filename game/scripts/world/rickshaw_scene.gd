@@ -28,6 +28,7 @@ const SignalLights = preload("res://scripts/world/signal_lights.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
+const DayEnd = preload("res://scripts/ui/day_end.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
 const Reveal = preload("res://scripts/world/reveal.gd")
 const Weather = preload("res://scripts/world/weather.gd")
@@ -940,11 +941,7 @@ func _end_day() -> void:
 	var lines := []
 	if shift.worn_out:
 		lines.append(strings.t("wornOut"))
-	lines.append_array([
-		strings.t("earned", {"money": shift.money}),
-		strings.t("tripsDone", {"trips": shift.trips}),
-		strings.t("avgRating", {"stars": _stars(snappedf(shift.average_stars(), 0.1))}),
-	])
+	lines.append(strings.t("tripsDone", {"trips": shift.trips}))
 	if shift.fines > 0:
 		lines.append(strings.t("finesPaid", {"fines": shift.fines}))
 	if shift.teas > 0:
@@ -957,20 +954,20 @@ func _end_day() -> void:
 	# And a copy online, if this build has it (not waited for).
 	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
 	CrashWatch.stop()
-	lines.append(strings.t("gainKept", {"n": got.kept}))
-	if got.school > 0:
-		lines.append(strings.t("gainSchool", {"n": got.school}))
-	lines.append(strings.t("gainFund", {"n": got.fund}))
-	lines.append(strings.t("gainXp", {"n": got.xp}))
-	if got.level_up:
-		lines.append(strings.t("levelUp", {"level": progress.level()}))
-	if got.best:
-		lines.append(strings.t("newBest"))
-	if got.project != "":
-		lines.append(strings.t("projectFinished", {"project": strings.t("project_" + got.project)}))
-	lines.append_array(DayLines.lines(got, strings))
-	lines.append(strings.t("targetMet" if met else "targetMissed", {"target": _target_money}))
-	hud.show_day_end(lines, met)
+	var end := DayEnd.new()
+	end.setup(strings, progress.b, progress, got, {
+		"title": strings.t("dayOver"),
+		"stars": shift.average_stars(),
+		"sub": strings.t("avgRating", {"stars": _stars(snappedf(shift.average_stars(), 0.1))}),
+		"money": shift.money,
+		"lines": lines,
+		"kept_label": strings.t("gainKeptLabel"),
+		"extras": [strings.t("targetMet" if met else "targetMissed", {"target": _target_money})],
+		"good": met,
+	})
+	end.home_pressed.connect(_go_home)
+	end.again_pressed.connect(_play_again)
+	hud.add_child(end)
 
 
 func _play_again() -> void:
