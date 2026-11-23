@@ -248,7 +248,58 @@ func sign_in(address: String, password: String) -> String:
 ## Google sign-in works here: on Android with the plugin, and the
 ## project's web client known.
 func google_ready() -> bool:
-	return enabled() and google_client != "" and Engine.has_singleton("GoogleSignIn")
+	if not enabled() or google_client == "":
+		return false
+	return OS.has_feature("web") or Engine.has_singleton("GoogleSignIn")
+
+
+## In a browser, Google's sign-in script, loaded ahead so the popup can open
+## straight from the tap (browsers block popups opened long after one).
+const WEB_GOOGLE_JS := """
+window.pdGooglePreload = function () {
+  if (window.google && google.accounts && google.accounts.oauth2) return;
+  if (document.getElementById('pd-gsi')) return;
+  var s = document.createElement('script');
+  s.id = 'pd-gsi'; s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+  document.head.appendChild(s);
+};
+window.pdGoogleSignIn = function (clientId, done) {
+  function go() {
+    try {
+      var c = google.accounts.oauth2.initTokenClient({
+        client_id: clientId, scope: 'openid email profile',
+        callback: function (r) { done(r && r.access_token ? 'OK:' + r.access_token : 'ERR:' + ((r && r.error) || 'no_token')); },
+        error_callback: function (e) { done('ERR:' + ((e && e.type) || 'popup')); }
+      });
+      c.requestAccessToken();
+    } catch (e) { done('ERR:' + e); }
+  }
+  if (window.google && google.accounts && google.accounts.oauth2) { go(); return; }
+  window.pdGooglePreload();
+  var s = document.getElementById('pd-gsi');
+  s.addEventListener('load', go);
+  s.addEventListener('error', function () { done('ERR:load'); });
+};
+"""
+
+## The browser's answer comes back through this (kept until the next try,
+## not freed while it runs).
+var _web_back = null
+
+
+func web_google_preload() -> void:
+	if not OS.has_feature("web") or not google_ready():
+		return
+	JavaScriptBridge.eval(WEB_GOOGLE_JS, true)
+	JavaScriptBridge.eval("window.pdGooglePreload()", true)
+
+
+func _web_google_said(args: Array) -> void:
+	var said := str(args[0]) if args.size() > 0 else "ERR:none"
+	if said.begins_with("OK:"):
+		_google_done.emit(said.substr(3), "")
+	else:
+		_google_done.emit("", said.substr(4))
 
 
 ## Shows Android's Google account picker; then, with `link`, ties this
@@ -258,16 +309,27 @@ func google_ready() -> bool:
 func google(link: bool) -> String:
 	if not google_ready():
 		return "NO_GOOGLE"
-	var plugin = Engine.get_singleton("GoogleSignIn")
-	# Plugin signals are connected by name (as Godot's Android plugin docs do).
-	if not plugin.is_connected("signed_in", _google_ok):
-		plugin.connect("signed_in", _google_ok)
-		plugin.connect("sign_in_failed", _google_fail)
-	plugin.signIn(google_client)
+	var web := OS.has_feature("web")
+	if web:
+		# Google's popup in the browser gives an access token for the account.
+		web_google_preload()
+		_web_back = JavaScriptBridge.create_callback(_web_google_said)
+		# Untyped, so the page's own function can be called on it.
+		var page = JavaScriptBridge.get_interface("window")
+		page.pdGoogleSignIn(google_client, _web_back)
+	else:
+		var plugin = Engine.get_singleton("GoogleSignIn")
+		# Plugin signals are connected by name (as Godot's Android plugin docs do).
+		if not plugin.is_connected("signed_in", _google_ok):
+			plugin.connect("signed_in", _google_ok)
+			plugin.connect("sign_in_failed", _google_fail)
+		plugin.signIn(google_client)
 	var got: Array = await _google_done
 	if got[1] != "":
-		return str(got[1]).split(" ")[0]
-	var body := {"requestUri": "http://localhost", "postBody": "id_token=%s&providerId=google.com" % got[0],
+		var why := str(got[1]).split(" ")[0]
+		return "CANCELLED" if why in ["popup_closed", "access_denied"] else why
+	var credential := ("access_token=%s" if web else "id_token=%s") % got[0]
+	var body := {"requestUri": "http://localhost", "postBody": credential + "&providerId=google.com",
 		"returnSecureToken": true, "returnIdpCredential": true}
 	if link:
 		var e := await ensure_user()

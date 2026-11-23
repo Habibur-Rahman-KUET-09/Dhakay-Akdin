@@ -1442,6 +1442,7 @@ func _email_form(keep: bool) -> void:
 	var note := Look.label("", 14, true, Look.VERMILION)
 	# Google first, where the phone and the build can do it.
 	if cloud.google_ready():
+		cloud.web_google_preload()
 		var google := Look.chunky(s.t("cloudGoogleKeep" if keep else "cloudGoogleFetch"), Color("1A73E8"), Color.WHITE, 17, 5, 14)
 		google.custom_minimum_size = Vector2(0, 56)
 		google.pressed.connect(_google_go.bind(keep, note, google))
