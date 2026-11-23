@@ -173,8 +173,28 @@ jobs:
           # Also on the release, to try the web build without the site.
           (cd build/web && zip -qr "../../dist/PranerDhaka-web-${{ steps.v.outputs.version }}.zip" .)
 
+      # The site named in firebase.json (pranerdhaka.web.app): made if it
+      # is not there yet.
+      - name: Firebase Hosting site
+        if: github.event_name != 'pull_request' && env.HAS_HOSTING == 'true'
+        continue-on-error: true
+        env:
+          KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          PROJECT: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: |
+          printf '%s' "$KEY" > "$RUNNER_TEMP/key.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/key.json"
+          site=$(python3 -c "import json; print(json.load(open('firebase.json'))['hosting']['site'])")
+          if npx --yes firebase-tools@latest hosting:sites:get "$site" --project "$PROJECT" > /dev/null 2>&1; then
+            echo "site $site is there"
+          else
+            npx --yes firebase-tools@latest hosting:sites:create "$site" --project "$PROJECT" --non-interactive
+          fi
+          rm -f "$RUNNER_TEMP/key.json"
+
       - name: Firebase Hosting
         if: github.event_name != 'pull_request' && env.HAS_HOSTING == 'true'
+        continue-on-error: true
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
