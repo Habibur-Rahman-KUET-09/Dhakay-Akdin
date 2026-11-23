@@ -170,6 +170,8 @@ jobs:
           if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" export-web.log; then exit 1; fi
           test -s build/web/index.html && test -s build/web/index.wasm && test -s build/web/index.pck
           ls -la build/web
+          # Also on the release, to try the web build without the site.
+          (cd build/web && zip -qr "../../dist/PranerDhaka-web-${{ steps.v.outputs.version }}.zip" .)
 
       - name: Firebase Hosting
         if: github.event_name != 'pull_request' && env.HAS_HOSTING == 'true'
