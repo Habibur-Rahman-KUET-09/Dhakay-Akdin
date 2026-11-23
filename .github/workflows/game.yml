@@ -50,7 +50,7 @@ jobs:
         run: |
           set -o pipefail
           godot --headless --path game -s res://tests/run_tests.gd 2>&1 | tee test.log
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" test.log
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" test.log; then exit 1; fi
 
       - name: Screenshots
         run: |
@@ -59,7 +59,7 @@ jobs:
           set -o pipefail
           xvfb-run -a -s "-screen 0 540x960x24" godot --path game --rendering-driver opengl3 \
             --resolution 540x960 -s res://tests/shots.gd -- "$PWD/dist" 2>&1 | tee shots.log
-          ! grep -E "SCRIPT ERROR|Parse Error" shots.log
+          if grep -E "SCRIPT ERROR|Parse Error" shots.log; then exit 1; fi
           ls -la dist
 
       - name: Version
@@ -151,7 +151,7 @@ jobs:
             other=$([ "$abi" = arm64-v8a ] && echo armeabi-v7a || echo arm64-v8a)
             sed -i "s/^architectures\/$abi=.*/architectures\/$abi=true/; s/^architectures\/$other=.*/architectures\/$other=false/" game/export_presets.cfg
             godot --headless --path game --export-release "Android" "$PWD/build/PranerDhaka-$v-$abi.apk" 2>&1 | tee "export-$abi.log"
-            ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "export-$abi.log"
+            if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "export-$abi.log"; then exit 1; fi
             test -s "build/PranerDhaka-$v-$abi.apk"
             cp "build/PranerDhaka-$v-$abi.apk" dist/
           done

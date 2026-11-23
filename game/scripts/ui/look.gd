@@ -224,3 +224,10 @@ static func band(height := 22) -> TextureRect:
 	r.custom_minimum_size = Vector2(0, height)
 	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return r
+
+
+## Lets a coloured icon (a coin, a star, a tick) on a chunky button keep
+## its own colours, instead of the button's ink.
+static func true_colours(b: Button) -> void:
+	for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_focus_color", "icon_hover_pressed_color"]:
+		b.add_theme_color_override(state, Color.WHITE)

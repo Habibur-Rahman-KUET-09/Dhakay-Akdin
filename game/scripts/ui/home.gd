@@ -209,6 +209,7 @@ func _app_page() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	# A finger has to move a little before it scrolls, so taps stay taps.
 	scroll.scroll_deadzone = 12
 	col.add_child(scroll)
@@ -293,14 +294,9 @@ func _level_badge() -> Control:
 	var center := VBoxContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	center.alignment = BoxContainer.ALIGNMENT_CENTER
-	center.add_theme_constant_override("separation", -6)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	badge.add_child(center)
-	var word := Look.label(s.t("levelShort"), 11, true)
-	word.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	word.autowrap_mode = TextServer.AUTOWRAP_OFF
-	center.add_child(word)
-	var number := Look.label(str(progress.level()), 22, true)
+	var number := Look.label(str(progress.level()), 24, true)
 	number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	number.autowrap_mode = TextServer.AUTOWRAP_OFF
 	center.add_child(number)
@@ -746,6 +742,7 @@ func _start_sheet(who: String) -> void:
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	scroll.scroll_deadzone = 12
 	col.add_child(scroll)
 	var body := VBoxContainer.new()
@@ -885,9 +882,9 @@ func _last_day_line(who: String) -> String:
 		if h.get("who", "rickshaw") != who:
 			continue
 		if who == "rickshaw":
-			return s.t("lastDay", {"money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.stars})
+			return s.t("lastDay", {"money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.get("stars", 0)})
 		if who == "tea":
-			return s.t("teaLastDay", {"money": int(h.earned), "served": int(h.served)})
+			return s.t("teaLastDay", {"money": int(h.earned), "served": int(h.get("served", 0))})
 		return s.t("busLastDay", {"money": int(h.earned), "riders": int(h.get("riders", 0))})
 	return ""
 
@@ -923,7 +920,7 @@ func _locked_body(box: VBoxContainer, who: String) -> void:
 		var early := Look.chunky(s.t("unlockEarly", {"n": cost}), Look.MAGENTA, Color.WHITE, 18, 5, 16)
 		early.icon = Look.icon_texture("star", 24)
 		early.add_theme_constant_override("icon_max_width", 24)
-		early.add_theme_color_override("icon_normal_color", Color.WHITE)
+		Look.true_colours(early)
 		early.pressed.connect(_unlock_early.bind(unlock))
 		col.add_child(early)
 	else:
@@ -954,7 +951,7 @@ func _area_row() -> Control:
 			st.border_color = Look.MAGENTA
 			pick.add_theme_stylebox_override("normal", st)
 			pick.add_theme_stylebox_override("hover", st)
-			pick.add_theme_color_override("icon_normal_color", Color.WHITE)
+			Look.true_colours(pick)
 		elif not is_open:
 			pick.icon = Look.icon_texture("lock", 24)
 		pick.add_theme_constant_override("icon_max_width", 26)
@@ -1037,6 +1034,7 @@ func _upgrade_card(id: String, who: String) -> Control:
 		var buy := Look.chunky(str(cost), Look.YELLOW, Look.OUTLINE, 18, 5, 14)
 		buy.name = "Buy_" + id
 		buy.icon = Look.icon_texture("coin", 24)
+		Look.true_colours(buy)
 		buy.add_theme_constant_override("icon_max_width", 24)
 		buy.custom_minimum_size = Vector2(0, 52)
 		buy.disabled = short > 0
@@ -1103,7 +1101,7 @@ func _fund_page(page: VBoxContainer) -> void:
 	if progress.data.history.is_empty():
 		list.add_child(Look.label(s.t("noDaysYet"), 15))
 	for h in progress.data.history:
-		var line := s.t("historyLine", {"day": int(h.day), "money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.stars})
+		var line := s.t("historyLine", {"day": int(h.day), "money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.get("stars", 0)})
 		if h.get("who", "") == "tea":
 			line = s.t("teaHistoryLine", {"day": int(h.day), "money": int(h.earned), "served": int(h.get("served", 0))})
 		elif h.get("who", "") == "bus":
@@ -1563,6 +1561,7 @@ func _overlay(title: String, rows: Array, on_close := Callable()) -> void:
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	col.add_child(scroll)
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
