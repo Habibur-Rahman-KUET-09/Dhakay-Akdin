@@ -83,6 +83,11 @@ func _remember() -> void:
 func _call(url: String, method: int, body := "", headers: PackedStringArray = PackedStringArray()) -> Dictionary:
 	var http := HTTPRequest.new()
 	http.timeout = 15.0
+	# In a browser the reply comes already unzipped while still marked as
+	# gzip: unzipping it again spoils it (sign-in failed as UNKNOWN on the
+	# web build). Let the browser handle compression there.
+	if OS.has_feature("web"):
+		http.accept_gzip = false
 	add_child(http)
 	var err := http.request(url, headers, method, body)
 	if err != OK:
@@ -108,8 +113,9 @@ static func error_of(reply: Dictionary) -> String:
 	if int(reply.get("code", 0)) == 0:
 		return "NETWORK"
 	var e = reply.get("data", {}).get("error", {})
-	if typeof(e) != TYPE_DICTIONARY:
-		return "UNKNOWN"
+	if typeof(e) != TYPE_DICTIONARY or e.is_empty():
+		# A reply without Firebase's error: say which, for a report.
+		return "HTTP_%d" % int(reply.code)
 	# Firestore says what went wrong in "status" (PERMISSION_DENIED…); the
 	# sign-in service in the first word of "message" (EMAIL_EXISTS…).
 	if str(e.get("status", "")) != "":

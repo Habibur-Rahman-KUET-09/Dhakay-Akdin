@@ -2082,5 +2082,9 @@
  "gainKeptLabel": {
   "bn": "চাচার পকেটে",
   "en": "In his pocket"
+ },
+ "busTripLine": {
+  "bn": "ট্রিপ {n}/{all}: {to} পর্যন্ত",
+  "en": "Trip {n}/{all}: to {to}"
  }
 }

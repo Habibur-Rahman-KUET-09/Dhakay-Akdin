@@ -92,6 +92,8 @@ var _slaps: Array = []
 var _notes_button: Button
 var _frames_logged := 0
 var _alive_left := 10.0
+## The turn back was announced under a hand activity: say it again once it closes.
+var _trip_news := false
 ## Where each rider is drawn: their seat number, so a move is noticed.
 var _spot_of := {}
 var _problem_row: HBoxContainer
@@ -709,7 +711,9 @@ func _handle(events: Array) -> void:
 	elif events.has(BusDay.Event.TRIP_OVER):
 		print("[bus] trip over")
 		# The way back: the route turns round.
-		_say(strings.t("tripBack", {"stop": _stop_name(bus.route.size() - 1)}), Look.SKY, 4.0)
+		_say(strings.t("tripBack", {"stop": _stop_name(bus.route.size() - 1)}), Look.SKY, 6.0)
+		# A hand activity open now would hide that: say it again after.
+		_trip_news = _activity != null
 		_stop_label.text = _stop_name(0)
 		_stop_sign.position.z = -2.5
 		_close_fare()
@@ -727,6 +731,9 @@ func _open(act: Activity, key: String, then: Callable) -> void:
 
 func _closed() -> void:
 	_activity = null
+	if _trip_news:
+		_trip_news = false
+		_say(strings.t("tripBack", {"stop": _stop_name(bus.route.size() - 1)}), Look.SKY, 6.0)
 	_refresh()
 
 
@@ -891,7 +898,8 @@ func _close_fare() -> void:
 func _refresh() -> void:
 	var next_i := bus.stop_i if bus.at_stop else bus.stop_i + 1
 	_next_stop.text = strings.t("atStopNow" if bus.at_stop else "nextStop", {"stop": _stop_name(next_i)})
-	_status.text = "%s\n%s" % [strings.t("taka", {"n": bus.earned()}), strings.t("busRating", {"stars": "%.1f" % bus.rating})]
+	_status.text = "%s\n%s\n%s" % [strings.t("busTripLine", {"n": bus.trip, "all": bus.trips, "to": _stop_name(bus.route.size() - 1)}),
+		strings.t("taka", {"n": bus.earned()}), strings.t("busRating", {"stars": "%.1f" % bus.rating})]
 	_route_bar.queue_redraw()
 	var waiting := bus.unpaid().size()
 	_unpaid_label.text = strings.t("faresDue", {"n": waiting})
