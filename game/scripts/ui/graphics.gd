@@ -17,8 +17,11 @@ static func level() -> String:
 	return default_level()
 
 
-## Low on Adreno chips older than the 700s, high elsewhere.
+## Low in a phone's browser (WebGL there is far slower than the app) and
+## on Adreno chips older than the 700s; high elsewhere.
 static func default_level() -> String:
+	if OS.has_feature("web_android") or OS.has_feature("web_ios"):
+		return "low"
 	var gpu := RenderingServer.get_video_adapter_name()
 	var re := RegEx.create_from_string("Adreno[^0-9]*([0-9]+)")
 	var m := re.search(gpu)
