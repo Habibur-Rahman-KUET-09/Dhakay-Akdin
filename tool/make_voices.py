@@ -6,7 +6,10 @@ Bangladesh, into game/voices/<id>.mp3.
 
 Lines come from game/content/voices.json (street talk: "<group>_<n>")
 and game/content/story.json (the story, each line by its speaker:
-"story_<first 10 of md5(speaker|text)>"). Only new or changed lines are
+"story_<first 10 of md5(speaker|text)>"). A line can be fixed one by one
+in voices.json's "fixes" ({id: {"voice": {...}, "say": "..."}}): another
+voice or pitch for it, or a spelling to speak that the voice says better
+than the written one (the screen keeps the written one). Only new or changed lines are
 made (game/voices/manifest.json remembers what each file was made
 from); files for lines that are gone are removed. Run by the voices
 workflow, which has the key as a repository secret; without a key it
@@ -48,8 +51,21 @@ def wanted():
     return out, v['voices']
 
 
+def fixes():
+    """Per-line fixes from voices.json: {id: {"voice": {...}, "say": text}}."""
+    v = json.load(open(os.path.join(CONTENT, 'voices.json'), encoding='utf-8'))
+    return v.get('fixes', {})
+
+
+def voice_for(id_, by, voices, fixed):
+    """The voice settings and the words to speak for one line."""
+    f = fixed.get(id_, {})
+    return {**voices[by], **f.get('voice', {})}, f.get('say')
+
+
 def ssml(voice, text):
-    return (f"<speak version='1.0' xml:lang='bn-BD'><voice name='{voice['voice']}'>"
+    lang = '-'.join(voice['voice'].split('-')[:2])
+    return (f"<speak version='1.0' xml:lang='{lang}'><voice name='{voice['voice']}'>"
             f"<prosody pitch='{voice.get('pitch', '+0%')}' rate='{voice.get('rate', '+0%')}'>"
             f"{escape(text)}</prosody></voice></speak>")
 
@@ -82,6 +98,7 @@ def main():
         print('::notice title=Voices::no AZURE_SPEECH_KEY / AZURE_SPEECH_REGION secret, nothing made')
         return
     lines, voices = wanted()
+    fixed = fixes()
     os.makedirs(OUT, exist_ok=True)
     manifest_path = os.path.join(OUT, 'manifest.json')
     manifest = json.load(open(manifest_path, encoding='utf-8')) if os.path.exists(manifest_path) else {}
@@ -89,7 +106,8 @@ def main():
     for id_, (by, text) in sorted(lines.items()):
         if by not in voices:
             raise SystemExit(f'{id_}: no voice for speaker "{by}" in voices.json')
-        body = ssml(voices[by], text)
+        voice, say = voice_for(id_, by, voices, fixed)
+        body = ssml(voice, say or text)
         stamp = hashlib.md5(body.encode('utf-8')).hexdigest()
         path = os.path.join(OUT, f'{id_}.mp3')
         if manifest.get(id_) == stamp and os.path.exists(path):
