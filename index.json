@@ -1,0 +1,216 @@
+[
+ {
+  "id": "story_0588f52926",
+  "by": "ostad",
+  "text": "ঠিক আছে, রাগ করিস না। দুজনে মিলেই তো বাসটা চলে।",
+  "ways": [
+   {
+    "way": "k1",
+    "label": "\"কোরিস না\" বানানে",
+    "file": "story_0588f52926__k1.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "-18%",
+     "rate": "-4%"
+    },
+    "say": "ঠিক আছে, রাগ কোরিস না। দুজনে মিলেই তো বাসটা চলে।",
+    "mood": null
+   },
+   {
+    "way": "k2",
+    "label": "\"করিশ না\" বানানে",
+    "file": "story_0588f52926__k2.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "-18%",
+     "rate": "-4%"
+    },
+    "say": "ঠিক আছে, রাগ করিশ না। দুজনে মিলেই তো বাসটা চলে।",
+    "mood": null
+   },
+   {
+    "way": "k3",
+    "label": "\"কোরিশ না\" বানানে",
+    "file": "story_0588f52926__k3.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "-18%",
+     "rate": "-4%"
+    },
+    "say": "ঠিক আছে, রাগ কোরিশ না। দুজনে মিলেই তো বাসটা চলে।",
+    "mood": null
+   },
+   {
+    "way": "k4",
+    "label": "কলকাতার কণ্ঠ",
+    "file": "story_0588f52926__k4.mp3",
+    "voice": {
+     "voice": "bn-IN-BashkarNeural"
+    },
+    "say": null,
+    "mood": null
+   }
+  ]
+ },
+ {
+  "id": "story_2406f011f9",
+  "by": "ostad",
+  "text": "স্বপ্ন দেখ, বাবু। তবে ভাংতি গুনতে ভুলিস না।",
+  "ways": [
+   {
+    "way": "b1",
+    "label": "\"ভুলিশ না\" বানানে",
+    "file": "story_2406f011f9__b1.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "-18%",
+     "rate": "-4%"
+    },
+    "say": "স্বপ্ন দেখ, বাবু। তবে ভাংতি গুনতে ভুলিশ না।",
+    "mood": null
+   },
+   {
+    "way": "b2",
+    "label": "\"ভুলিস্‌ না\" বানানে",
+    "file": "story_2406f011f9__b2.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "-18%",
+     "rate": "-4%"
+    },
+    "say": "স্বপ্ন দেখ, বাবু। তবে ভাংতি গুনতে ভুলিস্‌ না।",
+    "mood": null
+   },
+   {
+    "way": "b3",
+    "label": "\"ভুলিস নে\" বানানে",
+    "file": "story_2406f011f9__b3.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "-18%",
+     "rate": "-4%"
+    },
+    "say": "স্বপ্ন দেখ, বাবু। তবে ভাংতি গুনতে ভুলিস নে।",
+    "mood": null
+   },
+   {
+    "way": "b4",
+    "label": "কলকাতার কণ্ঠ",
+    "file": "story_2406f011f9__b4.mp3",
+    "voice": {
+     "voice": "bn-IN-BashkarNeural"
+    },
+    "say": null,
+    "mood": null
+   }
+  ]
+ },
+ {
+  "id": "story_8399d6819f",
+  "by": "babu",
+  "text": "ওস্তাদ, একদিন আমার নিজের বাস হবে। নাম দেব 'প্রাণের ঢাকা পরিবহন'!",
+  "ways": [
+   {
+    "way": "s1",
+    "label": "\"বাস্‌\" বানানে",
+    "file": "story_8399d6819f__s1.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "+0%",
+     "rate": "+0%"
+    },
+    "say": "ওস্তাদ, একদিন আমার নিজের বাস্‌ হবে। নাম দেবো, প্রাণের ঢাকা পরিবহন!",
+    "mood": null
+   },
+   {
+    "way": "s2",
+    "label": "\"বাসগাড়ি\" বলে",
+    "file": "story_8399d6819f__s2.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "+0%",
+     "rate": "+0%"
+    },
+    "say": "ওস্তাদ, একদিন আমার নিজের বাসগাড়ি হবে। নাম দেবো, প্রাণের ঢাকা পরিবহন!",
+    "mood": null
+   },
+   {
+    "way": "s3",
+    "label": "\"একটা বাস\" বলে",
+    "file": "story_8399d6819f__s3.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "+0%",
+     "rate": "+0%"
+    },
+    "say": "ওস্তাদ, একদিন আমার নিজের একটা বাস হবে। নাম দেবো, প্রাণের ঢাকা পরিবহন!",
+    "mood": null
+   },
+   {
+    "way": "s4",
+    "label": "কলকাতার কণ্ঠ",
+    "file": "story_8399d6819f__s4.mp3",
+    "voice": {
+     "voice": "bn-IN-BashkarNeural"
+    },
+    "say": "ওস্তাদ, একদিন আমার নিজের বাস হবে। নাম দেবো, প্রাণের ঢাকা পরিবহন!",
+    "mood": null
+   }
+  ]
+ },
+ {
+  "id": "story_c4ad917f4f",
+  "by": "monir",
+  "text": "ফ্রিজও হলো। এবার একটা ছোট ক্যাফে, টেবিল-চেয়ার, দেয়ালে ছবি…",
+  "ways": [
+   {
+    "way": "c1",
+    "label": "\"ছোটো\" বানানে",
+    "file": "story_c4ad917f4f__c1.mp3",
+    "voice": {
+     "voice": "bn-IN-BashkarNeural",
+     "pitch": "+0%",
+     "rate": "+0%"
+    },
+    "say": "ফ্রিজও হলো। এবার একটা ছোটো ক্যাফে, টেবিল-চেয়ার, দেয়ালে ছবি…",
+    "mood": null
+   },
+   {
+    "way": "c2",
+    "label": "\"ছোট্ট\" বলে",
+    "file": "story_c4ad917f4f__c2.mp3",
+    "voice": {
+     "voice": "bn-IN-BashkarNeural",
+     "pitch": "+0%",
+     "rate": "+0%"
+    },
+    "say": "ফ্রিজও হলো। এবার একটা ছোট্ট ক্যাফে, টেবিল-চেয়ার, দেয়ালে ছবি…",
+    "mood": null
+   },
+   {
+    "way": "c3",
+    "label": "\"ছোটো\", বাংলাদেশি কণ্ঠ",
+    "file": "story_c4ad917f4f__c3.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "-3%",
+     "rate": "+2%"
+    },
+    "say": "ফ্রিজও হলো। এবার একটা ছোটো ক্যাফে, টেবিল-চেয়ার, দেয়ালে ছবি…",
+    "mood": null
+   },
+   {
+    "way": "c4",
+    "label": "\"ছোট্ট\", বাংলাদেশি কণ্ঠ",
+    "file": "story_c4ad917f4f__c4.mp3",
+    "voice": {
+     "voice": "bn-BD-PradeepNeural",
+     "pitch": "-3%",
+     "rate": "+2%"
+    },
+    "say": "ফ্রিজও হলো। এবার একটা ছোট্ট ক্যাফে, টেবিল-চেয়ার, দেয়ালে ছবি…",
+    "mood": null
+   }
+  ]
+ }
+]
