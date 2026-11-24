@@ -1,42 +1,91 @@
 {
- "note": "Lines marked as badly spoken on the voice review page, each tried a few ways (tool/make_voice_trials.py). 'say' is the same line in standard spelling, for the dialect lines.",
+ "note": "Second round: the lines no first-round try fixed (pronunciation, no feeling). 'say' is a spelling the voice reads better (the screen keeps the written line); 'mood' is from voices.json's moods.",
  "variants": {
-  "plain": {"label": "একই কণ্ঠ, গলা না বদলে", "male": {"voice": "bn-BD-PradeepNeural"}, "female": {"voice": "bn-BD-NabanitaNeural"}},
-  "slow": {"label": "একই কণ্ঠ, একটু ধীরে", "male": {"voice": "bn-BD-PradeepNeural", "rate": "-12%"}, "female": {"voice": "bn-BD-NabanitaNeural", "rate": "-12%"}},
-  "india": {"label": "কলকাতার বাংলা কণ্ঠ", "male": {"voice": "bn-IN-BashkarNeural"}, "female": {"voice": "bn-IN-TanishaaNeural"}},
-  "say": {"label": "শুদ্ধ বানানে পড়া", "male": {"voice": "bn-BD-PradeepNeural"}, "female": {"voice": "bn-BD-NabanitaNeural"}, "only_with_say": true}
+  "say_bd": {
+   "label": "শুদ্ধ উচ্চারণ + আবেগ (বাংলাদেশি কণ্ঠ)",
+   "own": true,
+   "only_with_say": true,
+   "mood": true,
+   "male": {
+    "voice": "bn-BD-PradeepNeural"
+   },
+   "female": {
+    "voice": "bn-BD-NabanitaNeural"
+   }
+  },
+  "say_in": {
+   "label": "শুদ্ধ উচ্চারণ + আবেগ (কলকাতার কণ্ঠ)",
+   "only_with_say": true,
+   "mood": true,
+   "male": {
+    "voice": "bn-IN-BashkarNeural"
+   },
+   "female": {
+    "voice": "bn-IN-TanishaaNeural"
+   }
+  },
+  "mood_bd": {
+   "label": "লেখা যেমন, আবেগ বাড়িয়ে (বাংলাদেশি কণ্ঠ)",
+   "own": true,
+   "mood": true,
+   "male": {
+    "voice": "bn-BD-PradeepNeural"
+   },
+   "female": {
+    "voice": "bn-BD-NabanitaNeural"
+   }
+  },
+  "mood_in": {
+   "label": "লেখা যেমন, আবেগ বাড়িয়ে (কলকাতার কণ্ঠ)",
+   "mood": true,
+   "male": {
+    "voice": "bn-IN-BashkarNeural"
+   },
+   "female": {
+    "voice": "bn-IN-TanishaaNeural"
+   }
+  }
  },
  "lines": {
-  "bus_caught_1": {"say": "এই নিন, এই নিন, পালাইনি তো।"},
-  "counter_no_1": {},
-  "grumble_0": {},
-  "hail_elder_0": {"say": "বাবা, একটু আস্তে নিয়ে যাবে?"},
-  "hail_elder_1": {"say": "বাবা, আমাকে একটু নামিয়ে দেবে?"},
-  "hail_hurry_0": {"say": "মামা, জলদি চলেন, দেরি হয়ে গেছে!"},
-  "hail_hurry_2": {"say": "একটু জোরে চালাবেন মামা, খুব তাড়া।"},
-  "hail_miser_0": {},
-  "hail_miser_2": {"say": "আরে মামা, এটুকু রাস্তা, এত টাকা!"},
-  "hail_normal_0": {},
-  "hail_normal_1": {},
-  "hail_normal_2": {},
-  "stop_mirpur10_0": {"say": "মিরপুর দশ! মিরপুর দশ! নামেন, নামেন!"},
-  "story_0588f52926": {},
-  "story_0bbb59371c": {},
-  "story_1f7d65f128": {},
-  "story_2406f011f9": {},
-  "story_3ddd624713": {},
-  "story_62575d15f8": {},
-  "story_6be23f9046": {},
-  "story_782bb5caa1": {"say": "ঝুম বৃষ্টি! আজ আর কেউ আসবে না।"},
-  "story_8399d6819f": {"say": "ওস্তাদ, একদিন আমার নিজের বাস হবে। নাম দেব, প্রাণের ঢাকা পরিবহন!"},
-  "story_929d3bade1": {},
-  "story_941206e428": {},
-  "story_c4ad917f4f": {"say": "ফ্রিজও হলো। এবার একটা ছোট ক্যাফে, টেবিল চেয়ার, দেয়ালে ছবি।"},
-  "tea_angry_2": {"say": "ধুর মামা, ক্লাস মিস হয়ে যাবে, গেলাম!"},
-  "tea_happy_1": {"say": "মামা, চা-টা জোস হয়েছে।"},
-  "tea_happy_2": {},
-  "tea_order_0": {},
-  "tea_rain_0": {},
-  "tea_rain_1": {"say": "ইশ, ভিজে গেলাম!"}
+  "counter_no_1": {
+   "mood": "annoyed",
+   "say": "ধুর! এত ভাড়া, কেউ দেয়!"
+  },
+  "grumble_0": {
+   "mood": "annoyed",
+   "say": "এত্তো দেরি করলেন, মামা!"
+  },
+  "hail_elder_0": {
+   "mood": "pleading",
+   "say": "বাবা, একটু আস্তে নিয়ে যাবে?"
+  },
+  "hail_elder_1": {
+   "mood": "pleading",
+   "say": "বাবা, আমাকে একটু নামিয়ে দেবে?"
+  },
+  "hail_miser_0": {
+   "mood": "annoyed",
+   "say": "এত্তো চাইলে হবে? কম রাখেন, মামা।"
+  },
+  "hail_miser_2": {
+   "mood": "annoyed",
+   "say": "আরে মামা! এটুকু রাস্তা, এত্তো টাকা!"
+  },
+  "story_0bbb59371c": {
+   "mood": "grateful",
+   "say": "বাবু! তুমি আমার পুরো মাসের বেতন ফিরিয়ে দিলে! এই নাও, মিষ্টি খেও।"
+  },
+  "story_1f7d65f128": {
+   "mood": "earnest",
+   "say": "আমিও পড়াশোনায়, একটুও ফাঁকি দেবো না, আব্বা।"
+  },
+  "story_941206e428": {
+   "mood": "resolute",
+   "say": "সুমির মা, আজ থেকে, মিরপুরের রাস্তায় রিকশা চালাবো।"
+  },
+  "tea_rain_0": {
+   "mood": "relieved",
+   "say": "বৃষ্টি নামছে! একটু বসি, মামা।"
+  }
  }
 }

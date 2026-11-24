@@ -493,5 +493,117 @@
     "bn": "মতিঝিল! মতিঝিল! মতিঝিল! নামেন, নামেন!"
    }
   ]
+ },
+ "fixes": {
+  "hail_hurry_0": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  },
+  "hail_hurry_2": {
+   "voice": {
+    "voice": "bn-IN-TanishaaNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  },
+  "hail_normal_0": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  },
+  "hail_normal_2": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  },
+  "stop_mirpur10_0": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  },
+  "story_6be23f9046": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  },
+  "story_782bb5caa1": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  },
+  "story_8399d6819f": {
+   "voice": {
+    "voice": "bn-BD-PradeepNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   },
+   "say": "ওস্তাদ, একদিন আমার নিজের বাস হবে। নাম দেব, প্রাণের ঢাকা পরিবহন!"
+  },
+  "story_929d3bade1": {
+   "voice": {
+    "voice": "bn-IN-TanishaaNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  },
+  "story_c4ad917f4f": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  },
+  "tea_happy_2": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   }
+  }
+ },
+ "moods": {
+  "annoyed": {
+   "pitch": "+7%",
+   "rate": "+8%",
+   "volume": "+25%"
+  },
+  "pleading": {
+   "pitch": "-3%",
+   "rate": "-14%",
+   "volume": "-12%"
+  },
+  "grateful": {
+   "pitch": "+6%",
+   "rate": "-8%",
+   "volume": "+12%"
+  },
+  "earnest": {
+   "pitch": "+4%",
+   "rate": "-10%",
+   "volume": "+5%"
+  },
+  "resolute": {
+   "pitch": "-5%",
+   "rate": "-12%",
+   "volume": "+15%"
+  },
+  "relieved": {
+   "pitch": "+3%",
+   "rate": "-10%",
+   "volume": "-5%"
+  }
  }
 }
