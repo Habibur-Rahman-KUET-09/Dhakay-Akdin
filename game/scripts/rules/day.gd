@@ -37,6 +37,10 @@ const FLAT := 24
 ## Stuck in deep water in the rain (push to get out), and out again.
 const STUCK := 25
 const FREED := 26
+## Rain with a passenger aboard and the hood down: put it up (by hand).
+const HOOD := 27
+## Paid by phone: check the SMS (settle_phone with what the player said).
+const PHONE_PAY := 28
 
 var fares: Fares
 var balance: Balance
@@ -89,6 +93,15 @@ var _last_hand := -1
 var _pushed_at := Vector2i(-1, -1)
 var _last_ring := -10.0
 var _hand_rng := RandomNumberGenerator.new()
+## The hood: up in the rain (a little slower, but the passenger stays
+## dry); asked for once per rider and shower.
+var hood_up := false
+var _hood_asked := false
+## A ride paid by phone, waiting for the SMS to be checked: {fare, sms,
+## npc}; or {}. The mohalla level makes the fakes cleverer. Results today.
+var phone_pay := {}
+var level := 1
+var phone_log: Array = []
 ## The police: seconds still held, and what they have fined today.
 var held := 0.0
 var police_fines := 0
@@ -188,6 +201,8 @@ func update(dt: float) -> Array:
 	speed_factor = balance.n("rickshaw.tired_speed") if energy < balance.n("rickshaw.tired_below") else 1.0
 	if flat:
 		speed_factor *= balance.n("rickshaw.flat_speed")
+	if hood_up and raining:
+		speed_factor *= balance.n("rickshaw.hood_drag")
 	# The bell rung: people step aside for a moment.
 	if clear_left > 0.0:
 		clear_left -= dt
@@ -203,6 +218,7 @@ func update(dt: float) -> Array:
 	var events := super(dt)
 	events.append_array(early)
 	_time(dt)
+	_hood(events)
 	if events.has(Driver.Event.WRONG_WAY):
 		_police(events)
 	_talk(events)
@@ -232,6 +248,29 @@ func _weather(events: Array) -> void:
 	if now != raining:
 		raining = now
 		events.append(RAIN_START if now else RAIN_END)
+		# Without the hands, the hood goes up by itself; it comes down when
+		# the rain stops.
+		hood_up = now and not interactive
+		_hood_asked = false
+
+
+## Rain on a passenger with the hood down: ask for the hood, once.
+func _hood(events: Array) -> void:
+	if interactive and raining and not hood_up and not _hood_asked and not riding.is_empty():
+		_hood_asked = true
+		events.append(HOOD)
+
+
+## The hood put up, with how well it went (0..1, activities): quick and
+## the passenger stays dry and tips; slow and they get wet (half a star).
+func raise_hood(score: float) -> void:
+	hood_up = true
+	if riding.is_empty():
+		return
+	if score >= 0.7:
+		riding["dry"] = true
+	elif score < 0.4:
+		riding.flooded += 1
 
 
 ## Is p under water? Flooded tiles always; in rain, the tiles next to them
@@ -492,6 +531,24 @@ func push(hand: int) -> Array:
 	return []
 
 
+## The SMS checked: the player said it was fake, or not. Returns
+## phone_result's word; the money and the rating follow from it.
+func settle_phone(said_fake: bool) -> String:
+	if phone_pay.is_empty():
+		return ""
+	var result := Hands.phone_result(phone_pay.sms, said_fake)
+	if result != "fooled":
+		money += int(phone_pay.fare)
+	if result == "wrong":
+		# Called a cheat for nothing: a star less, and a neighbour remembers.
+		stars_sum = maxf(0.0, stars_sum - 1.0)
+		if phone_pay.npc != "":
+			npc_log.append({"id": phone_pay.npc, "delta": -1, "what": "doubted"})
+	phone_log.append(result)
+	phone_pay = {}
+	return result
+
+
 ## Says no: the passenger stays, Rahim Chacha moves on.
 func refuse() -> void:
 	if not offer_for.is_empty():
@@ -506,6 +563,9 @@ func _board(w: Dictionary, fare: int) -> void:
 		"place": w.place, "at": w.place.at, "type": w.type, "fare": fare, "tiles": w.tiles,
 		"since": clock, "eta": fares.eta(w.tiles, base_speed), "flooded": 0, "npc": w.get("npc", ""),
 	}
+	# Boarding under a hood already up in the rain: they stay dry.
+	if hood_up and raining:
+		riding["dry"] = true
 	_top_up()
 	_aim()
 
@@ -521,6 +581,9 @@ func _deliver(events: Array) -> void:
 	var thanks := npc != "" and int(relations.get(npc, 0)) >= 3
 	if thanks:
 		tip += 20
+	# Kept dry under the hood in the rain.
+	if riding.get("dry", false):
+		tip += int(balance.n("rickshaw.hood_tip"))
 	# A festival puts everyone in a giving mood.
 	tip += int(festival.get("tip", 0))
 	if npc != "":
@@ -530,7 +593,14 @@ func _deliver(events: Array) -> void:
 			npc_log.append({"id": npc, "delta": -1, "what": "bad_ride"})
 	if given >= 4.0:
 		good_trips += 1
-	money += riding.fare + tip
+	# Now and then they pay by phone: the fare waits until the SMS is checked.
+	if interactive and _hand_rng.randf() < balance.n("rickshaw.phone_pay_chance"):
+		var fake := _hand_rng.randf() < balance.n("rickshaw.phone_fake_chance")
+		phone_pay = {"fare": riding.fare, "npc": npc, "sms": Hands.phone_sms(_hand_rng, riding.fare, level, fake)}
+		money += tip
+		events.append(PHONE_PAY)
+	else:
+		money += riding.fare + tip
 	trips += 1
 	stars_sum += given
 	trip_time["tiles"] = riding.get("tiles", 0)

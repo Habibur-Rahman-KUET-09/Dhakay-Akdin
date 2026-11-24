@@ -263,3 +263,40 @@ func test_upgrades_bag_and_voice() -> void:
 	var t := BusDay.new(Balance.new(), 1, ["change_bag", "loud_voice"])
 	eq(t.bag_value(), 400, "a bigger bag: 400 of change")
 	near(t.perfect_zone(), 0.12, "a louder voice: a wider perfect call", 1e-6)
+
+
+func test_asking_someone_to_stand_for_a_mother() -> void:
+	var t := _bus()
+	t.riders.clear()
+	_person(t, 1, "elder", false, BusDay.ELDER_SEATS[0])
+	_person(t, 2, "elder", false, BusDay.ELDER_SEATS[1])
+	var tired := _person(t, 3, "normal", false, 10)
+	tired["trait"] = "tired"
+	var phone := _person(t, 4, "normal", false, 11)
+	phone["trait"] = "phone"
+	var mother := _person(t, 5, "needy", true, BusDay.SEATS)
+	mother["need"] = "mother"
+	eq(t.problems(), ["need"], "a mother stands, the front seats rightly taken")
+	eq(t.seat_candidates().size(), 2, "two who could stand")
+	var before := t.rating
+	eq(t.give_seat(4), [BusDay.Event.SEATED], "the young man on his phone gets up")
+	eq(mother.seat, 11, "she sits")
+	check(t.rating > before, "everyone is pleased")
+	eq(t.problems(), [], "all right now")
+	var sick := _person(t, 6, "needy", false, BusDay.SEATS + 1)
+	sick["need"] = "sick"
+	eq(t.give_seat(3), [BusDay.Event.SEATED, BusDay.Event.ARGUMENT], "the tired man is cross")
+	eq(sick.seat, 10, "but gives up his seat")
+	eq(t.last_seat, "tired", "")
+
+
+func test_the_needy_go_to_the_front_seats_first() -> void:
+	var t := _bus()
+	t.riders.clear()
+	check(BusDay.ELDER_SEATS.has(t._place_for({"kind": "needy", "woman": false})), "an ill man to the front")
+	var young := _person(t, 1, "normal", false, BusDay.ELDER_SEATS[0])
+	_person(t, 2, "elder", false, BusDay.ELDER_SEATS[1])
+	_person(t, 3, "needy", false, BusDay.SEATS)
+	eq(t.problems(), ["elder"], "a young man in a front seat while someone ill stands")
+	t.fix("elder")
+	eq(young.seat, BusDay.SEATS, "he stands")

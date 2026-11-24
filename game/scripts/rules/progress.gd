@@ -57,6 +57,8 @@ static func fresh() -> Dictionary:
 		"cosmetics": [],
 		# Where Rahim Chacha rides: "mirpur", or "old_dhaka" once open.
 		"area": "mirpur",
+		# How each one's family feels about them, 0–10 (calls from home).
+		"family": {"rickshaw": 5, "tea": 5, "bus": 5},
 	}
 
 
@@ -83,6 +85,19 @@ func save() -> void:
 	f.store_string(JSON.stringify(data, " "))
 	f.close()
 	DirAccess.rename_absolute(tmp, path)
+
+
+## How `who`'s family feels, 0–10.
+func family(who: String) -> int:
+	return int((data.get("family", {}) as Dictionary).get(who, 5))
+
+
+## Moves `who`'s family feeling by `delta`, kept within 0–10.
+func add_family(who: String, delta: int) -> int:
+	if not data.has("family"):
+		data.family = {"rickshaw": 5, "tea": 5, "bus": 5}
+	data.family[who] = clampi(family(who) + delta, 0, 10)
+	return int(data.family[who])
 
 
 # --- Levels ----------------------------------------------------------------

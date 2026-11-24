@@ -213,3 +213,39 @@ func test_a_neighbour_who_likes_the_stall_tips_more() -> void:
 	eq(t.npc_log.size(), 1, "he remembers")
 	eq(t.npc_log[0].delta, 1, "fondly")
 	eq(t.sold_items.get("banana", 0), 1, "a banana counted")
+
+
+func test_an_order_to_remember() -> void:
+	var t := _stall(["liquor_tea"])
+	t.memory = true
+	t.customers.append({"id": 2, "seat": 1, "kind": "normal", "items": ["banana"], "ordered": ["banana"],
+		"patience": 12.0, "left": 12.0, "bill": 10})
+	t.customers[0]["hide_at"] = 0.0
+	t.customers[1]["hide_at"] = 0.0
+	t.clock = 1.0
+	check(t.order_hidden(t.customers[0]), "no longer shown")
+	t.tap("cup")
+	eq(t.tap("kettle"), [TeaDay.Event.WHO], "ready, but whose was it?")
+	eq(t.tray, ["cup", "kettle"], "still in hand")
+	var patience: float = t.customers[1].left
+	eq(t.give_to(1), [TeaDay.Event.WRONG_PERSON], "not the banana man's")
+	check(t.customers[1].left < patience, "he waits longer")
+	var got := t.give_to(0)
+	check(got.has(TeaDay.Event.SERVED), "the right one")
+	eq(t.remembered, 1, "remembered")
+	eq(t.money, 10 + 1 + int(t.b.n("tea_stall.remember_tip")), "fare, tip and a little more for remembering")
+	check(t.last_served.remembered, "said so")
+
+
+func test_shown_orders_go_to_whoever_waited_longest() -> void:
+	var t := _stall(["liquor_tea"])
+	t.memory = true
+	t.tap("cup")
+	check(t.tap("kettle").has(TeaDay.Event.SERVED), "a shown order is handed over as before")
+
+
+func test_the_regulars_usual_is_never_said() -> void:
+	var t := TeaDay.new(Balance.new(), 1)
+	t.memory = true
+	t._arrive("rahim")
+	check(t.order_hidden(t.customers[0]), "Monir Mama knows what Rahim Chacha takes")

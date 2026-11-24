@@ -2126,5 +2126,217 @@
  "easyDrivingHelp": {
   "bn": "মোড়ে থেমে গেলে রিকশা নিজেই গন্তব্যের পথ ধরবে।",
   "en": "At a junction where it would stop, the rickshaw takes the way to where it is going."
+ },
+ "act_hood": {
+  "bn": "বৃষ্টি! হুড তুলুন",
+  "en": "Rain! Hood up"
+ },
+ "act_hood_hint": {
+  "bn": "আঙুল দিয়ে হুড উপরে টানুন",
+  "en": "Pull the hood up with your finger"
+ },
+ "act_hood_stuck": {
+  "bn": "আটকে গেছে! আঙুল তুলে আবার টানুন",
+  "en": "Stuck! Let go and pull again"
+ },
+ "act_hood_sheet": {
+  "bn": "এবার পলিথিনটা নিচে টেনে পা ঢেকে দিন",
+  "en": "Now pull the plastic down over their legs"
+ },
+ "hoodDry": {
+  "bn": "যাত্রী শুকনো আছেন, বখশিশ +{tip}",
+  "en": "Passenger kept dry: tip +{tip}"
+ },
+ "hoodWet": {
+  "bn": "দেরি হয়ে গেল, যাত্রী ভিজে গেছেন",
+  "en": "Too slow: the passenger got wet"
+ },
+ "act_sms": {
+  "bn": "মোবাইলে ভাড়া",
+  "en": "Paid by phone"
+ },
+ "act_sms_hint": {
+  "bn": "ভাড়া {fare} টাকা। SMS-টা আসল কিনা মিলিয়ে দেখুন: টাকার অঙ্ক, কে পাঠাল, কখন।",
+  "en": "The fare is Tk {fare}. Is the SMS real? Check the amount, who sent it, and when."
+ },
+ "sms_service": {
+  "bn": "টাকাফোন",
+  "en": "TakaPhone"
+ },
+ "sms_service_typo": {
+  "bn": "টাকাফন",
+  "en": "TakaFone"
+ },
+ "sms_number": {
+  "bn": "০১৭১৫-৩৮২৯৪০",
+  "en": "01715-382940"
+ },
+ "sms_body": {
+  "bn": "আপনি {amount} টাকা পেয়েছেন। সময়: {when}। TrxID {trx}",
+  "en": "You have received Tk {amount}. Time: {when}. TrxID {trx}"
+ },
+ "sms_now": {
+  "bn": "এইমাত্র",
+  "en": "just now"
+ },
+ "sms_old": {
+  "bn": "গতকাল সন্ধ্যা ৭:৪০",
+  "en": "yesterday 7:40 pm"
+ },
+ "sms_ok": {
+  "bn": "ঠিক আছে",
+  "en": "Fine"
+ },
+ "sms_fake": {
+  "bn": "ভুয়া!",
+  "en": "Fake!"
+ },
+ "phone_fine": {
+  "bn": "টাকা এসেছে, ঠিক আছে",
+  "en": "The money came: all fine"
+ },
+ "phone_caught": {
+  "bn": "ধরে ফেলেছেন! যাত্রী নগদে {fare} টাকা দিলেন",
+  "en": "Caught it! They paid Tk {fare} in cash"
+ },
+ "phone_fooled": {
+  "bn": "ভুয়া SMS ছিল! {fare} টাকা গেল",
+  "en": "It was a fake SMS! Tk {fare} lost"
+ },
+ "phone_wrong": {
+  "bn": "SMS আসল ছিল, যাত্রী মনে কষ্ট পেলেন (এক তারা কম)",
+  "en": "The SMS was real: the passenger was hurt (a star less)"
+ },
+ "fix_need": {
+  "bn": "বসার জায়গা করে দিন",
+  "en": "Find them a seat"
+ },
+ "act_seat": {
+  "bn": "কাকে উঠতে বলবেন?",
+  "en": "Whom will you ask to stand?"
+ },
+ "act_seat_hint": {
+  "bn": "{who} দাঁড়িয়ে আছেন। একজনকে উঠে বসতে দিতে বলুন।",
+  "en": "{who} is standing. Ask someone to give up their seat."
+ },
+ "need_sick": {
+  "bn": "একজন অসুস্থ যাত্রী",
+  "en": "A passenger who is ill"
+ },
+ "need_mother": {
+  "bn": "কোলে শিশু নিয়ে একজন মা",
+  "en": "A mother with a baby"
+ },
+ "trait_phone": {
+  "bn": "ফোনে ব্যস্ত একজন তরুণ",
+  "en": "A young man busy on his phone"
+ },
+ "trait_tired": {
+  "bn": "সারাদিন খেটে আসা ক্লান্ত একজন",
+  "en": "A man worn out after a day's work"
+ },
+ "trait_reading": {
+  "bn": "বই পড়ছে এমন এক ছাত্র",
+  "en": "A student reading a book"
+ },
+ "trait_plain": {
+  "bn": "জানালার পাশের এক ভদ্রলোক",
+  "en": "A gentleman by the window"
+ },
+ "seat_phone": {
+  "bn": "তরুণটি হেসে উঠে দিল, সবাই খুশি!",
+  "en": "He got up with a smile: everyone is pleased!"
+ },
+ "seat_plain": {
+  "bn": "ভদ্রলোক খুশি মনে উঠে দিলেন",
+  "en": "The gentleman gladly got up"
+ },
+ "seat_reading": {
+  "bn": "ছাত্রটি বই বন্ধ করে উঠে দিল",
+  "en": "The student closed his book and got up"
+ },
+ "seat_tired": {
+  "bn": "সারাদিন খেটে আসা মানুষ, রেগে গেলেন! একটু ঝগড়া হলো",
+  "en": "After a long day's work he got cross: a bit of an argument"
+ },
+ "orderHidden": {
+  "bn": "কী যেন চেয়েছিলেন?",
+  "en": "What was it again?"
+ },
+ "whoOrdered": {
+  "bn": "কে চেয়েছিলেন? তাঁর কার্ডে চাপুন",
+  "en": "Whose was it? Tap their card"
+ },
+ "memoryTip": {
+  "bn": "ভিড়ের সময় অর্ডার একবার বলেই মিলিয়ে যায়। মনে রাখুন, ঠিকজনকে দিলে বখশিশ বেশি। রহিম চাচা আর বাবুর রোজকার অর্ডার তো জানেনই!",
+  "en": "In the rush an order is said once, then it is gone. Remember it: the right person tips more. You know Rahim Chacha's and Babu's usual!"
+ },
+ "wrongPerson": {
+  "bn": "উনি এটা চাননি! আবার দেখুন",
+  "en": "That is not what they asked for! Look again"
+ },
+ "servedRemembered": {
+  "bn": "মনে রেখেছেন! {bill} টাকা, বখশিশ {tip}",
+  "en": "Remembered! Tk {bill}, tip {tip}"
+ },
+ "act_call": {
+  "bn": "বাসা থেকে ফোন",
+  "en": "A call from home"
+ },
+ "act_call_hint": {
+  "bn": "",
+  "en": ""
+ },
+ "call_from": {
+  "bn": "{who} ফোন করেছে",
+  "en": "{who} is calling"
+ },
+ "caller_sumi": {
+  "bn": "সুমি",
+  "en": "Sumi"
+ },
+ "caller_rokeya": {
+  "bn": "রোকেয়া",
+  "en": "Rokeya"
+ },
+ "caller_sister": {
+  "bn": "বড় আপা (গ্রাম থেকে)",
+  "en": "Big sister (from the village)"
+ },
+ "caller_babu_ma": {
+  "bn": "মা (গ্রাম থেকে)",
+  "en": "Ma (from the village)"
+ },
+ "call_go": {
+  "bn": "এখনই বাসায় যাই (আজকের কাজ শেষ)",
+  "en": "Go home now (the day ends)"
+ },
+ "call_later": {
+  "bn": "কাজ শেষে দেখব",
+  "en": "I'll see after work"
+ },
+ "call_send": {
+  "bn": "এখনই টাকা পাঠাই ({n} টাকা)",
+  "en": "Send money now (Tk {n})"
+ },
+ "call_talk": {
+  "bn": "একটু কথা বলি",
+  "en": "Talk for a bit"
+ },
+ "call_busy": {
+  "bn": "এখন ব্যস্ত, পরে ফোন দিব",
+  "en": "Busy now, I'll call later"
+ },
+ "familyUp": {
+  "bn": "পরিবারের মন ভালো হলো ({n}/10)",
+  "en": "The family is pleased ({n}/10)"
+ },
+ "familyDown": {
+  "bn": "পরিবারের মন খারাপ হলো ({n}/10)",
+  "en": "The family is let down ({n}/10)"
+ },
+ "familyLine": {
+  "bn": "পরিবারের মন: {n}/10",
+  "en": "Family: {n}/10"
  }
 }

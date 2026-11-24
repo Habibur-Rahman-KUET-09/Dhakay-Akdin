@@ -27,6 +27,8 @@ enum Event {
 	RAIN_START,
 	RAIN_END,
 	DAY_OVER,
+	WHO, ## ready, but whose order was it? Tap them (give_to)
+	WRONG_PERSON, ## handed to someone who did not order it
 }
 
 ## What can be ordered, in the order shown on the counter.
@@ -97,6 +99,14 @@ var interactive := false
 var perfect := 0
 var _quality: Array = []
 var _hand_rng := RandomNumberGenerator.new()
+## Remembering orders (with the hands on): in the rush an order is said
+## once and shown for a few seconds, then it is up to Monir Mama to
+## remember it; Rahim Chacha and Babu are never asked, he knows their
+## usual. Handing it to the right person (give_to) earns a little more;
+## the wrong one costs them patience. How many were remembered today.
+var memory := false
+var remembered := 0
+var mixed_up := 0
 
 
 func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") -> void:
@@ -270,14 +280,24 @@ func _arrive(regular := "") -> bool:
 	var npc := ""
 	if regular == "" and not npc_pool.is_empty() and rng.randf() < 0.2:
 		npc = npc_pool.pop_back()
-	customers.append({
+	var c := {
 		"id": _next_id, "seat": seat, "kind": kind, "items": items.duplicate(), "ordered": items,
 		"patience": patience, "left": patience, "bill": bill, "npc": npc,
 		# Rahim Chacha takes two spoons; Babu chews his paan with zarda.
 		"sugar": 2 if regular == "rahim" else _hand_rng.randi_range(1, 3),
 		"zarda": true if regular == "babu" else _hand_rng.randf() < 0.5,
-	})
+	}
+	if memory and regular != "":
+		c["hide_at"] = clock
+	elif memory and rush():
+		c["hide_at"] = clock + b.n("tea_stall.order_show_s")
+	customers.append(c)
 	return true
+
+
+## Whether this customer's order is no longer shown (to be remembered).
+func order_hidden(c: Dictionary) -> bool:
+	return c.has("hide_at") and clock >= float(c.hide_at)
 
 
 func _pick(weights: Dictionary) -> String:
@@ -402,13 +422,34 @@ func tap(step: String, quality := -1.0) -> Array:
 	return events
 
 
-## Hands over what is in the tray to whoever has waited longest for it.
+## Hands over what is in the tray to whoever has waited longest for it
+## (among those whose order is still shown; when only remembered orders
+## want it, the tray stays in hand: WHO).
 func give() -> Array:
 	var item := made()
 	if item == "":
 		return []
+	var who: Dictionary = {}
+	var hidden := false
+	for c in customers:
+		if not c.items.has(item):
+			continue
+		if order_hidden(c):
+			hidden = true
+		elif who.is_empty() or c.left < who.left:
+			who = c
+	if who.is_empty() and hidden:
+		return [Event.WHO]
 	tray.clear()
-	# How well it was made by hand (−1: not by hand at all).
+	var q := _made_quality()
+	if who.is_empty():
+		return [Event.NOBODY_WANTS]
+	return _hand(item, who, q)
+
+
+## How well the thing in hand was made by hand (−1: not by hand at all);
+## forgotten once asked.
+func _made_quality() -> float:
 	var q := -1.0
 	if not _quality.is_empty():
 		q = 0.0
@@ -416,12 +457,38 @@ func give() -> Array:
 			q += float(x)
 		q /= _quality.size()
 	_quality.clear()
+	return q
+
+
+## Hands what is in the tray to whoever sits in `seat`: right, and it is
+## theirs (a little more if it had to be remembered); wrong, and they
+## wait longer for it, and it stays in hand.
+func give_to(seat: int) -> Array:
+	var item := made()
+	if item == "":
+		return []
 	var who: Dictionary = {}
 	for c in customers:
-		if c.items.has(item) and (who.is_empty() or c.left < who.left):
+		if c.seat == seat:
 			who = c
 	if who.is_empty():
-		return [Event.NOBODY_WANTS]
+		return []
+	if not who.items.has(item):
+		who.left = maxf(1.0, who.left - 2.0)
+		mixed_up += 1
+		return [Event.WRONG_PERSON]
+	tray.clear()
+	var q := _made_quality()
+	if order_hidden(who):
+		remembered += 1
+		var extra := int(b.n("tea_stall.usual_tip" if who.kind in ["rahim", "babu"] else "tea_stall.remember_tip"))
+		money += extra
+		tips += extra
+		who["remembered"] = int(who.get("remembered", 0)) + extra
+	return _hand(item, who, q)
+
+
+func _hand(item: String, who: Dictionary, q: float) -> Array:
 	who.items.erase(item)
 	money += price(item)
 	sold += 1
@@ -435,7 +502,7 @@ func give() -> Array:
 		# A badly made cup spoils it, however quick.
 		if q >= 0.0 and q < 0.35:
 			glad = false
-		var tip := 0
+		var tip := int(who.get("remembered", 0))
 		var just_right := glad and q >= 0.85
 		if just_right:
 			perfect += 1
@@ -457,7 +524,8 @@ func give() -> Array:
 			tips += 20
 		if npc != "" and glad:
 			npc_log.append({"id": npc, "delta": 1, "what": "served"})
-		last_served = {"kind": who.kind, "bill": who.bill, "tip": tip, "happy": glad, "npc": npc, "thanks": thanks, "perfect": just_right}
+		last_served = {"kind": who.kind, "bill": who.bill, "tip": tip, "happy": glad, "npc": npc, "thanks": thanks, "perfect": just_right,
+			"remembered": int(who.get("remembered", 0)) > 0}
 		events.append(Event.SERVED)
 	return events
 

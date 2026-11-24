@@ -198,3 +198,46 @@ func test_pushing_the_crowd_back() -> void:
 	eq(t.push_in(), [BusDay.Event.BOARDED, BusDay.Event.PUSHED], "one more on")
 	eq(t.riders.size(), before + 1, "aboard")
 	eq(t.jam_waiting, 1, "one still outside")
+
+
+func test_the_hood_quick_or_slow() -> void:
+	near(Hands.hood_score(2.0), 1.0, "within 3 seconds")
+	near(Hands.hood_score(5.5), 0.5, "half by 5.5")
+	near(Hands.hood_score(9.0), 0.0, "none by 8")
+
+
+func test_the_phone_sms_real_or_fake() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4
+	var real := Hands.phone_sms(rng, 80, 1, false)
+	eq([real.amount, real.from_service, real.name_ok, real.today], [80, true, true, true], "a real one is all right")
+	for i in 30:
+		var f := Hands.phone_sms(rng, 80, 1, true)
+		eq(f.kind, "amount", "at level 1 only the amount is wrong")
+		check(int(f.amount) != 80, "the amount is off (%d)" % f.amount)
+	var kinds := {}
+	for i in 200:
+		kinds[Hands.phone_sms(rng, 80, 9, true).kind] = true
+	eq(kinds.size(), 4, "all four tricks by level 8")
+	eq(Hands.phone_result(real, false), "fine", "")
+	eq(Hands.phone_result(real, true), "wrong", "")
+	var fake := Hands.phone_sms(rng, 80, 1, true)
+	eq(Hands.phone_result(fake, true), "caught", "")
+	eq(Hands.phone_result(fake, false), "fooled", "")
+
+
+func test_settling_a_phone_payment() -> void:
+	var d := Day.new(RoadMap.load_area("mirpur"), Balance.new(), 3)
+	var rng := RandomNumberGenerator.new()
+	d.phone_pay = {"fare": 60, "npc": "", "sms": Hands.phone_sms(rng, 60, 1, true)}
+	var before := d.money
+	eq(d.settle_phone(true), "caught", "spotted")
+	eq(d.money - before, 60, "paid in cash")
+	d.phone_pay = {"fare": 60, "npc": "", "sms": Hands.phone_sms(rng, 60, 1, true)}
+	eq(d.settle_phone(false), "fooled", "taken in")
+	eq(d.money - before, 60, "nothing more")
+	d.stars_sum = 4.0
+	d.phone_pay = {"fare": 60, "npc": "", "sms": Hands.phone_sms(rng, 60, 1, false)}
+	eq(d.settle_phone(true), "wrong", "a real one called fake")
+	near(d.stars_sum, 3.0, "a star less")
+	eq(d.money - before, 120, "still paid")

@@ -633,3 +633,34 @@ func test_short_rides_in_the_first_days() -> void:
 	var d := Day.new(_mirpur(), Balance.new(), 3, "", 5)
 	for x in d.waiting:
 		check(x.tiles >= 5, "at least 5 tiles")
+
+
+func test_the_hood_in_the_rain() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 5)
+	d.interactive = true
+	var w: Dictionary = d.waiting[0]
+	d.driver.cell = w.at
+	d.driver.progress = 0.0
+	d.update(0.01)
+	d.accept()
+	d.start_rain()
+	var got := []
+	for i in 5:
+		got.append_array(d.update(0.05))
+	eq(got.count(Day.HOOD), 1, "the hood is asked for once")
+	d.raise_hood(1.0)
+	check(d.hood_up, "up")
+	check(d.riding.get("dry", false), "quick: the passenger stays dry")
+	d.update(0.05)
+	near(d.speed_factor, d.balance.n("rickshaw.hood_drag"), "a little slower under the hood", 1e-3)
+	d.riding.erase("dry")
+	d.raise_hood(0.1)
+	eq(int(d.riding.flooded), 1, "slow: they got wet")
+
+
+func test_without_the_hands_the_hood_goes_up_by_itself() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 5)
+	d.start_rain()
+	var got := d.update(0.05)
+	check(got.has(Day.RAIN_START) and not got.has(Day.HOOD), "no asking")
+	check(d.hood_up, "up by itself")

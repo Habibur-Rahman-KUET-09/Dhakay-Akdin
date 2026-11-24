@@ -30,6 +30,8 @@ const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
 const Weather = preload("res://scripts/world/weather.gd")
+const CallAct = preload("res://scripts/ui/activities/call.gd")
+const HomeCall = preload("res://scripts/rules/home_call.gd")
 
 ## Where the bench and its four seats are, in the stall's own space
 ## (the stall faces -Z, the street).
@@ -63,10 +65,17 @@ var _card_titles: Array[Label] = []
 var _card_items: Array[Label] = []
 var _card_bars: Array[ProgressBar] = []
 var _seated := {}
+## The order-memory tip, said once a day.
+var _memory_told := false
 var _rahim_rickshaw: Node3D
 var _layer: CanvasLayer
 ## The hand activity open over the counter, if any.
 var _activity: Activity
+## A call from home today: when (on the day's clock; -1 when none, or
+## once it has rung), and how it went, for the day's end.
+var _call_at := -1.0
+var _call_rng := RandomNumberGenerator.new()
+var _call_result := {}
 var _status: Label
 var _tray: Label
 var _give: Button
@@ -92,6 +101,11 @@ func _ready() -> void:
 	progress = Progress.new(b)
 	day = TeaDay.new(b, -1, progress.data.tea.upgrades, progress.date())
 	day.interactive = Activity.wanted()
+	day.memory = day.interactive
+	_call_rng.randomize()
+	var call_share := HomeCall.plan(_call_rng, progress.level())
+	if call_share >= 0.0:
+		_call_at = call_share * day.day_seconds
 	var ids := neighbours.ids()
 	ids.shuffle()
 	day.npc_pool = ids.slice(0, 6)
@@ -418,6 +432,9 @@ func _build_hud() -> void:
 		bar.add_theme_stylebox_override("fill", StyleBoxFlat.new())
 		col.add_child(bar)
 		card.visible = false
+		# With a cup ready, tapping a card hands it to that customer.
+		card.mouse_filter = Control.MOUSE_FILTER_STOP
+		card.gui_input.connect(_on_card.bind(i))
 		root.add_child(card)
 		_cards.append(card)
 		_card_titles.append(title)
@@ -496,6 +513,9 @@ func _process(dt: float) -> void:
 	_handle(events)
 	if not is_processing():
 		return
+	if _call_at >= 0.0 and day.clock >= _call_at and _activity == null:
+		_call_at = -1.0
+		_ring_home()
 	if _notice_left > 0.0:
 		_notice_left -= dt
 		if _notice_left <= 0.0:
@@ -522,6 +542,9 @@ func _handle(events: Array) -> void:
 			_say(strings.t("babuLine", {"level": int(b.n("unlocks.bus"))}), Look.SKY, 5.0)
 		elif last.get("thanks", false):
 			_say(strings.t("npcThanks", {"name": neighbours.name_of(last.npc, strings.lang)}), Look.PARROT, 3.0)
+		elif last.get("remembered", false):
+			_say(strings.t("servedRemembered", {"bill": last.bill, "tip": last.tip}), Look.PARROT)
+			_voice.say("tea_happy")
 		elif last.get("perfect", false):
 			_say(strings.t("servedPerfect", {"bill": last.bill, "tip": last.tip}), Look.PARROT)
 			_voice.say("tea_happy")
@@ -545,6 +568,14 @@ func _handle(events: Array) -> void:
 	if events.has(TeaDay.Event.WRONG_STEP):
 		_say(strings.t("wrongStep"), Look.VERMILION, 2.0)
 		_voice.say("tea_wrong")
+	if events.has(TeaDay.Event.WHO):
+		_say(strings.t("whoOrdered"), Look.SKY, 2.5)
+		if not _memory_told:
+			_memory_told = true
+			_say(strings.t("memoryTip"), Look.SKY, 5.0)
+	if events.has(TeaDay.Event.WRONG_PERSON):
+		_say(strings.t("wrongPerson"), Look.VERMILION, 2.0)
+		Activity.buzz(60)
 	if events.has(TeaDay.Event.NOBODY_WANTS):
 		_say(strings.t("nobodyWants"), Look.VERMILION, 2.0)
 	if events.has(TeaDay.Event.KETTLE_EMPTY):
@@ -646,8 +677,45 @@ func _kettle_filled() -> float:
 	return 1.0 - clampf(left / full, 0.0, 1.0)
 
 
+## The phone rings: someone from home. The answer moves the family's
+## feeling, and may send money home.
+func _ring_home() -> void:
+	var call := HomeCall.new().pick("tea", _call_rng, progress.family("tea"))
+	if call.is_empty():
+		return
+	var act := CallAct.new()
+	act.call = call
+	_open(act, "act_call", _answered.bind(act))
+
+
+func _answered(_score: float, act) -> void:
+	var options: Dictionary = act.call.get("options", {})
+	var option: String = act.option
+	if option == "" and not options.is_empty():
+		# Not answered: as if busy (the last answer).
+		option = str(options.keys().back())
+	var e := HomeCall.effect(act.call, option)
+	var now := progress.add_family("tea", e.family)
+	day.money -= e.cost
+	_call_result = {"family": now, "delta": e.family}
+	print("[home] call ", act.call.get("id", ""), ": ", option, ", family ", now)
+	if e.family > 0:
+		_say(strings.t("familyUp", {"n": now}), Look.PARROT, 3.0)
+	elif e.family < 0:
+		_say(strings.t("familyDown", {"n": now}), Look.VERMILION, 3.0)
+
+
 func _on_give() -> void:
 	_handle(day.give())
+	_refresh()
+
+
+## A tap on a customer's card: hand them what is ready.
+func _on_card(event: InputEvent, seat: int) -> void:
+	var pressed := (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+	if not pressed or day.made() == "":
+		return
+	_handle(day.give_to(seat))
 	_refresh()
 
 
@@ -684,7 +752,8 @@ func _refresh() -> void:
 		var names := PackedStringArray()
 		for it in c.items:
 			names.append(strings.t("item_" + it))
-		_card_items[i].text = "\n".join(names)
+		# An order to remember: shown for a moment, then only "?".
+		_card_items[i].text = strings.t("orderHidden") if day.order_hidden(c) else "\n".join(names)
 		var share: float = clampf(c.left / c.patience, 0.0, 1.0)
 		_card_bars[i].value = share
 		var fill := StyleBoxFlat.new()
@@ -809,6 +878,8 @@ func _end_day() -> void:
 		lines.append(strings.t("teaLost", {"n": day.lost}))
 	if day.tips > 0:
 		lines.append(strings.t("teaTips", {"n": day.tips}))
+	if not _call_result.is_empty():
+		lines.append(strings.t("familyLine", {"n": _call_result.family}))
 	var end := DayEnd.new()
 	end.setup(strings, b, progress, got, {
 		"title": strings.t("dayOver"),

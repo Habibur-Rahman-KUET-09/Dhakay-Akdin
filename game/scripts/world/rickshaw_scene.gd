@@ -22,6 +22,10 @@ const Activity = preload("res://scripts/ui/activity.gd")
 const Haggle = preload("res://scripts/ui/activities/haggle.gd")
 const Pump = preload("res://scripts/ui/activities/pump.gd")
 const Push = preload("res://scripts/ui/activities/push.gd")
+const Hood = preload("res://scripts/ui/activities/hood.gd")
+const Sms = preload("res://scripts/ui/activities/sms.gd")
+const CallAct = preload("res://scripts/ui/activities/call.gd")
+const HomeCall = preload("res://scripts/rules/home_call.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
@@ -85,6 +89,11 @@ var _key_pedal := false
 var _pedal_down_at := {}
 ## The way on (shift.next_turn), worked out again only when the rickshaw
 ## moves to another tile or the destination changes.
+## A call from home today: when (on the day's clock; -1 when none, or
+## once it has rung), and how it went, for the day's end.
+var _call_at := -1.0
+var _call_rng := RandomNumberGenerator.new()
+var _call_result := {}
 var _way := {"turn": -1, "tiles": -1}
 var _way_key := []
 var _said_way := []
@@ -120,6 +129,11 @@ func _ready() -> void:
 	shift = Day.new(map, b, -1, progress.date(), Day.trip_for_level(progress.level()))
 	shift.interactive = Activity.wanted()
 	shift.follow_route = Driving.easy()
+	shift.level = progress.level()
+	_call_rng.randomize()
+	var call_share := HomeCall.plan(_call_rng, progress.level())
+	if call_share >= 0.0:
+		_call_at = call_share * shift.day_seconds
 	_target_money = int(b.n("rickshaw.daily_target"))
 	shift.base_speed *= progress.speed_factor()
 	shift.energy_factor = progress.energy_factor()
@@ -470,6 +484,9 @@ func _process(dt: float) -> void:
 	_handle(events)
 	if not is_processing():
 		return
+	if _call_at >= 0.0 and shift.clock >= _call_at and _activity == null:
+		_call_at = -1.0
+		_ring_home()
 	if events.has(Driver.Event.WRONG_WAY) and not events.has(Day.POLICE):
 		_say(strings.t("rickshawWrongWay"), Look.VERMILION)
 	if events.has(Driver.Event.WAITING):
@@ -688,6 +705,10 @@ func _handle(events: Array) -> void:
 		_rain_sound.play()
 		if not shift.riding.is_empty():
 			_voice.say("rain")
+	if events.has(Day.HOOD):
+		_raise_hood()
+	if events.has(Day.PHONE_PAY):
+		_check_sms()
 	if events.has(Day.RAIN_END):
 		_say(strings.t("rainEnd"), Look.SKY, 2.5)
 	if events.has(Day.DAY_OVER):
@@ -903,6 +924,72 @@ func _pumped(_score: float, act: Pump) -> void:
 		_say(strings.t("pumpOk"), Look.PARROT, 2.0)
 
 
+## The phone rings: someone from home. The answer moves the family's
+## feeling, may send money home, may end the day (going home).
+func _ring_home() -> void:
+	var call := HomeCall.new().pick("rickshaw", _call_rng, progress.family("rickshaw"))
+	if call.is_empty():
+		return
+	var act := CallAct.new()
+	act.call = call
+	_open(act, "act_call", _answered.bind(act))
+
+
+func _answered(_score: float, act) -> void:
+	var options: Dictionary = act.call.get("options", {})
+	var option: String = act.option
+	if option == "" and not options.is_empty():
+		# Not answered: as if busy (the last answer).
+		option = str(options.keys().back())
+	var e := HomeCall.effect(act.call, option)
+	var now := progress.add_family("rickshaw", e.family)
+	shift.money -= e.cost
+	_call_result = {"family": now, "delta": e.family}
+	print("[home] call ", act.call.get("id", ""), ": ", option, ", family ", now)
+	if e.family > 0:
+		_say(strings.t("familyUp", {"n": now}), Look.PARROT, 3.0)
+	elif e.family < 0:
+		_say(strings.t("familyDown", {"n": now}), Look.VERMILION, 3.0)
+	if e.end_day:
+		shift.clock = shift.day_seconds
+
+## Paid by phone: check the SMS before they walk off.
+func _check_sms() -> void:
+	if _activity != null:
+		_sms_checked(1.0, null)
+		return
+	var act := Sms.new()
+	act.sms = shift.phone_pay.sms
+	act.fare = int(shift.phone_pay.fare)
+	_open(act, "act_sms", _sms_checked.bind(act))
+
+
+func _sms_checked(_score: float, act) -> void:
+	var fare := int(shift.phone_pay.get("fare", 0))
+	var result := shift.settle_phone(act != null and act.said_fake)
+	print("[rickshaw] phone pay: ", result)
+	var colour: Color = {"fine": Look.PARROT, "caught": Look.PARROT, "fooled": Look.VERMILION, "wrong": Look.VERMILION}.get(result, Look.SKY)
+	_say(strings.t("phone_" + result, {"fare": fare}), colour, 3.0)
+
+
+## Rain on the passenger: up with the hood, and the plastic over them.
+func _raise_hood() -> void:
+	if _activity != null:
+		# Busy with something else: the hood goes up anyway, slowly.
+		shift.raise_hood(0.5)
+		return
+	var act := Hood.new()
+	_open(act, "act_hood", _hood_raised)
+
+
+func _hood_raised(score: float) -> void:
+	shift.raise_hood(score)
+	if score >= 0.7:
+		_say(strings.t("hoodDry", {"tip": int(shift.balance.n("rickshaw.hood_tip"))}), Look.PARROT, 2.5)
+	elif score < 0.4:
+		_say(strings.t("hoodWet"), Look.SKY, 2.5)
+
+
 ## Stuck in deep water: get down and push.
 func _push_out() -> void:
 	if _activity != null:
@@ -1022,6 +1109,8 @@ func _end_day() -> void:
 		lines.append(strings.t("finesPaid", {"fines": shift.fines}))
 	if shift.teas > 0:
 		lines.append(strings.t("teaLine", {"n": shift.teas, "money": shift.tea_spent}))
+	if not _call_result.is_empty():
+		lines.append(strings.t("familyLine", {"n": _call_result.family}))
 	var met := shift.money >= _target_money
 	print("[day] rickshaw: %d trips, %.1f s a trip on average" % [shift.trips, shift.average_trip_seconds()])
 	# Into the save: savings, school fee, fund, XP, the record.

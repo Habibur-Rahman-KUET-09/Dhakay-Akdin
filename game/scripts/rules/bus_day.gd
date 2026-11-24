@@ -120,6 +120,14 @@ var loose: Array = []
 var jam_waiting := 0
 var _go := false
 var _go_wait := 0.0
+## With the hands on: now and then someone who needs a seat gets on (ill,
+## or a mother with a baby: "needy"), and everyone seated shows what they
+## are like ("phone", "tired", "reading", "plain"), so Babu can choose whom
+## to ask to stand. Own dice, so the rest of the day plays the same.
+var _seat_rng := RandomNumberGenerator.new()
+## Money sent home by phone today (a call from home), out of the day's.
+var sent_home := 0
+var last_seat := ""
 
 
 func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
@@ -127,8 +135,10 @@ func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
 	upgrades = owned
 	if seed_value >= 0:
 		rng.seed = seed_value
+		_seat_rng.seed = seed_value + 31
 	else:
 		rng.randomize()
+		_seat_rng.randomize()
 	route = (b.at("bus.route") as Array).duplicate()
 	trips = int(b.n("bus.trips_per_day"))
 	# The change bag: small notes worth 200 (4×5, 5×10, 4×20, 1×50); twice
@@ -170,7 +180,7 @@ func bag_value() -> int:
 
 ## What the day has made: the bag's growth, bonuses, less fines.
 func earned() -> int:
-	return bag_value() - bag_start + bonus - fines
+	return bag_value() - bag_start + bonus - fines - sent_home
 
 
 ## Fare from stop a to stop b.
@@ -369,10 +379,31 @@ func _board_at(i: int, n: int) -> int:
 			"note": _note_for(f if kind != "student" else int(f * b.n("bus.student_share"))),
 			"paid": false, "owed": 0, "seat": -1, "npc": npc,
 		}
+		if interactive:
+			_who_they_are(r)
 		r.seat = _place_for(r)
 		riders.append(r)
 		boarded += 1
 	return n
+
+
+## Needy or not, and what they are like in their seat.
+func _who_they_are(r: Dictionary) -> void:
+	if r.kind == "normal" and r.npc == "" and _seat_rng.randf() < b.n("bus.needy_chance"):
+		r.kind = "needy"
+		r["need"] = "mother" if _seat_rng.randf() < 0.5 else "sick"
+		if r.need == "mother":
+			r.woman = true
+	if r.kind == "student":
+		r["trait"] = "reading"
+	else:
+		var x := _seat_rng.randf()
+		r["trait"] = "phone" if x < 0.4 else ("tired" if x < 0.75 else "plain")
+
+
+## The elderly and the needy come first for the front seats.
+static func _first(r: Dictionary) -> bool:
+	return r.kind == "elder" or r.kind == "needy"
 
 
 func _taken() -> Dictionary:
@@ -389,14 +420,14 @@ func _taken() -> Dictionary:
 func _place_for(r: Dictionary) -> int:
 	var taken := _taken()
 	var order := []
-	if r.kind == "elder":
+	if _first(r):
 		order = ELDER_SEATS.duplicate()
 	if r.woman:
 		order += WOMEN_SEATS
 	for s in SEATS:
 		if not ELDER_SEATS.has(s) and not WOMEN_SEATS.has(s):
 			order.append(s)
-	if not r.woman and r.kind != "elder":
+	if not r.woman and not _first(r):
 		order += WOMEN_SEATS + ELDER_SEATS
 	for s in order:
 		if not taken.has(s):
@@ -413,13 +444,69 @@ func _place_for(r: Dictionary) -> int:
 func problems() -> Array:
 	var out := []
 	var standing := riders.filter(func(r): return r.seat >= SEATS or r.seat < 0)
-	if standing.any(func(r): return r.kind == "elder") \
-			and riders.any(func(r): return ELDER_SEATS.has(r.seat) and r.kind != "elder"):
+	if standing.any(func(r): return _first(r)) \
+			and riders.any(func(r): return ELDER_SEATS.has(r.seat) and not _first(r)):
 		out.append("elder")
 	if standing.any(func(r): return r.woman) \
 			and riders.any(func(r): return WOMEN_SEATS.has(r.seat) and not r.woman):
 		out.append("women")
+	# Someone who needs a seat standing, the front seats rightly taken:
+	# Babu must ask someone else to stand (give_seat).
+	if not out.has("elder") and standing.any(func(r): return r.kind == "needy") \
+			and not seat_candidates().is_empty():
+		out.append("need")
 	return out
+
+
+## Whom Babu could ask to stand for someone who needs the seat: up to
+## three seated, ordinary passengers (not the elderly, the needy, or a
+## woman in a women's seat), different kinds of people where possible.
+func seat_candidates() -> Array:
+	var out := []
+	var seen := {}
+	for pass_i in 2:
+		for r in riders:
+			if r.seat < 0 or r.seat >= SEATS or _first(r) or (r.woman and WOMEN_SEATS.has(r.seat)) or out.has(r):
+				continue
+			var t: String = r.get("trait", "plain")
+			if pass_i == 0 and seen.has(t):
+				continue
+			seen[t] = true
+			out.append(r)
+			if out.size() == 3:
+				return out
+	return out
+
+
+## Asks rider `id` to stand for the needy passenger. How it goes depends
+## on who it was (last_seat): glad to ("phone", "plain"), fine ("reading"),
+## or cross after a long day's work ("tired": an argument).
+func give_seat(id: int) -> Array:
+	var needy := {}
+	for r in riders:
+		if r.kind == "needy" and (r.seat >= SEATS or r.seat < 0):
+			needy = r
+			break
+	var who := {}
+	for r in seat_candidates():
+		if r.id == id:
+			who = r
+	if needy.is_empty() or who.is_empty():
+		return []
+	var seat: int = who.seat
+	who.seat = needy.seat
+	needy.seat = seat
+	last_seat = who.get("trait", "plain")
+	match last_seat:
+		"tired":
+			rating = clampf(rating - 0.1, 1.0, 5.0)
+			arguments += 1
+			return [Event.SEATED, Event.ARGUMENT]
+		"reading":
+			rating = clampf(rating + 0.1, 1.0, 5.0)
+		_:
+			rating = clampf(rating + 0.2, 1.0, 5.0)
+	return [Event.SEATED]
 
 
 ## Babu moves whoever has the wrong seat to stand, and gives it to the
@@ -429,7 +516,7 @@ func fix(problem: String) -> Array:
 	var wrong: Dictionary = {}
 	var right: Dictionary = {}
 	for r in riders:
-		var belongs: bool = r.kind == "elder" if problem == "elder" else r.woman
+		var belongs: bool = _first(r) if problem == "elder" else r.woman
 		if seats.has(r.seat) and not belongs and wrong.is_empty():
 			wrong = r
 		elif (r.seat >= SEATS or r.seat < 0) and belongs and right.is_empty():

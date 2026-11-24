@@ -18,6 +18,7 @@ const Activity = preload("res://scripts/ui/activity.gd")
 const Hands = preload("res://scripts/rules/activities.gd")
 const Notes = preload("res://scripts/ui/activities/notes.gd")
 const Door = preload("res://scripts/ui/activities/door.gd")
+const Seat = preload("res://scripts/ui/activities/seat.gd")
 const Crowd = preload("res://scripts/ui/activities/crowd.gd")
 const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
@@ -27,6 +28,8 @@ const Graphics = preload("res://scripts/ui/graphics.gd")
 const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
+const CallAct = preload("res://scripts/ui/activities/call.gd")
+const HomeCall = preload("res://scripts/rules/home_call.gd")
 
 ## How fast the street goes by, metres a second, between stops.
 const SPEED := 9.0
@@ -87,6 +90,11 @@ var _voice: Voice
 ## The hand activity open, if any; the slap pad on the bus's side and the
 ## times of the last slaps; the notes in his hand to sort.
 var _activity: Activity
+## A call from home today: when (on the day's clock; -1 when none, or
+## once it has rung), and how it went, for the day's end.
+var _call_at := -1.0
+var _call_rng := RandomNumberGenerator.new()
+var _call_result := {}
 var _slap_button: Button
 var _slaps: Array = []
 var _notes_button: Button
@@ -110,6 +118,10 @@ func _ready() -> void:
 	progress = Progress.new(b)
 	bus = BusDay.new(b, -1, progress.data.bus.upgrades)
 	bus.interactive = Activity.wanted()
+	_call_rng.randomize()
+	var call_share := HomeCall.plan(_call_rng, progress.level())
+	if call_share >= 0.0:
+		_call_at = call_share * bus.target_time * bus.trips
 	var ids := neighbours.ids()
 	ids.shuffle()
 	bus.npc_pool = ids.slice(0, 6)
@@ -462,7 +474,7 @@ func _build_hud() -> void:
 	# Seat problems: a button for each.
 	_problem_row = HBoxContainer.new()
 	_problem_row.add_theme_constant_override("separation", 6)
-	for problem in ["elder", "women"]:
+	for problem in ["elder", "women", "need"]:
 		var fix := Look.button(strings.t("fix_" + problem), Look.YELLOW.darkened(0.25), 14)
 		fix.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		fix.pressed.connect(_on_fix.bind(problem))
@@ -638,6 +650,9 @@ func _process(dt: float) -> void:
 	_handle(events)
 	if not is_processing():
 		return
+	if _call_at >= 0.0 and bus.clock >= _call_at and _activity == null:
+		_call_at = -1.0
+		_ring_home()
 	# The street slides by; slower into a stop, still while stopped.
 	var want := 0.0
 	if not bus.at_stop and bus.locked_left <= 0.0:
@@ -781,10 +796,74 @@ func _sorted(_score: float, act: Notes) -> void:
 
 
 func _on_fix(problem: String) -> void:
+	if problem == "need":
+		_ask_to_stand()
+		return
 	if bus.fix(problem).has(BusDay.Event.SEATED):
 		_say(strings.t("fixed_" + problem), Look.PARROT, 2.0)
 		_sync_people()
 	_refresh()
+
+
+## Someone ill, or a mother with a baby, standing: whom to ask to stand?
+## Without the hands (or busy), the first one asked.
+func _ask_to_stand() -> void:
+	var who := bus.seat_candidates()
+	if who.is_empty():
+		return
+	var need := "sick"
+	for r in bus.riders:
+		if r.kind == "needy" and int(r.seat) >= BusDay.SEATS:
+			need = str(r.get("need", "sick"))
+			break
+	if _activity != null or not bus.interactive:
+		_seat_given(1.0, null, int(who[0].id))
+		return
+	var act := Seat.new()
+	act.candidates = who
+	act.need = need
+	_open(act, "act_seat", _seat_given.bind(act, -1))
+
+
+func _seat_given(_score: float, act, id: int) -> void:
+	if act != null:
+		id = act.picked
+	if id < 0:
+		return
+	var got := bus.give_seat(id)
+	if got.has(BusDay.Event.SEATED):
+		var cross := got.has(BusDay.Event.ARGUMENT)
+		_say(strings.t("seat_" + bus.last_seat), Look.VERMILION if cross else Look.PARROT, 3.0)
+		_sync_people()
+	_refresh()
+
+
+## The phone rings: someone from home. The answer moves the family's
+## feeling, and may send money home.
+func _ring_home() -> void:
+	var call := HomeCall.new().pick("bus", _call_rng, progress.family("bus"))
+	if call.is_empty():
+		return
+	var act := CallAct.new()
+	act.call = call
+	_open(act, "act_call", _answered.bind(act))
+
+
+func _answered(_score: float, act) -> void:
+	var options: Dictionary = act.call.get("options", {})
+	var option: String = act.option
+	if option == "" and not options.is_empty():
+		# Not answered: as if busy (the last answer).
+		option = str(options.keys().back())
+	var e := HomeCall.effect(act.call, option)
+	var now := progress.add_family("bus", e.family)
+	bus.sent_home += e.cost
+	_call_result = {"family": now, "delta": e.family}
+	print("[home] call ", act.call.get("id", ""), ": ", option, ", family ", now)
+	if e.family > 0:
+		_say(strings.t("familyUp", {"n": now}), Look.PARROT, 3.0)
+	elif e.family < 0:
+		_say(strings.t("familyDown", {"n": now}), Look.VERMILION, 3.0)
 
 
 func _on_catch() -> void:
@@ -993,6 +1072,8 @@ func _end_trip() -> void:
 		lines.append(strings.t("busCaught", {"n": bus.caught}))
 	if bus.fines > 0:
 		lines.append(strings.t("busFines", {"n": bus.fines}))
+	if not _call_result.is_empty():
+		lines.append(strings.t("familyLine", {"n": _call_result.family}))
 	var end := DayEnd.new()
 	end.setup(strings, b, progress, got, {
 		"title": strings.t("busDayOver"),

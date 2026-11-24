@@ -1,0 +1,20 @@
+{
+ "about": "Calls from home in the middle of a working day (one at most, from mohalla level 2). Each option: how the family feels about it (family, -3..3), what it costs (cost, taka, sent home by phone) and whether the day ends there (end_day: going home now). Monir Mama's and Babu's families are in the village, so only Rahim Chacha can go home.",
+ "calls": {
+  "rickshaw": [
+   {"id": "r_drawing", "by": "sumi", "kind": "news", "bn": "আব্বা! আজ স্কুলে ছবি আঁকায় আমি প্রথম হয়েছি! তুমি কখন আসবে?", "en": "Abba! I came first in drawing at school today! When are you coming?", "options": {"go": {"family": 2, "end_day": true}, "later": {"family": 0}}},
+   {"id": "r_fever", "by": "rokeya", "kind": "need", "bn": "সুমির জ্বর এসেছে। ওষুধ কিনতে হবে, টাকা নেই।", "en": "Sumi has a fever. We need medicine, and there is no money.", "options": {"go": {"family": 2, "end_day": true}, "send": {"family": 1, "cost": 100}, "later": {"family": -2}}},
+   {"id": "r_lunch", "by": "rokeya", "kind": "chat", "bn": "খেয়েছেন তো? দুপুরে ঠিকমতো খাবেন কিন্তু।", "en": "Have you eaten? Mind you eat properly at noon.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
+  ],
+  "tea": [
+   {"id": "t_medicine", "by": "sister", "kind": "need", "bn": "ভাই, মায়ের ওষুধের টাকাটা এই মাসে পাঠাতে পারবি?", "en": "Brother, can you send Ma's medicine money this month?", "options": {"send": {"family": 2, "cost": 150}, "later": {"family": -2}}},
+   {"id": "t_shakil", "by": "sister", "kind": "news", "bn": "ভাই, শাকিল এবার ক্লাসে প্রথম হয়েছে! তোর কথা খুব বলে।", "en": "Brother, Shakil came first in his class! He talks about you a lot.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "t_eid", "by": "sister", "kind": "chat", "bn": "ভাই, এবার ঈদে বাড়ি আসবি তো?", "en": "Brother, will you come home for Eid this time?", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
+  ],
+  "bus": [
+   {"id": "b_eat", "by": "babu_ma", "kind": "chat", "bn": "বাবা, তুই ঠিকমতো খাস তো? শরীরটা ভালো আছে?", "en": "Son, are you eating properly? Are you well?", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "b_roof", "by": "babu_ma", "kind": "need", "bn": "বাবা, ঘরের চালটা ফুটো হয়ে গেছে, বৃষ্টি হলেই পানি পড়ে।", "en": "Son, the roof has a hole; when it rains the water comes in.", "options": {"send": {"family": 2, "cost": 120}, "later": {"family": -2}}},
+   {"id": "b_sister", "by": "babu_ma", "kind": "news", "bn": "বাবা, তোর ছোট বোনটা এবার স্কুলে ভর্তি হলো!", "en": "Son, your little sister has started school!", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
+  ]
+ }
+}

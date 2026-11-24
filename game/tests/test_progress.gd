@@ -249,3 +249,45 @@ func test_old_dhaka_opens_at_level_five() -> void:
 	eq(p.rickshaw_area(), "old_dhaka", "riding there now")
 	p.data.mohalla.level = 1
 	eq(p.rickshaw_area(), "mirpur", "an old save past its level falls back to Mirpur")
+
+
+func test_the_family_feeling_stays_within_0_and_10() -> void:
+	if FileAccess.file_exists("user://test_family.json"):
+		DirAccess.remove_absolute("user://test_family.json")
+	var p := Progress.new(Balance.new(), "user://test_family.json")
+	eq(p.family("rickshaw"), 5, "starts at 5")
+	eq(p.add_family("rickshaw", 3), 8, "up")
+	eq(p.add_family("rickshaw", 9), 10, "never past 10")
+	eq(p.add_family("bus", -9), 0, "never under 0")
+	eq(p.family("tea"), 5, "the others as they were")
+
+
+func test_calls_from_home() -> void:
+	const HomeCall = preload("res://scripts/rules/home_call.gd")
+	const Strings = preload("res://scripts/ui/strings.gd")
+	var calls := HomeCall.new()
+	var s := Strings.new()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2
+	for who in ["rickshaw", "tea", "bus"]:
+		var list: Array = calls.calls[who]
+		check(list.size() >= 2, "%s has calls" % who)
+		for c in list:
+			check(s.t("caller_" + c.by) != "caller_" + c.by, "%s: who is calling" % c.id)
+			check(c.has("bn") and c.has("en"), "%s in both languages" % c.id)
+			for o in c.options:
+				check(s.t("call_" + o) != "call_" + o, "%s: answer %s has words" % [c.id, o])
+				if c.options[o].get("end_day", false):
+					eq(who, "rickshaw", "only Rahim Chacha can go home")
+		check(not calls.pick(who, rng, 5).is_empty(), "a call for %s" % who)
+	var fever: Dictionary = calls.calls.rickshaw[1]
+	eq(HomeCall.effect(fever, "send"), {"family": 1, "cost": 100, "end_day": false}, "sending money")
+	eq(HomeCall.effect(fever, "go").end_day, true, "going home ends the day")
+	eq(HomeCall.plan(rng, 1), -1.0, "not on the first level")
+	var some := false
+	for i in 50:
+		var at := HomeCall.plan(rng, 3)
+		if at >= 0.0:
+			some = true
+			check(at >= 0.3 and at <= 0.7, "in the middle of the day")
+	check(some, "on some days")
