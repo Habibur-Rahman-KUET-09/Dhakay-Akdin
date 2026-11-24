@@ -278,6 +278,7 @@ func test_asking_someone_to_stand_for_a_mother() -> void:
 	mother["need"] = "mother"
 	eq(t.problems(), ["need"], "a mother stands, the front seats rightly taken")
 	eq(t.seat_candidates().size(), 2, "two who could stand")
+	t.rating = 4.0
 	var before := t.rating
 	eq(t.give_seat(4), [BusDay.Event.SEATED], "the young man on his phone gets up")
 	eq(mother.seat, 11, "she sits")

@@ -712,7 +712,7 @@ func _on_give() -> void:
 
 ## A tap on a customer's card: hand them what is ready.
 func _on_card(event: InputEvent, seat: int) -> void:
-	var pressed := (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+	var pressed: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
 	if not pressed or day.made() == "":
 		return
 	_handle(day.give_to(seat))
