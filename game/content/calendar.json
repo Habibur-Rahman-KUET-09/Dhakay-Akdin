@@ -1,5 +1,5 @@
 {
- "about": "The year in Dhaka. months: for each month, how much likelier rain is than balance.json's chance (x), how much likelier a hot day, and the chance of a foggy winter morning. festivals: fixed-date days (Eid moves with the moon, so it is not here), with a greeting, an extra tip per ride, and the colours the lanes are decked in.",
+ "about": "The year in Dhaka. months: for each month, how much likelier rain is than balance.json's chance (x), how much likelier a hot day, and the chance of a foggy winter morning. festivals: fixed-date days; moon_festivals: the two Eids, which move with the moon, by date for each year (approximate: the day is set by the moon sighting in Bangladesh, so correct them when announced); ramadan: the month of fasting, first and last day each year,, with a greeting, an extra tip per ride, and the colours the lanes are decked in.",
  "months": [
   {
    "month": "January",
@@ -160,5 +160,69 @@
     "F42A41"
    ]
   }
+ ],
+ "moon_festivals": [
+  {
+   "id": "eid_fitr",
+   "dates": [
+    "2026-03-21",
+    "2027-03-10",
+    "2028-02-27",
+    "2029-02-15"
+   ],
+   "name": {
+    "bn": "ঈদুল ফিতর",
+    "en": "Eid ul-Fitr"
+   },
+   "greeting": {
+    "bn": "ঈদ মোবারক! নতুন জামা, সেমাই আর খুশি যাত্রী। আজ সবাই বখশিশ দেয়।",
+    "en": "Eid Mubarak! New clothes, sweet semai and happy riders. Everyone tips today."
+   },
+   "tip": 30,
+   "colours": [
+    "2E9E6B",
+    "F6C445"
+   ]
+  },
+  {
+   "id": "eid_adha",
+   "dates": [
+    "2026-05-27",
+    "2027-05-17",
+    "2028-05-05",
+    "2029-04-24"
+   ],
+   "name": {
+    "bn": "ঈদুল আজহা",
+    "en": "Eid ul-Adha"
+   },
+   "greeting": {
+    "bn": "ঈদ মোবারক! কোরবানির ঈদে শহর অনেকটা ফাঁকা, যারা আছেন তারা খুশি মনে বখশিশ দেন।",
+    "en": "Eid Mubarak! The city is half empty for Eid ul-Adha; those who stay tip gladly."
+   },
+   "tip": 25,
+   "colours": [
+    "1C4E9B",
+    "F4F1E8"
+   ]
+  }
+ ],
+ "ramadan": [
+  [
+   "2026-02-19",
+   "2026-03-20"
+  ],
+  [
+   "2027-02-08",
+   "2027-03-09"
+  ],
+  [
+   "2028-01-28",
+   "2028-02-26"
+  ],
+  [
+   "2029-01-16",
+   "2029-02-14"
+  ]
  ]
 }

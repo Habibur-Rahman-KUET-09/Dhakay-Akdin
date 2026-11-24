@@ -2506,5 +2506,53 @@
  "smsPhoneTip": {
   "bn": "আপনার ফোনে আগের সব SMS: আসলগুলো আসে «টাকাফোন» থেকে, এইমাত্র, ঠিক অঙ্কে।",
   "en": "On your phone, the earlier SMS: real ones come from TakaPhone, just now, for the right amount."
+ },
+ "newsTitle": {
+  "bn": "রফিক চাচার খবর",
+  "en": "Rafiq Chacha's news"
+ },
+ "news_festival_today": {
+  "bn": "আজ {name}! রাস্তায় উৎসবের ভিড়, বখশিশও বেশি।",
+  "en": "Today is {name}! Festive crowds, and bigger tips."
+ },
+ "news_festival_tomorrow": {
+  "bn": "কাল {name}। আজ থেকেই বাজারে ভিড় বাড়ছে।",
+  "en": "Tomorrow is {name}. The markets are filling up already."
+ },
+ "news_ramadan": {
+  "bn": "রমজান মাস চলছে। বিকেলে ইফতারের আগে সবাই বাড়ি ফেরার তাড়ায় থাকে।",
+  "en": "It's Ramadan. In the afternoon everyone hurries home before iftar."
+ },
+ "news_rain": {
+  "bn": "বর্ষাকাল: আজ বৃষ্টির ভালো সম্ভাবনা। রিকশায় পলিথিন রাখুন, নিচু রাস্তায় পানি জমবে।",
+  "en": "The monsoon: rain is likely today. Keep a plastic sheet in the rickshaw; the low roads will flood."
+ },
+ "news_fog": {
+  "bn": "শীতের সকাল: কুয়াশায় সামনে কম দেখা যাবে, সাবধানে চালাবেন।",
+  "en": "A winter morning: fog will hide the road ahead; drive carefully."
+ },
+ "news_hot": {
+  "bn": "কাঠফাটা গরম: চায়ের দোকানে ঠান্ডা পানীয় বেশি চলবে। পানি সাথে রাখুন।",
+  "en": "Scorching heat: cold drinks will sell at the stalls. Keep water with you."
+ },
+ "news_quiet": {
+  "bn": "আজ শহর শান্ত। ভালো একটা কাজের দিন।",
+  "en": "A quiet day in town. A good day for work."
+ },
+ "ramadanDay": {
+  "bn": "রমজান মাস। বিকেলে ইফতারের আগে অনেকে তাড়াহুড়ায় থাকবেন।",
+  "en": "Ramadan: in the afternoon many will be hurrying home for iftar."
+ },
+ "readAloud": {
+  "bn": "পড়ে শোনানো",
+  "en": "Read aloud"
+ },
+ "readAloudHelp": {
+  "bn": "খেলার লেখাগুলো ফোনের নিজের কণ্ঠে পড়ে শোনাবে: নোটিশ, কাজের নির্দেশ, দিনের হিসাব। ফোনে বাংলা কণ্ঠ (Google-এর text-to-speech) থাকতে হবে।",
+  "en": "The game's words read out in the phone's own voice: notices, instructions, the day's summary. The phone needs a voice for the language (Google's text-to-speech)."
+ },
+ "readAloudOn": {
+  "bn": "এখন থেকে খেলার লেখা পড়ে শোনানো হবে।",
+  "en": "From now on, the game's words will be read out."
  }
 }

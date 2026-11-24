@@ -115,6 +115,11 @@
    "bn": "পুলিশ",
    "en": "Policeman",
    "colour": "2B3A55"
+  },
+  "man": {
+   "bn": "যাত্রী",
+   "en": "Passenger",
+   "colour": "37474F"
   }
  },
  "chapters": [

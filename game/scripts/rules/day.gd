@@ -118,6 +118,8 @@ var weather := RandomNumberGenerator.new()
 ## festival day an extra tip every ride.
 var foggy := false
 var festival := {}
+## Ramadan: in the afternoon more people hurry to be home for iftar.
+var ramadan := false
 ## Trips rated 4 stars or more (for the day's challenge).
 var good_trips := 0
 ## The named neighbours who may need a ride today (set by the scene), how
@@ -169,6 +171,7 @@ func _init(road_map: RoadMap, b: Balance, seed_value := -1, date := "", trip := 
 	if date != "":
 		chance = calendar.rain_chance(chance, date)
 		festival = calendar.festival(date)
+		ramadan = calendar.ramadan(date)
 	if weather.randf() < chance:
 		rain_at = weather.randf_range(0.15, 0.75) * day_seconds
 	if date != "":
@@ -639,6 +642,8 @@ func _top_up() -> void:
 		var place_to: Dictionary = choices[rng.randi() % choices.size()]
 		var tiles: int = dist[place_to.at]
 		var who := fares.pick_type(rng)
+		if ramadan and who == "normal" and hour() >= 15.0 and _hand_rng.randf() < 0.5:
+			who = "hurry"
 		var fair_fare := fares.fair(tiles)
 		_next_id += 1
 		var offered := fares.offer(who, fair_fare, rng)

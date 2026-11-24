@@ -31,6 +31,7 @@ const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
 const Weather = preload("res://scripts/world/weather.gd")
 const CallAct = preload("res://scripts/ui/activities/call.gd")
+const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const HomeCall = preload("res://scripts/rules/home_call.gd")
 
 ## Where the bench and its four seats are, in the stall's own space
@@ -496,6 +497,7 @@ func _build_hud() -> void:
 
 
 func _say(text: String, colour := Look.OUTLINE, seconds := 2.5) -> void:
+	ReadAloud.say(text, strings.lang)
 	_notice.text = text
 	_notice.add_theme_color_override("font_color", colour)
 	_notice_box.visible = true

@@ -10,6 +10,7 @@ extends Control
 const Look = preload("res://scripts/ui/look.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Rules = preload("res://scripts/rules/activities.gd")
+const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const SETTINGS := "user://settings.cfg"
 
 signal done(score: float)
@@ -104,6 +105,7 @@ func _ready() -> void:
 	buttons.add_theme_constant_override("separation", 8)
 	col.add_child(buttons)
 	_build()
+	ReadAloud.say("%s। %s" % [title, _hint_label.text], s.lang)
 
 
 ## Activities add their own buttons or labels here.

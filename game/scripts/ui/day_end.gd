@@ -10,6 +10,7 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
+const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 
 signal home_pressed
 signal again_pressed
@@ -38,6 +39,11 @@ func _ready() -> void:
 	# Already in the tree here: anchors alone would keep today's (empty) size.
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	print("[day end] shown")
+	# Read out: the banner, the money, how the day went.
+	var said := [str(info.get("title", "")), s.t("taka", {"n": int(info.get("money", 0))})]
+	for line in info.get("lines", []):
+		said.append(str(line))
+	ReadAloud.say("। ".join(PackedStringArray(said)), s.lang)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg := ColorRect.new()
 	bg.color = NIGHT

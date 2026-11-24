@@ -29,6 +29,7 @@ const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
 const CallAct = preload("res://scripts/ui/activities/call.gd")
+const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const HomeCall = preload("res://scripts/rules/home_call.gd")
 
 ## How fast the street goes by, metres a second, between stops.
@@ -642,6 +643,7 @@ func _build_fare_panel() -> PanelContainer:
 
 
 func _say(text: String, colour := Look.OUTLINE, seconds := 2.5) -> void:
+	ReadAloud.say(text, strings.lang)
 	_notice.text = text
 	_notice.add_theme_color_override("font_color", colour)
 	_notice_box.visible = true

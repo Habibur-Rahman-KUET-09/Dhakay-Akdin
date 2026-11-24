@@ -25,6 +25,7 @@ const Sfx = preload("res://scripts/ui/sfx.gd")
 const Activity = preload("res://scripts/ui/activity.gd")
 const Driving = preload("res://scripts/ui/driving.gd")
 const Goods = preload("res://scripts/rules/goods.gd")
+const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 
 const WHO := ["rickshaw", "tea", "bus"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
@@ -394,6 +395,7 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 	var challenge := _challenge_card()
 	if challenge != null:
 		inner.add_child(challenge)
+	inner.add_child(_news_card())
 	inner.add_child(_season_card())
 	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 12, false, Color("8A8178"))
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -785,6 +787,29 @@ func _start_sheet(who: String) -> void:
 
 func _caption(text: String) -> Label:
 	return Look.label(text, 15, true, Look.MUTED)
+
+
+## Rafiq Chacha's morning paper, read out over his tea: a festival today
+## or tomorrow, Ramadan, and what the month's weather means for the day.
+func _news_card() -> Control:
+	var panel := _card(Color("FFFDF6"), 20)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 6)
+	panel.add_child(col)
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 10)
+	top.add_child(Look.icon("book", 36, Look.OUTLINE))
+	top.add_child(Look.label(s.t("newsTitle"), 18, true))
+	col.add_child(top)
+	for item in Calendar.new().news(progress.date()):
+		var values := {}
+		for k in item.values:
+			var v = item.values[k]
+			values[k] = v.get(s.lang, v.get("en", "")) if typeof(v) == TYPE_DICTIONARY else v
+		var line := Look.label("• " + s.t(item.key, values), 15, false, Color("4A423A"))
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(line)
+	return panel
 
 
 ## Today's Dhaka in chips: the season or a festival, and a double-money day.
@@ -1503,6 +1528,8 @@ func _settings() -> void:
 	rows.append(_choice_row(s.t("hands"), [s.t("musicOn"), s.t("musicOff")], 0 if Activity.wanted() else 1, func(i): _set_hands(i == 0), "Hands_", ["on", "off"]))
 	rows.append(_choice_row(s.t("easyDriving"), [s.t("musicOn"), s.t("musicOff")], 0 if Driving.easy() else 1, func(i): _set_easy(i == 0), "Easy_", ["on", "off"]))
 	rows.append(Look.label(s.t("easyDrivingHelp"), 13, false, Look.MUTED))
+	rows.append(_choice_row(s.t("readAloud"), [s.t("musicOn"), s.t("musicOff")], 0 if ReadAloud.wanted() else 1, func(i): _set_read_aloud(i == 0), "ReadAloud_", ["on", "off"]))
+	rows.append(Look.label(s.t("readAloudHelp"), 13, false, Look.MUTED))
 	rows.append(_cloud_card())
 	# Who recorded the street sounds (their licences ask to be named).
 	var credits := Sfx.credits()
@@ -1541,6 +1568,13 @@ func _close_settings() -> void:
 
 func _set_hands(value: bool) -> void:
 	Activity.save_wanted(value)
+	_build()
+
+
+func _set_read_aloud(value: bool) -> void:
+	ReadAloud.save_wanted(value)
+	if value:
+		ReadAloud.say(s.t("readAloudOn"), s.lang)
 	_build()
 
 

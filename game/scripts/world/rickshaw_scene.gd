@@ -37,6 +37,7 @@ const Graphics = preload("res://scripts/ui/graphics.gd")
 const Reveal = preload("res://scripts/world/reveal.gd")
 const Weather = preload("res://scripts/world/weather.gd")
 const Driving = preload("res://scripts/ui/driving.gd")
+const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
@@ -264,6 +265,8 @@ func _ready() -> void:
 		_say(str(shift.festival.greeting.get(strings.lang, shift.festival.greeting.en)), Look.MAGENTA, 6.0)
 	elif shift.foggy:
 		_say(strings.t("fogMorning"), Look.SKY, 4.0)
+	elif shift.ramadan:
+		_say(strings.t("ramadanDay"), Look.SKY, 5.0)
 	elif progress.level() <= 3:
 		_say(strings.t("cruiseTip"), Look.SKY, 6.0)
 
@@ -521,6 +524,8 @@ func _process(dt: float) -> void:
 
 
 func _say(text: String, colour: Color, seconds := 2.0) -> void:
+	if text != _notice:
+		ReadAloud.say(text, strings.lang)
 	_notice = text
 	_notice_colour = colour
 	_notice_left = seconds

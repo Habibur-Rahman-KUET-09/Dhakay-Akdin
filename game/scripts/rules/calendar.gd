@@ -8,6 +8,10 @@ const PATH := "res://content/calendar.json"
 
 var months: Array = []
 var festivals: Array = []
+## The Eids, by date each year (they move with the moon), and Ramadan's
+## first and last days each year.
+var moon_festivals: Array = []
+var ramadan_spans: Array = []
 
 
 func _init() -> void:
@@ -15,6 +19,8 @@ func _init() -> void:
 	if typeof(parsed) == TYPE_DICTIONARY:
 		months = parsed.months
 		festivals = parsed.festivals
+		moon_festivals = parsed.get("moon_festivals", [])
+		ramadan_spans = parsed.get("ramadan", [])
 
 
 ## The month, 1 to 12 (0 if the date cannot be read).
@@ -54,4 +60,51 @@ func festival(date: String) -> Dictionary:
 	for f in festivals:
 		if f.date == md:
 			return f
+	var day := date.substr(0, 10)
+	for f in moon_festivals:
+		if (f.dates as Array).has(day):
+			return f
 	return {}
+
+
+## Whether the date is in Ramadan (people hurry home before iftar).
+func ramadan(date: String) -> bool:
+	if date.length() < 10:
+		return false
+	var day := date.substr(0, 10)
+	for span in ramadan_spans:
+		if day >= str(span[0]) and day <= str(span[1]):
+			return true
+	return false
+
+
+## The day after `date` ("YYYY-MM-DD").
+static func next_day(date: String) -> String:
+	var t := Time.get_unix_time_from_datetime_string(date.substr(0, 10) + "T12:00:00")
+	return Time.get_datetime_string_from_unix_time(t + 86400).substr(0, 10)
+
+
+## Rafiq Chacha's morning news: what today (and tomorrow) bring, as
+## [{key, values}] for the strings file: a festival today or tomorrow,
+## Ramadan, and the month's weather (rain, fog, heat) so the day can be
+## planned.
+func news(date: String) -> Array:
+	var out := []
+	var today := festival(date)
+	var tomorrow := festival(next_day(date))
+	if not today.is_empty():
+		out.append({"key": "news_festival_today", "values": {"name": today.name}})
+	elif not tomorrow.is_empty():
+		out.append({"key": "news_festival_tomorrow", "values": {"name": tomorrow.name}})
+	if ramadan(date):
+		out.append({"key": "news_ramadan", "values": {}})
+	var w := weather(date)
+	if float(w.rain) >= 2.0:
+		out.append({"key": "news_rain", "values": {}})
+	elif float(w.fog) >= 0.5:
+		out.append({"key": "news_fog", "values": {}})
+	elif float(w.hot) >= 1.5:
+		out.append({"key": "news_hot", "values": {}})
+	if out.is_empty():
+		out.append({"key": "news_quiet", "values": {}})
+	return out

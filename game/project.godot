@@ -25,6 +25,7 @@ window/handheld/orientation=1
 [audio]
 
 driver/enable_input=false
+general/text_to_speech=true
 
 [debug]
 

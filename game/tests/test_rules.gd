@@ -664,3 +664,21 @@ func test_without_the_hands_the_hood_goes_up_by_itself() -> void:
 	var got := d.update(0.05)
 	check(got.has(Day.RAIN_START) and not got.has(Day.HOOD), "no asking")
 	check(d.hood_up, "up by itself")
+
+
+func test_eid_ramadan_and_the_morning_news() -> void:
+	const Calendar = preload("res://scripts/rules/calendar.gd")
+	var c := Calendar.new()
+	eq(c.festival("2027-03-10").get("id", ""), "eid_fitr", "Eid ul-Fitr moves with the moon")
+	eq(c.festival("2026-05-27").get("id", ""), "eid_adha", "Eid ul-Adha")
+	check(c.ramadan("2027-02-20"), "Ramadan in February 2027")
+	check(not c.ramadan("2027-03-10"), "over by Eid")
+	eq(Calendar.next_day("2026-12-31"), "2027-01-01", "the next day, across a year")
+	var keys := func(date: String) -> Array: return c.news(date).map(func(n): return n.key)
+	check(keys.call("2026-12-15").has("news_festival_tomorrow"), "Victory Day is tomorrow")
+	check(keys.call("2026-12-16").has("news_festival_today"), "Victory Day today")
+	check(keys.call("2026-07-10").has("news_rain"), "the monsoon")
+	check(keys.call("2027-02-20").has("news_ramadan"), "Ramadan")
+	check(not c.news("2026-10-05").is_empty(), "always something to say")
+	var d := Day.new(_mirpur(), Balance.new(), 3, "2027-02-20")
+	check(d.ramadan, "the day knows it is Ramadan")
