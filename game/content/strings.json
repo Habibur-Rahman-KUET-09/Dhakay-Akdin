@@ -2284,8 +2284,8 @@
   "en": "A call from home"
  },
  "act_call_hint": {
-  "bn": "",
-  "en": ""
+  "bn": "কী বলবেন বেছে নিন",
+  "en": "Choose what to say"
  },
  "call_from": {
   "bn": "{who} ফোন করেছে",
