@@ -2086,5 +2086,45 @@
  "busTripLine": {
   "bn": "ট্রিপ {n}/{all}: {to} পর্যন্ত",
   "en": "Trip {n}/{all}: to {to}"
+ },
+ "turnLeft": {
+  "bn": "বামে",
+  "en": "left"
+ },
+ "turnRight": {
+  "bn": "ডানে",
+  "en": "right"
+ },
+ "turnBack": {
+  "bn": "ঘুরে যান",
+  "en": "turn round"
+ },
+ "wayIn": {
+  "bn": "{tiles} ব্লক পরে {way}",
+  "en": "{way} in {tiles} blocks"
+ },
+ "wayNow": {
+  "bn": "এখনই {way}",
+  "en": "{way} now"
+ },
+ "wayStraight": {
+  "bn": "সোজা",
+  "en": "straight on"
+ },
+ "rideLength": {
+  "bn": "প্রায় {m} মিনিটের পথ",
+  "en": "about {m} min ride"
+ },
+ "cruiseTip": {
+  "bn": "প্যাডেলে একবার চাপলেই রিকশা চলতে থাকবে, ব্রেকে থামবে। চেপে ধরেও চালাতে পারেন।",
+  "en": "Tap the pedal once and the rickshaw keeps going; the brake stops it. You can still hold it."
+ },
+ "easyDriving": {
+  "bn": "সহজ চালানো",
+  "en": "Easy driving"
+ },
+ "easyDrivingHelp": {
+  "bn": "মোড়ে থেমে গেলে রিকশা নিজেই গন্তব্যের পথ ধরবে।",
+  "en": "At a junction where it would stop, the rickshaw takes the way to where it is going."
  }
 }

@@ -20,6 +20,12 @@ var rng := RandomNumberGenerator.new()
 ## stops quicker when braking. Rates in tiles per second per second.
 var pedal := false
 var brake := false
+## Cruise: a tap on the pedal keeps it pedalling with no finger held, until
+## the brake (or another tap) stops it.
+var cruise := false
+## Easy driving: at a junction where it would stop and wait, it takes the
+## way to the destination by itself.
+var follow_route := false
 var accel := 0.45
 var coast := 0.3
 var braking := 1.5
@@ -66,14 +72,20 @@ func swipe(t: int) -> Array:
 func update(dt: float) -> Array:
 	var top := base_speed * speed_factor * (flood_speed if on_flood() else 1.0)
 	if brake:
+		cruise = false
 		speed_now = maxf(0.0, speed_now - braking * dt)
-	elif pedal:
+	elif pedal or cruise:
 		speed_now = minf(top, speed_now + accel * dt) if speed_now <= top else maxf(top, speed_now - braking * dt)
 	else:
 		speed_now = maxf(0.0, speed_now - coast * dt)
 	speed_now = minf(speed_now, top * room)
 	driver.speed = speed_now
 	var events := driver.update(dt)
+	if follow_route and events.has(Driver.Event.WAITING):
+		var way := next_turn()
+		if way.turn >= 0 and way.tiles == 0:
+			events.erase(Driver.Event.WAITING)
+			events.append_array(swipe(way.turn))
 	# Stopped at a junction or a dead end: the rickshaw stands still.
 	if not driver.moving:
 		speed_now = 0.0
@@ -94,6 +106,53 @@ func _entered(events: Array) -> void:
 
 func _measure() -> void:
 	remaining = map.distance(driver.cell, destination)
+
+
+## The next turn the way to the destination needs, at a junction where
+## there is a choice (bends the road takes by itself are skipped):
+## {turn: Driver.RIGHT / LEFT / BACK, tiles: how many tiles ahead it is
+## (0: here)}; turn -1 when it is straight on all the way (tiles: to the
+## destination) or there is no legal way (tiles -1).
+func next_turn() -> Dictionary:
+	var start := driver.cell
+	var tiles := 0
+	if driver.moving and driver.progress > 0.0:
+		start = driver.next_cell()
+		tiles = 1
+	if start == destination:
+		return {"turn": -1, "tiles": tiles}
+	var path = map.route(start, destination)
+	if path == null:
+		return {"turn": -1, "tiles": -1}
+	var h := driver.heading
+	var c := start
+	for q in path:
+		var d := _direction(c, q)
+		if d != h:
+			var rel := (d - h + 4) % 4
+			if rel == Driver.BACK or _ways_on(c, h) >= 2:
+				return {"turn": rel, "tiles": tiles}
+			h = d
+		c = q
+		tiles += 1
+	return {"turn": -1, "tiles": tiles}
+
+
+## How many ways on (ahead, right, left; legally) a tile has for someone
+## coming in heading h.
+func _ways_on(at: Vector2i, h: int) -> int:
+	var n := 0
+	for t in [Driver.AHEAD, Driver.RIGHT, Driver.LEFT]:
+		if map.move(at, RoadMap.turn(h, t)) == RoadMap.Move.OK:
+			n += 1
+	return n
+
+
+static func _direction(from: Vector2i, to: Vector2i) -> int:
+	for d in 4:
+		if RoadMap.step(from, d) == to:
+			return d
+	return -1
 
 
 ## A real place at least min_trip legal tiles away, other than the last

@@ -112,16 +112,28 @@ var good_trips := 0
 var npc_pool: Array = []
 var relations := {}
 var npc_log: Array = []
+## Where the time goes, from one drop-off to the next (for the log, and to
+## tune the day): seconds finding the next passenger and riding with them,
+## and of all that, how long standing at a junction waiting for a swipe,
+## held up by traffic or a red light, held (police, deep water), or just
+## standing (bargaining, no pedal); tiles that took it further away
+## ("detours"). Each finished trip's goes into `trip_times`.
+var trip_time := {}
+var trip_times: Array = []
+var _last_remaining := -1
+var _last_dest := Vector2i(-1, -1)
 
 
-func _init(road_map: RoadMap, b: Balance, seed_value := -1, date := "") -> void:
+## `trip`: the shortest ride, in tiles (shorter in the first days).
+func _init(road_map: RoadMap, b: Balance, seed_value := -1, date := "", trip := 8) -> void:
 	balance = b
 	if seed_value >= 0:
 		_hand_rng.seed = seed_value + 13
 	else:
 		_hand_rng.randomize()
 	fares = Fares.new(b)
-	super(road_map, b.n("rickshaw.speed_tiles_per_s"), b.n("rickshaw.waterlog_speed"), 8, seed_value)
+	_new_trip_time()
+	super(road_map, b.n("rickshaw.speed_tiles_per_s"), b.n("rickshaw.waterlog_speed"), trip, seed_value)
 	accel = b.n("rickshaw.accel_tiles_per_s2")
 	coast = b.n("rickshaw.coast_decel")
 	braking = b.n("rickshaw.brake_decel")
@@ -190,6 +202,7 @@ func update(dt: float) -> Array:
 		speed_now = 0.0
 	var events := super(dt)
 	events.append_array(early)
+	_time(dt)
 	if events.has(Driver.Event.WRONG_WAY):
 		_police(events)
 	_talk(events)
@@ -282,7 +295,41 @@ func red_at(p: Vector2i, heading: int) -> bool:
 	return map.kind_at(p) == RoadMap.Kind.SIGNAL and Signals.red_for(p, heading, clock, signal_cycle)
 
 
+## The trip's shortest trip length for a mohalla level: short rides at
+## first, the full length from level 7.
+static func trip_for_level(level: int) -> int:
+	return clampi(4 + int((level + 1) / 2.0), 5, 8)
+
+
+func _new_trip_time() -> void:
+	trip_time = {"finding": 0.0, "riding": 0.0, "junction": 0.0, "traffic": 0.0, "held": 0.0, "standing": 0.0, "detours": 0}
+
+
+func _time(dt: float) -> void:
+	trip_time["riding" if not riding.is_empty() else "finding"] += dt
+	if held > 0.0 or stuck:
+		trip_time.held += dt
+	elif not driver.moving:
+		trip_time.junction += dt
+	elif speed_now < 0.2 and (room < 0.3 or brake):
+		trip_time.traffic += dt
+	elif speed_now < 0.2:
+		trip_time.standing += dt
+
+
+## Seconds a finished trip took on average today (finding + riding).
+func average_trip_seconds() -> float:
+	if trip_times.is_empty():
+		return 0.0
+	var total := 0.0
+	for t in trip_times:
+		total += float(t.finding) + float(t.riding)
+	return total / trip_times.size()
+
+
 func _entered(events: Array) -> void:
+	# A tile that took the rickshaw further from where it is going.
+	var before := _last_remaining
 	# Every tile costs energy, more in the rain.
 	var cost := balance.n("rickshaw.energy_per_tile_rain" if raining else "rickshaw.energy_per_tile")
 	energy = maxf(0.0, energy - cost * energy_factor)
@@ -312,6 +359,10 @@ func _entered(events: Array) -> void:
 		if driver.cell == riding.at:
 			_deliver(events)
 	_aim()
+	if before >= 0 and destination == _last_dest and remaining > before:
+		trip_time.detours += 1
+	_last_remaining = remaining
+	_last_dest = destination
 
 
 ## Stopping beside a waiting passenger opens the bargaining; driving off
@@ -452,7 +503,7 @@ func _board(w: Dictionary, fare: int) -> void:
 	waiting.erase(w)
 	offer_for = {}
 	riding = {
-		"place": w.place, "at": w.place.at, "type": w.type, "fare": fare,
+		"place": w.place, "at": w.place.at, "type": w.type, "fare": fare, "tiles": w.tiles,
 		"since": clock, "eta": fares.eta(w.tiles, base_speed), "flooded": 0, "npc": w.get("npc", ""),
 	}
 	_top_up()
@@ -482,7 +533,10 @@ func _deliver(events: Array) -> void:
 	money += riding.fare + tip
 	trips += 1
 	stars_sum += given
-	last_trip = {"fare": riding.fare, "tip": tip, "stars": given, "npc": npc, "thanks": thanks}
+	trip_time["tiles"] = riding.get("tiles", 0)
+	trip_times.append(trip_time)
+	last_trip = {"fare": riding.fare, "tip": tip, "stars": given, "npc": npc, "thanks": thanks, "time": trip_time}
+	_new_trip_time()
 	riding = {}
 	delivered += 1
 	events.append(DELIVERED)

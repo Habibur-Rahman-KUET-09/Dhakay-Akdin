@@ -32,6 +32,7 @@ const DayEnd = preload("res://scripts/ui/day_end.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
 const Reveal = preload("res://scripts/world/reveal.gd")
 const Weather = preload("res://scripts/world/weather.gd")
+const Driving = preload("res://scripts/ui/driving.gd")
 
 const SWIPE_PX := 36.0
 ## The camera rides just behind and above the rickshaw, at street level.
@@ -79,6 +80,14 @@ var _pedal_fingers := {}
 var _brake_fingers := {}
 var _swipes := {}
 var _key_pedal := false
+## When each finger went down on the pedal: a quick tap starts (or stops)
+## the cruise, a hold pedals only while held.
+var _pedal_down_at := {}
+## The way on (shift.next_turn), worked out again only when the rickshaw
+## moves to another tile or the destination changes.
+var _way := {"turn": -1, "tiles": -1}
+var _way_key := []
+var _said_way := []
 var _key_brake := false
 var _frames_logged := 0
 ## The traffic policeman who stops a wrong-way rickshaw, and his whistle.
@@ -107,8 +116,10 @@ func _ready() -> void:
 	progress = Progress.new(b)
 	var map: RoadMap = RoadMap.load_area(progress.rickshaw_area())
 	# The date brings the month's weather and any festival.
-	shift = Day.new(map, b, -1, progress.date())
+	# Shorter rides in the first days, the full length later.
+	shift = Day.new(map, b, -1, progress.date(), Day.trip_for_level(progress.level()))
 	shift.interactive = Activity.wanted()
+	shift.follow_route = Driving.easy()
 	_target_money = int(b.n("rickshaw.daily_target"))
 	shift.base_speed *= progress.speed_factor()
 	shift.energy_factor = progress.energy_factor()
@@ -226,6 +237,8 @@ func _ready() -> void:
 		_say(str(shift.festival.greeting.get(strings.lang, shift.festival.greeting.en)), Look.MAGENTA, 6.0)
 	elif shift.foggy:
 		_say(strings.t("fogMorning"), Look.SKY, 4.0)
+	elif progress.level() <= 3:
+		_say(strings.t("cruiseTip"), Look.SKY, 6.0)
 
 
 ## The bell, horn players for passing traffic, the road's hum: WAV files
@@ -500,7 +513,7 @@ func _follow(dt: float, snap := false) -> void:
 	if d.moving:
 		for w in rickshaw.get_meta("wheels"):
 			w.rotate_x(-dt * d.speed * City.T / 0.34)
-	var pedalling := shift.pedal and d.moving
+	var pedalling := (shift.pedal or shift.cruise) and d.moving
 	_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if pedalling else 0.0, 0.0, 1.0))
 	var forward := Vector3(-sin(_yaw), 0, -cos(_yaw))
 	# Behind the rickshaw may be a building: then the camera comes closer
@@ -523,20 +536,65 @@ func _follow(dt: float, snap := false) -> void:
 func _update_hud() -> void:
 	var d := shift.driver
 	var me := d.position()
-	var to := Vector2(shift.destination) - me
-	var ahead := Vector2(RoadMap.DX[d.heading], RoadMap.DY[d.heading])
-	# Grid y grows down the screen, so this angle is clockwise.
-	var angle := ahead.angle_to(to) if to.length() > 0.01 else 0.0
+	_update_way()
+	# The arrow shows the way on: the next turn when it is close, else
+	# straight ahead (clockwise, as grid y grows down the screen). With no
+	# legal way, it points at the destination as the crow flies.
+	var angle := 0.0
+	if _way.tiles < 0:
+		var to := Vector2(shift.destination) - me
+		var ahead := Vector2(RoadMap.DX[d.heading], RoadMap.DY[d.heading])
+		angle = ahead.angle_to(to) if to.length() > 0.01 else 0.0
+	elif _way.turn >= 0 and _way.tiles <= 3:
+		angle = [0.0, PI / 2, PI, -PI / 2][_way.turn]
 	var target := strings.t("rickshawNoRoute")
 	if shift.remaining >= 0:
 		if not shift.riding.is_empty():
 			target = strings.t("rickshawToPlace", {"place": RoadMap.place_name(shift.riding.place, strings.lang), "tiles": shift.remaining})
 		else:
 			target = strings.t("toPassenger", {"tiles": shift.remaining})
-	hud.show_controls(shift.pedal, shift.brake, shift.speed_now * City.T * 3.6)
+		var hint := _way_text()
+		if hint != "":
+			target += "\n" + hint
+	hud.show_controls(shift.pedal or shift.cruise, shift.brake, shift.speed_now * City.T * 3.6)
 	hud.show_energy(shift.energy)
 	var status := "%s\n%s" % [_clock_text(), strings.t("taka", {"n": shift.money})]
 	hud.refresh(target, status, angle, _notice, _notice_colour, me, shift.destination)
+
+
+## Works out the way on again when the rickshaw has moved on a tile (or
+## turned, stopped, or got a new destination); a passenger aboard calls
+## out the turn two tiles before it, and the drop-off when it is close.
+func _update_way() -> void:
+	var d := shift.driver
+	var key := [d.cell, d.heading, d.moving, d.progress > 0.0, shift.destination]
+	if key == _way_key:
+		return
+	_way_key = key
+	_way = shift.next_turn()
+	if shift.riding.is_empty():
+		return
+	var said := [shift.destination, _way.turn, _way.tiles]
+	if said == _said_way:
+		return
+	if _way.turn >= 0 and _way.tiles == 2:
+		_said_way = said
+		_voice.say(["", "dir_right", "dir_back", "dir_left"][_way.turn])
+	elif _way.turn < 0 and _way.tiles == 2:
+		_said_way = said
+		_voice.say("dir_here")
+
+
+## "২ ব্লক পরে বামে", "এখনই ডানে", "সোজা"; "" with no legal way.
+func _way_text() -> String:
+	if _way.tiles < 0:
+		return ""
+	if _way.turn < 0:
+		return strings.t("wayStraight")
+	var way := strings.t(["", "turnRight", "turnBack", "turnLeft"][_way.turn])
+	if _way.tiles == 0 or _way.turn == Driver.BACK:
+		return strings.t("wayNow", {"way": way})
+	return strings.t("wayIn", {"tiles": _way.tiles, "way": way})
 
 
 ## "সকাল 9:15" from the day's clock.
@@ -559,6 +617,14 @@ func _clock_text() -> String:
 	return strings.t("clock", {"part": strings.t(part), "h": h12, "m": "%02d" % m})
 
 
+## About how long the ride takes, in the day's minutes (to the nearest 5).
+func _ride_minutes(w: Dictionary) -> int:
+	var seconds := shift.fares.eta(int(w.tiles), shift.base_speed)
+	var hours := shift.balance.n("rickshaw.end_hour") - shift.balance.n("rickshaw.start_hour")
+	var minutes := seconds / shift.day_seconds * hours * 60.0
+	return maxi(5, roundi(minutes / 5.0) * 5)
+
+
 ## Who is offering: a named neighbour by name and job, else the kind.
 func _who(w: Dictionary) -> String:
 	var npc: String = w.get("npc", "")
@@ -573,7 +639,7 @@ func _handle(events: Array) -> void:
 		var w: Dictionary = shift.offer_for
 		hud.show_offer(
 			strings.t("offerTitle", {"place": RoadMap.place_name(w.place, strings.lang), "fare": w.offer}),
-			_who(w),
+			"%s · %s" % [_who(w), strings.t("rideLength", {"m": _ride_minutes(w)})],
 			strings.t("haggleButton") if shift.interactive else strings.t("counter", {"fare": shift.fares.counter(w.fair)}))
 		# The passenger calls out, in the way of their kind.
 		_voice.say("hail_" + str(w.get("type", "normal")), true)
@@ -582,6 +648,10 @@ func _handle(events: Array) -> void:
 	if events.has(Day.DELIVERED):
 		_coin.play()
 		var t: Dictionary = shift.last_trip
+		var tt: Dictionary = t.get("time", {})
+		print("[trip] %d tiles: finding %.1f s, riding %.1f s; junction %.1f, traffic %.1f, held %.1f, standing %.1f; detours %d" % [
+			int(tt.get("tiles", 0)), tt.get("finding", 0.0), tt.get("riding", 0.0), tt.get("junction", 0.0),
+			tt.get("traffic", 0.0), tt.get("held", 0.0), tt.get("standing", 0.0), int(tt.get("detours", 0))])
 		if float(t.stars) >= 4.0:
 			_voice.say("thanks", true)
 		elif float(t.stars) < 3.0:
@@ -788,6 +858,8 @@ func _open(act: Activity, key: String, then: Callable) -> void:
 	act.tree_exited.connect(func(): _activity = null)
 	_activity = act
 	# Hands off the pedal while the fingers are busy.
+	shift.cruise = false
+	_pedal_down_at.clear()
 	_pedal_fingers.clear()
 	_brake_fingers.clear()
 	_swipes.clear()
@@ -939,6 +1011,7 @@ func _end_day() -> void:
 	hud.hide_offer()
 	hud.show_tea(false)
 	shift.pedal = false
+	shift.cruise = false
 	_rain_sound.stop()
 	_drops.emitting = false
 	var lines := []
@@ -950,6 +1023,7 @@ func _end_day() -> void:
 	if shift.teas > 0:
 		lines.append(strings.t("teaLine", {"n": shift.teas, "money": shift.tea_spent}))
 	var met := shift.money >= _target_money
+	print("[day] rickshaw: %d trips, %.1f s a trip on average" % [shift.trips, shift.average_trip_seconds()])
 	# Into the save: savings, school fee, fund, XP, the record.
 	var stats := {"good_trips": shift.good_trips, "clean": 1 if shift.fines == 0 and shift.trips >= 3 else 0, "earned": shift.money}
 	var got := progress.apply_day({"earned": shift.money, "trips": shift.trips, "stars": shift.average_stars(), "fines": shift.fines, "teas": shift.teas, "stats": stats, "npcs": shift.npc_log})
@@ -993,11 +1067,15 @@ func _input(event: InputEvent) -> void:
 				_ring()
 			elif hud.pedal_rect().has_point(event.position):
 				_pedal_fingers[finger] = true
+				_pedal_down_at[finger] = Time.get_ticks_msec()
 			elif hud.brake_rect().has_point(event.position):
 				_brake_fingers[finger] = true
 			else:
 				_swipes[finger] = {"start": event.position, "used": false}
 		else:
+			if _pedal_down_at.has(finger) and Time.get_ticks_msec() - int(_pedal_down_at[finger]) < 250:
+				shift.cruise = not shift.cruise
+			_pedal_down_at.erase(finger)
 			_pedal_fingers.erase(finger)
 			_brake_fingers.erase(finger)
 			_swipes.erase(finger)
@@ -1015,6 +1093,9 @@ func _input(event: InputEvent) -> void:
 		if event.keycode == KEY_SPACE:
 			_key_pedal = event.pressed
 			_apply_controls()
+			return
+		if event.keycode == KEY_C and event.pressed:
+			shift.cruise = not shift.cruise
 			return
 		if event.keycode == KEY_B:
 			_key_brake = event.pressed

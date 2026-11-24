@@ -555,3 +555,81 @@ func test_a_festival_adds_to_every_tip() -> void:
 	if not plain.last_trip.is_empty() and not fest.last_trip.is_empty():
 		eq(int(fest.last_trip.tip) - int(plain.last_trip.tip), 20, "20 taka more")
 
+
+
+func test_a_tap_keeps_it_pedalling_until_the_brake() -> void:
+	var s := Shift.new(small(), 1.0, 0.5, 3, 1)
+	s.cruise = true
+	for i in 10:
+		s.update(0.1)
+	check(s.speed_now > 0.3, "cruising with no finger on the pedal")
+	s.brake = true
+	s.update(0.1)
+	check(not s.cruise, "the brake ends the cruise")
+	s.brake = false
+	s.update(2.0)
+	near(s.speed_now, 0.0, "then it rolls to a stop", 1e-3)
+
+
+func test_the_next_turn_on_the_way() -> void:
+	var s := Shift.new(small(), 2.0, 0.5, 3, 1)
+	s.driver = Driver.new(s.map, 2.0, p(4, 3), RoadMap.N)
+	s.destination = p(5, 1)
+	eq(s.next_turn(), {"turn": Driver.RIGHT, "tiles": 2}, "right at the junction two tiles on")
+	s.driver = Driver.new(s.map, 2.0, p(1, 1), RoadMap.E)
+	s.destination = p(3, 1)
+	eq(s.next_turn(), {"turn": -1, "tiles": 2}, "straight there")
+	s.driver = Driver.new(s.map, 2.0, p(3, 1), RoadMap.E)
+	s.destination = p(1, 1)
+	eq(s.next_turn(), {"turn": Driver.BACK, "tiles": 0}, "behind: turn round")
+
+
+func test_easy_driving_takes_the_way_at_a_junction() -> void:
+	var s := Shift.new(small(), 2.0, 0.5, 3, 1)
+	s.driver = Driver.new(s.map, 2.0, p(4, 3), RoadMap.N)
+	s.destination = p(5, 1)
+	s.follow_route = true
+	s.pedal = true
+	s.accel = 100.0
+	var got := []
+	for i in 100:
+		var e := s.update(0.05)
+		if s.delivered > 0:
+			break
+		got.append_array(e)
+	eq(s.delivered, 1, "got there with no swipe")
+	check(not got.has(Driver.Event.WAITING), "never stopped to wait")
+
+
+func test_following_the_hints_delivers_a_passenger() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 5)
+	var w: Dictionary = d.waiting[0]
+	d.driver.cell = w.at
+	d.driver.progress = 0.0
+	d.update(0.01)
+	d.accept()
+	d.pedal = true
+	d.accel = 100.0
+	var i := 0
+	while i < 6000 and d.trips == 0:
+		var way := d.next_turn()
+		if way.turn >= 0 and way.tiles <= 1:
+			d.swipe(way.turn)
+		d.update(0.05)
+		i += 1
+	eq(d.trips, 1, "the hints lead to the drop-off")
+	eq(d.trip_times.size(), 1, "the trip's time is kept")
+	var t: Dictionary = d.trip_times[0]
+	check(float(t.riding) > 0.0, "time riding counted")
+	eq(int(t.detours), 0, "no tile away from the drop-off")
+	check(d.average_trip_seconds() > 0.0, "an average for the day")
+
+
+func test_short_rides_in_the_first_days() -> void:
+	eq(Day.trip_for_level(1), 5, "level 1")
+	eq(Day.trip_for_level(3), 6, "level 3")
+	eq(Day.trip_for_level(7), 8, "level 7")
+	eq(Day.trip_for_level(40), 8, "never more than 8")
+	var d := Day.new(_mirpur(), Balance.new(), 3, "", 5)
+	for x in d.waiting:
+		check(x.tiles >= 5, "at least 5 tiles")

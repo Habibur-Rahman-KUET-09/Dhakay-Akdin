@@ -23,6 +23,7 @@ const Music = preload("res://scripts/ui/music.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Activity = preload("res://scripts/ui/activity.gd")
+const Driving = preload("res://scripts/ui/driving.gd")
 
 const WHO := ["rickshaw", "tea", "bus"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
@@ -1334,6 +1335,8 @@ func _settings() -> void:
 	rows.append(_choice_row(s.t("music"), [s.t("musicOn"), s.t("musicOff")], 0 if Music.wanted() else 1, func(i): _set_music(i == 0), "Music_", ["on", "off"]))
 	rows.append(_choice_row(s.t("voices"), [s.t("musicOn"), s.t("musicOff")], 0 if Voice.wanted() else 1, func(i): _set_voices(i == 0), "Voices_", ["on", "off"]))
 	rows.append(_choice_row(s.t("hands"), [s.t("musicOn"), s.t("musicOff")], 0 if Activity.wanted() else 1, func(i): _set_hands(i == 0), "Hands_", ["on", "off"]))
+	rows.append(_choice_row(s.t("easyDriving"), [s.t("musicOn"), s.t("musicOff")], 0 if Driving.easy() else 1, func(i): _set_easy(i == 0), "Easy_", ["on", "off"]))
+	rows.append(Look.label(s.t("easyDrivingHelp"), 13, false, Look.MUTED))
 	rows.append(_cloud_card())
 	# Who recorded the street sounds (their licences ask to be named).
 	var credits := Sfx.credits()
@@ -1372,6 +1375,11 @@ func _close_settings() -> void:
 
 func _set_hands(value: bool) -> void:
 	Activity.save_wanted(value)
+	_build()
+
+
+func _set_easy(value: bool) -> void:
+	Driving.save_easy(value)
 	_build()
 
 
