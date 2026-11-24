@@ -15,7 +15,7 @@ const Voice = preload("res://scripts/ui/voice.gd")
 signal finished(chapter_id: String, effects: Dictionary)
 
 ## Women in the cast (drawn with long hair and a dress).
-const WOMEN := ["rokeya", "sumi", "nasrin", "rumana", "joya", "sultana", "babu_ma"]
+const WOMEN := ["rokeya", "sumi", "nasrin", "rumana", "joya", "sultana", "babu_ma", "sister", "tania"]
 
 var story: Story
 var chapter: Dictionary

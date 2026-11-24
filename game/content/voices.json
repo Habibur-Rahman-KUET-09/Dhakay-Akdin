@@ -120,6 +120,41 @@
    "voice": "bn-BD-PradeepNeural",
    "pitch": "-5%",
    "rate": "+0%"
+  },
+  "sister": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "-6%",
+   "rate": "-2%"
+  },
+  "shakil": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+18%",
+   "rate": "+8%"
+  },
+  "tania": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "+6%",
+   "rate": "+2%"
+  },
+  "farhan": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+6%",
+   "rate": "+6%"
+  },
+  "owner": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-12%",
+   "rate": "-4%"
+  },
+  "dalal": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+2%",
+   "rate": "+10%"
+  },
+  "mahajan": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-14%",
+   "rate": "-10%"
   }
  },
  "lines": {

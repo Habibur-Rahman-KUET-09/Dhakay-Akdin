@@ -6,11 +6,11 @@ const Daily = preload("res://scripts/rules/daily.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 
 
-func test_fifteen_chapters_all_whole() -> void:
+func test_eleven_chapters_each_all_whole() -> void:
 	var s := Story.new()
-	eq(s.chapters.size(), 15, "fifteen chapters")
+	eq(s.chapters.size(), 33, "thirty-three chapters")
 	for who in ["rickshaw", "tea", "bus"]:
-		eq(s.chapters.filter(func(c): return c.who == who).size(), 5, "five for %s" % who)
+		eq(s.chapters.filter(func(c): return c.who == who).size(), 11, "ten and a side story for %s" % who)
 	for c in s.chapters:
 		check(c.panels.size() >= 1, "%s has panels" % c.id)
 		for p in c.panels:
@@ -76,3 +76,29 @@ func test_every_speaker_has_a_voice() -> void:
 	var Voice = load("res://scripts/ui/voice.gd")
 	eq(Voice.story_id("rahim", "সুমির মা, আজ থেকে মিরপুরের রাস্তায় রিকশা চালাব।"), "story_941206e428", "same name as tool/make_voices.py")
 	check(Voice.ids_of("no_such_group").is_empty(), "an unknown group says nothing")
+
+
+func test_choices_do_only_what_the_game_knows() -> void:
+	var s := Story.new()
+	var npcs = JSON.parse_string(FileAccess.get_file_as_string("res://content/npcs.json"))
+	var ids: Array = npcs.people.map(func(p): return p.id)
+	for c in s.chapters:
+		if not c.has("choice"):
+			continue
+		eq(c.choice.options.size(), 2, "%s: two ways" % c.id)
+		for o in c.choice.options:
+			for k in o.effects:
+				check(k in ["taka", "npc", "family"], "%s: knows the effect %s" % [c.id, k])
+			if o.effects.has("npc"):
+				check(ids.has(o.effects.npc[0]), "%s: %s is a neighbour" % [c.id, o.effects.npc[0]])
+			if o.effects.has("family"):
+				check(o.effects.family[0] in ["rickshaw", "tea", "bus"], "%s: whose family" % c.id)
+
+
+func test_a_story_choice_moves_the_family() -> void:
+	var p := Progress.new(preload("res://scripts/rules/balance.gd").new(), "user://test_story_family.json")
+	p.data = Progress.fresh()
+	p.data.taka = 100
+	p.finish_chapter("rahim_6", {"family": ["rickshaw", 2], "taka": -500})
+	eq(p.family("rickshaw"), 7, "the family is glad")
+	eq(int(p.data.taka), 0, "a cost never goes below nothing")

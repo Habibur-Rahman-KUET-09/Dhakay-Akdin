@@ -1,5 +1,5 @@
 {
- "note": "Story chapters (§৬.২): five for each character, unlocked by days played, money earned, upgrades bought or the school fee. Pictures are drawn from the scene name until real art arrives.",
+ "note": "Story chapters (§৬.২): ten for each character and a side story each (n 11), unlocked by days played, money earned, upgrades bought or the school fee. Choices may give or take money (taka), move how a neighbour feels (npc) or a family's feeling (family). Pictures are drawn from the scene name until real art arrives.",
  "cast": {
   "rahim": {
    "bn": "রহিম চাচা",
@@ -75,6 +75,46 @@
    "bn": "কামাল ভাই",
    "en": "Kamal Bhai",
    "colour": "2B2B2B"
+  },
+  "sister": {
+   "bn": "বড় আপা",
+   "en": "Big sister",
+   "colour": "8E3B6B"
+  },
+  "shakil": {
+   "bn": "শাকিল",
+   "en": "Shakil",
+   "colour": "2F7D6B"
+  },
+  "tania": {
+   "bn": "তানিয়া",
+   "en": "Tania",
+   "colour": "D35B3A"
+  },
+  "farhan": {
+   "bn": "ফারহান",
+   "en": "Farhan",
+   "colour": "3D5A99"
+  },
+  "owner": {
+   "bn": "বাসের মালিক",
+   "en": "The bus owner",
+   "colour": "4A3B2A"
+  },
+  "dalal": {
+   "bn": "দালাল",
+   "en": "The tout",
+   "colour": "6B5E2E"
+  },
+  "mahajan": {
+   "bn": "মহাজন",
+   "en": "The moneylender",
+   "colour": "5A2E2E"
+  },
+  "police": {
+   "bn": "পুলিশ",
+   "en": "Policeman",
+   "colour": "2B3A55"
   }
  },
  "chapters": [
@@ -338,6 +378,557 @@
    ]
   },
   {
+   "id": "rahim_6",
+   "who": "rickshaw",
+   "n": 6,
+   "title": {
+    "bn": "পরীক্ষার সপ্তাহ",
+    "en": "Exam week"
+   },
+   "unlock": {
+    "days": [
+     "rickshaw",
+     12
+    ]
+   },
+   "panels": [
+    {
+     "scene": "home_dawn",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, কাল থেকে বার্ষিক পরীক্ষা। আমাকে সময়মতো স্কুলে পৌঁছে দিবে তো?",
+       "en": "Abba, the yearly exams start tomorrow. Will you get me to school on time?"
+      },
+      {
+       "by": "rokeya",
+       "bn": "ভোরে নাকি ভালো ভাড়া বেশি পাওয়া যায়, কিন্তু মেয়েটার পরীক্ষা…",
+       "en": "They say the best fares are at dawn, but the girl's exams…"
+      },
+      {
+       "by": "rahim",
+       "bn": "দেখি, কী করা যায়।",
+       "en": "Let me see what I can do."
+      }
+     ]
+    },
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "man",
+       "bn": "এই রিকশা! মতিঝিল যাবেন? দুইশো টাকা দেব, এখনই চলেন।",
+       "en": "Rickshaw! To Motijheel? I'll pay two hundred, go now."
+      },
+      {
+       "by": "rahim",
+       "bn": "দুইশো টাকা… আর ওদিকে সুমি অপেক্ষা করছে।",
+       "en": "Two hundred… and Sumi is waiting over there."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "রহিম চাচা কী করবেন?",
+     "en": "What will Rahim Chacha do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "সুমিকে স্কুলে নিয়ে যান",
+       "en": "Take Sumi to school"
+      },
+      "effects": {
+       "family": [
+        "rickshaw",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "sumi",
+        "bn": "আব্বা, তুমি ঠিক সময়ে এসেছ! আমি খুব ভালো পরীক্ষা দেব।",
+        "en": "Abba, you came right on time! I'll do really well."
+       },
+       {
+        "by": "rahim",
+        "bn": "যাও মা, মন দিয়ে লিখো।",
+        "en": "Go on, dear. Write it with all your heart."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "ভালো ভাড়াটা নিন",
+       "en": "Take the good fare"
+      },
+      "effects": {
+       "taka": 200,
+       "family": [
+        "rickshaw",
+        -2
+       ]
+      },
+      "lines": [
+       {
+        "by": "rokeya",
+        "bn": "সুমি হেঁটে গেছে, দেরি করে পৌঁছেছে। খুব কান্না করছিল।",
+        "en": "Sumi walked and got there late. She was crying so much."
+       },
+       {
+        "by": "rahim",
+        "bn": "টাকাটা পেলাম, কিন্তু বুকটা ভারী লাগছে।",
+        "en": "I got the money, but my heart feels heavy."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "rahim_7",
+   "who": "rickshaw",
+   "n": 7,
+   "title": {
+    "bn": "রিকশা আটক",
+    "en": "The rickshaw seized"
+   },
+   "unlock": {
+    "days": [
+     "rickshaw",
+     16
+    ]
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "police",
+       "bn": "এই রিকশা থামান! এই রাস্তায় রিকশা চলবে না। রিকশা থানায় যাবে।",
+       "en": "Stop that rickshaw! No rickshaws on this road. It goes to the station."
+      },
+      {
+       "by": "rahim",
+       "bn": "স্যার, আমি জানতাম না। এটাই আমার রুটি-রুজি।",
+       "en": "Sir, I didn't know. This is my whole living."
+      },
+      {
+       "by": "dalal",
+       "bn": "চাচা, পাঁচশো টাকা দেন, আমি এখনই ছাড়িয়ে দিচ্ছি। কাগজপত্রের ঝামেলা লাগবে না।",
+       "en": "Chacha, give me five hundred and I'll get it out now. No paperwork."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "রিকশা কীভাবে ছাড়াবেন?",
+     "en": "How will he get the rickshaw back?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "নিয়ম মেনে জরিমানা দিন",
+       "en": "Pay the fine the proper way"
+      },
+      "effects": {
+       "taka": -150,
+       "family": [
+        "rickshaw",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "rahim",
+        "bn": "দুই দিন লাগল, কিন্তু রসিদ হাতে, কারও কাছে মাথা নিচু করিনি।",
+        "en": "It took two days, but I have the receipt, and I bowed to no one."
+       },
+       {
+        "by": "rokeya",
+        "bn": "আপনি ঠিক করেছেন। সুমিও শিখল, সৎ পথে দেরি হলেও ক্ষতি নেই।",
+        "en": "You did right. Sumi learned it too: the honest way may be slow, but it costs nothing."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "দালালকে টাকা দিন",
+       "en": "Pay the tout"
+      },
+      "effects": {
+       "taka": -500
+      },
+      "lines": [
+       {
+        "by": "dalal",
+        "bn": "এই নেন আপনার রিকশা। আবার লাগলে আমাকেই খুঁজবেন।",
+        "en": "Here's your rickshaw. Need me again, you know where I am."
+       },
+       {
+        "by": "rahim",
+        "bn": "রিকশা ফিরল, কিন্তু পাঁচশো টাকা… পুরো দুই দিনের আয়।",
+        "en": "The rickshaw's back, but five hundred… two whole days' earnings."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "rahim_8",
+   "who": "rickshaw",
+   "n": 8,
+   "title": {
+    "bn": "রোকেয়ার অসুখ",
+    "en": "Rokeya falls ill"
+   },
+   "unlock": {
+    "days": [
+     "rickshaw",
+     20
+    ]
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, আম্মার খুব জ্বর। কথা বলতে পারছে না।",
+       "en": "Abba, Amma has a high fever. She can hardly speak."
+      },
+      {
+       "by": "rahim",
+       "bn": "নাসরিন আপা হাসপাতালে কাজ করেন। এখনই যাই।",
+       "en": "Nasrin works at the hospital. Let's go now."
+      }
+     ]
+    },
+    {
+     "scene": "hospital",
+     "lines": [
+      {
+       "by": "nasrin",
+       "bn": "চাচা, আপনি সেই বৃষ্টির রাতে আমার বাবাকে বাঁচিয়েছিলেন। এবার আমার পালা।",
+       "en": "Chacha, you saved my father that rainy night. Now it's my turn."
+      },
+      {
+       "by": "nasrin",
+       "bn": "ওষুধ আর পরীক্ষায় চারশো টাকার মতো লাগবে। আমি ডাক্তারের সাথে কথা বলেছি, এর বেশি লাগবে না।",
+       "en": "Medicine and tests come to about four hundred. I've spoken to the doctor; it won't be more."
+      },
+      {
+       "by": "mahajan",
+       "bn": "রহিম, টাকা লাগলে আমার কাছ থেকে নাও। মাসে মাসে শোধ দিবে, একটু সুদ লাগবে, এই আর কী।",
+       "en": "Rahim, take the money from me. Pay it back month by month, a little interest, that's all."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "টাকা কোথা থেকে আসবে?",
+     "en": "Where will the money come from?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "জমানো টাকা থেকে দিন",
+       "en": "Pay from the savings"
+      },
+      "effects": {
+       "taka": -400,
+       "family": [
+        "rickshaw",
+        1
+       ],
+       "npc": [
+        "nasrin",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "rahim",
+        "bn": "জমানো টাকা তো এমন দিনের জন্যই।",
+        "en": "Savings are for days like this."
+       },
+       {
+        "by": "rokeya",
+        "bn": "আপনি পাশে ছিলেন, এতেই অর্ধেক অসুখ সেরে গেছে।",
+        "en": "You were by my side; that cured half of it."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "মহাজনের কাছে ধার নিন",
+       "en": "Borrow from the moneylender"
+      },
+      "effects": {
+       "taka": -650,
+       "family": [
+        "rickshaw",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "mahajan",
+        "bn": "চারশো নিলে, শোধ দিবে সাড়ে ছয়শো। হিসাব পরিষ্কার।",
+        "en": "Four hundred taken, six hundred fifty paid back. Clear accounts."
+       },
+       {
+        "by": "rahim",
+        "bn": "সুদে সুদে আড়াইশো টাকা বেশি গেল। পরের বার আগে থেকে জমিয়ে রাখব।",
+        "en": "Two hundred fifty more lost to interest. Next time I'll have savings ready."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "rahim_9",
+   "who": "rickshaw",
+   "n": 9,
+   "title": {
+    "bn": "গ্রামে বন্যা",
+    "en": "Floods at home"
+   },
+   "unlock": {
+    "earned": [
+     "rickshaw",
+     15000
+    ]
+   },
+   "panels": [
+    {
+     "scene": "rain_night",
+     "lines": [
+      {
+       "by": "rokeya",
+       "bn": "গ্রাম থেকে ফোন এসেছে। নদীর পানি ঘরে ঢুকেছে, আম্মার ঘরের চাল ভেসে গেছে।",
+       "en": "A call from the village. The river is in the houses; Mother's roof has washed away."
+      },
+      {
+       "by": "rahim",
+       "bn": "আম্মা একা… এখন কী করি?",
+       "en": "Mother alone… what do I do now?"
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "রহিম চাচা কী করবেন?",
+     "en": "What will Rahim Chacha do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "গ্রামে টাকা পাঠান",
+       "en": "Send money home"
+      },
+      "effects": {
+       "taka": -500,
+       "family": [
+        "rickshaw",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "rahim",
+        "bn": "মোবাইলে পাঁচশো টাকা পাঠালাম। নতুন টিন কিনবে, আর আমি পরের মাসে যাব।",
+        "en": "I sent five hundred by phone. She'll buy new tin, and I'll go next month."
+       },
+       {
+        "by": "sumi",
+        "bn": "আব্বা, দাদির জন্য আমিও একটা চিঠি লিখে দিয়েছি।",
+        "en": "Abba, I wrote Grandma a letter too."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "নিজে গ্রামে যান",
+       "en": "Go to the village"
+      },
+      "effects": {
+       "family": [
+        "rickshaw",
+        3
+       ],
+       "taka": -200
+      },
+      "lines": [
+       {
+        "by": "rahim",
+        "bn": "তিন দিন রিকশা বন্ধ, কিন্তু আম্মার মুখটা দেখে এলাম। চালও মেরামত করে দিলাম।",
+        "en": "Three days without the rickshaw, but I saw Mother's face, and I mended her roof myself."
+       },
+       {
+        "by": "rokeya",
+        "bn": "টাকা আবার আসবে। মা একটাই।",
+        "en": "Money comes again. A mother you have only one."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "rahim_10",
+   "who": "rickshaw",
+   "n": 10,
+   "title": {
+    "bn": "সুমির বৃত্তি",
+    "en": "Sumi's scholarship"
+   },
+   "unlock": {
+    "days": [
+     "rickshaw",
+     30
+    ]
+   },
+   "panels": [
+    {
+     "scene": "school",
+     "lines": [
+      {
+       "by": "rumana",
+       "bn": "আজকের অনুষ্ঠানে সবচেয়ে বড় খবর: সুমি জেলায় বৃত্তি পেয়েছে!",
+       "en": "The biggest news at today's ceremony: Sumi has won a district scholarship!"
+      },
+      {
+       "by": "rumana",
+       "bn": "আমি সুমির বাবাকে মঞ্চে ডাকছি। রহিম ভাই, আসুন।",
+       "en": "I call Sumi's father to the stage. Rahim Bhai, please come."
+      },
+      {
+       "by": "rahim",
+       "bn": "আমি… আমি তো একজন রিকশাওয়ালা।",
+       "en": "Me… I'm just a rickshaw puller."
+      }
+     ]
+    },
+    {
+     "scene": "school",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, তুমি প্রতিদিন রোদে-বৃষ্টিতে প্যাডেল মেরেছ বলেই আমি পড়তে পেরেছি।",
+       "en": "Abba, I could study because you pedalled every day, sun and rain."
+      },
+      {
+       "by": "rahim",
+       "bn": "আজ মনে হচ্ছে, এই শহরে আমার প্রতিটা প্যাডেল কাজে লেগেছে।",
+       "en": "Today it feels like every turn of the pedals in this city was worth it."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rahim_11",
+   "who": "rickshaw",
+   "n": 11,
+   "title": {
+    "bn": "তানিয়ার রাতের রিকশা",
+    "en": "Tania's ride home"
+   },
+   "unlock": {
+    "days": [
+     "rickshaw",
+     8
+    ]
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "tania",
+       "bn": "চাচা, কারখানায় আজও ওভারটাইম ছিল। রাত দশটা বাজে, রাস্তা ফাঁকা। একটু বাসায় পৌঁছে দিবেন?",
+       "en": "Chacha, overtime at the factory again. It's ten at night and the roads are empty. Will you take me home?"
+      },
+      {
+       "by": "rahim",
+       "bn": "উঠে বসো মা। এত রাতে একা হাঁটবে না।",
+       "en": "Sit down, dear. You shouldn't walk alone this late."
+      }
+     ]
+    },
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "tania",
+       "bn": "চাচা, কাল থেকে আপনি রোজ রাত দশটায় কারখানার গেটে থাকবেন? মাসের ভাড়া আগেই দিয়ে দেব।",
+       "en": "Chacha, from tomorrow will you wait at the factory gate at ten every night? I'll pay the month in advance."
+      },
+      {
+       "by": "rahim",
+       "bn": "থাকব মা। তোমার বাবা থাকলে তিনিও এটাই চাইতেন।",
+       "en": "I'll be there, dear. Your father would have wanted it too."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "মাসের ভাড়া কত নেবেন?",
+     "en": "What will he charge for the month?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "ন্যায্য ভাড়াই নিন",
+       "en": "Charge a fair fare"
+      },
+      "effects": {
+       "taka": 300,
+       "npc": [
+        "tania",
+        3
+       ]
+      },
+      "lines": [
+       {
+        "by": "tania",
+        "bn": "আপনার মতো মানুষ আছে বলেই এই শহরে রাতে বাড়ি ফিরতে ভয় লাগে না।",
+        "en": "Because of people like you I'm not afraid to come home at night."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "রাতের বাড়তি ভাড়া চান",
+       "en": "Ask for night-time extra"
+      },
+      "effects": {
+       "taka": 500,
+       "npc": [
+        "tania",
+        -1
+       ]
+      },
+      "lines": [
+       {
+        "by": "tania",
+        "bn": "ঠিক আছে চাচা… বেতনটা তো কম, তবু দেব।",
+        "en": "All right, Chacha… my pay is small, but I'll pay."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
    "id": "monir_1",
    "who": "tea",
    "n": 1,
@@ -548,6 +1139,486 @@
      ]
     }
    ]
+  },
+  {
+   "id": "monir_6",
+   "who": "tea",
+   "n": 6,
+   "title": {
+    "bn": "উচ্ছেদ",
+    "en": "The eviction"
+   },
+   "unlock": {
+    "days": [
+     "tea",
+     10
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "belal",
+       "bn": "মনির, শুনেছ? কাল সিটি কর্পোরেশন ফুটপাতের সব দোকান ভেঙে দিতে আসবে।",
+       "en": "Monir, heard? Tomorrow the city corporation is coming to clear every pavement stall."
+      },
+      {
+       "by": "monir",
+       "bn": "এই টংটাই আমার সব। দশ বছর ধরে এখানে চা বেচি।",
+       "en": "This stall is all I have. Ten years I've sold tea here."
+      },
+      {
+       "by": "haider",
+       "bn": "মনির, মহল্লার সবাই তোমাকে চেনে। চলো সবাই মিলে আবেদন করি।",
+       "en": "Monir, the whole mohalla knows you. Let's petition together."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "মনির মামা কী করবেন?",
+     "en": "What will Monir Mama do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "মহল্লার সই নিয়ে আবেদন করুন",
+       "en": "Petition with the mohalla's signatures"
+      },
+      "effects": {
+       "npc": [
+        "belal",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "haider",
+        "bn": "দুইশো জনের সই! কর্মকর্তা বললেন, পরিষ্কার রাখলে টং থাকবে।",
+        "en": "Two hundred signatures! The officer says the stall can stay if it's kept clean."
+       },
+       {
+        "by": "monir",
+        "bn": "আজ বুঝলাম, এই টং শুধু আমার না, পুরো মহল্লার।",
+        "en": "Today I learned this stall isn't only mine; it's the whole mohalla's."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "চুপচাপ পাশের গলিতে সরে যান",
+       "en": "Quietly move to the next lane"
+      },
+      "effects": {
+       "taka": -300
+      },
+      "lines": [
+       {
+        "by": "monir",
+        "bn": "নতুন জায়গা, নতুন বেঞ্চ, তিনশো টাকা খরচ। কাস্টমাররা খুঁজে পাবে তো?",
+        "en": "A new spot, a new bench, three hundred spent. Will the customers find me?"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "monir_7",
+   "who": "tea",
+   "n": 7,
+   "title": {
+    "bn": "হিসাবের খাতা",
+    "en": "The account book"
+   },
+   "unlock": {
+    "days": [
+     "tea",
+     14
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "haider",
+       "bn": "মনির, সারাদিন এত চা বেচো, মাস শেষে টাকা যায় কোথায়?",
+       "en": "Monir, you sell so much tea all day; where does the money go by month's end?"
+      },
+      {
+       "by": "monir",
+       "bn": "সত্যি বলতে জানি না, স্যার। বাকি অনেক, মনে থাকে না।",
+       "en": "Honestly I don't know, sir. So much on credit, I can't remember."
+      },
+      {
+       "by": "haider",
+       "bn": "এই নাও একটা খাতা। প্রতিদিন লিখবে: কত এল, কত গেল, কে বাকি রাখল।",
+       "en": "Here, a notebook. Every day write: what came in, what went out, who owes."
+      }
+     ]
+    },
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "farhan",
+       "bn": "মামা, এই মাসে টিউশনির টাকা পাইনি। চা-টা খাতায় লিখে রাখবেন?",
+       "en": "Mama, my tuition money hasn't come this month. Will you put the tea on the book?"
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "ফারহানকে বাকি দেবেন?",
+     "en": "Give Farhan credit?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "খাতায় লিখে বাকি দিন",
+       "en": "Write it in the book"
+      },
+      "effects": {
+       "taka": -100,
+       "npc": [
+        "farhan",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "farhan",
+        "bn": "মামা, টাকা পেলেই শোধ দেব। আর আপনাকে ইংরেজি পড়া শেখাব, কথা দিলাম।",
+        "en": "Mama, I'll pay as soon as I'm paid. And I'll teach you English, I promise."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "নগদ ছাড়া চা নয়",
+       "en": "No tea without cash"
+      },
+      "effects": {
+       "taka": 100,
+       "npc": [
+        "farhan",
+        -2
+       ]
+      },
+      "lines": [
+       {
+        "by": "monir",
+        "bn": "খাতায় লাভ বাড়ল, কিন্তু ছেলেটা মুখ কালো করে চলে গেল।",
+        "en": "The book shows more profit, but the boy walked off looking low."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "monir_8",
+   "who": "tea",
+   "n": 8,
+   "title": {
+    "bn": "ম্যাচের রাত",
+    "en": "Match night"
+   },
+   "unlock": {
+    "earned": [
+     "tea",
+     8000
+    ]
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "joya",
+       "bn": "মামা, আজ রাতে ফাইনাল! দোকানের টিভিতে খেলা দেখাবেন?",
+       "en": "Mama, tonight's the final! Will you show the match on the stall's TV?"
+      },
+      {
+       "by": "monir",
+       "bn": "দেখাব না মানে? আজ চা-ও চলবে, খেলাও চলবে।",
+       "en": "Of course! Tonight the tea flows and so does the match."
+      }
+     ]
+    },
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "rafiq",
+       "bn": "ছক্কা! ছক্কা! মনির, সবাইকে এক কাপ করে চা দাও, আমার পক্ষ থেকে!",
+       "en": "A six! A six! Monir, a cup of tea for everyone, on me!"
+      },
+      {
+       "by": "monir",
+       "bn": "এক রাতেই তিনশো কাপ! আর সবাই একসাথে চিৎকার করছে, এই তো ঢাকা।",
+       "en": "Three hundred cups in one night! And everyone shouting together; this is Dhaka."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "monir_9",
+   "who": "tea",
+   "n": 9,
+   "title": {
+    "bn": "মামার আড্ডা",
+    "en": "Mamar Adda"
+   },
+   "unlock": {
+    "days": [
+     "tea",
+     22
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "joya",
+       "bn": "মামা, আজ থেকে এটা আর টং না, এটা «মামার আড্ডা» ক্যাফে!",
+       "en": "Mama, from today this isn't a stall; it's the café, Mamar Adda!"
+      },
+      {
+       "by": "monir",
+       "bn": "টেবিল, চেয়ার, দেয়ালে ছবি। স্বপ্নটা সত্যি হলো।",
+       "en": "Tables, chairs, pictures on the wall. The dream came true."
+      },
+      {
+       "by": "rafiq",
+       "bn": "তবে মনির, দাম বাড়িয়ে দিবে না তো? আমরা পুরনো মানুষ।",
+       "en": "But Monir, you won't raise the prices? We're old customers."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "দাম কি বাড়াবেন?",
+     "en": "Will he raise the prices?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "পুরনোদের জন্য আগের দামই রাখুন",
+       "en": "Keep the old price for the old customers"
+      },
+      "effects": {
+       "npc": [
+        "rafiq",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "rafiq",
+        "bn": "এই জন্যই তো তোমার দোকানে আসি। চা-টা শুধু চা না, মনির।",
+        "en": "That's why I come to you. Your tea is more than tea, Monir."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "নতুন ক্যাফে, নতুন দাম",
+       "en": "A new café, new prices"
+      },
+      "effects": {
+       "taka": 400,
+       "npc": [
+        "rafiq",
+        -2
+       ]
+      },
+      "lines": [
+       {
+        "by": "monir",
+        "bn": "আয় বেড়েছে, কিন্তু রফিক চাচা এখন সকালে অন্য দোকানে যান।",
+        "en": "Earnings are up, but Rafiq Chacha takes his morning tea elsewhere now."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "monir_10",
+   "who": "tea",
+   "n": 10,
+   "title": {
+    "bn": "শাকিল",
+    "en": "Shakil"
+   },
+   "unlock": {
+    "days": [
+     "tea",
+     28
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "sister",
+       "bn": "ভাই, শাকিলকে তোর কাছে পাঠালাম। গ্রামে কাজ নেই, ও তোর দোকানে কাজ শিখুক।",
+       "en": "Brother, I've sent Shakil to you. There's no work in the village; let him learn your trade."
+      },
+      {
+       "by": "shakil",
+       "bn": "মামা, আমি সব পারব। কাপ ধোয়া, চা বানানো, সব।",
+       "en": "Mama, I can do it all. Washing cups, making tea, everything."
+      },
+      {
+       "by": "monir",
+       "bn": "তুই তো ক্লাসে প্রথম হতি, শাকিল…",
+       "en": "But you came first in your class, Shakil…"
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "শাকিলকে নিয়ে কী করবেন?",
+     "en": "What will he do about Shakil?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "স্কুলে ভর্তি করান, বিকেলে দোকানে",
+       "en": "Put him in school, the stall after"
+      },
+      "effects": {
+       "taka": -300,
+       "family": [
+        "tea",
+        3
+       ]
+      },
+      "lines": [
+       {
+        "by": "shakil",
+        "bn": "মামা, আমি একদিন বড় ক্যাফে খুলব, আর নাম রাখব «মামার আড্ডা ২»!",
+        "en": "Mama, one day I'll open a big café and call it Mamar Adda 2!"
+       },
+       {
+        "by": "sister",
+        "bn": "ভাই, তুই আমার ছেলেটার জীবন বদলে দিলি।",
+        "en": "Brother, you've changed my son's life."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "সারাদিন দোকানে রাখুন",
+       "en": "Keep him at the stall all day"
+      },
+      "effects": {
+       "taka": 300,
+       "family": [
+        "tea",
+        -1
+       ]
+      },
+      "lines": [
+       {
+        "by": "monir",
+        "bn": "দোকানে একজন বাড়তি হাত, আয়ও বাড়বে। কিন্তু ছেলেটার বইগুলো ব্যাগেই পড়ে থাকে।",
+        "en": "An extra pair of hands, more money. But the boy's books stay in his bag."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "monir_11",
+   "who": "tea",
+   "n": 11,
+   "title": {
+    "bn": "সুলতানা খালার পিঠা",
+    "en": "Sultana Khala's pitha"
+   },
+   "unlock": {
+    "days": [
+     "tea",
+     8
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "sultana",
+       "bn": "মনির, শীত এসেছে। তোমার দোকানের পাশে আমি একটু ভাপা পিঠা বেচব, আপত্তি নেই তো?",
+       "en": "Monir, winter's here. I'll sell a little bhapa pitha beside your stall; you don't mind?"
+      },
+      {
+       "by": "monir",
+       "bn": "পাশেই? তাহলে তো আমার কাস্টমাররা আপনার দিকে যাবে…",
+       "en": "Right beside me? Then my customers will go to you…"
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "মনির মামা কী বলবেন?",
+     "en": "What will Monir Mama say?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "একসাথে বেচুন: চা আর পিঠা",
+       "en": "Sell together: tea and pitha"
+      },
+      "effects": {
+       "taka": 200,
+       "npc": [
+        "sultana",
+        3
+       ]
+      },
+      "lines": [
+       {
+        "by": "sultana",
+        "bn": "চায়ের সাথে পিঠা, পিঠার সাথে চা। দুজনেরই বিক্রি দ্বিগুণ!",
+        "en": "Pitha with tea, tea with pitha. Twice the sales for both of us!"
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "অন্য জায়গায় যেতে বলুন",
+       "en": "Ask her to go elsewhere"
+      },
+      "effects": {
+       "npc": [
+        "sultana",
+        -2
+       ]
+      },
+      "lines": [
+       {
+        "by": "sultana",
+        "bn": "ঠিক আছে বাবা, মোড়ের ওপাশে বসব।",
+        "en": "All right, son. I'll sit across the corner."
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "babu_1",
@@ -793,6 +1864,395 @@
      ]
     }
    ]
+  },
+  {
+   "id": "babu_6",
+   "who": "bus",
+   "n": 6,
+   "title": {
+    "bn": "লাইসেন্সের পরীক্ষা",
+    "en": "The licence test"
+   },
+   "unlock": {
+    "days": [
+     "bus",
+     10
+    ]
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "ostad",
+       "bn": "বাবু, আর কত কন্ডাক্টরি করবি? এবার ড্রাইভিং লাইসেন্সটা নে।",
+       "en": "Babu, how long will you stay a conductor? Get your driving licence now."
+      },
+      {
+       "by": "dalal",
+       "bn": "পরীক্ষা কঠিন, ভাই। হাজার টাকা দাও, লাইসেন্স ঘরে পৌঁছে যাবে।",
+       "en": "The test is hard, brother. A thousand taka and the licence comes to your door."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "বাবু কী করবেন?",
+     "en": "What will Babu do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "নিজে পড়ে পরীক্ষা দিন",
+       "en": "Study and sit the test"
+      },
+      "effects": {
+       "family": [
+        "bus",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "babu",
+        "bn": "রাত জেগে ট্রাফিকের সব চিহ্ন মুখস্থ করেছি। আর পাস করেছি!",
+        "en": "Nights awake learning every traffic sign. And I passed!"
+       },
+       {
+        "by": "ostad",
+        "bn": "এই না হলে আমার সাগরেদ! যে নিয়ম জানে, সে রাস্তায় মানুষ বাঁচায়।",
+        "en": "That's my apprentice! A driver who knows the rules saves lives on the road."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "দালালকে টাকা দিন",
+       "en": "Pay the tout"
+      },
+      "effects": {
+       "taka": -1000
+      },
+      "lines": [
+       {
+        "by": "babu",
+        "bn": "লাইসেন্স হাতে, কিন্তু চিহ্নগুলো তো এখনও ঠিকমতো চিনি না…",
+        "en": "The licence is in my hand, but I still don't really know the signs…"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "babu_7",
+   "who": "bus",
+   "n": 7,
+   "title": {
+    "bn": "প্রথমবার স্টিয়ারিং",
+    "en": "At the wheel"
+   },
+   "unlock": {
+    "days": [
+     "bus",
+     14
+    ]
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "ostad",
+       "bn": "বাবু, আজ শরীরটা ভালো নেই। বাসটা তুই চালা।",
+       "en": "Babu, I'm not well today. You drive the bus."
+      },
+      {
+       "by": "babu",
+       "bn": "আমি? চল্লিশজন যাত্রী… ওস্তাদ, হাত কাঁপছে।",
+       "en": "Me? Forty passengers… Ostad, my hands are shaking."
+      },
+      {
+       "by": "ostad",
+       "bn": "কাঁপুক। ধীরে চালাবি, আয়নায় দেখবি, কখনো রেস করবি না।",
+       "en": "Let them shake. Drive slow, watch the mirrors, never race."
+      }
+     ]
+    },
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "মতিঝিল পৌঁছে গেছি! একটাও ঝাঁকি দিইনি!",
+       "en": "We've reached Motijheel! Not a single jolt!"
+      },
+      {
+       "by": "ostad",
+       "bn": "আজ থেকে তুই শুধু কন্ডাক্টর না, বাবু।",
+       "en": "From today you're not just a conductor, Babu."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "babu_8",
+   "who": "bus",
+   "n": 8,
+   "title": {
+    "bn": "মালিকের হিসাব",
+    "en": "The owner's accounts"
+   },
+   "unlock": {
+    "earned": [
+     "bus",
+     6000
+    ]
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "owner",
+       "bn": "এই মাসে আয় কম। তোদের বেতন থেকে তিনশো করে কাটা যাবে।",
+       "en": "Takings are down this month. Three hundred off each of your pay."
+      },
+      {
+       "by": "babu",
+       "bn": "কম? আমি প্রতিদিনের হিসাব খাতায় লিখে রেখেছি। আয় তো বেড়েছে।",
+       "en": "Down? I've written every day's takings in my book. They've gone up."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "বাবু কী করবেন?",
+     "en": "What will Babu do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "খাতা দেখিয়ে প্রতিবাদ করুন",
+       "en": "Show the book and object"
+      },
+      "effects": {
+       "taka": 300
+      },
+      "lines": [
+       {
+        "by": "owner",
+        "bn": "হুম… খাতার হিসাব তো মিলে যাচ্ছে। ঠিক আছে, বেতন পুরোটাই পাবি।",
+        "en": "Hmm… the book adds up. All right, you'll get your full pay."
+       },
+       {
+        "by": "ostad",
+        "bn": "সাহস আর হিসাব একসাথে থাকলে কেউ ঠকাতে পারে না।",
+        "en": "With courage and accounts together, no one can cheat you."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "চুপ থাকুন",
+       "en": "Stay quiet"
+      },
+      "effects": {
+       "taka": -300
+      },
+      "lines": [
+       {
+        "by": "babu",
+        "bn": "চাকরি গেলে মা খাবে কী? চুপ করে রইলাম।",
+        "en": "If I lose the job, what will Ma eat? I kept quiet."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "babu_9",
+   "who": "bus",
+   "n": 9,
+   "title": {
+    "bn": "মা ঢাকায়",
+    "en": "Ma in Dhaka"
+   },
+   "unlock": {
+    "days": [
+     "bus",
+     20
+    ]
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "babu_ma",
+       "bn": "বাবা, এই বুঝি তোর বাস? কত মানুষ! কত গাড়ি!",
+       "en": "Son, is this your bus? So many people! So many cars!"
+      },
+      {
+       "by": "babu",
+       "bn": "মা, জানালার পাশে বসো। আজ তোমাকে পুরো ঢাকা দেখাব।",
+       "en": "Ma, sit by the window. Today I'll show you all of Dhaka."
+      }
+     ]
+    },
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "babu_ma",
+       "bn": "তুই যখন ভাড়া চাস, সবাই তোকে সম্মান করে। আমার বুকটা ভরে গেল।",
+       "en": "When you ask for fares, everyone respects you. My heart is full."
+      },
+      {
+       "by": "babu",
+       "bn": "সবই তোমার দোয়া, মা।",
+       "en": "It's all your blessing, Ma."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "babu_10",
+   "who": "bus",
+   "n": 10,
+   "title": {
+    "bn": "প্রাণের ঢাকা পরিবহন",
+    "en": "Praner Dhaka Transport"
+   },
+   "unlock": {
+    "earned": [
+     "bus",
+     15000
+    ]
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "ostad",
+       "bn": "বাবু, আমার বয়স হয়েছে। একটা পুরনো বাস বিক্রি হচ্ছে। তুই অর্ধেক দিলে আমরা দুজনে মিলে কিনতে পারি।",
+       "en": "Babu, I'm getting old. An old bus is for sale. If you pay half, we can buy it together."
+      },
+      {
+       "by": "babu",
+       "bn": "আমার নিজের বাস! নাম দেব, প্রাণের ঢাকা পরিবহন!",
+       "en": "A bus of my own! I'll name it Praner Dhaka Transport!"
+      }
+     ]
+    },
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "এই বাসে কেউ ঠকবে না, মহিলাদের সিট খালি থাকবে, বয়স্করা আগে বসবেন।",
+       "en": "On this bus no one gets cheated, the women's seats stay free, the elderly sit first."
+      },
+      {
+       "by": "ostad",
+       "bn": "এই কথাগুলো বাসের গায়ে লিখে রাখ, বাবু।",
+       "en": "Write those words on the side of the bus, Babu."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "babu_11",
+   "who": "bus",
+   "n": 11,
+   "title": {
+    "bn": "কামাল ভাইয়ের প্রস্তাব",
+    "en": "Kamal Bhai's offer"
+   },
+   "unlock": {
+    "days": [
+     "bus",
+     12
+    ]
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "kamal",
+       "bn": "বাবু, মনে আছে আমার মানিব্যাগ ফিরিয়ে দিয়েছিলে? আমার অফিসে একজন পিয়ন লাগবে। মাসে মাসে বাঁধা বেতন।",
+       "en": "Babu, remember you returned my wallet? My office needs a peon. A fixed monthly salary."
+      },
+      {
+       "by": "babu",
+       "bn": "অফিসে চাকরি… কিন্তু বাস, ওস্তাদ, আমার স্বপ্ন?",
+       "en": "An office job… but the bus, Ostad, my dream?"
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "বাবু কী বেছে নেবেন?",
+     "en": "What will Babu choose?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "বাসেই থাকুন",
+       "en": "Stay on the bus"
+      },
+      "effects": {
+       "npc": [
+        "kamal",
+        1
+       ],
+       "family": [
+        "bus",
+        -1
+       ]
+      },
+      "lines": [
+       {
+        "by": "kamal",
+        "bn": "ঠিক আছে বাবু। তোমার বাস হলে প্রথম টিকিটটা আমিই কাটব।",
+        "en": "All right, Babu. When you have your bus, I'll buy the first ticket."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "ধন্যবাদ জানিয়ে ভেবে দেখার সময় নিন",
+       "en": "Thank him and ask for time to think"
+      },
+      "effects": {
+       "npc": [
+        "kamal",
+        2
+       ],
+       "family": [
+        "bus",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "babu_ma",
+        "bn": "বাবা, যা-ই করিস, সৎ থাকিস। কামাল ভাই ভালো মানুষ।",
+        "en": "Son, whatever you do, stay honest. Kamal Bhai is a good man."
+       }
+      ]
+     }
+    ]
+   }
   }
  ]
 }

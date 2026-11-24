@@ -552,9 +552,12 @@ func finish_chapter(chapter_id: String, effects := {}) -> Dictionary:
 	out.tara = int(b.n("tara.chapter"))
 	data.tara = int(data.tara) + out.tara
 	if effects.has("taka"):
-		data.taka = int(data.taka) + int(effects.taka)
+		# A story cost never takes the savings below nothing.
+		data.taka = maxi(0, int(data.taka) + int(effects.taka))
 	if effects.has("npc"):
 		apply_npcs([{"id": effects.npc[0], "delta": int(effects.npc[1]), "what": "story"}], "story")
+	if effects.has("family"):
+		add_family(str(effects.family[0]), int(effects.family[1]))
 	return out
 
 
