@@ -24,6 +24,7 @@ const Voice = preload("res://scripts/ui/voice.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Activity = preload("res://scripts/ui/activity.gd")
 const Driving = preload("res://scripts/ui/driving.gd")
+const Goods = preload("res://scripts/rules/goods.gd")
 
 const WHO := ["rickshaw", "tea", "bus"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
@@ -978,29 +979,194 @@ func _shop_page(page: VBoxContainer) -> void:
 	page.add_child(_page_title(s.t("nav_shop")))
 	page.add_child(Look.label(s.t("shopHelp"), 15, false, Look.MUTED))
 	var tabs := GridContainer.new()
-	tabs.columns = 3
+	tabs.columns = 4
 	tabs.add_theme_constant_override("h_separation", 8)
 	var open := progress.open_characters()
-	for who in WHO:
+	for who in WHO + ["home"]:
 		var on: bool = who == _shop_who
-		var text := s.t(_name_key(who))
-		if not open.has(who):
+		var text := s.t("shopHome") if who == "home" else s.t(_name_key(who))
+		if who != "home" and not open.has(who):
 			text = s.t("lockedPlate", {"name": text, "level": int(b.n("unlocks." + _unlock_of(who)))})
 		var tab := Look.chunky(text, _deep_of(who) if on else Color.WHITE, Color.WHITE if on else Look.OUTLINE, 15, 4 if on else 2, 14)
 		tab.name = "ShopTab_" + who
 		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tab.custom_minimum_size = Vector2(0, 54)
-		tab.disabled = not open.has(who)
+		tab.disabled = who != "home" and not open.has(who)
 		tab.pressed.connect(_pick_shop.bind(who))
 		tabs.add_child(tab)
 	page.add_child(tabs)
+	if _shop_who == "home":
+		_home_shop(page)
+		return
+	var grid := _two_columns()
+	page.add_child(grid)
+	for id in Progress.UPGRADE_LISTS[_shop_who][1]:
+		grid.add_child(_upgrade_card(id, _shop_who))
+	# Looks: paint and decorations, bought once, worn or taken off.
+	page.add_child(_caption(s.t("looksTitle")))
+	var looks := _two_columns()
+	page.add_child(looks)
+	for l in Goods.looks(_shop_who):
+		looks.add_child(_look_card(l, _shop_who))
+
+
+func _two_columns() -> GridContainer:
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
+	return grid
+
+
+## A card: a picture tile, a name, a line of help, then whatever goes at
+## the bottom (a price button, a pill).
+func _goods_card(icon: String, tile_fill: Color, title: String, help_text: String) -> Array:
+	var panel := _card(Color.WHITE, 20)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 6)
+	panel.add_child(col)
+	var tile := PanelContainer.new()
+	tile.add_theme_stylebox_override("panel", Look.card(tile_fill, 14, 0))
+	tile.custom_minimum_size = Vector2(0, 86)
+	var center := CenterContainer.new()
+	center.add_child(Look.icon(icon, 54, Look.OUTLINE))
+	tile.add_child(center)
+	col.add_child(tile)
+	col.add_child(Look.label(title, 18, true))
+	var help := Look.label(help_text, 14, false, Color("4A423A"))
+	help.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	col.add_child(help)
+	return [panel, col]
+
+
+## A price button (greyed with how much more is needed when short).
+func _price_button(col: VBoxContainer, cost: int, then: Callable, button_name: String) -> void:
+	var short := cost - int(progress.data.taka)
+	var buy := Look.chunky(str(cost), Look.YELLOW, Look.OUTLINE, 18, 5, 14)
+	buy.name = button_name
+	buy.icon = Look.icon_texture("coin", 24)
+	Look.true_colours(buy)
+	buy.add_theme_constant_override("icon_max_width", 24)
+	buy.custom_minimum_size = Vector2(0, 52)
+	buy.disabled = short > 0
+	buy.pressed.connect(then)
+	col.add_child(buy)
+	if short > 0:
+		var more := Look.label(s.t("needMore", {"n": short}), 13, true, Look.MUTED)
+		more.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		col.add_child(more)
+
+
+func _owned_pill(col: VBoxContainer, text: String) -> void:
+	var owned := Look.pill("check", text, Color("E6F4EC"), Look.OUTLINE, 16)
+	var c := CenterContainer.new()
+	c.add_child(owned)
+	col.add_child(c)
+
+
+## A look: its colour (or the slot's picture), and buy, wear or take off.
+func _look_card(l: Dictionary, who: String) -> Control:
+	var tile := _tint_of(who)
+	for key in ["hood", "fill", "colour"]:
+		if l.has(key):
+			tile = Color(str(l[key])).lerp(Color.WHITE, 0.35)
+			break
+	var parts := _goods_card(str(l.get("icon", "bag")), tile, s.t("look_" + l.id), s.t("lookHelp_" + l.slot))
+	var col: VBoxContainer = parts[1]
+	if not progress.owns_look(l.id):
+		_price_button(col, int(l.price), _buy_look.bind(who, l.id), "Look_" + l.id)
+	else:
+		var on: bool = progress.worn(who, l.slot).get("id", "") == l.id
+		var wear := Look.chunky(s.t("lookTakeOff" if on else "lookWear"), Look.PARROT if not on else Color.WHITE, Color.WHITE if not on else Look.OUTLINE, 16, 4, 14)
+		wear.name = "Wear_" + l.id
+		wear.custom_minimum_size = Vector2(0, 50)
+		wear.pressed.connect(_wear_look.bind(who, l.id))
+		if on:
+			_owned_pill(col, s.t("lookOn"))
+		col.add_child(wear)
+	return parts[0]
+
+
+func _buy_look(who: String, id: String) -> void:
+	if progress.buy_look(who, id):
+		progress.save()
+		_build()
+
+
+func _wear_look(who: String, id: String) -> void:
+	if progress.wear_look(who, id):
+		progress.save()
+		_build()
+
+
+## Rahim Chacha's home: things for it, a phone of his own, the samity.
+func _home_shop(page: VBoxContainer) -> void:
+	page.add_child(Look.label(s.t("homeShopHelp", {"n": progress.family("rickshaw")}), 15, false, Look.MUTED))
+	var grid := _two_columns()
 	page.add_child(grid)
-	for id in Progress.UPGRADE_LISTS[_shop_who][1]:
-		grid.add_child(_upgrade_card(id, _shop_who))
+	for h in Goods.home_items():
+		var parts := _goods_card(str(h.get("icon", "home")), Color("FFF1D6"), s.t("home_" + h.id), s.t("homeHelp_" + h.id))
+		if progress.has_home(h.id):
+			_owned_pill(parts[1], s.t("owned"))
+		else:
+			_price_button(parts[1], int(h.price), _buy_home.bind(h.id), "Home_" + h.id)
+		grid.add_child(parts[0])
+	var phone := Goods.phone()
+	var pp := _goods_card(str(phone.get("icon", "voice")), Color("D6ECF7"), s.t("phoneName"), s.t("phoneHelp"))
+	if progress.has_phone():
+		_owned_pill(pp[1], s.t("owned"))
+	else:
+		_price_button(pp[1], int(phone.get("price", 0)), _buy_phone, "Phone")
+	grid.add_child(pp[0])
+	page.add_child(_samity_card())
+
+
+func _buy_home(id: String) -> void:
+	if progress.buy_home(id):
+		progress.save()
+		_build()
+
+
+func _buy_phone() -> void:
+	if progress.buy_phone():
+		progress.save()
+		_build()
+
+
+## The samity: a little put in at the end of every day, paid back with a
+## bonus after a round.
+func _samity_card() -> Control:
+	var rules := Goods.samity()
+	var sm: Dictionary = progress.data.samity
+	var daily := int(rules.get("daily", 30))
+	var rounds := int(rules.get("rounds", 10))
+	var panel := _card(Color.WHITE, 20)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	panel.add_child(col)
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 10)
+	top.add_child(Look.icon(str(rules.get("icon", "ledger")), 40, Look.OUTLINE))
+	top.add_child(Look.label(s.t("samityName"), 19, true))
+	col.add_child(top)
+	col.add_child(Look.label(s.t("samityHelp", {"daily": daily, "rounds": rounds, "bonus": int(rules.get("bonus", 0))}), 14, false, Color("4A423A")))
+	var joined := bool(sm.get("in", false))
+	if joined:
+		col.add_child(Look.label(s.t("samityPaid", {"n": int(sm.get("paid", 0)), "all": daily * rounds}), 15, true))
+		col.add_child(Look.bar(int(sm.get("paid", 0)), daily * rounds, Look.PARROT, 16))
+	var act := Look.chunky(s.t("samityLeave" if joined else "samityJoin"), Color.WHITE if joined else Look.PARROT, Look.OUTLINE if joined else Color.WHITE, 16, 4, 14)
+	act.name = "Samity"
+	act.custom_minimum_size = Vector2(0, 50)
+	act.pressed.connect(_set_samity.bind(not joined))
+	col.add_child(act)
+	return panel
+
+
+func _set_samity(join: bool) -> void:
+	progress.set_samity(join)
+	progress.save()
+	_build()
 
 
 func _pick_shop(who: String) -> void:
@@ -1265,12 +1431,12 @@ func _colour_of(who: String) -> Color:
 
 ## Their colour dark enough for white words on it.
 func _deep_of(who: String) -> Color:
-	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT_DARK, "bus": Look.SKY_DARK}[who]
+	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT_DARK, "bus": Look.SKY_DARK}.get(who, Look.VERMILION)
 
 
 ## A pale wash of their colour, behind pictures.
 func _tint_of(who: String) -> Color:
-	return {"rickshaw": Color("FDE7F0"), "tea": Color("E6F4EC"), "bus": Color("D6ECF7")}[who]
+	return {"rickshaw": Color("FDE7F0"), "tea": Color("E6F4EC"), "bus": Color("D6ECF7")}.get(who, Color("FFF1D6"))
 
 
 ## What opens a character ("tea_stall" for the tea stall).

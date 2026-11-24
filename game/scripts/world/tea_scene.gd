@@ -256,6 +256,11 @@ func _build_stall(map: RoadMap, tile: Vector2i) -> void:
 	board.outline_size = 12
 	board.modulate = Look.YELLOW
 	board.outline_modulate = Look.OUTLINE
+	# A bought signboard colour.
+	var sign_look := progress.worn("tea", "sign")
+	if not sign_look.is_empty():
+		board.modulate = Color(str(sign_look.fill))
+		board.outline_modulate = Color(str(sign_look.outline))
 	board.pixel_size = 0.0045
 	board.alpha_cut = Label3D.ALPHA_CUT_DISCARD
 	board.position = Vector3(0, 2.9, -0.82)
@@ -870,7 +875,7 @@ func _end_day() -> void:
 	# And a copy online, if this build has it (not waited for).
 	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
 	CrashWatch.stop()
-	var lines := [
+	var lines: Array = [
 		strings.t("teaSold", {"n": day.sold}),
 		strings.t("teaServed", {"served": day.served, "happy": day.happy}),
 	]
@@ -880,6 +885,10 @@ func _end_day() -> void:
 		lines.append(strings.t("teaTips", {"n": day.tips}))
 	if not _call_result.is_empty():
 		lines.append(strings.t("familyLine", {"n": _call_result.family}))
+	if int(got.get("samity_payout", 0)) > 0:
+		lines.append(strings.t("samityPayoutLine", {"n": int(got.samity_payout)}))
+	elif int(got.get("samity_paid", 0)) > 0:
+		lines.append(strings.t("samityDayLine", {"n": int(got.samity_paid)}))
 	var end := DayEnd.new()
 	end.setup(strings, b, progress, got, {
 		"title": strings.t("dayOver"),

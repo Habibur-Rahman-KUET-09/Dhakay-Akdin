@@ -152,6 +152,20 @@ func _ready() -> void:
 		board.alpha_cut = Label3D.ALPHA_CUT_DISCARD
 		board.position = sign_at[0]
 		add_child(board)
+	# A bought sign over the windscreen.
+	var sticker := progress.worn("bus", "sticker")
+	if not sticker.is_empty():
+		var words := Label3D.new()
+		words.text = strings.t(str(sticker.id))
+		words.font = Look.font(Look.BOLD)
+		words.font_size = 48
+		words.outline_size = 10
+		words.modulate = Color(str(sticker.colour))
+		words.outline_modulate = Color.WHITE
+		words.pixel_size = 0.0035
+		words.alpha_cut = Label3D.ALPHA_CUT_DISCARD
+		words.position = Vector3(0, 2.15, -1.7)
+		add_child(words)
 	# The ticket checker, by the door when he gets on.
 	_checker = MeshInstance3D.new()
 	_checker.mesh = Models.person()
@@ -1074,6 +1088,10 @@ func _end_trip() -> void:
 		lines.append(strings.t("busFines", {"n": bus.fines}))
 	if not _call_result.is_empty():
 		lines.append(strings.t("familyLine", {"n": _call_result.family}))
+	if int(got.get("samity_payout", 0)) > 0:
+		lines.append(strings.t("samityPayoutLine", {"n": int(got.samity_payout)}))
+	elif int(got.get("samity_paid", 0)) > 0:
+		lines.append(strings.t("samityDayLine", {"n": int(got.samity_paid)}))
 	var end := DayEnd.new()
 	end.setup(strings, b, progress, got, {
 		"title": strings.t("busDayOver"),

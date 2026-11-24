@@ -9,6 +9,7 @@ extends RefCounted
 
 const Balance = preload("res://scripts/rules/balance.gd")
 const Daily = preload("res://scripts/rules/daily.gd")
+const Goods = preload("res://scripts/rules/goods.gd")
 
 const SCHEMA := 1
 const DEFAULT_PATH := "user://save.json"
@@ -59,6 +60,12 @@ static func fresh() -> Dictionary:
 		"area": "mirpur",
 		# How each one's family feels about them, 0–10 (calls from home).
 		"family": {"rickshaw": 5, "tea": 5, "bus": 5},
+		# Looks worn (bought ones are in "cosmetics"), by slot; things for
+		# Rahim Chacha's home; his own phone; the savings club.
+		"looks": {"rickshaw": {}, "tea": {}, "bus": {}},
+		"home": [],
+		"phone": false,
+		"samity": {"in": false, "paid": 0, "rounds": 0},
 	}
 
 
@@ -85,6 +92,115 @@ func save() -> void:
 	f.store_string(JSON.stringify(data, " "))
 	f.close()
 	DirAccess.rename_absolute(tmp, path)
+
+
+# --- Looks, the home, the phone, the samity (goods.gd) -----------------------
+
+
+func owns_look(id: String) -> bool:
+	return (data.cosmetics as Array).has(id)
+
+
+## Buys a look for `who` and wears it. False if already owned, unknown or
+## not affordable.
+func buy_look(who: String, id: String) -> bool:
+	var l := Goods.look(who, id)
+	if l.is_empty() or owns_look(id) or int(data.taka) < int(l.price):
+		return false
+	data.taka = int(data.taka) - int(l.price)
+	data.cosmetics.append(id)
+	wear_look(who, id)
+	return true
+
+
+## Wears an owned look in its slot (taking off what was there); wearing the
+## one already worn takes it off.
+func wear_look(who: String, id: String) -> bool:
+	var l := Goods.look(who, id)
+	if l.is_empty() or not owns_look(id):
+		return false
+	var on: Dictionary = data.looks.get(who, {})
+	if on.get(l.slot, "") == id:
+		on.erase(l.slot)
+	else:
+		on[l.slot] = id
+	data.looks[who] = on
+	return true
+
+
+## The look worn in a slot, or {}.
+func worn(who: String, slot: String) -> Dictionary:
+	var id: String = (data.looks.get(who, {}) as Dictionary).get(slot, "")
+	return Goods.look(who, id) if id != "" else {}
+
+
+func has_home(id: String) -> bool:
+	return (data.home as Array).has(id)
+
+
+## Buys a thing for the home: the family is glad.
+func buy_home(id: String) -> bool:
+	var h := Goods.home_item(id)
+	if h.is_empty() or has_home(id) or int(data.taka) < int(h.price):
+		return false
+	data.taka = int(data.taka) - int(h.price)
+	data.home.append(id)
+	add_family("rickshaw", int(h.get("family", 0)))
+	return true
+
+
+## Extra energy at the start of Rahim Chacha's day from resting better.
+func home_energy() -> float:
+	var extra := 0.0
+	for id in data.home:
+		extra += float(Goods.home_item(id).get("energy", 0))
+	return extra
+
+
+func has_phone() -> bool:
+	return bool(data.get("phone", false))
+
+
+func buy_phone() -> bool:
+	var cost := int(Goods.phone().get("price", 0))
+	if has_phone() or int(data.taka) < cost:
+		return false
+	data.taka = int(data.taka) - cost
+	data.phone = true
+	return true
+
+
+## Joins the samity (or leaves it, taking back what was paid in, without
+## the bonus).
+func set_samity(join: bool) -> void:
+	var sm: Dictionary = data.samity
+	if not join and bool(sm.get("in", false)):
+		data.taka = int(data.taka) + int(sm.get("paid", 0))
+		sm.paid = 0
+	sm["in"] = join
+	data.samity = sm
+
+
+## At the end of a day: the day's deposit, if the savings allow; after the
+## last deposit of a round, everything paid in comes back with the bonus.
+## Fills out.samity_paid (deposited) and out.samity_payout (paid back).
+func _samity_day(out: Dictionary) -> void:
+	var sm: Dictionary = data.samity
+	if not bool(sm.get("in", false)):
+		return
+	var rules := Goods.samity()
+	var per_day := int(rules.get("daily", 30))
+	if int(data.taka) < per_day:
+		return
+	data.taka = int(data.taka) - per_day
+	sm.paid = int(sm.get("paid", 0)) + per_day
+	out.samity_paid = per_day
+	if int(sm.paid) >= per_day * int(rules.get("rounds", 10)):
+		var back := int(sm.paid) + int(rules.get("bonus", 0))
+		data.taka = int(data.taka) + back
+		sm.paid = 0
+		sm.rounds = int(sm.get("rounds", 0)) + 1
+		out.samity_payout = back
 
 
 ## How `who`'s family feels, 0–10.
@@ -386,6 +502,7 @@ func _featured(who: String, earned: int, out: Dictionary) -> int:
 ## After any day: the run of days played (stars for it, a special hood on
 ## the seventh), the challenge (stars if met), the neighbours.
 func _day_done(who: String, result: Dictionary, out: Dictionary) -> void:
+	_samity_day(out)
 	var today_state := daily()
 	var streak: Dictionary = data.streak
 	out.streak_stars = 0

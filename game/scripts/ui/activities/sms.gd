@@ -8,6 +8,8 @@ var sms := {}
 var fare := 0
 ## What the player said; read by the scene after `done`.
 var said_fake := false
+## With his own phone, the earlier SMS are there to compare with.
+var has_phone := false
 
 
 func _build() -> void:
@@ -39,6 +41,10 @@ func _build() -> void:
 	}), 17)
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(body)
+	if has_phone:
+		var tip := Look.label(s.t("smsPhoneTip"), 14, true, Look.PARROT_DARK)
+		tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(tip)
 	add_button("sms_ok", Look.PARROT, _answer.bind(false))
 	add_button("sms_fake", Look.VERMILION, _answer.bind(true))
 

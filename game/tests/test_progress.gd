@@ -291,3 +291,67 @@ func test_calls_from_home() -> void:
 			some = true
 			check(at >= 0.3 and at <= 0.7, "in the middle of the day")
 	check(some, "on some days")
+
+
+func test_looks_bought_once_and_worn_one_per_slot() -> void:
+	var p := _fresh()
+	p.data.taka = 1000
+	check(p.buy_look("rickshaw", "paint_sky"), "bought")
+	eq(int(p.data.taka), 700, "paid")
+	eq(p.worn("rickshaw", "paint").id, "paint_sky", "worn at once")
+	check(not p.buy_look("rickshaw", "paint_sky"), "not twice")
+	check(p.buy_look("rickshaw", "paint_parrot"), "another paint")
+	eq(p.worn("rickshaw", "paint").id, "paint_parrot", "the new one is worn")
+	check(p.wear_look("rickshaw", "paint_sky"), "back to the first")
+	eq(p.worn("rickshaw", "paint").id, "paint_sky", "")
+	p.wear_look("rickshaw", "paint_sky")
+	eq(p.worn("rickshaw", "paint"), {}, "worn again: taken off")
+	check(not p.wear_look("rickshaw", "art_peacock"), "not owned, not worn")
+	check(not p.buy_look("tea", "paint_sky"), "a rickshaw paint is not for the stall")
+
+
+func test_the_home_the_phone_and_the_samity() -> void:
+	var p := _fresh()
+	p.data.taka = 3000
+	var family := p.family("rickshaw")
+	check(p.buy_home("bed"), "a bed")
+	eq(p.family("rickshaw"), family + 1, "the family is glad")
+	near(p.home_energy(), 10.0, "rests better")
+	check(not p.buy_home("house"), "the house is too dear")
+	check(p.buy_phone(), "a phone")
+	check(p.has_phone() and not p.buy_phone(), "only one")
+	p.data.taka = 1000
+	p.set_samity(true)
+	var out := {}
+	for i in 9:
+		out = {}
+		p._samity_day(out)
+	eq(int(p.data.samity.paid), 270, "nine deposits")
+	eq(int(p.data.taka), 730, "out of the savings")
+	out = {}
+	p._samity_day(out)
+	eq(int(out.samity_payout), 330, "the tenth: all back, and the bonus")
+	eq(int(p.data.taka), 1030, "a little more than before")
+	p._samity_day({})
+	p.set_samity(false)
+	eq(int(p.data.taka), 1030, "leaving: what was paid in comes back")
+
+
+func test_every_good_has_its_words() -> void:
+	const Goods = preload("res://scripts/rules/goods.gd")
+	const Strings = preload("res://scripts/ui/strings.gd")
+	var s := Strings.new()
+	for lang in ["bn", "en"]:
+		s.lang = lang
+		for who in ["rickshaw", "tea", "bus"]:
+			check(not Goods.looks(who).is_empty(), "looks for %s" % who)
+			for l in Goods.looks(who):
+				for key in ["look_" + l.id, "lookHelp_" + l.slot]:
+					check(s.t(key) != key, "%s: %s" % [lang, key])
+				check(int(l.price) > 0, "%s has a price" % l.id)
+				if who == "bus":
+					check(s.t(l.id) != l.id, "%s: the sign's words" % l.id)
+		for h in Goods.home_items():
+			for key in ["home_" + h.id, "homeHelp_" + h.id]:
+				check(s.t(key) != key, "%s: %s" % [lang, key])
+	check(int(Goods.phone().price) > 0 and int(Goods.samity().daily) > 0, "phone and samity priced")

@@ -137,6 +137,9 @@ func _ready() -> void:
 	_target_money = int(b.n("rickshaw.daily_target"))
 	shift.base_speed *= progress.speed_factor()
 	shift.energy_factor = progress.energy_factor()
+	# Resting better at home (a bed, a fan): more energy to start with.
+	shift.energy_max += progress.home_energy()
+	shift.energy = shift.energy_max
 	# A few of the named neighbours may need a ride today.
 	var ids := neighbours.ids()
 	ids.shuffle()
@@ -172,11 +175,21 @@ func _ready() -> void:
 	# Rahim Chacha's own rickshaw: yellow hood, magenta body.
 	# The street's colours too, for the decorations (hood 0, body 1).
 	# The festive hood (seven days running) is the studded one.
+	# Bought looks: another paint, or hood art.
 	var hood_style := 1 if (progress.data.cosmetics as Array).has("festive_hood") else 0
-	rickshaw = Models.player_rickshaw(Look.YELLOW, Look.MAGENTA, hood_style)
+	var hood_colour := Look.YELLOW
+	var body_colour := Look.MAGENTA
+	var paint := progress.worn("rickshaw", "paint")
+	if not paint.is_empty():
+		hood_colour = Color(str(paint.hood))
+		body_colour = Color(str(paint.body))
+	var art := progress.worn("rickshaw", "art")
+	if not art.is_empty():
+		hood_style = int(art.style)
+	rickshaw = Models.player_rickshaw(hood_colour, body_colour, hood_style)
 	var own := _palette.duplicate()
-	own[0] = Look.YELLOW
-	own[1] = Look.MAGENTA
+	own[0] = hood_colour
+	own[1] = body_colour
 	_paint = Models.traffic_material(own, false)
 	(rickshaw.get_meta("body") as MeshInstance3D).material_override = _paint
 	var plain := Models.material()
@@ -942,6 +955,9 @@ func _answered(_score: float, act) -> void:
 		# Not answered: as if busy (the last answer).
 		option = str(options.keys().back())
 	var e := HomeCall.effect(act.call, option)
+	# With his own phone, a talk with home is a video call: gladder still.
+	if option == "talk" and progress.has_phone():
+		e.family += 1
 	var now := progress.add_family("rickshaw", e.family)
 	shift.money -= e.cost
 	_call_result = {"family": now, "delta": e.family}
@@ -961,6 +977,7 @@ func _check_sms() -> void:
 	var act := Sms.new()
 	act.sms = shift.phone_pay.sms
 	act.fare = int(shift.phone_pay.fare)
+	act.has_phone = progress.has_phone()
 	_open(act, "act_sms", _sms_checked.bind(act))
 
 
@@ -1120,6 +1137,10 @@ func _end_day() -> void:
 	# And a copy online, if this build has it (not waited for).
 	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
 	CrashWatch.stop()
+	if int(got.get("samity_payout", 0)) > 0:
+		lines.append(strings.t("samityPayoutLine", {"n": int(got.samity_payout)}))
+	elif int(got.get("samity_paid", 0)) > 0:
+		lines.append(strings.t("samityDayLine", {"n": int(got.samity_paid)}))
 	var end := DayEnd.new()
 	end.setup(strings, progress.b, progress, got, {
 		"title": strings.t("dayOver"),

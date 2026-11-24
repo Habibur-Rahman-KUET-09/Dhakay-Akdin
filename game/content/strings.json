@@ -2338,5 +2338,173 @@
  "familyLine": {
   "bn": "পরিবারের মন: {n}/10",
   "en": "Family: {n}/10"
+ },
+ "shopHome": {
+  "bn": "বাসা",
+  "en": "Home"
+ },
+ "looksTitle": {
+  "bn": "সাজ",
+  "en": "Looks"
+ },
+ "look_paint_parrot": {
+  "bn": "টিয়া সবুজ রং",
+  "en": "Parrot green paint"
+ },
+ "look_paint_sky": {
+  "bn": "আকাশি রং",
+  "en": "Sky blue paint"
+ },
+ "look_paint_vermilion": {
+  "bn": "সিঁদুর লাল রং",
+  "en": "Vermilion paint"
+ },
+ "look_art_rings": {
+  "bn": "রংধনু হুড",
+  "en": "Rainbow hood"
+ },
+ "look_art_peacock": {
+  "bn": "ময়ূর হুড",
+  "en": "Peacock hood"
+ },
+ "look_sign_red": {
+  "bn": "লাল সাইনবোর্ড",
+  "en": "Red signboard"
+ },
+ "look_sign_green": {
+  "bn": "সবুজ সাইনবোর্ড",
+  "en": "Green signboard"
+ },
+ "look_sign_blue": {
+  "bn": "নীল সাইনবোর্ড",
+  "en": "Blue signboard"
+ },
+ "look_sticker_ma": {
+  "bn": "«মায়ের দোয়া» লেখা",
+  "en": "\"Mother's blessing\" sign"
+ },
+ "look_sticker_dhaka": {
+  "bn": "«প্রাণের ঢাকা» লেখা",
+  "en": "\"Praner Dhaka\" sign"
+ },
+ "lookHelp_paint": {
+  "bn": "হুড আর বডির নতুন রং",
+  "en": "A new colour for the hood and body"
+ },
+ "lookHelp_art": {
+  "bn": "হুডের পাশে রিকশা-আর্টের নকশা",
+  "en": "Rickshaw art on the side of the hood"
+ },
+ "lookHelp_sign": {
+  "bn": "দোকানের সাইনবোর্ডের রং",
+  "en": "The colour of the stall's signboard"
+ },
+ "lookHelp_sticker": {
+  "bn": "বাসের সামনের কাচের উপরে লেখা",
+  "en": "Lettering over the bus's windscreen"
+ },
+ "lookWear": {
+  "bn": "পরান",
+  "en": "Use"
+ },
+ "lookTakeOff": {
+  "bn": "খুলে ফেলুন",
+  "en": "Take off"
+ },
+ "lookOn": {
+  "bn": "এখন আছে",
+  "en": "In use"
+ },
+ "sticker_ma": {
+  "bn": "মায়ের দোয়া",
+  "en": "Mother's blessing"
+ },
+ "sticker_dhaka": {
+  "bn": "প্রাণের ঢাকা",
+  "en": "Praner Dhaka"
+ },
+ "homeShopHelp": {
+  "bn": "রহিম চাচার মিরপুরের বাসা। প্রতিটা জিনিসে পরিবার খুশি হয় (এখন পরিবারের মন {n}/10)।",
+  "en": "Rahim Chacha's home in Mirpur. Everything bought makes the family glad (family now {n}/10)."
+ },
+ "home_bed": {
+  "bn": "নতুন চৌকি",
+  "en": "A new bed"
+ },
+ "home_fan": {
+  "bn": "সিলিং ফ্যান",
+  "en": "A ceiling fan"
+ },
+ "home_desk": {
+  "bn": "সুমির পড়ার টেবিল",
+  "en": "Sumi's study table"
+ },
+ "home_tv": {
+  "bn": "টেলিভিশন",
+  "en": "A television"
+ },
+ "home_house": {
+  "bn": "পাকা ঘর",
+  "en": "A brick house"
+ },
+ "homeHelp_bed": {
+  "bn": "ভালো ঘুম: দিনের শুরুতে শক্তি +10",
+  "en": "Better sleep: +10 energy at the start of a day"
+ },
+ "homeHelp_fan": {
+  "bn": "গরমে আরাম: দিনের শুরুতে শক্তি +10",
+  "en": "Cool nights: +10 energy at the start of a day"
+ },
+ "homeHelp_desk": {
+  "bn": "সুমি মন দিয়ে পড়ে, পরিবার খুব খুশি",
+  "en": "Sumi studies hard; the family is very glad"
+ },
+ "homeHelp_tv": {
+  "bn": "সন্ধ্যায় সবাই মিলে খবর আর নাটক",
+  "en": "News and dramas together in the evening"
+ },
+ "homeHelp_house": {
+  "bn": "টিনের ঘর ছেড়ে পাকা দেয়ালের ঘর",
+  "en": "From a tin shed to brick walls"
+ },
+ "phoneName": {
+  "bn": "নিজের মোবাইল ফোন",
+  "en": "A phone of his own"
+ },
+ "phoneHelp": {
+  "bn": "মোবাইলে ভাড়ার SMS মেলানো সহজ হয়, আর বাসার সাথে কথা বললে পরিবার আরও খুশি",
+  "en": "Payment SMS are easier to check, and talks with home make the family gladder"
+ },
+ "samityName": {
+  "bn": "সমিতি",
+  "en": "Savings club (samity)"
+ },
+ "samityHelp": {
+  "bn": "প্রতিদিন কাজ শেষে {daily} টাকা জমা। {rounds} বার জমা হলে সব টাকা ফেরত, সাথে {bonus} টাকা বাড়তি। ছেড়ে দিলে জমানো টাকা ফেরত পাবেন, বাড়তিটা নয়।",
+  "en": "Tk {daily} paid in at the end of every day. After {rounds} times it all comes back, with Tk {bonus} more. Leave and you get back what you paid in, without the extra."
+ },
+ "samityPaid": {
+  "bn": "জমা হয়েছে {n} / {all} টাকা",
+  "en": "Paid in: Tk {n} / {all}"
+ },
+ "samityJoin": {
+  "bn": "সমিতিতে যোগ দিন",
+  "en": "Join the samity"
+ },
+ "samityLeave": {
+  "bn": "সমিতি ছেড়ে দিন",
+  "en": "Leave the samity"
+ },
+ "samityDayLine": {
+  "bn": "সমিতিতে জমা: {n} টাকা",
+  "en": "Paid into the samity: Tk {n}"
+ },
+ "samityPayoutLine": {
+  "bn": "সমিতির পালা এলো! {n} টাকা পেলেন",
+  "en": "The samity paid out: Tk {n}!"
+ },
+ "smsPhoneTip": {
+  "bn": "আপনার ফোনে আগের সব SMS: আসলগুলো আসে «টাকাফোন» থেকে, এইমাত্র, ঠিক অঙ্কে।",
+  "en": "On your phone, the earlier SMS: real ones come from TakaPhone, just now, for the right amount."
  }
 }

@@ -1,0 +1,30 @@
+{
+ "about": "What the savings can be spent on besides upgrades. looks: paint and decorations for each one's rickshaw, stall or bus (bought once, then worn or taken off; one per slot). home: things for Rahim Chacha's home in Mirpur, each makes the family glad (family) and some let him rest better (energy: more at the start of a day). phone: a phone of his own, which helps check payment SMS and talk to home. samity: the savings club, a small deposit at the end of every day, paid back with a bonus after `rounds` deposits.",
+ "looks": {
+  "rickshaw": [
+   {"id": "paint_parrot", "slot": "paint", "price": 300, "hood": "2E9E6B", "body": "C2185B", "icon": "flag"},
+   {"id": "paint_sky", "slot": "paint", "price": 300, "hood": "2D8BD6", "body": "F6B800", "icon": "flag"},
+   {"id": "paint_vermilion", "slot": "paint", "price": 400, "hood": "E2432A", "body": "1C3E7B", "icon": "flag"},
+   {"id": "art_rings", "slot": "art", "price": 500, "style": 1, "icon": "bunting"},
+   {"id": "art_peacock", "slot": "art", "price": 800, "style": 2, "icon": "bunting"}
+  ],
+  "tea": [
+   {"id": "sign_red", "slot": "sign", "price": 250, "fill": "E2432A", "outline": "FFFFFF", "icon": "shop"},
+   {"id": "sign_green", "slot": "sign", "price": 250, "fill": "2E9E6B", "outline": "FFFFFF", "icon": "shop"},
+   {"id": "sign_blue", "slot": "sign", "price": 350, "fill": "2D8BD6", "outline": "F6B800", "icon": "shop"}
+  ],
+  "bus": [
+   {"id": "sticker_ma", "slot": "sticker", "price": 200, "colour": "E2432A", "icon": "band"},
+   {"id": "sticker_dhaka", "slot": "sticker", "price": 300, "colour": "2E9E6B", "icon": "band"}
+  ]
+ },
+ "home": [
+  {"id": "bed", "price": 500, "family": 1, "energy": 10, "icon": "home"},
+  {"id": "fan", "price": 1200, "family": 1, "energy": 10, "icon": "sun"},
+  {"id": "desk", "price": 1500, "family": 2, "icon": "book"},
+  {"id": "tv", "price": 4000, "family": 2, "icon": "bulb"},
+  {"id": "house", "price": 10000, "family": 3, "icon": "town"}
+ ],
+ "phone": {"price": 2500, "icon": "voice"},
+ "samity": {"daily": 30, "rounds": 10, "bonus": 30, "icon": "ledger"}
+}
