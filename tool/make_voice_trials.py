@@ -7,7 +7,9 @@ them side by side and pick.
 A variant gives the voice for male and female speakers; "own": true starts
 from the speaker's own pitch and rate; "only_with_say" speaks the line's
 "say" spelling (skipped when it has none); "mood": true says it in the
-line's "mood".
+line's "mood". A line can instead name its "tries" one by one, each with
+its own spelling, voice (the line's current one, the speaker's own, or the
+Kolkata one) and mood.
 
     AZURE_SPEECH_KEY=... AZURE_SPEECH_REGION=... python3 tool/make_voice_trials.py trials
 """
@@ -20,6 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_voices as mv  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+INDIA = {'male': {'voice': 'bn-IN-BashkarNeural'}, 'female': {'voice': 'bn-IN-TanishaaNeural'}}
 
 
 def main():
@@ -31,6 +34,7 @@ def main():
     trials = json.load(open(os.path.join(HERE, 'voice_trials.json'), encoding='utf-8'))
     lines, voices = mv.wanted()
     named = mv.moods()
+    fixed = mv.fixes()
     os.makedirs(out, exist_ok=True)
     index = []
     for id_, extra in trials['lines'].items():
@@ -40,6 +44,24 @@ def main():
         by, text = lines[id_]
         sex = 'female' if 'Nabanita' in voices[by]['voice'] else 'male'
         ways = []
+        if 'tries' in extra:
+            # Tries named one by one: {way, label, say?, voice: current|own|india, mood?}
+            current, fixed_say, fixed_mood = mv.voice_for(id_, by, voices, fixed)
+            for t in extra['tries']:
+                voice = {'current': current, 'own': voices[by],
+                         'india': INDIA[sex]}[t.get('voice', 'current')]
+                spoken = t.get('say') or fixed_say or text
+                mood = t.get('mood', fixed_mood)
+                if mood and mood not in named:
+                    raise SystemExit(f'{id_}: no mood "{mood}" in voices.json')
+                name = f"{id_}__{t['way']}.mp3"
+                body = mv.ssml(voice, spoken, named.get(mood))
+                open(os.path.join(out, name), 'wb').write(mv.speak(key, region, body))
+                ways.append({'way': t['way'], 'label': t['label'], 'file': name, 'voice': voice,
+                             'say': spoken if spoken != text else None, 'mood': mood})
+                time.sleep(0.4)
+            index.append({'id': id_, 'by': by, 'text': text, 'ways': ways})
+            continue
         for way, spec in trials['variants'].items():
             say = extra.get('say')
             if spec.get('only_with_say') and not say:

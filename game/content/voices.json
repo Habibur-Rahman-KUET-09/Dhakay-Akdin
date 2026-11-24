@@ -495,6 +495,23 @@
   ]
  },
  "fixes": {
+  "counter_no_1": {
+   "mood": "annoyed"
+  },
+  "grumble_0": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   },
+   "mood": "annoyed"
+  },
+  "hail_elder_0": {
+   "mood": "pleading"
+  },
+  "hail_elder_1": {
+   "mood": "pleading"
+  },
   "hail_hurry_0": {
    "voice": {
     "voice": "bn-IN-BashkarNeural",
@@ -508,6 +525,13 @@
     "pitch": "+0%",
     "rate": "+0%"
    }
+  },
+  "hail_miser_0": {
+   "mood": "annoyed"
+  },
+  "hail_miser_2": {
+   "say": "আরে মামা! এটুকু রাস্তা, এত্তো টাকা!",
+   "mood": "annoyed"
   },
   "hail_normal_0": {
    "voice": {
@@ -529,6 +553,14 @@
     "pitch": "+0%",
     "rate": "+0%"
    }
+  },
+  "story_0bbb59371c": {
+   "say": "বাবু! তুমি আমার পুরো মাসের বেতন ফিরিয়ে দিলে! এই নাও, মিষ্টি খেও।",
+   "mood": "grateful"
+  },
+  "story_1f7d65f128": {
+   "say": "আমিও পড়াশোনায়, একটুও ফাঁকি দেবো না, আব্বা।",
+   "mood": "earnest"
   },
   "story_6be23f9046": {
    "voice": {
@@ -559,6 +591,10 @@
     "rate": "+0%"
    }
   },
+  "story_941206e428": {
+   "say": "সুমির মা, আজ থেকে, মিরপুরের রাস্তায় রিকশা চালাবো।",
+   "mood": "resolute"
+  },
   "story_c4ad917f4f": {
    "voice": {
     "voice": "bn-IN-BashkarNeural",
@@ -572,6 +608,15 @@
     "pitch": "+0%",
     "rate": "+0%"
    }
+  },
+  "tea_rain_0": {
+   "voice": {
+    "voice": "bn-IN-BashkarNeural",
+    "pitch": "+0%",
+    "rate": "+0%"
+   },
+   "say": "বৃষ্টি নামছে! একটু বসি, মামা।",
+   "mood": "relieved"
   }
  },
  "moods": {
