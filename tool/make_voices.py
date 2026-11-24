@@ -18,6 +18,7 @@ does nothing.
 import hashlib
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -63,11 +64,35 @@ def voice_for(id_, by, voices, fixed):
     return {**voices[by], **f.get('voice', {})}, f.get('say')
 
 
+def expressive(text):
+    """The words as SSML that follows the punctuation: a short pause at each
+    comma; each sentence by how it ends: a question rises at the end, an
+    exclamation comes louder and a little higher and quicker, a trailing
+    "…" slows and drops; a pause between sentences, longer after "…"."""
+    out = []
+    for part in re.findall(r'[^।!?…]+[।!?…]*', text):
+        part = part.strip()
+        if not part:
+            continue
+        m = re.search(r'[।!?…]+$', part)
+        end = m.group(0) if m else ''
+        body = re.sub(r',\s*', ', <break time="180ms"/>', escape(part))
+        if '?' in end:
+            body = f"<prosody contour='(0%,+0%) (55%,+2%) (80%,+9%) (100%,+24%)'>{body}</prosody>"
+        elif '!' in end:
+            body = f"<prosody pitch='+8%' rate='+6%' volume='+30%'>{body}</prosody>"
+        elif '…' in end:
+            body = f"<prosody pitch='-5%' rate='-10%'>{body}</prosody>"
+        out.append(body)
+        out.append('<break time="600ms"/>' if '…' in end else '<break time="320ms"/>')
+    return ''.join(out[:-1]) if out else escape(text)
+
+
 def ssml(voice, text):
     lang = '-'.join(voice['voice'].split('-')[:2])
     return (f"<speak version='1.0' xml:lang='{lang}'><voice name='{voice['voice']}'>"
             f"<prosody pitch='{voice.get('pitch', '+0%')}' rate='{voice.get('rate', '+0%')}'>"
-            f"{escape(text)}</prosody></voice></speak>")
+            f"{expressive(text)}</prosody></voice></speak>")
 
 
 def speak(key, region, body):
