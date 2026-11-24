@@ -10,6 +10,7 @@ extends RefCounted
 const Balance = preload("res://scripts/rules/balance.gd")
 const Daily = preload("res://scripts/rules/daily.gd")
 const Goods = preload("res://scripts/rules/goods.gd")
+const Friends = preload("res://scripts/rules/friends.gd")
 
 const SCHEMA := 1
 const DEFAULT_PATH := "user://save.json"
@@ -66,6 +67,8 @@ static func fresh() -> Dictionary:
 		"home": [],
 		"phone": false,
 		"samity": {"in": false, "paid": 0, "rounds": 0},
+		# Playing with friends (friends.gd): the code, the list, gifts…
+		"friends": Friends.fresh(),
 	}
 
 
@@ -105,7 +108,7 @@ func owns_look(id: String) -> bool:
 ## not affordable.
 func buy_look(who: String, id: String) -> bool:
 	var l := Goods.look(who, id)
-	if l.is_empty() or owns_look(id) or int(data.taka) < int(l.price):
+	if l.is_empty() or bool(l.get("prize", false)) or owns_look(id) or int(data.taka) < int(l.price):
 		return false
 	data.taka = int(data.taka) - int(l.price)
 	data.cosmetics.append(id)
@@ -422,6 +425,9 @@ func apply_tea_day(result: Dictionary) -> Dictionary:
 func apply_bus_day(result: Dictionary) -> Dictionary:
 	var out := {}
 	var earned := _featured("bus", maxi(0, int(result.earned)), out)
+	# A friend's good noon on the rickshaw brought riders to the stop.
+	out.relay_bonus = Friends.relay_bonus(data, b, "bus", earned, date())
+	earned += int(out.relay_bonus)
 	var stars := float(result.stars)
 	out.earned = earned
 	var fund_cut := _to_fund(earned, out)
@@ -447,6 +453,7 @@ func apply_bus_day(result: Dictionary) -> Dictionary:
 func _to_fund(earned: int, out: Dictionary) -> int:
 	var fund_cut := int(roundf(earned * b.n("economy.fund_share")))
 	data.fund = int(data.fund) + fund_cut
+	Friends.note_given(data, fund_cut)
 	out.fund = fund_cut
 	out.project = ""
 	if data.fundProject != "" and int(data.fund) >= fund_goal():
@@ -531,6 +538,9 @@ func _day_done(who: String, result: Dictionary, out: Dictionary) -> void:
 		data.tara = int(data.tara) + int(b.n("tara.daily_challenge"))
 		out.challenge = true
 	apply_npcs(result.get("npcs", []), who)
+	# This week's earnings and today's relay leg, for friends to see.
+	Friends.note_day(data, who, int(out.get("earned", 0)), float(result.get("stars", 0.0)), date())
+	out.relay_done = Friends.claim_relay(data, b, date())
 
 
 # --- The story (§৬.২) ---------------------------------------------------------

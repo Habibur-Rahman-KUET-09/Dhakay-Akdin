@@ -58,7 +58,16 @@ static func backup(parent: Node, data: Dictionary) -> void:
 		cloud.free()
 		return
 	parent.add_child(cloud)
-	cloud.upload(data)
+	cloud._copy_all(data)
+
+
+## The save, then the card friends see (once there is a friend code).
+func _copy_all(data: Dictionary) -> void:
+	await upload(data)
+	var f = data.get("friends", {})
+	if typeof(f) == TYPE_DICTIONARY and str(f.get("code", "")) != "":
+		var friends_rules = load("res://scripts/rules/friends.gd")
+		await publish_card(friends_rules.card(data, Time.get_date_string_from_system()))
 
 
 func enabled() -> bool:
@@ -98,7 +107,10 @@ func _call(url: String, method: int, body := "", headers: PackedStringArray = Pa
 	var code: int = result[1]
 	var text: String = (result[3] as PackedByteArray).get_string_from_utf8()
 	var data = JSON.parse_string(text) if text != "" else {}
-	if typeof(data) != TYPE_DICTIONARY:
+	# A list (Firestore's batchGet) is kept under "list".
+	if typeof(data) == TYPE_ARRAY:
+		data = {"list": data}
+	elif typeof(data) != TYPE_DICTIONARY:
 		data = {}
 	return {"ok": result[0] == HTTPRequest.RESULT_SUCCESS and code >= 200 and code < 300, "code": code, "data": data}
 
@@ -206,6 +218,155 @@ func download() -> Dictionary:
 	var reply := await _call(_doc_url(uid), HTTPClient.METHOD_GET, "",
 		PackedStringArray(["Authorization: Bearer " + _token]))
 	return from_doc(reply.data) if reply.ok else {}
+
+
+# --- Friends (friends.gd): codes, cards, gifts -------------------------------------
+
+
+func _docs() -> String:
+	return "https://firestore.googleapis.com/v1/projects/%s/databases/(default)/documents" % project
+
+
+func _auth() -> PackedStringArray:
+	return PackedStringArray(["Content-Type: application/json", "Authorization: Bearer " + _token])
+
+
+## A plain value as a Firestore value (text, whole numbers, numbers,
+## yes/no, lists, dictionaries).
+static func to_value(v) -> Dictionary:
+	match typeof(v):
+		TYPE_BOOL:
+			return {"booleanValue": v}
+		TYPE_INT:
+			return {"integerValue": str(v)}
+		TYPE_FLOAT:
+			return {"doubleValue": v}
+		TYPE_DICTIONARY:
+			var fields := {}
+			for k in v:
+				fields[str(k)] = to_value(v[k])
+			return {"mapValue": {"fields": fields}}
+		TYPE_ARRAY:
+			var values := []
+			for x in v:
+				values.append(to_value(x))
+			return {"arrayValue": {"values": values}}
+		TYPE_NIL:
+			return {"nullValue": null}
+	return {"stringValue": str(v)}
+
+
+## A Firestore value back to a plain one.
+static func from_value(v):
+	if typeof(v) != TYPE_DICTIONARY:
+		return null
+	if v.has("stringValue"):
+		return str(v.stringValue)
+	if v.has("integerValue"):
+		return int(v.integerValue)
+	if v.has("doubleValue"):
+		return float(v.doubleValue)
+	if v.has("booleanValue"):
+		return bool(v.booleanValue)
+	if v.has("mapValue"):
+		return from_fields(v.mapValue.get("fields", {}))
+	if v.has("arrayValue"):
+		var out := []
+		for x in v.arrayValue.get("values", []):
+			out.append(from_value(x))
+		return out
+	return null
+
+
+static func to_fields_of(data: Dictionary) -> Dictionary:
+	return to_value(data).mapValue
+
+
+static func from_fields(fields) -> Dictionary:
+	var out := {}
+	if typeof(fields) == TYPE_DICTIONARY:
+		for k in fields:
+			out[k] = from_value(fields[k])
+	return out
+
+
+## Claims a friend code for this account. "" when it is ours now,
+## "ALREADY_EXISTS" when someone has it, else the error.
+func claim_code(code: String) -> String:
+	var e := await ensure_user()
+	if e != "":
+		return e
+	var reply := await _call(_docs() + "/codes?documentId=" + code.uri_encode(), HTTPClient.METHOD_POST,
+		JSON.stringify(to_fields_of({"uid": uid})), _auth())
+	return "" if reply.ok else error_of(reply)
+
+
+## The account behind a friend code; "" if none (or no network).
+func find_code(code: String) -> String:
+	if await ensure_user() != "":
+		return ""
+	var reply := await _call(_docs() + "/codes/" + code.uri_encode(), HTTPClient.METHOD_GET, "", _auth())
+	if not reply.ok:
+		return ""
+	return str(from_fields(reply.data.get("fields", {})).get("uid", ""))
+
+
+## Writes this player's card for friends to see. "" or the error.
+func publish_card(c: Dictionary) -> String:
+	var e := await ensure_user()
+	if e != "":
+		return e
+	var body := c.duplicate()
+	body["updated"] = Time.get_datetime_string_from_system(true, true)
+	var reply := await _call(_docs() + "/profiles/" + uid, HTTPClient.METHOD_PATCH, JSON.stringify(to_fields_of(body)), _auth())
+	return "" if reply.ok else error_of(reply)
+
+
+## Friends' cards, by account ({} for none or no network).
+func cards(uids: Array) -> Dictionary:
+	var out := {}
+	if uids.is_empty() or await ensure_user() != "":
+		return out
+	var names := []
+	for u in uids:
+		names.append("projects/%s/databases/(default)/documents/profiles/%s" % [project, u])
+	var reply := await _call(_docs() + ":batchGet", HTTPClient.METHOD_POST, JSON.stringify({"documents": names}), _auth())
+	if not reply.ok:
+		return out
+	for r in reply.data.get("list", []):
+		if typeof(r) == TYPE_DICTIONARY and r.has("found"):
+			out[str(r.found.name).get_file()] = from_fields(r.found.get("fields", {}))
+	return out
+
+
+## Sends a gift or sticker (friends.gd's send) to a friend. "" or the error.
+func send_item(to_uid: String, item: Dictionary) -> String:
+	var e := await ensure_user()
+	if e != "":
+		return e
+	var reply := await _call(_docs() + "/inbox/%s/items" % to_uid, HTTPClient.METHOD_POST, JSON.stringify(to_fields_of(item)), _auth())
+	return "" if reply.ok else error_of(reply)
+
+
+## What came in, taken off the server: [{from, name, kind, sticker, date}].
+func take_inbox() -> Array:
+	var out := []
+	if await ensure_user() != "":
+		return out
+	var reply := await _call(_docs() + "/inbox/%s/items?pageSize=50" % uid, HTTPClient.METHOD_GET, "", _auth())
+	if not reply.ok:
+		return out
+	for d in reply.data.get("documents", []):
+		out.append(from_fields(d.get("fields", {})))
+		await _call("https://firestore.googleapis.com/v1/" + str(d.name), HTTPClient.METHOD_DELETE, "", _auth())
+	return out
+
+
+## Lets go of the card and the code (when the account is deleted).
+func drop_friends(code: String) -> void:
+	await _call(_docs() + "/profiles/" + uid, HTTPClient.METHOD_DELETE, "", _auth())
+	if code != "":
+		await _call(_docs() + "/codes/" + code.uri_encode(), HTTPClient.METHOD_DELETE, "", _auth())
 
 
 # --- Email and password, to move phones ------------------------------------------
@@ -354,9 +515,10 @@ func _google_fail(reason: String) -> void:
 
 
 ## Removes this account and its copy (used by the build's own check).
-func delete_account() -> String:
+func delete_account(code_to_drop := "") -> String:
 	if await ensure_user() != "":
 		return "NETWORK"
 	await _call(_doc_url(uid), HTTPClient.METHOD_DELETE, "", PackedStringArray(["Authorization: Bearer " + _token]))
+	await drop_friends(code_to_drop)
 	var reply := await _json_post(AUTH_URL + "delete?key=" + key, {"idToken": _token})
 	return "" if reply.ok else error_of(reply)

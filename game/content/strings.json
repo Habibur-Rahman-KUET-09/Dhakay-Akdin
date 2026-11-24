@@ -2554,5 +2554,313 @@
  "readAloudOn": {
   "bn": "এখন থেকে খেলার লেখা পড়ে শোনানো হবে।",
   "en": "From now on, the game's words will be read out."
+ },
+ "friendsTitle": {
+  "bn": "বন্ধুরা",
+  "en": "Friends"
+ },
+ "friendsStart": {
+  "bn": "একটা কোড বানিয়ে বন্ধুদের সাথে খেলুন",
+  "en": "Get a code and play with friends"
+ },
+ "friendsSummary": {
+  "bn": "{n} জন বন্ধু · এই সপ্তাহে আপনি {rank} নম্বরে",
+  "en": "{n} friends · you are number {rank} this week"
+ },
+ "friendsOpen": {
+  "bn": "খুলুন",
+  "en": "Open"
+ },
+ "friendsBack": {
+  "bn": "মহল্লায় ফিরুন",
+  "en": "Back to the mohalla"
+ },
+ "friendsOff": {
+  "bn": "এই build-এ অনলাইন ব্যবস্থা বন্ধ, তাই বন্ধুদের সাথে খেলা যাবে না।",
+  "en": "Online play is off in this build, so friends are not available."
+ },
+ "friendsWeek": {
+  "bn": "এই সপ্তাহের তালিকা",
+  "en": "This week's list"
+ },
+ "relayTitle": {
+  "bn": "আজকের পালার দিন",
+  "en": "Today's relay day"
+ },
+ "jointTitle": {
+  "bn": "বন্ধুদের যৌথ তহবিল",
+  "en": "The friends' joint fund"
+ },
+ "friendsSafety": {
+  "bn": "অন্যরা শুধু আপনার বাছাই করা নাম আর খেলার হিসাব দেখে; email বা ফোন নম্বর কখনো না। কথা শুধু বাছাই করা স্টিকারে।",
+  "en": "Others see only the name you chose and your game; never your email or phone number. Messages are preset stickers only."
+ },
+ "friendsHelp": {
+  "bn": "একটা নাম বাছুন। আপনি ৬ অক্ষরের একটা কোড পাবেন; বন্ধুকে সেটা দিন, বা বন্ধুর কোড দিয়ে তাকে যোগ করুন। ফোন নম্বর বা email লাগে না।",
+  "en": "Choose a name. You get a six-letter code: give it to a friend, or add a friend by theirs. No phone number or email needed."
+ },
+ "friendsNameHint": {
+  "bn": "আপনার নাম (যেমন: রাতুল)",
+  "en": "Your name (for example: Ratul)"
+ },
+ "friendsMakeCode": {
+  "bn": "কোড বানান",
+  "en": "Get my code"
+ },
+ "friendsYourCode": {
+  "bn": "{name}, আপনার কোড",
+  "en": "{name}, your code"
+ },
+ "friendsShareHelp": {
+  "bn": "এই কোড বন্ধুকে দিন। সে যোগ করলে একে অপরের হিসাব দেখবেন।",
+  "en": "Give this code to a friend. Once they add it, you see each other's days."
+ },
+ "friendsCopy": {
+  "bn": "কোড কপি",
+  "en": "Copy code"
+ },
+ "friendsCopied": {
+  "bn": "কোড কপি হয়েছে।",
+  "en": "Code copied."
+ },
+ "friendsRename": {
+  "bn": "নাম বদলান",
+  "en": "Change name"
+ },
+ "friendsRenameGo": {
+  "bn": "রাখুন",
+  "en": "Save"
+ },
+ "friendsAdd": {
+  "bn": "বন্ধু যোগ করুন",
+  "en": "Add a friend"
+ },
+ "friendsCodeHint": {
+  "bn": "বন্ধুর কোড",
+  "en": "Friend's code"
+ },
+ "friendsAddGo": {
+  "bn": "যোগ",
+  "en": "Add"
+ },
+ "friendsMail": {
+  "bn": "বন্ধুরা পাঠিয়েছে",
+  "en": "From friends"
+ },
+ "friendsTeaWaiting": {
+  "bn": "{n} কাপ চা জমা আছে: রহিম চাচার পরের দিনে +{energy} শক্তি",
+  "en": "{n} cups of tea waiting: +{energy} energy on Rahim Chacha's next day"
+ },
+ "gift_tea": {
+  "bn": "চা",
+  "en": "Tea"
+ },
+ "gift_paan": {
+  "bn": "পান",
+  "en": "Paan"
+ },
+ "friendsMailLine": {
+  "bn": "{name} পাঠিয়েছে: {what}",
+  "en": "{name} sent: {what}"
+ },
+ "friendsNone": {
+  "bn": "এখনো কোনো বন্ধু নেই। ওপরে কোড দিয়ে যোগ করুন।",
+  "en": "No friends yet. Add one by code above."
+ },
+ "friendsLeft": {
+  "bn": "আজ আরও পাঠাতে পারবেন: {gifts}টা উপহার, {stickers}টা স্টিকার",
+  "en": "Left to send today: {gifts} gifts, {stickers} stickers"
+ },
+ "friendsYou": {
+  "bn": "আপনি",
+  "en": "You"
+ },
+ "friends_sticker": {
+  "bn": "স্টিকার",
+  "en": "Sticker"
+ },
+ "friends_more": {
+  "bn": "আরও",
+  "en": "More"
+ },
+ "friendsPrizeHelp": {
+  "bn": "সপ্তাহ শেষে যে প্রথম, সে রিকশার সোনালি রং পায় (শনিবার থেকে নতুন সপ্তাহ)।",
+  "en": "Whoever is first at the end of the week wins a golden paint for the rickshaw (weeks start on Saturday)."
+ },
+ "relayHelp": {
+  "bn": "সকালে মনির মামার দোকান, দুপুরে রহিম চাচার রিকশা, সন্ধ্যায় বাবুর বাস: আলাদা বন্ধু খেলতে পারে। বন্ধুর ভালো দোকান (৩.৫ তারা বা বেশি) হলে রহিম চাচা বেশি শক্তি পান; বন্ধুর ভালো রিকশা হলে বাবুর আয় ১০% বাড়ে।",
+  "en": "Monir Mama's stall in the morning, Rahim Chacha's rickshaw at noon, Babu's bus in the evening: different friends can play each. A friend's good stall day (3.5 stars or more) gives Rahim Chacha more energy; a friend's good rickshaw day adds 10% to Babu's earnings."
+ },
+ "relayLeg_tea": {
+  "bn": "সকাল: মনির মামার দোকান",
+  "en": "Morning: Monir Mama's stall"
+ },
+ "relayLeg_rickshaw": {
+  "bn": "দুপুর: রহিম চাচার রিকশা",
+  "en": "Noon: Rahim Chacha's rickshaw"
+ },
+ "relayLeg_bus": {
+  "bn": "সন্ধ্যা: বাবুর বাস",
+  "en": "Evening: Babu's bus"
+ },
+ "relayNobody": {
+  "bn": "আজ এখনো কেউ খেলেনি",
+  "en": "Nobody yet today"
+ },
+ "relayWho": {
+  "bn": "{name} ({stars} তারা)",
+  "en": "{name} ({stars} stars)"
+ },
+ "relayReward": {
+  "bn": "তিনটাই আজ খেলা হলে (আপনি আর বন্ধুরা মিলে) +{n} তারা।",
+  "en": "When all three are played today (you and friends together): +{n} stars."
+ },
+ "jointHelp": {
+  "bn": "আপনি আর বন্ধুরা মহল্লার তহবিলে যা দিয়েছেন, সব মিলিয়ে এই বড় কাজগুলো হয়।",
+  "en": "Everything you and your friends gave to your mohalla funds, together, builds these big things."
+ },
+ "jointTotal": {
+  "bn": "সবাই মিলে দিয়েছে: {n} টাকা",
+  "en": "Given together: Tk {n}"
+ },
+ "joint_school": {
+  "bn": "মহল্লার স্কুল",
+  "en": "The mohalla school"
+ },
+ "joint_playground": {
+  "bn": "খেলার মাঠ",
+  "en": "The playground"
+ },
+ "joint_library": {
+  "bn": "পাঠাগার",
+  "en": "The library"
+ },
+ "friendsErr_PERMISSION_DENIED": {
+  "bn": "বন্ধুদের ব্যবস্থা অনলাইনে এখনো চালু হয়নি। পরে আবার চেষ্টা করুন।",
+  "en": "Friends are not switched on online yet. Try again later."
+ },
+ "friendsNeedName": {
+  "bn": "আগে একটা নাম লিখুন।",
+  "en": "Write a name first."
+ },
+ "friendsBadCode": {
+  "bn": "কোড ৬ অক্ষরের, যেমন K7M2QX।",
+  "en": "A code has six letters, like K7M2QX."
+ },
+ "friendsNoCode": {
+  "bn": "এই কোডে কাউকে পাওয়া গেল না।",
+  "en": "Nobody has this code."
+ },
+ "friendsAdd_self": {
+  "bn": "এটা আপনার নিজের কোড।",
+  "en": "That is your own code."
+ },
+ "friendsAdd_already": {
+  "bn": "ইনি আগেই বন্ধু।",
+  "en": "Already a friend."
+ },
+ "friendsAdd_blocked": {
+  "bn": "এঁকে আপনি ব্লক করেছেন।",
+  "en": "You blocked this player."
+ },
+ "friendsAdd_full": {
+  "bn": "আর বন্ধু যোগ করা যাবে না (২০ জন পর্যন্ত)।",
+  "en": "No more friends can be added (20 at most)."
+ },
+ "friendsAdded": {
+  "bn": "{name} এখন আপনার বন্ধু!",
+  "en": "{name} is your friend now!"
+ },
+ "friendsLimit": {
+  "bn": "আজ আর পাঠানো যাবে না, কাল আবার।",
+  "en": "No more for today; again tomorrow."
+ },
+ "friendsSent": {
+  "bn": "পাঠানো হলো: {what}",
+  "en": "Sent: {what}"
+ },
+ "stickerHelp": {
+  "bn": "{name}-কে কোন স্টিকার পাঠাবেন?",
+  "en": "Which sticker for {name}?"
+ },
+ "friendsMoreHelp": {
+  "bn": "{name}-কে বন্ধুর তালিকা থেকে বাদ দিতে পারেন, বা ব্লক করতে পারেন।",
+  "en": "You can remove {name} from your friends, or block them."
+ },
+ "friendsRemove": {
+  "bn": "বাদ দিন",
+  "en": "Remove"
+ },
+ "friendsBlock": {
+  "bn": "ব্লক করুন",
+  "en": "Block"
+ },
+ "friendsBlockHelp": {
+  "bn": "ব্লক করলে তার পাঠানো উপহার বা স্টিকার আর আসবে না।",
+  "en": "Once blocked, their gifts and stickers no longer arrive."
+ },
+ "friendsGotMail": {
+  "bn": "বন্ধুরা {n}টা জিনিস পাঠিয়েছে!",
+  "en": "Friends sent you {n} things!"
+ },
+ "friendsWon_prize": {
+  "bn": "গত সপ্তাহে বন্ধুদের মধ্যে আপনি প্রথম! রিকশার সোনালি রং পেলেন (দোকানে পরুন)।",
+  "en": "First among friends last week! You won the golden paint for the rickshaw (wear it in the shop)."
+ },
+ "friendsWon_tara": {
+  "bn": "গত সপ্তাহে বন্ধুদের মধ্যে আপনি প্রথম! +{n} তারা।",
+  "en": "First among friends last week! +{n} stars."
+ },
+ "jointDone": {
+  "bn": "বন্ধুরা মিলে {name} হয়ে গেল! +{n} তারা।",
+  "en": "Together with friends: {name} is built! +{n} stars."
+ },
+ "friendTeaLine": {
+  "bn": "বন্ধুদের পাঠানো চা: +{n} শক্তি",
+  "en": "Tea from friends: +{n} energy"
+ },
+ "relayEnergyLine": {
+  "bn": "পালার দিন: বন্ধুর সকালের ভালো দোকান, +{n} শক্তি",
+  "en": "Relay day: a friend's good morning at the stall, +{n} energy"
+ },
+ "relayBonusLine": {
+  "bn": "পালার দিন: বন্ধুর রিকশা যাত্রী এনেছে, +{n} টাকা",
+  "en": "Relay day: a friend's rickshaw brought riders, +Tk {n}"
+ },
+ "relayDoneLine": {
+  "bn": "পালার দিন পূর্ণ: সকাল, দুপুর, সন্ধ্যা সবাই মিলে! +{n} তারা",
+  "en": "Relay day complete: morning, noon and evening together! +{n} stars"
+ },
+ "look_paint_friends": {
+  "bn": "সোনালি রং (পুরস্কার)",
+  "en": "Golden paint (prize)"
+ },
+ "lookPrize": {
+  "bn": "বন্ধুদের মধ্যে সপ্তাহে প্রথম হলে পাবেন",
+  "en": "Won by coming first among friends in a week"
+ },
+ "sticker_josh": {
+  "bn": "জোস!",
+  "en": "Awesome!"
+ },
+ "sticker_rain": {
+  "bn": "আজ বৃষ্টি, সাবধান",
+  "en": "Rain today, take care"
+ },
+ "sticker_thanks": {
+  "bn": "ধন্যবাদ বন্ধু",
+  "en": "Thanks, friend"
+ },
+ "sticker_well_done": {
+  "bn": "দারুণ খেলেছ!",
+  "en": "Well played!"
+ },
+ "sticker_see_you": {
+  "bn": "কাল দেখা হবে",
+  "en": "See you tomorrow"
+ },
+ "sticker_eid": {
+  "bn": "ঈদ মোবারক",
+  "en": "Eid Mubarak"
  }
 }

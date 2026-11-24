@@ -85,5 +85,12 @@
     "street_lights": {"cost": 2000},
     "drain_cleaning": {"cost": 3000},
     "bus_shelter": {"cost": 2500}
+  },
+  "friends": {
+    "max_friends": 20, "gifts_per_day": 3, "stickers_per_day": 10,
+    "tea_energy": 10, "tea_cap": 3, "paan_tara": 2, "week_tara": 10,
+    "relay_good_stars": 3.5, "relay_energy": 20, "relay_bonus": 0.1, "relay_tara": 5,
+    "joint_tara": 10,
+    "joint": [{"id": "school", "cost": 20000}, {"id": "playground", "cost": 40000}, {"id": "library", "cost": 60000}]
   }
 }

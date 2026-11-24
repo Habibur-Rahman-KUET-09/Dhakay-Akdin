@@ -9,6 +9,7 @@ extends Node3D
 const BusDay = preload("res://scripts/rules/bus_day.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
+const Friends = preload("res://scripts/rules/friends.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
@@ -1094,6 +1095,10 @@ func _end_trip() -> void:
 		lines.append(strings.t("samityPayoutLine", {"n": int(got.samity_payout)}))
 	elif int(got.get("samity_paid", 0)) > 0:
 		lines.append(strings.t("samityDayLine", {"n": int(got.samity_paid)}))
+	if int(got.get("relay_bonus", 0)) > 0:
+		lines.append(strings.t("relayBonusLine", {"n": int(got.relay_bonus)}))
+	if bool(got.get("relay_done", false)):
+		lines.append(strings.t("relayDoneLine", {"n": int(progress.b.n("friends.relay_tara"))}))
 	var end := DayEnd.new()
 	end.setup(strings, b, progress, got, {
 		"title": strings.t("busDayOver"),

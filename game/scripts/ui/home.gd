@@ -4,7 +4,8 @@
 ## challenge, the season and a chapter waiting; and the big button into
 ## the day. Picking a character opens a sheet to get ready (where to ride,
 ## today's Dhaka, the target, the school fee, a tip). Along the bottom:
-## the shop, the mohalla fund, the story book and the neighbours.
+## the shop, the mohalla fund, the story book and the neighbours. Friends
+## (codes, the week's list, gifts, the relay day) open from a card.
 ## Language, graphics, music and the online copy are under Settings.
 extends Control
 
@@ -26,6 +27,7 @@ const Activity = preload("res://scripts/ui/activity.gd")
 const Driving = preload("res://scripts/ui/driving.gd")
 const Goods = preload("res://scripts/rules/goods.gd")
 const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
+const Friends = preload("res://scripts/rules/friends.gd")
 
 const WHO := ["rickshaw", "tea", "bus"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
@@ -58,6 +60,11 @@ var _page := "hub"
 var _sheet := ""
 var _shop_who := ""
 var _settings_open := false
+## Friends: what just happened (a prize, gifts), the note under the
+## buttons on their page, and whether they are being brought up to date.
+var _friends_news: Array = []
+var _friends_note: Label
+var _friends_busy := false
 
 
 func _ready() -> void:
@@ -82,10 +89,11 @@ func _ready() -> void:
 
 ## Copies the save online if it has changed since the last copy.
 func _backup() -> void:
-	if not cloud.enabled() or int(progress.data.day) == cloud.last_day:
-		return
-	if await cloud.upload(progress.data) == "":
-		_build()
+	if cloud.enabled() and int(progress.data.day) != cloud.last_day:
+		if await cloud.upload(progress.data) == "":
+			_build()
+	# And friends: my card out, theirs and their gifts in.
+	_refresh_friends()
 
 
 func _build() -> void:
@@ -119,9 +127,13 @@ func enter() -> void:
 
 func show_page(page: String) -> void:
 	_title_done = true
+	if _page == "friends" and page != "friends":
+		_friends_news = []
 	_page = page
 	_sheet = ""
 	_build()
+	if page == "friends":
+		_refresh_friends()
 
 
 func open_sheet(who: String) -> void:
@@ -238,6 +250,8 @@ func _app_page() -> void:
 			_story_page(page)
 		"people":
 			_people_page(page)
+		"friends":
+			_friends_page(page)
 		_:
 			_hub_page(page, margin)
 	_let_scroll(margin)
@@ -395,6 +409,9 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 	var challenge := _challenge_card()
 	if challenge != null:
 		inner.add_child(challenge)
+	var friends := _friends_card()
+	if friends != null:
+		inner.add_child(friends)
 	inner.add_child(_news_card())
 	inner.add_child(_season_card())
 	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 12, false, Color("8A8178"))
@@ -1099,7 +1116,9 @@ func _look_card(l: Dictionary, who: String) -> Control:
 			break
 	var parts := _goods_card(str(l.get("icon", "bag")), tile, s.t("look_" + l.id), s.t("lookHelp_" + l.slot))
 	var col: VBoxContainer = parts[1]
-	if not progress.owns_look(l.id):
+	if not progress.owns_look(l.id) and bool(l.get("prize", false)):
+		col.add_child(Look.label(s.t("lookPrize"), 13, true, Look.MAGENTA))
+	elif not progress.owns_look(l.id):
 		_price_button(col, int(l.price), _buy_look.bind(who, l.id), "Look_" + l.id)
 	else:
 		var on: bool = progress.worn(who, l.slot).get("id", "") == l.id
@@ -1406,6 +1425,466 @@ func _people_page(page: VBoxContainer) -> void:
 			list.add_child(Look.label(s.t("logLine", {"name": neighbours.name_of(e.id, s.lang), "what": s.t("log_" + str(e.what)),
 				"n": ("+" if change > 0 else "") + str(change)}), 14))
 		page.add_child(card)
+
+
+# --- Friends (friends.gd) ------------------------------------------------------------
+
+
+## On the mohalla page: friends at a glance, and the way in.
+func _friends_card() -> Control:
+	if not cloud.enabled():
+		return null
+	var f := Friends.of(progress.data)
+	var panel := _card(Color("FFF4D6"))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	row.add_child(_icon_tile("people", Look.MAGENTA, Color.WHITE))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_theme_constant_override("separation", 0)
+	row.add_child(text)
+	text.add_child(Look.label(s.t("friendsTitle"), 18, true))
+	var line := s.t("friendsStart")
+	if str(f.code) != "":
+		var rows := Friends.board(progress.data, cloud.uid, progress.date())
+		var rank := 1
+		for i in rows.size():
+			if rows[i].me:
+				rank = i + 1
+		line = s.t("friendsSummary", {"n": f.list.size(), "rank": rank})
+	if not _friends_news.is_empty():
+		line = _friends_news[0]
+	text.add_child(Look.label(line, 14, false, Look.MUTED))
+	var go := Look.chunky(s.t("friendsOpen"), Look.YELLOW, Look.OUTLINE, 16, 4, 14)
+	go.name = "FriendsOpen"
+	go.autowrap_mode = TextServer.AUTOWRAP_OFF
+	go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	go.pressed.connect(show_page.bind("friends"))
+	row.add_child(go)
+	return panel
+
+
+func _friends_page(page: VBoxContainer) -> void:
+	var f := Friends.of(progress.data)
+	var back := Look.chunky(s.t("friendsBack"), Color.WHITE, Look.OUTLINE, 15, 3, 14)
+	back.name = "FriendsBack"
+	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	back.pressed.connect(show_page.bind("hub"))
+	page.add_child(back)
+	page.add_child(_page_title(s.t("friendsTitle")))
+	if not cloud.enabled():
+		page.add_child(Look.label(s.t("friendsOff"), 15, false, Look.MUTED))
+		return
+	_friends_note = Look.label("", 14, true, Look.VERMILION)
+	for news in _friends_news:
+		var news_card := _card(Look.YELLOW, 16)
+		news_card.add_child(Look.label(str(news), 15, true))
+		page.add_child(news_card)
+	if str(f.code) == "":
+		page.add_child(_friends_start())
+		page.add_child(_friends_note)
+		return
+	page.add_child(_my_code_card(f))
+	page.add_child(_friends_note)
+	page.add_child(_add_friend_card())
+	if not (f.mail as Array).is_empty() or int(f.tea) > 0:
+		page.add_child(_mail_card(f))
+	page.add_child(_caption(s.t("friendsWeek")))
+	page.add_child(_board_card())
+	page.add_child(_caption(s.t("relayTitle")))
+	page.add_child(_relay_card())
+	page.add_child(_caption(s.t("jointTitle")))
+	page.add_child(_joint_card())
+	page.add_child(Look.label(s.t("friendsSafety"), 13, false, Look.MUTED))
+
+
+## The first time: choose a name, get a code.
+func _friends_start() -> Control:
+	var panel := _card(Color.WHITE, 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("friendsHelp"), 15))
+	var name_edit := LineEdit.new()
+	name_edit.name = "FriendName"
+	name_edit.placeholder_text = s.t("friendsNameHint")
+	name_edit.max_length = Friends.NAME_LENGTH
+	name_edit.custom_minimum_size = Vector2(0, 48)
+	box.add_child(name_edit)
+	var go := Look.chunky(s.t("friendsMakeCode"), Look.MAGENTA, Color.WHITE, 17, 5, 14)
+	go.name = "FriendMakeCode"
+	go.custom_minimum_size = Vector2(0, 54)
+	go.pressed.connect(_make_code.bind(name_edit, go))
+	box.add_child(go)
+	return panel
+
+
+func _my_code_card(f: Dictionary) -> Control:
+	var panel := _card(Look.MAGENTA, 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("friendsYourCode", {"name": str(f.name)}), 15, true, Color.WHITE))
+	var code := Look.title(str(f.code), 44, Look.YELLOW, true)
+	code.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(code)
+	box.add_child(Look.label(s.t("friendsShareHelp"), 13, false, Color.WHITE))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	var copy := Look.chunky(s.t("friendsCopy"), Look.YELLOW, Look.OUTLINE, 15, 4, 14)
+	copy.name = "FriendCopy"
+	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	copy.pressed.connect(_copy_code.bind(str(f.code)))
+	grid.add_child(copy)
+	var rename := Look.chunky(s.t("friendsRename"), Color.WHITE, Look.OUTLINE, 15, 4, 14)
+	rename.name = "FriendRename"
+	rename.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rename.pressed.connect(_rename_form)
+	grid.add_child(rename)
+	box.add_child(grid)
+	return panel
+
+
+func _add_friend_card() -> Control:
+	var panel := _card(Color.WHITE, 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("friendsAdd"), 16, true))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var edit := LineEdit.new()
+	edit.name = "FriendCode"
+	edit.placeholder_text = s.t("friendsCodeHint")
+	edit.max_length = 8
+	edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	edit.custom_minimum_size = Vector2(0, 48)
+	row.add_child(edit)
+	var go := Look.chunky(s.t("friendsAddGo"), Look.PARROT, Color.WHITE, 16, 4, 14)
+	go.name = "FriendAdd"
+	go.autowrap_mode = TextServer.AUTOWRAP_OFF
+	go.pressed.connect(_add_friend.bind(edit, go))
+	row.add_child(go)
+	box.add_child(row)
+	return panel
+
+
+## What friends sent lately; tea waiting for Rahim Chacha's next day.
+func _mail_card(f: Dictionary) -> Control:
+	var panel := _card(Color.WHITE, 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("friendsMail"), 16, true))
+	if int(f.tea) > 0:
+		var cups := mini(int(f.tea), int(b.n("friends.tea_cap")))
+		box.add_child(Look.label(s.t("friendsTeaWaiting", {"n": int(f.tea), "energy": int(cups * b.n("friends.tea_energy"))}), 14, true, Look.PARROT_DARK))
+	for m in f.mail:
+		var what := s.t("gift_" + str(m.kind)) if m.kind != "sticker" else "\"%s\"" % s.t("sticker_" + str(m.sticker))
+		box.add_child(Look.label(s.t("friendsMailLine", {"name": str(m.name), "what": what}), 14))
+	return panel
+
+
+## This week's list, with gifts, stickers and the rest for each friend.
+func _board_card() -> Control:
+	var panel := _card(Color.WHITE, 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	var rows := Friends.board(progress.data, cloud.uid, progress.date())
+	if rows.size() == 1:
+		box.add_child(Look.label(s.t("friendsNone"), 14, false, Look.MUTED))
+	box.add_child(Look.label(s.t("friendsLeft", {"gifts": Friends.left_today(progress.data, b, "gift", progress.date()),
+		"stickers": Friends.left_today(progress.data, b, "sticker", progress.date())}), 13, false, Look.MUTED))
+	for i in rows.size():
+		var r: Dictionary = rows[i]
+		if i > 0:
+			box.add_child(_dash())
+		var top := HBoxContainer.new()
+		top.add_theme_constant_override("separation", 10)
+		var rank := Look.title(str(i + 1), 28, Look.MAGENTA if i == 0 else Look.MUTED, false)
+		rank.custom_minimum_size = Vector2(28, 0)
+		rank.autowrap_mode = TextServer.AUTOWRAP_OFF
+		top.add_child(rank)
+		var who := Look.label(s.t("friendsYou") if r.me else str(r.name), 17, true, Look.MAGENTA if r.me else Look.OUTLINE)
+		who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(who)
+		var money := Look.label(s.t("takaN", {"n": int(r.taka)}), 16, true)
+		money.autowrap_mode = TextServer.AUTOWRAP_OFF
+		top.add_child(money)
+		box.add_child(top)
+		if r.me:
+			continue
+		var acts := GridContainer.new()
+		acts.columns = 4
+		acts.add_theme_constant_override("h_separation", 6)
+		for kind in ["tea", "paan", "sticker", "more"]:
+			var label := s.t("gift_" + kind) if kind != "sticker" and kind != "more" else s.t("friends_" + kind)
+			var btn := Look.chunky(label, Look.YELLOW if kind == "tea" else Color.WHITE, Look.OUTLINE, 13, 3, 12)
+			btn.name = "Friend_%s_%d" % [kind, i]
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			btn.custom_minimum_size = Vector2(0, 44)
+			match kind:
+				"sticker":
+					btn.pressed.connect(_sticker_form.bind(str(r.uid), str(r.name)))
+				"more":
+					btn.pressed.connect(_friend_more.bind(str(r.uid), str(r.name)))
+				_:
+					btn.pressed.connect(_send.bind(str(r.uid), kind, ""))
+			acts.add_child(btn)
+		box.add_child(acts)
+	box.add_child(Look.label(s.t("friendsPrizeHelp"), 13, false, Look.MUTED))
+	return panel
+
+
+## Today's relay: who played the morning stall, the noon rickshaw and the
+## evening bus, and what each good leg gives the next.
+func _relay_card() -> Control:
+	var panel := _card(Color.WHITE, 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("relayHelp"), 14))
+	var theirs := Friends.relay(progress.data, progress.date())
+	var f := Friends.of(progress.data)
+	var mine: Dictionary = f.legs if f.legs_date == progress.date() else {}
+	for leg in Friends.LEGS:
+		box.add_child(_dash())
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		row.add_child(_icon_tile({"tea": "monir", "rickshaw": "rahim", "bus": "babu"}[leg], _colour_of(leg), Color.WHITE, 40))
+		var text := VBoxContainer.new()
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		text.add_theme_constant_override("separation", 0)
+		row.add_child(text)
+		text.add_child(Look.label(s.t("relayLeg_" + leg), 15, true))
+		var names := []
+		if mine.has(leg):
+			names.append(s.t("friendsYou"))
+		if theirs.has(leg):
+			names.append(s.t("relayWho", {"name": str(theirs[leg].name), "stars": snappedf(float(theirs[leg].stars), 0.1)}))
+		var played := ", ".join(PackedStringArray(names)) if not names.is_empty() else s.t("relayNobody")
+		text.add_child(Look.label(played, 14, false, Look.PARROT_DARK if not names.is_empty() else Look.MUTED))
+		box.add_child(row)
+	box.add_child(Look.label(s.t("relayReward", {"n": int(b.n("friends.relay_tara"))}), 13, false, Look.MUTED))
+	return panel
+
+
+## Everyone's gifts to their mohalla funds, together, for big things.
+func _joint_card() -> Control:
+	var panel := _card(Color.WHITE, 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("jointHelp"), 14))
+	box.add_child(Look.label(s.t("jointTotal", {"n": Friends.joint_total(progress.data)}), 16, true))
+	for p in Friends.joint(progress.data, b):
+		box.add_child(_dash())
+		var top := HBoxContainer.new()
+		var name_label := Look.label(s.t("joint_" + str(p.id)), 16, true)
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(name_label)
+		var st := Look.label(s.t("projectIsDone") if p.done else s.t("takaN", {"n": int(p.cost)}), 14, true, Look.PARROT_DARK if p.done else Look.MUTED)
+		st.autowrap_mode = TextServer.AUTOWRAP_OFF
+		top.add_child(st)
+		box.add_child(top)
+		if not p.done:
+			box.add_child(Look.bar(int(p.got), int(p.cost), Look.YELLOW, 14))
+	return panel
+
+
+func _say_friends(text: String, bad := true) -> void:
+	if is_instance_valid(_friends_note):
+		_friends_note.add_theme_color_override("font_color", Look.VERMILION if bad else Look.PARROT_DARK)
+		_friends_note.text = text
+
+
+func _friends_err(e: String) -> String:
+	for k in ["friendsErr_" + e, "cloudErr_" + e]:
+		if s.has(k):
+			return s.t(k)
+	return s.t("cloudErrOther", {"e": e})
+
+
+func _make_code(name_edit: LineEdit, go: Button) -> void:
+	var chosen := Friends.clean_name(name_edit.text)
+	if chosen == "":
+		_say_friends(s.t("friendsNeedName"))
+		return
+	go.disabled = true
+	_say_friends(s.t("cloudWorking"), false)
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var e := "ALREADY_EXISTS"
+	var code := ""
+	for i in 5:
+		code = Friends.make_code(rng)
+		e = await cloud.claim_code(code)
+		if e != "ALREADY_EXISTS":
+			break
+	if not is_instance_valid(go):
+		return
+	go.disabled = false
+	if e != "":
+		_say_friends(_friends_err(e))
+		return
+	var f := Friends.of(progress.data)
+	f.name = chosen
+	f.code = code
+	progress.save()
+	await cloud.publish_card(Friends.card(progress.data, progress.date()))
+	_build()
+
+
+func _rename_form() -> void:
+	var rows := []
+	var edit := LineEdit.new()
+	edit.name = "FriendNewName"
+	edit.text = str(Friends.of(progress.data).name)
+	edit.max_length = Friends.NAME_LENGTH
+	edit.custom_minimum_size = Vector2(0, 48)
+	rows.append(edit)
+	var go := Look.chunky(s.t("friendsRenameGo"), Look.MAGENTA, Color.WHITE, 16, 5, 14)
+	go.pressed.connect(_rename_go.bind(edit))
+	rows.append(go)
+	_overlay(s.t("friendsRename"), rows)
+
+
+func _rename_go(edit: LineEdit) -> void:
+	var chosen := Friends.clean_name(edit.text)
+	if chosen == "":
+		return
+	Friends.of(progress.data).name = chosen
+	progress.save()
+	cloud.publish_card(Friends.card(progress.data, progress.date()))
+	_build()
+
+
+func _copy_code(code: String) -> void:
+	DisplayServer.clipboard_set(code)
+	_say_friends(s.t("friendsCopied"), false)
+
+
+func _add_friend(edit: LineEdit, go: Button) -> void:
+	var code := Friends.clean_code(edit.text)
+	if not Friends.valid_code(code):
+		_say_friends(s.t("friendsBadCode"))
+		return
+	go.disabled = true
+	_say_friends(s.t("cloudWorking"), false)
+	var uid := await cloud.find_code(code)
+	if not is_instance_valid(go):
+		return
+	go.disabled = false
+	if uid == "":
+		_say_friends(s.t("friendsNoCode"))
+		return
+	var got := await cloud.cards([uid])
+	var card: Dictionary = got.get(uid, {})
+	var why := Friends.add(progress.data, b, uid, code, str(card.get("name", code)), cloud.uid)
+	if why != "":
+		_say_friends(s.t("friendsAdd_" + why))
+		return
+	Friends.take_cards(progress.data, got)
+	progress.save()
+	_friends_news = [s.t("friendsAdded", {"name": Friends.clean_name(str(card.get("name", code)))})]
+	_build()
+
+
+## Sends a gift or a sticker, within today's limits.
+func _send(uid: String, kind: String, sticker: String) -> void:
+	var item := Friends.send(progress.data, b, cloud.uid, kind, sticker, progress.date())
+	if item.is_empty():
+		_say_friends(s.t("friendsLimit"))
+		return
+	_say_friends(s.t("cloudWorking"), false)
+	var e := await cloud.send_item(uid, item)
+	if e != "":
+		Friends.unsend(progress.data, kind, progress.date())
+		_say_friends(_friends_err(e))
+		return
+	progress.save()
+	_friends_news = [s.t("friendsSent", {"what": s.t("gift_" + kind) if kind != "sticker" else "\"%s\"" % s.t("sticker_" + sticker)})]
+	_build()
+
+
+func _sticker_form(uid: String, friend_name: String) -> void:
+	var rows := []
+	rows.append(Look.label(s.t("stickerHelp", {"name": friend_name}), 15))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	var tones := [Look.MAGENTA, Look.PARROT, Look.SKY_DARK, Look.VERMILION, Look.YELLOW, Look.PARROT_DARK]
+	for i in Friends.STICKERS.size():
+		var id: String = Friends.STICKERS[i]
+		var fill: Color = tones[i % tones.size()]
+		var btn := Look.chunky(s.t("sticker_" + id), fill, Look.OUTLINE if fill == Look.YELLOW else Color.WHITE, 17, 5, 18)
+		btn.name = "Sticker_" + id
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.custom_minimum_size = Vector2(0, 70)
+		btn.pressed.connect(_send.bind(uid, "sticker", id))
+		grid.add_child(btn)
+	rows.append(grid)
+	_overlay(s.t("friends_sticker"), rows)
+
+
+## Removing a friend, or blocking them.
+func _friend_more(uid: String, friend_name: String) -> void:
+	var rows := []
+	rows.append(Look.label(s.t("friendsMoreHelp", {"name": friend_name}), 15))
+	var remove := Look.chunky(s.t("friendsRemove"), Color.WHITE, Look.OUTLINE, 16, 4, 14)
+	remove.name = "FriendRemove"
+	remove.pressed.connect(_friend_drop.bind(uid, false))
+	rows.append(remove)
+	var block := Look.chunky(s.t("friendsBlock"), Look.VERMILION, Color.WHITE, 16, 4, 14)
+	block.name = "FriendBlock"
+	block.pressed.connect(_friend_drop.bind(uid, true))
+	rows.append(block)
+	rows.append(Look.label(s.t("friendsBlockHelp"), 13, false, Look.MUTED))
+	_overlay(friend_name, rows)
+
+
+func _friend_drop(uid: String, and_block: bool) -> void:
+	if and_block:
+		Friends.block(progress.data, uid)
+	else:
+		Friends.remove(progress.data, uid)
+	progress.save()
+	_build()
+
+
+## Brings friends up to date: my card out; their cards, gifts and
+## stickers in; the week's prize, joint projects. Rebuilds if anything
+## changed, or the friends page is open.
+func _refresh_friends() -> void:
+	var f := Friends.of(progress.data)
+	if _friends_busy or not cloud.enabled() or str(f.code) == "":
+		return
+	_friends_busy = true
+	await cloud.publish_card(Friends.card(progress.data, progress.date()))
+	var uids := []
+	for p in f.list:
+		uids.append(p.uid)
+	var got := await cloud.cards(uids)
+	Friends.take_cards(progress.data, got)
+	var news := []
+	var items := await cloud.take_inbox()
+	if Friends.receive(progress.data, b, items) > 0:
+		news.append(s.t("friendsGotMail", {"n": items.size()}))
+	var won := Friends.claim_week(progress.data, b, progress.date())
+	if won != "":
+		news.append(s.t("friendsWon_" + won, {"n": int(b.n("friends.week_tara"))}))
+	for id in Friends.claim_joint(progress.data, b):
+		news.append(s.t("jointDone", {"name": s.t("joint_" + id), "n": int(b.n("friends.joint_tara"))}))
+	progress.save()
+	_friends_busy = false
+	if not news.is_empty():
+		_friends_news = news
+	if not news.is_empty() or _page == "friends":
+		_build()
 
 
 # --- Small parts ----------------------------------------------------------------

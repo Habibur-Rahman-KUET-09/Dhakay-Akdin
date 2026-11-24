@@ -348,7 +348,7 @@ func test_every_good_has_its_words() -> void:
 			for l in Goods.looks(who):
 				for key in ["look_" + l.id, "lookHelp_" + l.slot]:
 					check(s.t(key) != key, "%s: %s" % [lang, key])
-				check(int(l.price) > 0, "%s has a price" % l.id)
+				check(int(l.price) > 0 or bool(l.get("prize", false)), "%s has a price (or is a prize)" % l.id)
 				if who == "bus":
 					check(s.t(l.id) != l.id, "%s: the sign's words" % l.id)
 		for h in Goods.home_items():

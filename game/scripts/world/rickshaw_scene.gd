@@ -30,6 +30,7 @@ const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
+const Friends = preload("res://scripts/rules/friends.gd")
 const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
@@ -94,6 +95,9 @@ var _pedal_down_at := {}
 ## once it has rung), and how it went, for the day's end.
 var _call_at := -1.0
 var _call_rng := RandomNumberGenerator.new()
+## Energy from friends today: cups of tea they sent, the relay day.
+var _friend_energy := 0.0
+var _relay_energy := 0.0
 var _call_result := {}
 var _way := {"turn": -1, "tiles": -1}
 var _way_key := []
@@ -140,6 +144,11 @@ func _ready() -> void:
 	shift.energy_factor = progress.energy_factor()
 	# Resting better at home (a bed, a fan): more energy to start with.
 	shift.energy_max += progress.home_energy()
+	# Cups of tea friends sent, and a friend's good morning at the stall
+	# (the relay day): more energy too.
+	_friend_energy = Friends.drink_tea(progress.data, b)
+	_relay_energy = Friends.relay_energy(progress.data, b, progress.date())
+	shift.energy_max += _friend_energy + _relay_energy
 	shift.energy = shift.energy_max
 	# A few of the named neighbours may need a ride today.
 	var ids := neighbours.ids()
@@ -1146,6 +1155,14 @@ func _end_day() -> void:
 		lines.append(strings.t("samityPayoutLine", {"n": int(got.samity_payout)}))
 	elif int(got.get("samity_paid", 0)) > 0:
 		lines.append(strings.t("samityDayLine", {"n": int(got.samity_paid)}))
+	if _friend_energy > 0.0:
+		lines.append(strings.t("friendTeaLine", {"n": int(_friend_energy)}))
+	if _relay_energy > 0.0:
+		lines.append(strings.t("relayEnergyLine", {"n": int(_relay_energy)}))
+	if int(got.get("relay_bonus", 0)) > 0:
+		lines.append(strings.t("relayBonusLine", {"n": int(got.relay_bonus)}))
+	if bool(got.get("relay_done", false)):
+		lines.append(strings.t("relayDoneLine", {"n": int(progress.b.n("friends.relay_tara"))}))
 	var end := DayEnd.new()
 	end.setup(strings, progress.b, progress, got, {
 		"title": strings.t("dayOver"),
