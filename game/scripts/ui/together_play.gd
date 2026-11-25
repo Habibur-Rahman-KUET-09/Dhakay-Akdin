@@ -2,6 +2,9 @@
 ## playing, then the opening scene, then each character's turn — the phone
 ## passed to whoever plays them, their scene, their hand activity, how it
 ## went — and the ending the turns earned, with its stars.
+## Online (online.gd, from the room's lobby): each plays their own
+## characters' turns on their own phone; for the others' turns the phone
+## waits, then shows how it went. Every phone reaches the same ending.
 extends Control
 
 const Look = preload("res://scripts/ui/look.gd")
@@ -22,6 +25,8 @@ const Pump = preload("res://scripts/ui/activities/pump.gd")
 const Stir = preload("res://scripts/ui/activities/stir.gd")
 const Balloons = preload("res://scripts/ui/activities/balloons.gd")
 const Choose = preload("res://scripts/ui/activities/choose.gd")
+const Online = preload("res://scripts/rules/online.gd")
+const Cloud = preload("res://scripts/ui/cloud.gd")
 
 
 var s := Strings.new()
@@ -37,6 +42,12 @@ var step_i := -1
 var _bonus := 0.0
 var _taka := 0
 var _page: Control
+## Online: the room ({} on one phone), the cloud, what I have written
+## (my name and my turns' scores), the turn being waited for.
+var online := {}
+var cloud: Cloud
+var _mine := {}
+var _waiting := -1
 
 
 func _ready() -> void:
@@ -52,6 +63,14 @@ func _ready() -> void:
 	Together.next = ""
 	if story.is_empty():
 		_go_home()
+		return
+	if Online.active() and str(Online.room.kind) == "story":
+		online = Online.room.duplicate(true)
+		Online.room = {}
+		cloud = Cloud.new()
+		add_child(cloud)
+		_mine = {"name": str(online.names.get(online.me, ""))}
+		_begin((online.players as Array).size())
 		return
 	_ask_players()
 
@@ -141,6 +160,13 @@ func _next_step() -> void:
 		return
 	var step: Dictionary = story.steps[step_i]
 	var who := s.t(_name_key(str(step.who)))
+	if not online.is_empty():
+		var owner := Online.owner_of(online.players, str(step.who))
+		if owner == str(online.me):
+			_card(s.t("onYourTurn", {"name": who}), [s.t("onYourTurnLine")], [[s.t("tgReady"), Look.YELLOW, _play_step]])
+		else:
+			_wait_for(step_i, owner, who)
+		return
 	if players > 1:
 		# Pass the phone: whose turn it is.
 		_card(s.t("tgTurn", {"name": who}), [s.t("tgPass", {"name": who})], [[s.t("tgReady"), Look.YELLOW, _play_step]])
@@ -208,6 +234,9 @@ func _scored(score: float, act, step: Dictionary) -> void:
 	var got := Together.step_score(score, _bonus)
 	_bonus = 0.0
 	scores.append(got)
+	if not online.is_empty():
+		_mine["s%d" % step_i] = got
+		_send_mine()
 	print("[together] step %d (%s): %.2f" % [step_i, str(step.game), got])
 	var good := got >= b.n("together.good")
 	var text: Dictionary = step.get("good" if good else "bad", {})
@@ -224,6 +253,8 @@ func _ending() -> void:
 
 
 func _results(rank: int) -> void:
+	if not online.is_empty():
+		_leave_room()
 	var got := Together.settle(progress.data, b, str(story.id), rank)
 	if rank == 2:
 		for who in Together.CAST:
@@ -243,7 +274,74 @@ func _results(rank: int) -> void:
 		lines.append(s.t("tgFamilyUp"))
 	if _taka > 0:
 		lines.append(s.t("tgTaka", {"n": _taka}))
+	if not online.is_empty():
+		lines.append(s.t("onTogetherDone"))
+		_card(_title(), lines, [[s.t("onAgain"), Look.YELLOW, func(): get_tree().change_scene_to_file.call_deferred("res://scenes/online.tscn")], [s.t("back"), Color.WHITE, _go_home]])
+		return
 	_card(_title(), lines, [[s.t("tgAgain"), Look.YELLOW, _again], [s.t("back"), Color.WHITE, _go_home]])
+
+
+# --- Online: the others' turns -------------------------------------------------
+
+
+## Someone else's turn: wait (asking every second or two) for their score,
+## then show how it went. After a long wait, offer to play it here.
+func _wait_for(i: int, owner: String, who: String) -> void:
+	_waiting = i
+	var name := str(online.names.get(owner, ""))
+	_card(s.t("onTheirTurn", {"name": name, "who": who}), [s.t("onTheirTurnLine")], [])
+	var waited := 0.0
+	var offered := false
+	while _waiting == i and is_inside_tree():
+		await get_tree().create_timer(b.n("online.poll_s")).timeout
+		if _waiting != i:
+			return
+		waited += b.n("online.poll_s")
+		var m := await cloud.moves(str(online.code))
+		if _waiting != i:
+			return
+		var score := Online.score_of(m, owner, i) if not m.has("_error") else -1.0
+		if score >= 0.0:
+			_waiting = -1
+			_their_score(i, score, name)
+			return
+		if waited >= b.n("online.wait_s") and not offered:
+			offered = true
+			_card(s.t("onTheirTurn", {"name": name, "who": who}), [s.t("onTooLong", {"name": name})],
+				[[s.t("onPlayIt"), Look.YELLOW, func():
+					_waiting = -1
+					_play_step()]])
+
+
+func _their_score(i: int, score: float, name: String) -> void:
+	_bonus = 0.0
+	scores.append(score)
+	print("[together] step %d by %s: %.2f" % [i, name, score])
+	var step: Dictionary = story.steps[i]
+	var good := score >= b.n("together.good")
+	var text: Dictionary = step.get("good" if good else "bad", {})
+	_card(s.t("tgGood" if good else "tgBad"), [s.t("onPlayedBy", {"name": name}), str(text.get(s.lang, text.get("en", "")))],
+		[[s.t("tgNext") if step_i + 1 < (story.steps as Array).size() else s.t("tgEnding"), Look.YELLOW, _next_step]])
+
+
+## My part of the room, written again (a few tries).
+func _send_mine() -> void:
+	for attempt in 3:
+		if await cloud.move_put(str(online.code), _mine) == "":
+			return
+		await get_tree().create_timer(1.0).timeout
+
+
+## Done: my part taken away; the host closes the room a little later, once
+## the others have had time to read the last turn.
+func _leave_room() -> void:
+	var code := str(online.code)
+	var host := str(online.host) == str(online.me)
+	await cloud.move_delete(code)
+	if host:
+		await get_tree().create_timer(20.0).timeout
+		if is_inside_tree():
+			await cloud.room_delete(code)
 
 
 func _again() -> void:

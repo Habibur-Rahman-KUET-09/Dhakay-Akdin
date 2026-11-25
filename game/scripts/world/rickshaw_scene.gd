@@ -35,6 +35,8 @@ const Progress = preload("res://scripts/rules/progress.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
 const League = preload("res://scripts/rules/league.gd")
 const Race = preload("res://scripts/rules/race.gd")
+const Online = preload("res://scripts/rules/online.gd")
+const Cloud = preload("res://scripts/ui/cloud.gd")
 const Delivery = preload("res://scripts/rules/delivery.gd")
 const Choose = preload("res://scripts/ui/activities/choose.gd")
 const Neighbours = preload("res://scripts/rules/neighbours.gd")
@@ -134,6 +136,13 @@ var _ghost := {}
 var _ghost_points := PackedVector2Array()
 var _ghost_node: Node3D
 var _race_clock := 0.0
+## A live race (online.gd): the room ({} when not), the cloud, the
+## others' rickshaws {uid: {node, points, name, done, time}}.
+var _live := {}
+var _live_cloud: Cloud
+var _live_ghosts := {}
+var _live_poll := 0.0
+var _live_busy := false
 ## Activities that came while another was open, opened after it.
 var _queued: Array[Callable] = []
 ## Passengers, the policeman and Rahim Chacha talking.
@@ -152,7 +161,13 @@ func _ready() -> void:
 	# What carries over from earlier days: a faster rickshaw, for one, and
 	# where he rides (Mirpur, or Old Dhaka once the mohalla is level 5).
 	progress = Progress.new(b)
-	var map: RoadMap = RoadMap.load_area("mirpur" if mode == "delivery" else progress.rickshaw_area())
+	# A live race in a room: the host's area and the room's route.
+	if mode == "rickshaw" and Online.active() and str(Online.room.kind) == "race":
+		_live = Online.room.duplicate(true)
+		Online.room = {}
+		Race.next = true
+	var area := progress.rickshaw_area() if _live.is_empty() else str(_live.area)
+	var map: RoadMap = RoadMap.load_area("mirpur" if mode == "delivery" else area)
 	# The date brings the month's weather and any festival.
 	# Shorter rides in the first days, the full length later.
 	shift = Day.new(map, b, -1, progress.date(), Day.trip_for_level(progress.level()))
@@ -163,7 +178,8 @@ func _ready() -> void:
 	# Today's race instead of a working day, when chosen at home.
 	_race = Race.next and mode == "rickshaw"
 	Race.next = false
-	var route := Race.route(map, progress.date(), int(b.n("race.low_tiles")), int(b.n("race.high_tiles"))) if _race else {}
+	var route_key := progress.date() if _live.is_empty() else str(_live.seed)
+	var route := Race.route(map, route_key, int(b.n("race.low_tiles")), int(b.n("race.high_tiles"))) if _race else {}
 	_race = not route.is_empty()
 	if _race:
 		# No passengers, no calls, no boosts used up: just the ride.
@@ -300,7 +316,9 @@ func _ready() -> void:
 		lamp.spot_angle = 32.0
 		lamp.light_color = Color("FFF1C9")
 		rickshaw.add_child(lamp)
-	if _race:
+	if _race and not _live.is_empty():
+		_setup_live()
+	elif _race:
 		_setup_ghost()
 	marker = _marker()
 	add_child(marker)
@@ -618,6 +636,8 @@ func _process(dt: float) -> void:
 		return
 	if _race:
 		_race_tick(dt * pace)
+	if not _live.is_empty():
+		_live_tick(dt)
 	hud.show_hood_down(shift.interactive and shift.hood_up and not shift.raining)
 	# A call from home comes when he is standing still (a signal, a jam),
 	# or after half a minute's wait for that.
@@ -722,6 +742,9 @@ func _update_hud() -> void:
 		if hint != "":
 			target += "\n" + hint
 		status = strings.t("raceClock", {"s": "%.1f" % _race_clock})
+		for uid in _live_ghosts:
+			var g: Dictionary = _live_ghosts[uid]
+			status += "\n" + (strings.t("liveDone", {"name": g.name, "s": "%.1f" % float(g.time)}) if g.done else strings.t("liveRiding", {"name": g.name}))
 		if not _ghost.is_empty():
 			status += "\n" + strings.t("raceGhostTime", {"s": "%.1f" % float(_ghost.time)})
 	if _delivery != null:
@@ -880,7 +903,10 @@ func _handle(events: Array) -> void:
 	if events.has(Day.RAIN_END):
 		_say(strings.t("rainEnd"), Look.SKY, 2.5)
 	if events.has(Day.RACE_DONE):
-		_end_race()
+		if _live.is_empty():
+			_end_race()
+		else:
+			_end_live_race()
 	if events.has(Day.POTHOLE):
 		_say(strings.t("pothole"), Look.YELLOW.darkened(0.3), 3.0)
 		Activity.buzz(120)
@@ -1454,6 +1480,161 @@ func _end_race() -> void:
 		row.add_child(button)
 	col.add_child(row)
 	ReadAloud.say("\n".join(lines), strings.lang)
+
+
+# --- A live race with friends (online.gd) -------------------------------------------
+
+
+## The others in the room: a pale rickshaw each, with their name, riding
+## where they were at the same moment of their race (a second or two late).
+func _setup_live() -> void:
+	_live_cloud = Cloud.new()
+	add_child(_live_cloud)
+	var tints := [Color(1.0, 0.75, 0.6, 0.6), Color(0.7, 1.0, 0.75, 0.6)]
+	for uid in _live.players:
+		if str(uid) == str(_live.me):
+			continue
+		var node := Models.player_rickshaw(Color(0.9, 0.95, 1.0), Color(0.7, 0.8, 1.0))
+		var pale := StandardMaterial3D.new()
+		pale.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		pale.albedo_color = tints[_live_ghosts.size() % tints.size()]
+		pale.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		for m in node.find_children("*", "MeshInstance3D", true, false):
+			(m as MeshInstance3D).material_override = pale
+			(m as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var name := str(_live.names.get(uid, ""))
+		node.add_child(City._sign(name, Vector3(0, 2.6, 0), 40, Look.VERMILION))
+		node.visible = false
+		add_child(node)
+		_live_ghosts[str(uid)] = {"node": node, "points": PackedVector2Array(), "name": name, "done": false, "time": 0.0}
+
+
+## Every second or two: my ride so far out, the others' in.
+func _live_tick(dt: float) -> void:
+	for uid in _live_ghosts:
+		var g: Dictionary = _live_ghosts[uid]
+		var pts: PackedVector2Array = g.points
+		if pts.size() >= 2:
+			var t := float(g.time) if g.done else _race_clock
+			var p := Race.at_time(pts, t)
+			var ahead := Race.at_time(pts, t + Race.STEP) - p
+			var node: Node3D = g.node
+			node.visible = true
+			node.position = Vector3(p.x, 0, p.y)
+			if ahead.length() > 0.01:
+				node.rotation.y = lerp_angle(node.rotation.y, atan2(-ahead.x, -ahead.y), 0.3)
+	_live_poll -= dt
+	if _live_poll > 0.0 or _live_busy:
+		return
+	_live_poll = float(progress.b.n("online.poll_s"))
+	_live_sync({"t": _race_clock})
+
+
+func _live_sync(extra: Dictionary) -> void:
+	_live_busy = true
+	var mine := {"name": str(_live.names.get(_live.me, "")), "path": Race.encode(_path)}
+	mine.merge(extra, true)
+	await _live_cloud.move_put(str(_live.code), mine)
+	var m := await _live_cloud.moves(str(_live.code))
+	_live_busy = false
+	if m.has("_error"):
+		return
+	for uid in _live_ghosts:
+		var d = m.get(uid, null)
+		if typeof(d) != TYPE_DICTIONARY:
+			continue
+		var g: Dictionary = _live_ghosts[uid]
+		g.points = Race.decode(str(d.get("path", "")))
+		g.done = bool(d.get("done", false))
+		g.time = float(d.get("time", 0.0))
+
+
+## At the finish: my time out, then the places as the others come in
+## (a minute and a half at most), stars, and the room tidied away.
+func _end_live_race() -> void:
+	set_process(false)
+	shift.pedal = false
+	shift.cruise = false
+	_rain_sound.stop()
+	_drops.emitting = false
+	_path.append(Vector2(rickshaw.position.x, rickshaw.position.z))
+	CrashWatch.stop()
+	print("[live race] %.1f s" % _race_clock)
+	var layer := CanvasLayer.new()
+	layer.layer = 5
+	add_child(layer)
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0, 0, 0.45)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(shade)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Look.card(Look.CREAM, 18, 3))
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.custom_minimum_size = Vector2(420, 0)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	layer.add_child(panel)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	panel.add_child(col)
+	col.add_child(Look.title(strings.t("raceOver"), 32))
+	col.add_child(Look.label(strings.t("raceTime", {"s": "%.1f" % _race_clock}), 17, true))
+	var table := Look.label(strings.t("liveWaiting"), 17, true)
+	table.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(table)
+	while _live_busy:
+		await get_tree().create_timer(0.3).timeout
+	var code := str(_live.code)
+	var rows := []
+	var waited := 0.0
+	while true:
+		await _live_cloud.move_put(code, {"name": str(_live.names.get(_live.me, "")), "path": Race.encode(_path), "done": true, "time": snappedf(_race_clock, 0.1)})
+		var m := await _live_cloud.moves(code)
+		if not m.has("_error"):
+			rows = Online.standings(_live.players, m)
+			var text := PackedStringArray()
+			for i in rows.size():
+				var r: Dictionary = rows[i]
+				var who: String = r.name + (" " + strings.t("onYou") if r.uid == str(_live.me) else "")
+				text.append(strings.t("livePlace", {"n": i + 1, "name": who, "s": "%.1f" % float(r.time)}) if r.done else strings.t("liveStill", {"name": who}))
+			table.text = "\n".join(text)
+			if rows.all(func(r): return r.done):
+				break
+		waited += float(progress.b.n("online.poll_s"))
+		if waited >= float(progress.b.n("online.wait_s")):
+			break
+		await get_tree().create_timer(float(progress.b.n("online.poll_s"))).timeout
+	var place := 1
+	for i in rows.size():
+		if rows[i].uid == str(_live.me):
+			place = i + 1
+	var stars := Online.race_prize(progress.data, progress.b, progress.date(), place, rows.size())
+	progress.save()
+	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
+	print("[live race] place %d of %d, %d stars" % [place, rows.size(), stars])
+	col.add_child(Look.label(strings.t("liveWon") if place == 1 and rows.size() > 1 else strings.t("livePlaceMine", {"n": place}), 19, true, Look.MAGENTA))
+	if stars > 0:
+		col.add_child(Look.label(strings.t("raceStars", {"n": stars}), 17, true, Look.PARROT_DARK))
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 10)
+	var again := Look.chunky(strings.t("onAgain"), Look.YELLOW, Look.OUTLINE, 18)
+	again.pressed.connect(func(): get_tree().change_scene_to_file.call_deferred("res://scenes/online.tscn"))
+	var home := Look.chunky(strings.t("back"), Color.WHITE, Look.OUTLINE, 18)
+	home.pressed.connect(_go_home)
+	for button in [again, home]:
+		button.autowrap_mode = TextServer.AUTOWRAP_OFF
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size = Vector2(0, 58)
+		row.add_child(button)
+	col.add_child(row)
+	ReadAloud.say(table.text, strings.lang)
+	# Tidy up: my part away; the host closes the room once everyone is in.
+	await _live_cloud.move_delete(code)
+	if str(_live.host) == str(_live.me):
+		await get_tree().create_timer(10.0).timeout
+		if is_inside_tree():
+			await _live_cloud.room_delete(code)
 
 
 ## A friend's tea stall by the road, with their name over it.

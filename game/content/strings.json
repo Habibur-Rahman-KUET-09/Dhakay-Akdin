@@ -4714,5 +4714,205 @@
  "caller_bablu": {
   "bn": "বাবলু (নাতি)",
   "en": "Bablu (his grandson)"
+ },
+ "onTitle": {
+  "bn": "অনলাইনে একসাথে",
+  "en": "Online together"
+ },
+ "onCardLine": {
+  "bn": "বন্ধুরা নিজের নিজের ফোনে, একই সময়ে: গল্প বা লাইভ রিকশা রেস",
+  "en": "Friends on their own phones, at the same time: a story or a live rickshaw race"
+ },
+ "onAbout": {
+  "bn": "একটা রুম খুলুন আর কোডটা বন্ধুদের দিন, অথবা বন্ধুর কোড দিয়ে ঢুকুন। তিনজন পর্যন্ত।",
+  "en": "Open a room and give your friends the code, or type a friend's code. Up to three."
+ },
+ "onStoryLocked": {
+  "bn": "গল্পগুলো খোলে রহিম চাচা, মনির মামা আর বাবু তিনজনই খোলা হলে। রেস সবসময় খেলা যায়।",
+  "en": "The stories open once Rahim Chacha, Monir Mama and Babu are all open. The race is always open."
+ },
+ "onOff": {
+  "bn": "এই সংস্করণে অনলাইন খেলা চালু নেই।",
+  "en": "Online play isn't available in this version."
+ },
+ "onStory": {
+  "bn": "গল্পের রুম: {title}",
+  "en": "Story room: {title}"
+ },
+ "onRace": {
+  "bn": "লাইভ রিকশা রেসের রুম",
+  "en": "Live rickshaw race room"
+ },
+ "onJoin": {
+  "bn": "বন্ধুর কোড দিয়ে ঢুকুন",
+  "en": "Join with a friend's code"
+ },
+ "onJoinAbout": {
+  "bn": "বন্ধুর রুমের ৬ অক্ষরের কোড লিখুন।",
+  "en": "Type the six-letter code of your friend's room."
+ },
+ "onCodeHint": {
+  "bn": "যেমন K7MPX2",
+  "en": "e.g. K7MPX2"
+ },
+ "onJoinGo": {
+  "bn": "ঢুকুন",
+  "en": "Join"
+ },
+ "onOpening": {
+  "bn": "রুম খোলা হচ্ছে…",
+  "en": "Opening a room…"
+ },
+ "onJoining": {
+  "bn": "রুমে ঢোকা হচ্ছে…",
+  "en": "Joining the room…"
+ },
+ "onLeaving": {
+  "bn": "বের হচ্ছেন…",
+  "en": "Leaving…"
+ },
+ "onNoRoom": {
+  "bn": "এই কোডে কোনো রুম নেই। কোডটা আবার দেখুন।",
+  "en": "There's no room with that code. Check it again."
+ },
+ "onFull": {
+  "bn": "রুমে আর জায়গা নেই (তিনজন পর্যন্ত)।",
+  "en": "The room is full (three at most)."
+ },
+ "onStarted": {
+  "bn": "এই রুমে খেলা শুরু হয়ে গেছে।",
+  "en": "This room has already started."
+ },
+ "onNetwork": {
+  "bn": "ইন্টারনেট পাওয়া যাচ্ছে না। আবার চেষ্টা করছি…",
+  "en": "No internet connection. Trying again…"
+ },
+ "onBadCode": {
+  "bn": "কোডটা ৬ অক্ষরের হয়, যেমন K7MPX2।",
+  "en": "A code has six letters, like K7MPX2."
+ },
+ "onError": {
+  "bn": "কিছু একটা ঠিকমতো হলো না ({e})। একটু পরে আবার চেষ্টা করুন।",
+  "en": "Something went wrong ({e}). Try again in a little while."
+ },
+ "onLobby": {
+  "bn": "রুমের কোড",
+  "en": "Room code"
+ },
+ "onShareCode": {
+  "bn": "এই কোডটা বন্ধুদের দিন। কেউ ঢুকলে শুরু করুন।",
+  "en": "Give this code to your friends. Start once someone is in."
+ },
+ "onWaitHost": {
+  "bn": "রুম যিনি খুলেছেন তিনি শুরু করবেন।",
+  "en": "Whoever opened the room will start it."
+ },
+ "onStart": {
+  "bn": "শুরু করুন",
+  "en": "Start"
+ },
+ "onLeave": {
+  "bn": "বের হন",
+  "en": "Leave"
+ },
+ "onYou": {
+  "bn": "(আপনি)",
+  "en": "(you)"
+ },
+ "onHost": {
+  "bn": "রুমের মালিক",
+  "en": "host"
+ },
+ "onPlays": {
+  "bn": "খেলবেন: {who}",
+  "en": "Plays: {who}"
+ },
+ "onRaceKind": {
+  "bn": "লাইভ রিকশা রেস",
+  "en": "Live rickshaw race"
+ },
+ "onStoryKind": {
+  "bn": "গল্প: {title}",
+  "en": "Story: {title}"
+ },
+ "onCount": {
+  "bn": "রুমে {n}/{max} জন",
+  "en": "{n}/{max} in the room"
+ },
+ "onClosed": {
+  "bn": "রুমটা বন্ধ হয়ে গেছে।",
+  "en": "The room has closed."
+ },
+ "onLeftOut": {
+  "bn": "খেলা শুরু হয়ে গেছে আপনাকে ছাড়া। আবার একটা রুমে ঢুকুন।",
+  "en": "The game started without you. Join another room."
+ },
+ "onNoName": {
+  "bn": "নাম নেই",
+  "en": "No name"
+ },
+ "onYourTurn": {
+  "bn": "আপনার পালা: {name}",
+  "en": "Your turn: {name}"
+ },
+ "onYourTurnLine": {
+  "bn": "এই পালাটা আপনার ফোনে। বন্ধুরা অপেক্ষা করছেন।",
+  "en": "This turn is on your phone. Your friends are waiting."
+ },
+ "onTheirTurn": {
+  "bn": "{name} খেলছেন: {who}",
+  "en": "{name} is playing: {who}"
+ },
+ "onTheirTurnLine": {
+  "bn": "বন্ধুর পালা শেষ হলে এখানে দেখাবে…",
+  "en": "When your friend's turn is done it will show here…"
+ },
+ "onTooLong": {
+  "bn": "{name} অনেকক্ষণ ধরে খেলছেন। চাইলে পালাটা আপনি খেলে দিন।",
+  "en": "{name} is taking a long time. You can play the turn yourself."
+ },
+ "onPlayIt": {
+  "bn": "পালাটা আমি খেলি",
+  "en": "I'll play this turn"
+ },
+ "onPlayedBy": {
+  "bn": "খেললেন {name}",
+  "en": "Played by {name}"
+ },
+ "onTogetherDone": {
+  "bn": "সবার ফোনে একই শেষ।",
+  "en": "Everyone's phone has the same ending."
+ },
+ "onAgain": {
+  "bn": "আবার অনলাইনে",
+  "en": "Online again"
+ },
+ "liveRiding": {
+  "bn": "{name}: চালাচ্ছেন",
+  "en": "{name}: riding"
+ },
+ "liveDone": {
+  "bn": "{name}: {s} সেকেন্ড",
+  "en": "{name}: {s} s"
+ },
+ "liveWaiting": {
+  "bn": "বন্ধুদের সময়ের অপেক্ষা…",
+  "en": "Waiting for your friends' times…"
+ },
+ "livePlace": {
+  "bn": "{n}. {name}: {s} সেকেন্ড",
+  "en": "{n}. {name}: {s} s"
+ },
+ "liveStill": {
+  "bn": "{name}: এখনো চালাচ্ছেন",
+  "en": "{name}: still riding"
+ },
+ "liveWon": {
+  "bn": "আপনি প্রথম!",
+  "en": "You came first!"
+ },
+ "livePlaceMine": {
+  "bn": "আপনি {n} নম্বরে",
+  "en": "You came number {n}"
  }
 }

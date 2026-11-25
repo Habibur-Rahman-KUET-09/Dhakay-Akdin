@@ -418,6 +418,98 @@ func stats_of(field: String) -> Dictionary:
 	return {}
 
 
+# --- Rooms: playing at the same time on several phones (online.gd) --------------
+
+
+## Opens a room under `code` with this account as its host. "" when made,
+## "ALREADY_EXISTS" when the code is taken, else the error.
+func room_create(code: String, data: Dictionary) -> String:
+	var e := await ensure_user()
+	if e != "":
+		return e
+	var body := data.duplicate()
+	body["host"] = uid
+	body["players"] = [uid]
+	var reply := await _call(_docs() + "/rooms?documentId=" + code.uri_encode(), HTTPClient.METHOD_POST,
+		JSON.stringify(to_fields_of(body)), _auth())
+	return "" if reply.ok else error_of(reply)
+
+
+## A room's fields (and "_time", its last change), or {} when there is none
+## (or no network: "_error" says which).
+func room_get(code: String) -> Dictionary:
+	var e := await ensure_user()
+	if e != "":
+		return {"_error": e}
+	var reply := await _call(_docs() + "/rooms/" + code.uri_encode(), HTTPClient.METHOD_GET, "", _auth())
+	if not reply.ok:
+		return {"_error": error_of(reply)}
+	var out := from_fields(reply.data.get("fields", {}))
+	out["_time"] = str(reply.data.get("updateTime", ""))
+	return out
+
+
+## Joins a room: this account added to its players (only while it is
+## open and has room). "" when in, else "NOT_FOUND", "FULL", "STARTED" or
+## the error.
+func room_join(code: String, max_players: int) -> String:
+	for attempt in 3:
+		var r := await room_get(code)
+		if r.has("_error"):
+			return str(r._error)
+		var players: Array = r.get("players", [])
+		if players.has(uid):
+			return ""
+		if str(r.get("state", "")) != "lobby":
+			return "STARTED"
+		if players.size() >= max_players:
+			return "FULL"
+		var url := _docs() + "/rooms/%s?updateMask.fieldPaths=players&currentDocument.updateTime=%s" % [code.uri_encode(), str(r._time).uri_encode()]
+		var reply := await _call(url, HTTPClient.METHOD_PATCH, JSON.stringify(to_fields_of({"players": players + [uid]})), _auth())
+		if reply.ok:
+			return ""
+		# Someone else joined at the same moment: read it again.
+		if error_of(reply) != "FAILED_PRECONDITION":
+			return error_of(reply)
+	return "FULL"
+
+
+## The host changes some of a room's fields (its state, who plays).
+func room_update(code: String, fields: Dictionary) -> String:
+	var mask := PackedStringArray()
+	for k in fields:
+		mask.append("updateMask.fieldPaths=" + str(k).uri_encode())
+	var reply := await _call(_docs() + "/rooms/%s?%s" % [code.uri_encode(), "&".join(mask)], HTTPClient.METHOD_PATCH,
+		JSON.stringify(to_fields_of(fields)), _auth())
+	return "" if reply.ok else error_of(reply)
+
+
+func room_delete(code: String) -> void:
+	await _call(_docs() + "/rooms/" + code.uri_encode(), HTTPClient.METHOD_DELETE, "", _auth())
+
+
+## Writes this account's own part of a room (name, scores, the ride).
+func move_put(code: String, data: Dictionary) -> String:
+	var reply := await _call(_docs() + "/rooms/%s/moves/%s" % [code.uri_encode(), uid], HTTPClient.METHOD_PATCH,
+		JSON.stringify(to_fields_of(data)), _auth())
+	return "" if reply.ok else error_of(reply)
+
+
+## Everyone's parts of a room: {uid: fields}; {"_error": …} on failure.
+func moves(code: String) -> Dictionary:
+	var reply := await _call(_docs() + "/rooms/%s/moves?pageSize=10" % code.uri_encode(), HTTPClient.METHOD_GET, "", _auth())
+	if not reply.ok:
+		return {"_error": error_of(reply)}
+	var out := {}
+	for d in reply.data.get("documents", []):
+		out[str(d.name).get_file()] = from_fields(d.get("fields", {}))
+	return out
+
+
+func move_delete(code: String) -> void:
+	await _call(_docs() + "/rooms/%s/moves/%s" % [code.uri_encode(), uid], HTTPClient.METHOD_DELETE, "", _auth())
+
+
 ## Lets go of the card and the code (when the account is deleted).
 func drop_friends(code: String) -> void:
 	await _call(_docs() + "/profiles/" + uid, HTTPClient.METHOD_DELETE, "", _auth())

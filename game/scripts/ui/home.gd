@@ -451,6 +451,8 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 	if challenge != null:
 		inner.add_child(challenge)
 	inner.add_child(_together_card())
+	if cloud.enabled():
+		inner.add_child(_online_card())
 	var friends := _friends_card()
 	if friends != null:
 		inner.add_child(friends)
@@ -2146,6 +2148,30 @@ func _together_card() -> Control:
 	go.autowrap_mode = TextServer.AUTOWRAP_OFF
 	go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	go.pressed.connect(show_page.bind("together"))
+	row.add_child(go)
+	return panel
+
+
+## On the mohalla page: playing at the same time on friends' phones.
+func _online_card() -> Control:
+	var panel := _card(Color("E6F0FA"))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	row.add_child(_icon_tile("people", Look.SKY_DARK, Color.WHITE))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_theme_constant_override("separation", 0)
+	row.add_child(text)
+	text.add_child(Look.label(s.t("onTitle"), 18, true))
+	var line := Look.label(s.t("onCardLine"), 14, false, Look.MUTED)
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_child(line)
+	var go := Look.chunky(s.t("friendsOpen"), Look.YELLOW, Look.OUTLINE, 16, 4, 14)
+	go.name = "OnlineOpen"
+	go.autowrap_mode = TextServer.AUTOWRAP_OFF
+	go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	go.pressed.connect(_go.bind("res://scenes/online.tscn"))
 	row.add_child(go)
 	return panel
 

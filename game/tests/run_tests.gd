@@ -4,7 +4,7 @@
 ## half way is caught too.
 extends SceneTree
 
-const FILES := ["res://tests/test_rules.gd", "res://tests/test_content.gd", "res://tests/test_progress.gd", "res://tests/test_tea.gd", "res://tests/test_bus.gd", "res://tests/test_story.gd", "res://tests/test_hands.gd", "res://tests/test_friends.gd", "res://tests/test_leaderboard.gd", "res://tests/test_fuchka.gd", "res://tests/test_odd_jobs.gd", "res://tests/test_league.gd", "res://tests/test_together.gd", "res://tests/test_delivery.gd", "res://tests/test_night.gd", "res://tests/test_hawker.gd", "res://tests/test_boat.gd"]
+const FILES := ["res://tests/test_rules.gd", "res://tests/test_content.gd", "res://tests/test_progress.gd", "res://tests/test_tea.gd", "res://tests/test_bus.gd", "res://tests/test_story.gd", "res://tests/test_hands.gd", "res://tests/test_friends.gd", "res://tests/test_leaderboard.gd", "res://tests/test_fuchka.gd", "res://tests/test_odd_jobs.gd", "res://tests/test_league.gd", "res://tests/test_together.gd", "res://tests/test_delivery.gd", "res://tests/test_night.gd", "res://tests/test_hawker.gd", "res://tests/test_boat.gd", "res://tests/test_online.gd"]
 
 
 func _initialize() -> void:

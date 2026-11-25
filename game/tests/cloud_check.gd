@@ -37,6 +37,7 @@ func _run() -> void:
 	print("cloud: read back ", "ok" if ok else "WRONG")
 	var code: String = await _friends(cloud)
 	await _board(cloud)
+	await _room(cloud)
 	e = await cloud.delete_account(code)
 	print("cloud: cleaned up ", "ok" if e == "" else e)
 	quit(0 if ok else 1)
@@ -88,3 +89,36 @@ func _board(cloud) -> void:
 	var rank: int = await cloud.rank_of(field, 77)
 	var ok: bool = rows.size() == 1 and str(rows[0].uid) == cloud.uid and int(rows[0].value) == 77 and rank == 1
 	print("cloud: leaderboard ", "ok" if ok else "WRONG (rows %s, rank %d)" % [rows.size(), rank])
+
+
+## Rooms for playing at once: one opened, read back, a part written and
+## read, the host's change, then all taken away (the Firestore rules must
+## allow rooms and their moves).
+func _room(cloud) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var code := ""
+	var e := ""
+	for i in 3:
+		code = Friends.make_code(rng)
+		e = await cloud.room_create(code, {"kind": "race", "story": "", "area": "mirpur", "state": "lobby", "date": "2026-01-01"})
+		if e != "ALREADY_EXISTS":
+			break
+	if e != "":
+		print("cloud: rooms: open failed: ", e)
+		return
+	var r: Dictionary = await cloud.room_get(code)
+	var ok: bool = str(r.get("host", "")) == cloud.uid and (r.get("players", []) as Array) == [cloud.uid]
+	e = await cloud.room_join(code, 3)
+	ok = ok and e == ""
+	e = await cloud.move_put(code, {"name": "check", "s0": 0.75})
+	var m: Dictionary = await cloud.moves(code)
+	ok = ok and e == "" and float(m.get(cloud.uid, {}).get("s0", 0.0)) == 0.75
+	e = await cloud.room_update(code, {"state": "go"})
+	r = await cloud.room_get(code)
+	ok = ok and e == "" and str(r.get("state", "")) == "go"
+	await cloud.move_delete(code)
+	await cloud.room_delete(code)
+	r = await cloud.room_get(code)
+	ok = ok and str(r.get("_error", "")) == "NOT_FOUND"
+	print("cloud: rooms ", "ok" if ok else "WRONG (%s)" % str(r))
