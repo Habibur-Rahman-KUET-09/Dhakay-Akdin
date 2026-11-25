@@ -539,6 +539,60 @@ static func player_rickshaw(hood: Color, body: Color, style := 0) -> Node3D:
 	return root
 
 
+# --- Ratul's bicycle (phase 8) ------------------------------------------------
+
+
+## Ratul's delivery bicycle, facing -Z like the rickshaw: a painted frame
+## (PAINT_B), a big insulated food box on the rack (PAINT_A, with a white
+## band), Ratul riding in his cap. The same metas as the player's
+## rickshaw ("wheels", "body", "colours"), so the street scene treats it
+## alike.
+static func player_bicycle(box: Color, frame: Color) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Bicycle"
+	var b := Builder.new()
+	# The frame: top tube, down tube, seat tube, the stays to the back axle.
+	b.box(Vector3(0.05, 0.05, 0.72), Vector3(0, 0.82, -0.08), Color.WHITE, Vector3(-6, 0, 0), PAINT_B)
+	b.box(Vector3(0.05, 0.05, 0.78), Vector3(0, 0.6, -0.2), Color.WHITE, Vector3(-38, 0, 0), PAINT_B)
+	b.box(Vector3(0.05, 0.55, 0.05), Vector3(0, 0.64, 0.12), Color.WHITE, Vector3(-12, 0, 0), PAINT_B)
+	for x in [-0.06, 0.06]:
+		b.box(Vector3(0.03, 0.03, 0.5), Vector3(x, 0.38, 0.32), Color.WHITE, Vector3(0, 0, 0), PAINT_B)
+		b.box(Vector3(0.03, 0.03, 0.5), Vector3(x, 0.6, 0.36), Color.WHITE, Vector3(48, 0, 0), PAINT_B)
+	# Fork, handlebar with grips, saddle, crank and the front lamp.
+	b.box(Vector3(0.04, 0.62, 0.04), Vector3(0, 0.64, -0.5), STEEL, Vector3(-14, 0, 0))
+	b.box(Vector3(0.56, 0.035, 0.035), Vector3(0, 1.0, -0.42), CHROME)
+	for x in [-0.28, 0.28]:
+		b.cyl(0.025, 0.1, Vector3(x, 1.0, -0.42), RUBBER, Vector3(0, 0, 90), 6)
+	b.box(Vector3(0.16, 0.05, 0.26), Vector3(0, 0.92, 0.16), RUBBER)
+	b.cyl(0.08, 0.03, Vector3(0.05, 0.38, 0.06), CHROME, Vector3(0, 0, 90), 12)
+	b.cyl(0.05, 0.06, Vector3(0, 0.92, -0.5), Color("FFF3B0"), Vector3(90, 0, 0), 8)
+	# The rack and the food box, with a band of white round it.
+	b.box(Vector3(0.42, 0.03, 0.4), Vector3(0, 0.86, 0.5), STEEL)
+	b.box(Vector3(0.46, 0.44, 0.44), Vector3(0, 1.1, 0.52), Color.WHITE, Vector3.ZERO, PAINT_A)
+	b.box(Vector3(0.47, 0.07, 0.45), Vector3(0, 1.12, 0.52), Color("F4F1E8"))
+	b.box(Vector3(0.48, 0.04, 0.46), Vector3(0, 1.33, 0.52), Color.WHITE, Vector3.ZERO, PAINT_A)
+	# Ratul, pedalling, and a cap.
+	_body(b, Vector3(0, 0.95, 0.2), true, true, true)
+	b.cyl(0.13, 0.08, Vector3(0, 1.86, 0.18), Color.WHITE, Vector3.ZERO, 10, PAINT_A)
+	b.box(Vector3(0.18, 0.02, 0.12), Vector3(0, 1.83, 0.06), Color.WHITE, Vector3.ZERO, PAINT_A)
+	var mi := MeshInstance3D.new()
+	mi.mesh = b.commit()
+	root.add_child(mi)
+	var wheels: Array[Node3D] = []
+	for at in [Vector3(0, 0.34, -0.55), Vector3(0, 0.34, 0.58)]:
+		var wb := Builder.new()
+		wb.wheel(Vector3.ZERO, 0.34)
+		var w := MeshInstance3D.new()
+		w.mesh = wb.commit()
+		w.position = at
+		root.add_child(w)
+		wheels.append(w)
+	root.set_meta("wheels", wheels)
+	root.set_meta("body", mi)
+	root.set_meta("colours", [box, frame])
+	return root
+
+
 # --- Monir Mama's tea stall ------------------------------------------------
 
 

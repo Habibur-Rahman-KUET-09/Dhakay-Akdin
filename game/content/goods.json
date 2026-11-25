@@ -25,6 +25,11 @@
    {"id": "cart_blue", "slot": "cart", "price": 300, "body": "1E6FB0", "trim": "F6B800", "icon": "flag"},
    {"id": "cart_red", "slot": "cart", "price": 400, "body": "B3261E", "trim": "FFFFFF", "icon": "flag"},
    {"id": "cart_star", "slot": "cart", "tara": 35, "body": "6A1B9A", "trim": "F6B800", "icon": "star"}
+  ],
+  "delivery": [
+   {"id": "cycle_green", "slot": "cycle", "price": 300, "box": "2E9E6B", "frame": "1D1A1A", "icon": "flag"},
+   {"id": "cycle_red", "slot": "cycle", "price": 400, "box": "B3261E", "frame": "F6B800", "icon": "flag"},
+   {"id": "cycle_star", "slot": "cycle", "tara": 35, "box": "6A1B9A", "frame": "F6B800", "icon": "star"}
   ]
  },
  "home": [
@@ -38,7 +43,8 @@
   {"id": "meal", "who": "rickshaw", "tara": 8, "energy": 30, "icon": "bolt"},
   {"id": "mike", "who": "tea", "tara": 8, "arrivals": 1.3, "icon": "voice"},
   {"id": "change_pack", "who": "bus", "tara": 8, "notes": {"10": 5, "20": 4, "50": 2}, "icon": "purse"},
-  {"id": "price_board", "who": "fuchka", "tara": 8, "arrivals": 1.3, "icon": "flag"}
+  {"id": "price_board", "who": "fuchka", "tara": 8, "arrivals": 1.3, "icon": "flag"},
+  {"id": "fast_app", "who": "delivery", "tara": 8, "arrivals": 1.3, "icon": "bolt"}
  ],
  "phone": {"price": 2500, "icon": "voice"},
  "samity": {"daily": 30, "rounds": 10, "bonus": 30, "icon": "ledger"}

@@ -12,7 +12,7 @@
     "xp_level_step": 40,
     "max_level": 50
   },
-  "unlocks": {"tea_stall": 2, "bus": 4, "old_dhaka": 5, "fuchka": 6, "early_unlock_tara": 30},
+  "unlocks": {"tea_stall": 2, "bus": 4, "old_dhaka": 5, "fuchka": 6, "delivery": 7, "early_unlock_tara": 30},
   "tara": {"daily_challenge": 3, "chapter": 5, "rewarded_ad": 2, "retry_cost": 5,
            "streak": [5, 5, 10, 10, 10, 15]},
   "ads": {"double_per_day": 3, "retry_per_day": 2, "tara_per_day": 3,
@@ -101,6 +101,12 @@
     "upgrades": {"stool": {"cost": 800, "patience_bonus_s": 4}, "umbrella": {"cost": 1500}, "doi": {"cost": 2500}}
   },
   "league": {"min_players": 1, "win_tara": 5},
+  "delivery": {
+    "start_hour": 16, "end_hour": 22, "day_seconds": 300, "speed": 1.15, "energy": 0.8, "daily_target": 500,
+    "max_orders": 3, "offer_every_s": 9, "offer_s": 12, "cook_s": 8, "hot_s": 70, "rain_cooling": 1.4,
+    "base_pay": 30, "pay_per_tile": 3, "min_tiles": 6, "max_tiles": 16, "tip_hot": 15, "rain_tip": 10, "gate_chance": 0.3,
+    "upgrades": {"gear_cycle": {"cost": 1200, "speed": 1.15}, "hot_bag": {"cost": 900, "cooling": 0.6}, "raincoat": {"cost": 700, "tip": 10}}
+  },
   "race": {"finish_tara": 2, "beat_tara": 3, "low_tiles": 14, "high_tiles": 26},
   "together": {"good": 0.7, "ok": 0.4, "tara": [5, 10, 15], "help_pushes": 0.6},
   "leaderboard": {"top": 20, "prizes": {"day": [5, 3, 2], "week": [15, 10, 5], "month": [40, 25, 15]}},

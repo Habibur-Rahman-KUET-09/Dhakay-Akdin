@@ -4014,5 +4014,181 @@
  "chooseRound": {
   "bn": "প্রশ্ন {n}/{of}",
   "en": "Question {n}/{of}"
+ },
+ "deliveryName": {
+  "bn": "রাতুল",
+  "en": "Ratul"
+ },
+ "deliveryRole": {
+  "bn": "খাবার পৌঁছানো সাইকেল রাইডার",
+  "en": "Food delivery rider"
+ },
+ "start_delivery": {
+  "bn": "অ্যাপ চালু করুন",
+  "en": "Go online"
+ },
+ "tip_delivery": {
+  "bn": "একসাথে তিনটা পর্যন্ত অর্ডার। কোনটা আগে নেবেন ঠিক করুন, খাবার গরম থাকতে পৌঁছালে পাঁচ তারা।",
+  "en": "Up to three orders at once. Choose which comes first; deliver while it's hot for five stars."
+ },
+ "deliveryLastDay": {
+  "bn": "শেষ দিন: {money} টাকা, {orders}টা অর্ডার",
+  "en": "Last day: Tk {money}, {orders} orders"
+ },
+ "deliveryHistoryLine": {
+  "bn": "দিন {day}: ডেলিভারি · {money} টাকা · {orders}টা অর্ডার",
+  "en": "Day {day}: deliveries · Tk {money} · {orders} orders"
+ },
+ "share_delivery": {
+  "bn": "আজ রাতুল সাইকেলে {n}টা অর্ডার পৌঁছে দিল, আয় {money} টাকা!",
+  "en": "Today Ratul delivered {n} orders on his bicycle and made Tk {money}!"
+ },
+ "lbWho_delivery": {
+  "bn": "রাতুল",
+  "en": "Ratul"
+ },
+ "caller_ratul_ma": {
+  "bn": "মা",
+  "en": "His mother"
+ },
+ "ch_d_orders": {
+  "bn": "এক সন্ধ্যায় {goal}টা অর্ডার পৌঁছান",
+  "en": "Deliver {goal} orders in an evening"
+ },
+ "ch_d_hot": {
+  "bn": "{goal}টা অর্ডার গরম থাকতে পৌঁছান (পাঁচ তারা)",
+  "en": "Deliver {goal} orders while hot (five stars)"
+ },
+ "ch_d_money": {
+  "bn": "ডেলিভারিতে এক সন্ধ্যায় {goal} টাকা",
+  "en": "Tk {goal} from deliveries in an evening"
+ },
+ "up_gear_cycle": {
+  "bn": "গিয়ারের সাইকেল",
+  "en": "A geared bicycle"
+ },
+ "upHelp_gear_cycle": {
+  "bn": "আরও দ্রুত চালানো যায়",
+  "en": "Ride faster"
+ },
+ "up_hot_bag": {
+  "bn": "গরম রাখার ব্যাগ",
+  "en": "An insulated food bag"
+ },
+ "upHelp_hot_bag": {
+  "bn": "খাবার অনেক দেরিতে ঠান্ডা হয়",
+  "en": "Food stays hot much longer"
+ },
+ "up_raincoat": {
+  "bn": "রেইনকোট",
+  "en": "A raincoat"
+ },
+ "upHelp_raincoat": {
+  "bn": "বৃষ্টিতে প্রতি অর্ডারে ১০ টাকা বাড়তি বখশিশ",
+  "en": "Tk 10 more tip per order in the rain"
+ },
+ "look_cycle_green": {
+  "bn": "সবুজ বাক্স, কালো সাইকেল",
+  "en": "Green box, black bicycle"
+ },
+ "look_cycle_red": {
+  "bn": "লাল বাক্স, হলুদ সাইকেল",
+  "en": "Red box, yellow bicycle"
+ },
+ "look_cycle_star": {
+  "bn": "বেগুনি-সোনালি সাইকেল (তারা)",
+  "en": "Purple and gold bicycle (stars)"
+ },
+ "lookHelp_cycle": {
+  "bn": "রাতুলের সাইকেল আর খাবারের বাক্সের নতুন রং",
+  "en": "New colours for Ratul's bicycle and food box"
+ },
+ "boost_fast_app": {
+  "bn": "অ্যাপে আগে আগে অর্ডার",
+  "en": "Orders first on the app"
+ },
+ "boostHelp_fast_app": {
+  "bn": "পরের ডেলিভারির দিনে ৩০% বেশি অর্ডার",
+  "en": "30% more orders on Ratul's next evening"
+ },
+ "deliveryStart": {
+  "bn": "সন্ধ্যা হলো, অ্যাপ চালু! অর্ডার এলে নিন, রান্নাঘর থেকে খাবার তুলে গরম থাকতে পৌঁছে দিন।",
+  "en": "Evening: the app is on! Take orders as they come, pick up from the kitchen and deliver while it's hot."
+ },
+ "orderTitle": {
+  "bn": "নতুন অর্ডার: {food} · {pay} টাকা",
+  "en": "New order: {food} · Tk {pay}"
+ },
+ "orderSub": {
+  "bn": "{kitchen} থেকে বাসা {flat} · {tiles} ব্লক",
+  "en": "From {kitchen} to flat {flat} · {tiles} blocks"
+ },
+ "orderGone": {
+  "bn": "অর্ডারটা অন্য কেউ নিয়ে নিল",
+  "en": "Someone else took that order"
+ },
+ "orderTaken": {
+  "bn": "অর্ডার নিলেন! আগে রান্নাঘরে যান।",
+  "en": "Order taken! First to the kitchen."
+ },
+ "foodCooking": {
+  "bn": "রান্না চলছে, একটু দাঁড়ান। তৈরি হলেই হাতে দেবে।",
+  "en": "Still cooking: wait a moment, they'll hand it over when it's ready."
+ },
+ "foodPicked": {
+  "bn": "{food} নিলেন! এবার বাসা {flat}-এ, গরম থাকতে থাকতে।",
+  "en": "Got the {food}! Now to flat {flat}, while it's hot."
+ },
+ "foodCold": {
+  "bn": "একটা অর্ডারের খাবার ঠান্ডা হয়ে গেছে…",
+  "en": "One order has gone cold…"
+ },
+ "foodDelivered": {
+  "bn": "পৌঁছে দিলেন! {pay} টাকা {tip}· রেটিং {stars}",
+  "en": "Delivered! Tk {pay} {tip}· rating {stars}"
+ },
+ "waitingOrders": {
+  "bn": "নতুন অর্ডারের অপেক্ষা…",
+  "en": "Waiting for orders…"
+ },
+ "stopPick": {
+  "bn": "রান্নাঘর: {kitchen} · আর {tiles} ব্লক",
+  "en": "Kitchen: {kitchen} · {tiles} blocks to go"
+ },
+ "stopDrop": {
+  "bn": "বাসা {flat} · আর {tiles} ব্লক · গরম {heat}%",
+  "en": "Flat {flat} · {tiles} blocks · {heat}% hot"
+ },
+ "switchStop": {
+  "bn": "পরের ঠিকানা ({n})",
+  "en": "Next stop ({n})"
+ },
+ "act_gate": {
+  "bn": "গেটে দারোয়ান",
+  "en": "The guard at the gate"
+ },
+ "act_gate_hint": {
+  "bn": "ভদ্রভাবে উত্তর দিন, তাহলে তাড়াতাড়ি ঢুকতে দেবে।",
+  "en": "Answer politely and he'll let you in quickly."
+ },
+ "gateBad": {
+  "bn": "দারোয়ান অনেকক্ষণ আটকে রাখল, কাস্টমার একটু বিরক্ত",
+  "en": "The guard held you up; the customer was a little annoyed"
+ },
+ "ordersDone": {
+  "bn": "অর্ডার পৌঁছালেন: {n}টা",
+  "en": "Orders delivered: {n}"
+ },
+ "ordersHot": {
+  "bn": "গরম থাকতে (পাঁচ তারা): {n}টা",
+  "en": "While hot (five stars): {n}"
+ },
+ "ordersCold": {
+  "bn": "ঠান্ডা হয়ে গিয়েছিল: {n}টা",
+  "en": "Gone cold: {n}"
+ },
+ "appRating": {
+  "bn": "অ্যাপের রেটিং: {stars}/৫",
+  "en": "App rating: {stars}/5"
  }
 }

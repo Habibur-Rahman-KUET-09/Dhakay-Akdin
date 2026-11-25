@@ -25,8 +25,10 @@ const BUS_UPGRADES := ["notebook", "change_bag", "loud_voice"]
 ## Julekha Khala's cart: a stool for waiting, an umbrella against the rain,
 ## a pot of doi for doi fuchka.
 const FUCHKA_UPGRADES := ["stool", "umbrella", "doi"]
+## Ratul's bicycle (phase 8): gears, an insulated food bag, a raincoat.
+const DELIVERY_UPGRADES := ["gear_cycle", "hot_bag", "raincoat"]
 ## Each character's upgrades, and where their prices are in the balance.
-const UPGRADE_LISTS := {"rickshaw": ["rickshaw", UPGRADES], "tea": ["tea_stall", TEA_UPGRADES], "bus": ["bus", BUS_UPGRADES], "fuchka": ["fuchka", FUCHKA_UPGRADES]}
+const UPGRADE_LISTS := {"rickshaw": ["rickshaw", UPGRADES], "tea": ["tea_stall", TEA_UPGRADES], "bus": ["bus", BUS_UPGRADES], "fuchka": ["fuchka", FUCHKA_UPGRADES], "delivery": ["delivery", DELIVERY_UPGRADES]}
 
 var b: Balance
 var path := DEFAULT_PATH
@@ -54,6 +56,7 @@ static func fresh() -> Dictionary:
 		"tea": {"days": 0, "bestDay": 0, "served": 0, "happy": 0, "earned": 0, "upgrades": []},
 		"bus": {"days": 0, "bestDay": 0, "riders": 0, "earned": 0, "upgrades": []},
 		"fuchka": {"days": 0, "bestDay": 0, "served": 0, "exact": 0, "earned": 0, "upgrades": []},
+		"delivery": {"days": 0, "bestDay": 0, "orders": 0, "earned": 0, "upgrades": []},
 		"history": [],
 		"tara": 0,
 		"story": {"seen": []},
@@ -66,10 +69,10 @@ static func fresh() -> Dictionary:
 		# Where Rahim Chacha rides: "mirpur", or "old_dhaka" once open.
 		"area": "mirpur",
 		# How each one's family feels about them, 0–10 (calls from home).
-		"family": {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5},
+		"family": {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5, "delivery": 5},
 		# Looks worn (bought ones are in "cosmetics"), by slot; things for
 		# Rahim Chacha's home; his own phone; the savings club.
-		"looks": {"rickshaw": {}, "tea": {}, "bus": {}, "fuchka": {}},
+		"looks": {"rickshaw": {}, "tea": {}, "bus": {}, "fuchka": {}, "delivery": {}},
 		"home": [],
 		"phone": false,
 		"samity": {"in": false, "paid": 0, "rounds": 0},
@@ -282,7 +285,7 @@ func family(who: String) -> int:
 ## Moves `who`'s family feeling by `delta`, kept within 0–10.
 func add_family(who: String, delta: int) -> int:
 	if not data.has("family"):
-		data.family = {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5}
+		data.family = {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5, "delivery": 5}
 	data.family[who] = clampi(family(who) + delta, 0, 10)
 	return int(data.family[who])
 
@@ -308,7 +311,8 @@ func unlocked(what: String) -> bool:
 	return level() >= int(b.n("unlocks." + what)) or (data.early as Array).has(what)
 
 
-## The characters that can be played: "rickshaw", "tea", "bus", "fuchka".
+## The characters that can be played: "rickshaw", "tea", "bus", "fuchka",
+## "delivery".
 func open_characters() -> Array:
 	var out := ["rickshaw"]
 	if unlocked("tea_stall"):
@@ -317,6 +321,8 @@ func open_characters() -> Array:
 		out.append("bus")
 	if unlocked("fuchka"):
 		out.append("fuchka")
+	if unlocked("delivery"):
+		out.append("delivery")
 	return out
 
 
@@ -545,6 +551,33 @@ func apply_fuchka_day(result: Dictionary) -> Dictionary:
 		f.bestDay = earned
 	_day_done("fuchka", result, out)
 	_remember({"day": data.day, "who": "fuchka", "earned": earned, "served": int(result.served), "stars": snappedf(stars, 0.1), "met": true})
+	out.day = data.day
+	return out
+
+
+## Takes an evening of Ratul's deliveries ({earned, orders, stars, cold})
+## into the save: a tenth to the fund, the rest saved.
+func apply_delivery_day(result: Dictionary) -> Dictionary:
+	var out := {}
+	var earned := _featured("delivery", maxi(0, int(result.earned)), out)
+	var stars := float(result.stars)
+	out.earned = earned
+	var fund_cut := _to_fund(earned, out)
+	data.taka = int(data.taka) + earned - fund_cut
+	out.kept = earned - fund_cut
+	_gain_xp(stars, int(result.orders) > 0, out)
+	data.day = int(data.day) + 1
+	if typeof(data.get("delivery")) != TYPE_DICTIONARY:
+		data["delivery"] = {"days": 0, "bestDay": 0, "orders": 0, "earned": 0, "upgrades": []}
+	var r: Dictionary = data.delivery
+	r.days = int(r.days) + 1
+	r.orders = int(r.get("orders", 0)) + int(result.orders)
+	r.earned = int(r.earned) + earned
+	out.best = earned > int(r.bestDay) and earned > 0
+	if out.best:
+		r.bestDay = earned
+	_day_done("delivery", result, out)
+	_remember({"day": data.day, "who": "delivery", "earned": earned, "orders": int(result.orders), "stars": snappedf(stars, 0.1), "met": true})
 	out.day = data.day
 	return out
 

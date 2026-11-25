@@ -8,7 +8,7 @@ const Progress = preload("res://scripts/rules/progress.gd")
 
 func test_eleven_chapters_each_all_whole() -> void:
 	var s := Story.new()
-	eq(s.chapters.size(), 38, "thirty-eight chapters (Julekha Khala has five)")
+	eq(s.chapters.size(), 43, "forty-three chapters (Julekha Khala and Ratul have five each)")
 	for who in ["rickshaw", "tea", "bus"]:
 		eq(s.chapters.filter(func(c): return c.who == who).size(), 11, "ten and a side story for %s" % who)
 	for c in s.chapters:
@@ -95,7 +95,7 @@ func test_choices_do_only_what_the_game_knows() -> void:
 			if o.effects.has("npc"):
 				check(ids.has(o.effects.npc[0]), "%s: %s is a neighbour" % [c.id, o.effects.npc[0]])
 			if o.effects.has("family"):
-				check(o.effects.family[0] in ["rickshaw", "tea", "bus", "fuchka"], "%s: whose family" % c.id)
+				check(o.effects.family[0] in ["rickshaw", "tea", "bus", "fuchka", "delivery"], "%s: whose family" % c.id)
 
 
 func test_a_story_choice_moves_the_family() -> void:

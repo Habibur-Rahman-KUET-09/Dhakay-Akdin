@@ -166,6 +166,11 @@ var friend_places: Array = []
 ## Today's race (race.gd), when racing: the place to reach; no passengers
 ## then, and the clock is the race's.
 var race_to := {}
+## Ratul's deliveries (delivery.gd), on his days: orders instead of
+## passengers.
+var delivery = null
+## Whose working hours the clock shows ("delivery": 4 pm to 10 pm).
+var hours_key := "rickshaw"
 var friend_visits := {}
 var _friend_rng := RandomNumberGenerator.new()
 var _last_remaining := -1
@@ -230,7 +235,9 @@ func fog() -> float:
 
 ## The hour of the day, 7.0 to 21.0.
 func hour() -> float:
-	return lerpf(balance.n("rickshaw.start_hour"), balance.n("rickshaw.end_hour"), clampf(clock / day_seconds, 0.0, 1.0))
+	var from := balance.n(hours_key + ".start_hour")
+	var to := balance.n(hours_key + ".end_hour")
+	return lerpf(from, to, clampf(clock / day_seconds, 0.0, 1.0))
 
 
 func average_stars() -> float:
@@ -271,6 +278,12 @@ func update(dt: float) -> Array:
 	_talk(events)
 	_tea(events)
 	_found(events)
+	if delivery != null:
+		delivery.raining = raining
+		var got: Array = delivery.update(dt, driver.cell)
+		if not got.is_empty():
+			events.append_array(got)
+			_aim()
 	if clock >= day_seconds or worn_out:
 		over = true
 		events.append(DAY_OVER)
@@ -457,6 +470,9 @@ func _entered(events: Array) -> void:
 		chains += 1
 		speed_now = 0.0
 		events.append(CHAIN)
+	if delivery != null:
+		var got: Array = delivery.arrive(driver.cell)
+		events.append_array(got)
 	if not race_to.is_empty() and driver.cell == race_to.at and not over:
 		over = true
 		events.append(RACE_DONE)
@@ -748,7 +764,7 @@ func _deliver(events: Array) -> void:
 
 ## Keeps a few passengers waiting by the road, a short ride away.
 func _top_up() -> void:
-	if map == null or map.places.is_empty() or not race_to.is_empty():
+	if map == null or map.places.is_empty() or not race_to.is_empty() or delivery != null:
 		return
 	var roads := map.roads()
 	var tries := 0
@@ -797,6 +813,10 @@ func _aim() -> void:
 	if not race_to.is_empty():
 		destination = race_to.at
 		place = race_to
+	elif delivery != null:
+		var stop: Dictionary = delivery.current()
+		destination = stop.at if not stop.is_empty() else driver.cell
+		place = {}
 	elif riding.has("at"):
 		destination = riding.at
 		place = riding.place
@@ -825,6 +845,15 @@ func start_race(route: Dictionary) -> void:
 	driver.heading = driver._first_exit()
 	day_seconds = 1e9
 	energy_factor = 0.0
+	_aim()
+
+
+## Ratul's evening: orders instead of passengers.
+func start_delivery(d) -> void:
+	delivery = d
+	waiting.clear()
+	offer_for = {}
+	riding = {}
 	_aim()
 
 

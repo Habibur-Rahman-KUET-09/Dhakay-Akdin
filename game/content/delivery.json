@@ -1,0 +1,157 @@
+{
+ "note": "Ratul's deliveries (phase 8): the kitchens he picks up from, what they cook, and what the guards at the gates ask.",
+ "kitchens": [
+  {
+   "id": "kacchi",
+   "name": {
+    "bn": "কাচ্চি ঘর",
+    "en": "Kacchi Ghor"
+   },
+   "food": {
+    "bn": "কাচ্চি বিরিয়ানি",
+    "en": "kacchi biryani"
+   }
+  },
+  {
+   "id": "tehari",
+   "name": {
+    "bn": "মামা তেহারি",
+    "en": "Mama Tehari"
+   },
+   "food": {
+    "bn": "তেহারি",
+    "en": "tehari"
+   }
+  },
+  {
+   "id": "pizza",
+   "name": {
+    "bn": "পিৎজা কর্নার",
+    "en": "Pizza Corner"
+   },
+   "food": {
+    "bn": "পিৎজা",
+    "en": "pizza"
+   }
+  },
+  {
+   "id": "chinese",
+   "name": {
+    "bn": "চায়না গার্ডেন",
+    "en": "China Garden"
+   },
+   "food": {
+    "bn": "চাওমিন",
+    "en": "chow mein"
+   }
+  },
+  {
+   "id": "burger",
+   "name": {
+    "bn": "বার্গার বাড়ি",
+    "en": "Burger Bari"
+   },
+   "food": {
+    "bn": "বার্গার",
+    "en": "burgers"
+   }
+  },
+  {
+   "id": "fuchka",
+   "name": {
+    "bn": "জুলেখা খালার ফুচকা",
+    "en": "Julekha Khala's fuchka"
+   },
+   "food": {
+    "bn": "ফুচকা",
+    "en": "fuchka"
+   }
+  }
+ ],
+ "gates": [
+  {
+   "q": {
+    "bn": "দারোয়ান: কই যাইবেন? কার বাসা?",
+    "en": "Guard: Where to? Whose flat?"
+   },
+   "options": [
+    {
+     "bn": "ভাই, চার তলার ফ্ল্যাট, অর্ডারের নাম দেখেন।",
+     "en": "Fourth floor, brother: here's the name on the order."
+    },
+    {
+     "bn": "সরেন, দেরি হইতেছে!",
+     "en": "Move, I'm late!"
+    },
+    {
+     "bn": "জানি না, খালি খাবার দিতে আসছি।",
+     "en": "No idea, I'm just bringing food."
+    }
+   ],
+   "right": 0
+  },
+  {
+   "q": {
+    "bn": "দারোয়ান: লিফট বন্ধ, খাবার নিচে রাইখা যান।",
+    "en": "Guard: The lift's off. Leave the food down here."
+   },
+   "options": [
+    {
+     "bn": "আচ্ছা, রাইখা যাই।",
+     "en": "Fine, I'll leave it."
+    },
+    {
+     "bn": "সিঁড়ি দিয়ে উঠে দিয়ে আসি, গরম থাকতে থাকতে।",
+     "en": "I'll run up the stairs while it's hot."
+    },
+    {
+     "bn": "তাইলে ফেরত নিয়া যাই।",
+     "en": "Then I'll take it back."
+    }
+   ],
+   "right": 1
+  },
+  {
+   "q": {
+    "bn": "দারোয়ান: সাহেব কইছে ফোন না কইরা কাউরে ঢুকতে দিমু না।",
+    "en": "Guard: Sir says nobody in without a phone call."
+   },
+   "options": [
+    {
+     "bn": "ঠিক আছে, আমি ওনাকে ফোন দিচ্ছি।",
+     "en": "Fine, I'll ring him now."
+    },
+    {
+     "bn": "আমার সময় নাই ভাই।",
+     "en": "I haven't time, brother."
+    },
+    {
+     "bn": "খাবার ঠান্ডা হইলে আপনার দোষ।",
+     "en": "If it goes cold it's on you."
+    }
+   ],
+   "right": 0
+  },
+  {
+   "q": {
+    "bn": "দারোয়ান: এত দেরি কেন? সাহেব রাগ করছে।",
+    "en": "Guard: Why so late? Sir's angry."
+   },
+   "options": [
+    {
+     "bn": "রাস্তায় যা জ্যাম! মাফ করবেন।",
+     "en": "The traffic was awful! I'm sorry."
+    },
+    {
+     "bn": "আমার কী দোষ?",
+     "en": "Not my fault."
+    },
+    {
+     "bn": "রাগ করলে করুক।",
+     "en": "Let him be angry."
+    }
+   ],
+   "right": 0
+  }
+ ]
+}

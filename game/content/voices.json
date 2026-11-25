@@ -170,6 +170,21 @@
    "voice": "bn-BD-PradeepNeural",
    "pitch": "-12%",
    "rate": "-2%"
+  },
+  "ratul": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+10%",
+   "rate": "+8%"
+  },
+  "ratul_ma": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "-6%",
+   "rate": "-4%"
+  },
+  "guard": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-12%",
+   "rate": "-4%"
   }
  },
  "lines": {

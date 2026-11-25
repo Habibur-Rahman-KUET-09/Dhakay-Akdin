@@ -35,6 +35,8 @@ const Progress = preload("res://scripts/rules/progress.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
 const League = preload("res://scripts/rules/league.gd")
 const Race = preload("res://scripts/rules/race.gd")
+const Delivery = preload("res://scripts/rules/delivery.gd")
+const Choose = preload("res://scripts/ui/activities/choose.gd")
 const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
@@ -122,6 +124,10 @@ var _league_decked := false
 ## Today's race (race.gd): on, the ride's points so far, the ghost to
 ## race and its points, the race's own clock.
 var _race := false
+## Whose day this is: Rahim Chacha's rickshaw, or Ratul's deliveries on
+## his bicycle (scenes/delivery.tscn) through the same streets.
+@export var mode := "rickshaw"
+var _delivery = null
 var _path := PackedVector2Array()
 var _path_left := 0.0
 var _ghost := {}
@@ -146,7 +152,7 @@ func _ready() -> void:
 	# What carries over from earlier days: a faster rickshaw, for one, and
 	# where he rides (Mirpur, or Old Dhaka once the mohalla is level 5).
 	progress = Progress.new(b)
-	var map: RoadMap = RoadMap.load_area(progress.rickshaw_area())
+	var map: RoadMap = RoadMap.load_area("mirpur" if mode == "delivery" else progress.rickshaw_area())
 	# The date brings the month's weather and any festival.
 	# Shorter rides in the first days, the full length later.
 	shift = Day.new(map, b, -1, progress.date(), Day.trip_for_level(progress.level()))
@@ -155,7 +161,7 @@ func _ready() -> void:
 	shift.easy = Driving.easy()
 	shift.level = progress.level()
 	# Today's race instead of a working day, when chosen at home.
-	_race = Race.next
+	_race = Race.next and mode == "rickshaw"
 	Race.next = false
 	var route := Race.route(map, progress.date(), int(b.n("race.low_tiles")), int(b.n("race.high_tiles"))) if _race else {}
 	_race = not route.is_empty()
@@ -163,6 +169,8 @@ func _ready() -> void:
 		# No passengers, no calls, no boosts used up: just the ride.
 		shift.start_race(route)
 		shift.base_speed *= progress.speed_factor()
+	elif mode == "delivery":
+		_setup_delivery(b)
 	else:
 		# A chapter's mark on the next days: a rented old rickshaw, shorter
 		# days with Rokeya ill, more to earn for the flooded village.
@@ -209,6 +217,8 @@ func _ready() -> void:
 	add_child(town)
 	for pl in shift.friend_places:
 		add_child(_friend_stall(map, pl))
+	if _delivery != null:
+		add_child(_kitchen_signs())
 	await _step("clutter")
 	for hex in Traffic.PALETTE:
 		_palette.append(Color(hex))
@@ -246,7 +256,17 @@ func _ready() -> void:
 	var art := progress.worn("rickshaw", "art")
 	if not art.is_empty():
 		hood_style = int(art.style)
-	rickshaw = Models.player_rickshaw(hood_colour, body_colour, hood_style)
+	if mode == "delivery":
+		# Ratul's bicycle: the food box (hood's colour) and the frame.
+		hood_colour = Color("F26B1D")
+		body_colour = Color("1E6FB0")
+		var cycle := progress.worn("delivery", "cycle")
+		if not cycle.is_empty():
+			hood_colour = Color(str(cycle.box))
+			body_colour = Color(str(cycle.frame))
+		rickshaw = Models.player_bicycle(hood_colour, body_colour)
+	else:
+		rickshaw = Models.player_rickshaw(hood_colour, body_colour, hood_style)
 	var own := _palette.duplicate()
 	own[0] = hood_colour
 	own[1] = body_colour
@@ -284,6 +304,7 @@ func _ready() -> void:
 	hud.tea_pressed.connect(_on_tea)
 	hud.pump_pressed.connect(_on_pump)
 	hud.hood_down_pressed.connect(_on_hood_down)
+	hud.switch_pressed.connect(_on_switch)
 	add_child(hud)
 	_police = _police_man()
 	add_child(_police)
@@ -323,7 +344,9 @@ func _ready() -> void:
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
-	if _race:
+	if _delivery != null:
+		_say(strings.t("deliveryStart"), Look.VERMILION, 5.0)
+	elif _race:
 		var line := strings.t("raceStart", {"place": RoadMap.place_name(shift.race_to, strings.lang)})
 		if not _ghost.is_empty():
 			line += "\n" + (strings.t("ghostFriend", {"name": str(_ghost.name), "s": "%.1f" % float(_ghost.time)}) if _ghost.friend else strings.t("ghostMine", {"s": "%.1f" % float(_ghost.time)}))
@@ -683,6 +706,14 @@ func _update_hud() -> void:
 		status = strings.t("raceClock", {"s": "%.1f" % _race_clock})
 		if not _ghost.is_empty():
 			status += "\n" + strings.t("raceGhostTime", {"s": "%.1f" % float(_ghost.time)})
+	if _delivery != null:
+		target = _stop_text()
+		var hint := _way_text()
+		if hint != "" and not _delivery.current().is_empty():
+			target += "\n" + hint
+		status = "%s\n%s" % [_clock_text(), strings.t("taka", {"n": _delivery.money + shift.money})]
+		var n: int = _delivery.stops().size()
+		hud.show_switch(n > 1 and _activity == null, strings.t("switchStop", {"n": n}))
 	hud.refresh(target, status, angle, _notice, _notice_colour, me, shift.destination)
 
 
@@ -832,8 +863,13 @@ func _handle(events: Array) -> void:
 		_say(strings.t("rainEnd"), Look.SKY, 2.5)
 	if events.has(Day.RACE_DONE):
 		_end_race()
+	if _delivery != null:
+		_delivery_events(events)
 	if events.has(Day.DAY_OVER):
-		_end_day()
+		if _delivery != null:
+			_end_delivery()
+		else:
+			_end_day()
 
 
 ## The policeman steps out in front of the rickshaw, whistling.
@@ -943,6 +979,9 @@ static func _stars(x: float) -> String:
 
 
 func _on_accept() -> void:
+	if _delivery != null:
+		_take_order(true)
+		return
 	shift.accept()
 	_voice.say("board")
 	_boarded()
@@ -1059,6 +1098,182 @@ func _lost_answered(_score: float, act) -> void:
 			_say(strings.t("lost_wrong"), Look.VERMILION, 3.0)
 		"police":
 			_say(strings.t("lost_police_said"), Look.SKY, 2.5)
+
+
+# --- Ratul's deliveries (delivery.gd) --------------------------------------------------
+
+
+## Whose phone calls and family: Rahim Chacha's, or Ratul's.
+func _whose() -> String:
+	return "delivery" if mode == "delivery" else "rickshaw"
+
+
+## Ratul's evening: his hours, his bicycle, orders instead of passengers.
+func _setup_delivery(b: Balance) -> void:
+	_delivery = Delivery.new(b, shift.map, -1, progress.data.delivery.upgrades)
+	shift.start_delivery(_delivery)
+	shift.hours_key = "delivery"
+	shift.day_seconds = b.n("delivery.day_seconds")
+	var speed := b.n("delivery.speed")
+	if progress.has_upgrade("gear_cycle", "delivery"):
+		speed *= b.n("delivery.upgrades.gear_cycle.speed")
+	shift.base_speed *= speed
+	shift.energy_factor = b.n("delivery.energy")
+	_target_money = int(b.n("delivery.daily_target"))
+	_call_rng.randomize()
+	var call_share := HomeCall.plan(_call_rng, progress.level())
+	if call_share >= 0.0:
+		_call_at = call_share * shift.day_seconds
+	# A boost bought with stars: more orders on the app.
+	_boost = progress.take_boost("delivery")
+	_delivery.offer_factor = float(_boost.get("arrivals", 1.0))
+
+
+## The kitchens' names over them, so they can be found.
+func _kitchen_signs() -> Node3D:
+	var node := Node3D.new()
+	node.name = "Kitchens"
+	for k in _delivery.kitchens:
+		var board := City._sign(str(k.name.get(strings.lang, k.name.en)), City._side(shift.map, k.at) + Vector3(0, 3.4, 0), 44, Look.VERMILION)
+		node.add_child(board)
+	return node
+
+
+## The stop the arrow points at, in words.
+func _stop_text() -> String:
+	var stop: Dictionary = _delivery.current()
+	if stop.is_empty():
+		return strings.t("waitingOrders")
+	var o: Dictionary = _delivery.order(int(stop.order))
+	var kitchen := str(o.kitchen.name.get(strings.lang, o.kitchen.name.en))
+	if stop.kind == "pick":
+		return strings.t("stopPick", {"kitchen": kitchen, "tiles": shift.remaining})
+	return strings.t("stopDrop", {"flat": str(o.flat), "tiles": shift.remaining, "heat": int(round(float(o.heat) * 100.0))})
+
+
+func _delivery_events(events: Array) -> void:
+	if events.has(Delivery.OFFER):
+		var o: Dictionary = _delivery.offer
+		hud.show_offer(strings.t("orderTitle", {"food": str(o.kitchen.food.get(strings.lang, o.kitchen.food.en)), "pay": int(o.pay)}),
+			strings.t("orderSub", {"kitchen": str(o.kitchen.name.get(strings.lang, o.kitchen.name.en)), "flat": str(o.flat), "tiles": int(o.tiles)}), "")
+		Activity.buzz(40)
+		_bell.play()
+	if events.has(Delivery.OFFER_GONE):
+		hud.hide_offer()
+		_say(strings.t("orderGone"), Look.MUTED, 2.0)
+	if events.has(Delivery.COOKING):
+		_say(strings.t("foodCooking"), Look.YELLOW.darkened(0.3), 3.0)
+	if events.has(Delivery.PICKED):
+		var p: Dictionary = _delivery.last_picked
+		_say(strings.t("foodPicked", {"food": str(p.kitchen.food.get(strings.lang, p.kitchen.food.en)), "flat": str(p.flat)}), Look.PARROT, 3.0)
+		_place_marker()
+	if events.has(Delivery.COLD):
+		_say(strings.t("foodCold"), Look.VERMILION, 3.0)
+	if events.has(Delivery.GATE):
+		_ask_guard()
+	if events.has(Delivery.DELIVERED):
+		_delivered()
+
+
+func _delivered() -> void:
+	_coin.play()
+	var d: Dictionary = _delivery.last_done
+	var tip_text := strings.t("tipText", {"tip": d.tip}) if int(d.tip) > 0 else ""
+	_say(strings.t("foodDelivered", {"pay": int(d.pay), "tip": tip_text, "stars": _stars(float(d.stars))}), Look.PARROT, 3.5)
+	shift._aim()
+	_place_marker()
+
+
+func _take_order(yes: bool) -> void:
+	hud.hide_offer()
+	if yes and _delivery.accept():
+		_say(strings.t("orderTaken"), Look.PARROT, 2.0)
+	elif not yes:
+		_delivery.decline()
+	shift._aim()
+	_place_marker()
+
+
+func _on_switch() -> void:
+	if _delivery == null:
+		return
+	_delivery.switch_target()
+	shift._aim()
+	_place_marker()
+	Activity.buzz(12)
+
+
+## A guard at the gate wants a word: a good answer, and in.
+func _ask_guard() -> void:
+	var q: Dictionary = _delivery.gate.question
+	if _activity != null:
+		_delivered_after_gate(0.5, null)
+		return
+	var act := Choose.new()
+	act.rounds = [q]
+	_open(act, "act_gate", _delivered_after_gate.bind(act))
+
+
+func _delivered_after_gate(score: float, act) -> void:
+	var ok := score >= 0.5
+	var got: Array = _delivery.settle_gate(ok)
+	if not ok:
+		_say(strings.t("gateBad"), Look.VERMILION, 2.5)
+	if got.has(Delivery.DELIVERED):
+		_delivered()
+
+
+## The end of Ratul's evening: what came in, the rating, into the save.
+func _end_delivery() -> void:
+	set_process(false)
+	hud.hide_offer()
+	hud.show_tea(false)
+	hud.show_switch(false)
+	shift.pedal = false
+	shift.cruise = false
+	_rain_sound.stop()
+	_drops.emitting = false
+	var d = _delivery
+	var earned: int = d.money + shift.money
+	var lines := [strings.t("ordersDone", {"n": d.delivered})]
+	if d.hot > 0:
+		lines.append(strings.t("ordersHot", {"n": d.hot}))
+	if d.cold_ones > 0:
+		lines.append(strings.t("ordersCold", {"n": d.cold_ones}))
+	if d.tips > 0:
+		lines.append(strings.t("teaTips", {"n": d.tips}))
+	if shift.fines > 0:
+		lines.append(strings.t("finesPaid", {"fines": shift.fines}))
+	if shift.teas > 0:
+		lines.append(strings.t("teaLine", {"n": shift.teas, "money": shift.tea_spent}))
+	if not _call_result.is_empty():
+		lines.append(strings.t("familyLine", {"n": _call_result.family}))
+	var stats := {"orders": d.delivered, "hot": d.hot, "earned": earned}
+	var got := progress.apply_delivery_day({"earned": earned, "orders": d.delivered, "stars": d.average_stars(), "stats": stats})
+	progress.save()
+	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
+	CrashWatch.stop()
+	if int(got.get("samity_payout", 0)) > 0:
+		lines.append(strings.t("samityPayoutLine", {"n": int(got.samity_payout)}))
+	elif int(got.get("samity_paid", 0)) > 0:
+		lines.append(strings.t("samityDayLine", {"n": int(got.samity_paid)}))
+	var met := earned >= _target_money
+	print("[day] delivery: %d orders, %.1f stars, %d taka" % [d.delivered, d.average_stars(), earned])
+	var end := DayEnd.new()
+	end.setup(strings, progress.b, progress, got, {
+		"title": strings.t("dayOver"),
+		"stars": d.average_stars(),
+		"sub": strings.t("appRating", {"stars": _stars(snappedf(d.average_stars(), 0.1))}),
+		"money": earned,
+		"lines": lines,
+		"share": strings.t("share_delivery", {"n": d.delivered, "money": earned}) if d.delivered > 0 else "",
+		"kept_label": strings.t("gainKeptLabel"),
+		"extras": [strings.t("targetMet" if met else "targetMissed", {"target": _target_money})],
+		"good": met,
+	})
+	end.home_pressed.connect(_go_home)
+	end.again_pressed.connect(_play_again)
+	hud.add_child(end)
 
 
 # --- Today's race with a ghost (race.gd) ---------------------------------------------
@@ -1232,7 +1447,7 @@ func _pumped(_score: float, act: Pump) -> void:
 ## The phone rings: someone from home. The answer moves the family's
 ## feeling, may send money home, may end the day (going home).
 func _ring_home() -> void:
-	var call := HomeCall.new().pick("rickshaw", _call_rng, progress.family("rickshaw"))
+	var call := HomeCall.new().pick(_whose(), _call_rng, progress.family(_whose()))
 	if call.is_empty():
 		return
 	var act := CallAct.new()
@@ -1250,7 +1465,7 @@ func _answered(_score: float, act) -> void:
 	# With his own phone, a talk with home is a video call: gladder still.
 	if option == "talk" and progress.has_phone():
 		e.family += 1
-	var now := progress.add_family("rickshaw", e.family)
+	var now := progress.add_family(_whose(), e.family)
 	shift.money -= e.cost
 	_call_result = {"family": now, "delta": e.family}
 	print("[home] call ", act.call.get("id", ""), ": ", option, ", family ", now)
@@ -1324,6 +1539,9 @@ func _pushed_out(_score: float, act: Push) -> void:
 
 
 func _on_refuse() -> void:
+	if _delivery != null:
+		_take_order(false)
+		return
 	shift.refuse()
 	hud.hide_offer()
 
@@ -1485,7 +1703,8 @@ func _input(event: InputEvent) -> void:
 		var finger: int = event.index
 		if event.pressed:
 			if hud.offer_rect().has_point(event.position) or hud.tea_rect().has_point(event.position) \
-					or hud.pump_rect().has_point(event.position) or hud.hood_rect().has_point(event.position):
+					or hud.pump_rect().has_point(event.position) or hud.hood_rect().has_point(event.position) \
+					or hud.switch_rect().has_point(event.position):
 				pass
 			elif hud.bell_rect().has_point(event.position):
 				_ring()

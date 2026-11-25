@@ -16,6 +16,8 @@ signal again_pressed
 signal tea_pressed
 signal pump_pressed
 signal hood_down_pressed
+## Ratul's orders: point the arrow at the next stop.
+signal switch_pressed
 
 var s: Strings
 var map: RoadMap
@@ -55,6 +57,7 @@ var _energy_shown := -1
 var _tea_button: Button
 var _hood_button: Button
 var _pump_button: Button
+var _switch_button: Button
 
 
 func setup(strings: Strings, road_map: RoadMap) -> void:
@@ -177,6 +180,17 @@ func _ready() -> void:
 	_hood_button.pressed.connect(func(): hood_down_pressed.emit())
 	_hood_button.visible = false
 	root.add_child(_hood_button)
+	# Ratul with more than one stop to make: which one next.
+	_switch_button = Look.button("", Look.VERMILION, 16)
+	_switch_button.name = "SwitchStop"
+	_switch_button.set_anchors_preset(Control.PRESET_CENTER)
+	_switch_button.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_switch_button.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_switch_button.offset_top = -170
+	_switch_button.offset_bottom = -170
+	_switch_button.pressed.connect(func(): switch_pressed.emit())
+	_switch_button.visible = false
+	root.add_child(_switch_button)
 
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
@@ -268,6 +282,8 @@ func show_offer(title: String, sub: String, counter_text: String) -> void:
 	_offer_title.text = title
 	_offer_sub.text = sub
 	_counter_button.text = counter_text
+	# Nothing to say back (Ratul's orders): only yes or no.
+	_counter_button.visible = counter_text != ""
 	_offer_box.visible = true
 
 
@@ -324,6 +340,15 @@ func hood_rect() -> Rect2:
 
 func pump_rect() -> Rect2:
 	return _pump_button.get_global_rect().grow(8) if _pump_button.visible else Rect2()
+
+
+func show_switch(shown: bool, text := "") -> void:
+	_switch_button.text = text
+	_switch_button.visible = shown
+
+
+func switch_rect() -> Rect2:
+	return _switch_button.get_global_rect().grow(8) if _switch_button.visible else Rect2()
 
 
 func tea_rect() -> Rect2:

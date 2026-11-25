@@ -135,6 +135,21 @@
    "bn": "সিটি কর্পোরেশনের লোক",
    "en": "City Corporation man",
    "colour": "455A64"
+  },
+  "ratul": {
+   "bn": "রাতুল",
+   "en": "Ratul",
+   "colour": "F26B1D"
+  },
+  "ratul_ma": {
+   "bn": "রাতুলের মা",
+   "en": "Ratul's mother",
+   "colour": "6A1B9A"
+  },
+  "guard": {
+   "bn": "দারোয়ান",
+   "en": "The guard",
+   "colour": "37474F"
   }
  },
  "chapters": [
@@ -2635,6 +2650,385 @@
      }
     ]
    }
+  },
+  {
+   "id": "ratul_1",
+   "who": "delivery",
+   "n": 1,
+   "title": {
+    "bn": "প্রথম অর্ডার",
+    "en": "The first order"
+   },
+   "unlock": {
+    "start": "delivery"
+   },
+   "panels": [
+    {
+     "scene": "home_dawn",
+     "lines": [
+      {
+       "by": "ratul_ma",
+       "bn": "কলেজ শেষে আবার সাইকেল নিয়ে বের হবি? পড়াশোনা কখন করবি বাবা?",
+       "en": "Out on the bicycle again after college? When will you study, son?"
+      },
+      {
+       "by": "ratul",
+       "bn": "মা, সন্ধ্যায় তিন-চার ঘণ্টা খাবার পৌঁছাই, মাসের বেতনটা তো উঠে যায়।",
+       "en": "Ma, three or four hours of deliveries in the evening pays my college fees."
+      },
+      {
+       "by": "ratul_ma",
+       "bn": "সাবধানে চালাস। রাস্তায় বাস-ট্রাক কাউকে দেখে না।",
+       "en": "Ride carefully. The buses and trucks don't look out for anyone."
+      }
+     ]
+    },
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "farhan",
+       "bn": "রাতুল! অ্যাপে রেটিং পাঁচ রাখতে হলে খাবার গরম থাকতে পৌঁছাতে হবে।",
+       "en": "Ratul! To keep a five-star rating, the food has to arrive hot."
+      },
+      {
+       "by": "ratul",
+       "bn": "দুইটা অর্ডার একসাথে নিলে কোনটা আগে দিব, সেটাই আসল খেলা।",
+       "en": "Take two orders at once, and which to drop first is the whole game."
+      },
+      {
+       "by": "farhan",
+       "bn": "আর দারোয়ানদের সাথে ভালো ব্যবহার করিস। ওরাই গেট খোলে!",
+       "en": "And be nice to the guards. They're the ones who open the gates!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ratul_2",
+   "who": "delivery",
+   "n": 2,
+   "title": {
+    "bn": "বৃষ্টির রাত",
+    "en": "A rainy night"
+   },
+   "unlock": {
+    "days": [
+     "delivery",
+     3
+    ]
+   },
+   "panels": [
+    {
+     "scene": "rain_night",
+     "lines": [
+      {
+       "by": "ratul",
+       "bn": "বৃষ্টিতে সবাই অর্ডার করে, কিন্তু কেউ বের হয় না।",
+       "en": "In the rain everyone orders, and nobody goes out."
+      },
+      {
+       "by": "monir",
+       "bn": "রাতুল, দাঁড়াও! এক কাপ চা খাও, গা গরম হবে।",
+       "en": "Ratul, wait! Have a cup of tea, it'll warm you up."
+      },
+      {
+       "by": "ratul",
+       "bn": "মামা, খাবারটা ঠান্ডা হয়ে যাবে। পলিথিনে মুড়ে আবার ছুটি।",
+       "en": "Mama, the food will go cold. I'll wrap it in plastic and run."
+      },
+      {
+       "by": "monir",
+       "bn": "তাহলে ফেরার পথে আসিস। চা রেখে দিলাম।",
+       "en": "Then come by on your way back. I'll keep a cup for you."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ratul_3",
+   "who": "delivery",
+   "n": 3,
+   "title": {
+    "bn": "রেটিং ৪.২",
+    "en": "A 4.2 rating"
+   },
+   "unlock": {
+    "days": [
+     "delivery",
+     6
+    ]
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "ratul",
+       "bn": "অ্যাপ বলছে রেটিং ৪.৫-এর নিচে নামলে অর্ডার কমে যাবে। আমার এখন ৪.২।",
+       "en": "The app says below 4.5, the orders dry up. I'm on 4.2."
+      },
+      {
+       "by": "farhan",
+       "bn": "একজন খাবার দেরিতে পেয়ে এক তারা দিয়েছে। জ্যাম তো তোর দোষ না!",
+       "en": "Someone gave you one star for being late. The traffic isn't your fault!"
+      },
+      {
+       "by": "ratul",
+       "bn": "দোষ হোক না হোক, তারা গুনে গুনেই টাকা আসে।",
+       "en": "Fault or not, the stars are what pay."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "রাতুল কী করবে?",
+     "en": "What will Ratul do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "ধীরে, কিন্তু ঠিকঠাক কাজ করো",
+       "en": "Slow down and do it right"
+      },
+      "effects": {
+       "family": [
+        "delivery",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "ratul",
+        "bn": "তাড়াহুড়ায় ভুল বেশি হয়। এক অর্ডার এক অর্ডার করে, গরম থাকতে থাকতেই দিব।",
+        "en": "Rushing makes mistakes. One order at a time, while it's hot."
+       },
+       {
+        "by": "ratul_ma",
+        "bn": "এই তো আমার বুদ্ধিমান ছেলে।",
+        "en": "That's my sensible boy."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "একসাথে আরও বেশি অর্ডার নাও",
+       "en": "Take more orders at once"
+      },
+      "effects": {
+       "taka": 150
+      },
+      "lines": [
+       {
+        "by": "ratul",
+        "bn": "তিনটা অর্ডার একসাথে! টাকাও বেশি, ঝুঁকিও বেশি।",
+        "en": "Three orders at once! More money, more risk."
+       },
+       {
+        "by": "farhan",
+        "bn": "সাবধান রে, ঠান্ডা খাবারে রেটিং আরও নামবে।",
+        "en": "Careful: cold food will drag your rating down further."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "ratul_4",
+   "who": "delivery",
+   "n": 4,
+   "title": {
+    "bn": "পরীক্ষার আগের রাত",
+    "en": "The night before the exam"
+   },
+   "unlock": {
+    "days": [
+     "delivery",
+     9
+    ]
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "ratul_ma",
+       "bn": "কাল তোর ফাইনাল পরীক্ষা, আর তুই আজও বের হচ্ছিস?",
+       "en": "Your final exam is tomorrow, and you're going out tonight too?"
+      },
+      {
+       "by": "ratul",
+       "bn": "বৃহস্পতিবার রাতে অর্ডার সবচেয়ে বেশি আসে, মা।",
+       "en": "Thursday night has the most orders, Ma."
+      },
+      {
+       "by": "ratul_ma",
+       "bn": "টাকা পরেও কামানো যাবে, পরীক্ষা কিন্তু একবারই।",
+       "en": "You can earn money later. The exam comes only once."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "রাতুল কী করবে?",
+     "en": "What will Ratul do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "আজ বাসায় থেকে পড়ো",
+       "en": "Stay home and study"
+      },
+      "effects": {
+       "family": [
+        "delivery",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "ratul",
+        "bn": "ঠিক আছে মা, আজ সাইকেল বিশ্রাম নিক। আমি বই নিয়ে বসি।",
+        "en": "All right, Ma: the bicycle can rest tonight. I'll sit with my books."
+       },
+       {
+        "by": "ratul_ma",
+        "bn": "চা বানিয়ে দিচ্ছি। রাত জাগলে মাথা ঠান্ডা রাখিস।",
+        "en": "I'll make you tea. Keep a cool head if you stay up."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "দুই ঘণ্টা চালিয়ে এসে পড়ো",
+       "en": "Ride two hours, then study"
+      },
+      "effects": {
+       "taka": 250,
+       "family": [
+        "delivery",
+        -1
+       ]
+      },
+      "lines": [
+       {
+        "by": "ratul",
+        "bn": "দুই ঘণ্টা মাত্র, মা। ফিরে এসেই পড়তে বসব।",
+        "en": "Just two hours, Ma. I'll study as soon as I'm back."
+       },
+       {
+        "by": "ratul_ma",
+        "bn": "বলিস তো ঠিকই, ফিরিস রাত বারোটায়।",
+        "en": "So you say, and you'll be back at midnight."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "ratul_5",
+   "who": "delivery",
+   "n": 5,
+   "title": {
+    "bn": "সাইকেল রাইডারদের দল",
+    "en": "The riders' group"
+   },
+   "unlock": {
+    "days": [
+     "delivery",
+     12
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "farhan",
+       "bn": "রাতুল, মিরপুরের রাইডারদের নিয়ে একটা দল করলে কেমন হয়? কেউ বিপদে পড়লে সবাই পাশে।",
+       "en": "Ratul, what about a group of Mirpur's riders? When one's in trouble, all stand by him."
+      },
+      {
+       "by": "ratul",
+       "bn": "গত সপ্তাহে শামীমের সাইকেল চুরি হলো, কেউ সাহায্য করতে পারল না।",
+       "en": "Last week Shamim's bicycle was stolen and nobody could help."
+      },
+      {
+       "by": "monir",
+       "bn": "আমার দোকানেই বসো তোমরা। চা আমার তরফ থেকে।",
+       "en": "Meet at my stall. The tea's on me."
+      },
+      {
+       "by": "ratul",
+       "bn": "তাহলে প্রথম সভা মনির মামার দোকানে! সবাই মিলে একটা জমার বাক্স রাখব।",
+       "en": "Then the first meeting is at Monir Mama's! We'll keep a savings box together."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "দলের প্রথম কাজ কী হবে?",
+     "en": "What will the group do first?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "শামীমের জন্য সবাই মিলে টাকা তোলো",
+       "en": "Raise money for Shamim's bicycle"
+      },
+      "effects": {
+       "taka": -200,
+       "family": [
+        "delivery",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "farhan",
+        "bn": "বিশজনে দুইশো করে দিলেই নতুন সাইকেল!",
+        "en": "Twenty of us at two hundred each, and he has a new bicycle!"
+       },
+       {
+        "by": "ratul",
+        "bn": "শামীম কাঁদছিল। এটাই আসল রেটিং।",
+        "en": "Shamim was in tears. That's the real rating."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "অ্যাপ অফিসে গিয়ে ন্যায্য রেটিং চাও",
+       "en": "Ask the app office for fair ratings"
+      },
+      "effects": {
+       "family": [
+        "delivery",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "ratul",
+        "bn": "জ্যামের জন্য এক তারা দেওয়া চলবে না, এটা লিখে জমা দিলাম।",
+        "en": "No more one-star for traffic jams: we've put it in writing."
+       },
+       {
+        "by": "farhan",
+        "bn": "ওরা বলেছে দেখবে। অন্তত শুরু তো হলো!",
+        "en": "They said they'll look into it. At least it's a start!"
+       }
+      ]
+     }
+    ]
+   }
   }
  ],
  "scenes": [
@@ -3773,6 +4167,68 @@
        "by": "sumi",
        "bn": "এটাই আমার সবচেয়ে ভালো জন্মদিন।",
        "en": "This is my best birthday ever."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_high_delivery",
+   "who": "delivery",
+   "n": 0,
+   "title": {
+    "bn": "মায়ের হাসি",
+    "en": "Ma's smile"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "ratul_ma",
+       "bn": "বাবা, আজ তোর পছন্দের খিচুড়ি রেঁধেছি।",
+       "en": "Son, I've made your favourite khichuri tonight."
+      },
+      {
+       "by": "ratul",
+       "bn": "মা, এই মাসের কলেজের বেতন দিয়ে দিয়েছি। আর তোমার ওষুধও এনেছি।",
+       "en": "Ma, I've paid this month's college fees. And brought your medicine."
+      },
+      {
+       "by": "ratul_ma",
+       "bn": "আমার ছেলে আমার গর্ব।",
+       "en": "My son is my pride."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_low_delivery",
+   "who": "delivery",
+   "n": 0,
+   "title": {
+    "bn": "মায়ের চিন্তা",
+    "en": "Ma is worried"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "ratul_ma",
+       "bn": "রাত বারোটা বাজে, ফোনও ধরিস না। কত চিন্তা হয় জানিস?",
+       "en": "It's midnight and you won't answer your phone. Do you know how I worry?"
+      },
+      {
+       "by": "ratul",
+       "bn": "অর্ডারের চাপে ফোন দেখা হয় না, মা।",
+       "en": "With the orders I never look at the phone, Ma."
+      },
+      {
+       "by": "ratul",
+       "bn": "কাল থেকে প্রতি অর্ডারের ফাঁকে একবার তোমাকে জানাব।",
+       "en": "From tomorrow I'll text you between orders."
       }
      ]
     }

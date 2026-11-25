@@ -62,7 +62,7 @@ func _seen(c: Dictionary, data: Dictionary) -> bool:
 ## Whether a chapter's condition holds for the save `data`: days played as
 ## a character, money earned as one, an upgrade bought, the school fee.
 func met(unlock: Dictionary, data: Dictionary) -> bool:
-	var record := {"rickshaw": data.get("rickshaw", {}), "tea": data.get("tea", {}), "bus": data.get("bus", {}), "fuchka": data.get("fuchka", {})}
+	var record := {"rickshaw": data.get("rickshaw", {}), "tea": data.get("tea", {}), "bus": data.get("bus", {}), "fuchka": data.get("fuchka", {}), "delivery": data.get("delivery", {})}
 	if unlock.has("days"):
 		return int(record[unlock.days[0]].get("days", 0)) >= int(unlock.days[1])
 	if unlock.has("earned"):

@@ -28,6 +28,12 @@
    {"id": "f_rana_shoes", "by": "rana", "kind": "need", "bn": "মা, স্কুলের জুতা ছিঁড়ে গেছে। স্যার বলেছেন কাল নতুন জুতা পরে আসতে।", "en": "Ma, my school shoes are torn. Sir says to come in new shoes tomorrow.", "options": {"send": {"family": 2, "cost": 200}, "later": {"family": -2}}},
    {"id": "f_rana_eat", "by": "rana", "kind": "chat", "bn": "মা, ভাত রান্না করে রেখেছি। তুমি খেয়েছ?", "en": "Ma, I've cooked the rice. Have you eaten?", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
    {"id": "f_rana_rain", "by": "rana", "kind": "chat", "bn": "মা, বৃষ্টি আসছে। গাড়িটা ঢেকে রেখো, আর তুমি ভিজো না।", "en": "Ma, rain is coming. Cover the cart, and don't get wet yourself.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
+  ],
+  "delivery": [
+   {"id": "d_ma_eat", "by": "ratul_ma", "kind": "chat", "bn": "বাবা, ভাত খেয়েছিস? সারা সন্ধ্যা সাইকেলে, কিছু খেয়ে নিস।", "en": "Son, have you eaten? All evening on that bicycle: eat something.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "d_ma_medicine", "by": "ratul_ma", "kind": "need", "bn": "বাবা, আমার প্রেশারের ওষুধ শেষ। আসার সময় নিয়ে আসিস।", "en": "Son, my blood-pressure pills have run out. Bring some on your way home.", "options": {"send": {"family": 2, "cost": 150}, "later": {"family": -2}}},
+   {"id": "d_ma_exam", "by": "ratul_ma", "kind": "news", "bn": "তোর কলেজ থেকে ফোন করেছিল, কাল থেকে পরীক্ষা! আজ তাড়াতাড়ি আয়।", "en": "Your college phoned: exams start tomorrow! Come home early tonight.", "options": {"go": {"family": 2, "end_day": true}, "later": {"family": 0}}},
+   {"id": "d_ma_rain", "by": "ratul_ma", "kind": "chat", "bn": "বৃষ্টি নামছে। রেইনকোট পরে নিস, ভিজে জ্বর বাধাস না।", "en": "It's starting to rain. Put your raincoat on: don't catch a fever.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
   ]
  }
 }
