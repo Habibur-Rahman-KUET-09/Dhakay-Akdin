@@ -13,7 +13,7 @@ const Balance = preload("res://scripts/rules/balance.gd")
 const Daily = preload("res://scripts/rules/daily.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
 
-const WHO := ["all", "rickshaw", "tea", "bus"]
+const WHO := ["all", "rickshaw", "tea", "bus", "fuchka"]
 const PERIODS := ["day", "week", "month", "ever"]
 ## The periods that end, and so have prizes.
 const ENDING := ["day", "week", "month"]

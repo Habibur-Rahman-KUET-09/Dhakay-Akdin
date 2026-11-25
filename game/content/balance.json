@@ -12,7 +12,7 @@
     "xp_level_step": 40,
     "max_level": 50
   },
-  "unlocks": {"tea_stall": 2, "bus": 4, "old_dhaka": 5, "early_unlock_tara": 30},
+  "unlocks": {"tea_stall": 2, "bus": 4, "old_dhaka": 5, "fuchka": 6, "early_unlock_tara": 30},
   "tara": {"daily_challenge": 3, "chapter": 5, "rewarded_ad": 2, "retry_cost": 5,
            "streak": [5, 5, 10, 10, 10, 15]},
   "ads": {"double_per_day": 3, "retry_per_day": 2, "tara_per_day": 3,
@@ -88,6 +88,14 @@
     "street_lights": {"cost": 2000},
     "drain_cleaning": {"cost": 3000},
     "bus_shelter": {"cost": 2500}
+  },
+  "fuchka": {
+    "start_hour": 13, "end_hour": 21, "day_seconds": 300, "school_out_hour": 13.5,
+    "rush_hours": [[13.5, 14.5], [18, 20]], "arrival_every_s": 7, "rush_arrival_every_s": 3.5,
+    "patience_s": {"child": 16, "student": 13, "office": 11, "family": 18},
+    "price": {"fuchka": 40, "doi_fuchka": 60}, "tip_exact": 10, "happy_tip_share": 0.15, "doi_share": 0.35,
+    "rain_chance_per_day": 0.25, "rain_seconds": 60, "rain_arrivals": 0.5, "winter_arrivals": 1.4,
+    "upgrades": {"stool": {"cost": 800, "patience_bonus_s": 4}, "umbrella": {"cost": 1500}, "doi": {"cost": 2500}}
   },
   "leaderboard": {"top": 20, "prizes": {"day": [5, 3, 2], "week": [15, 10, 5], "month": [40, 25, 15]}},
   "friends": {

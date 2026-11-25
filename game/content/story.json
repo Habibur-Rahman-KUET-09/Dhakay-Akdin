@@ -120,6 +120,21 @@
    "bn": "যাত্রী",
    "en": "Passenger",
    "colour": "37474F"
+  },
+  "julekha": {
+   "bn": "জুলেখা খালা",
+   "en": "Julekha Khala",
+   "colour": "B3261E"
+  },
+  "rana": {
+   "bn": "রানা",
+   "en": "Rana",
+   "colour": "1E6FB0"
+  },
+  "officer": {
+   "bn": "সিটি কর্পোরেশনের লোক",
+   "en": "City Corporation man",
+   "colour": "455A64"
   }
  },
  "chapters": [
@@ -2283,6 +2298,343 @@
      }
     ]
    }
+  },
+  {
+   "id": "julekha_1",
+   "who": "fuchka",
+   "n": 1,
+   "title": {
+    "bn": "স্কুলের গেটে ফুচকার গাড়ি",
+    "en": "A fuchka cart at the school gate"
+   },
+   "unlock": {
+    "start": "fuchka"
+   },
+   "panels": [
+    {
+     "scene": "home_dawn",
+     "lines": [
+      {
+       "by": "julekha",
+       "bn": "রানার আব্বা চলে যাওয়ার পর এই গাড়িটাই আমাদের সংসার চালায়।",
+       "en": "Since Rana's father passed, this cart is what keeps our home going."
+      },
+      {
+       "by": "rana",
+       "bn": "মা, আজ স্কুল থেকে ফিরে আমি তোমাকে সাহায্য করব।",
+       "en": "Ma, after school today I'll help you."
+      },
+      {
+       "by": "julekha",
+       "bn": "না বাবা, তুমি আগে পড়া শেষ করবে। ফুচকা আমি একাই সামলাতে পারি।",
+       "en": "No, son, finish your studies first. I can manage the fuchka on my own."
+      }
+     ]
+    },
+    {
+     "scene": "school",
+     "lines": [
+      {
+       "by": "julekha",
+       "bn": "মনিপুর স্কুলের ছুটির ঘণ্টা বাজলেই ভিড় শুরু হবে।",
+       "en": "The moment Monipur school's bell rings, the crowd will come."
+      },
+      {
+       "by": "julekha",
+       "bn": "কেউ টক বেশি খায়, কেউ ঝাল ছাড়া। মাপ ঠিক হলেই কাস্টমার আবার আসে।",
+       "en": "Some like it very sour, some with no chilli. Get the measure right and they come back."
+      },
+      {
+       "by": "sumi",
+       "bn": "খালা, আমাকে ঝাল ছাড়া এক প্লেট দেবেন? টক মাঝারি!",
+       "en": "Khala, one plate with no chilli for me? Medium sour!"
+      },
+      {
+       "by": "julekha",
+       "bn": "দেব মা। তোমার নাম কী?",
+       "en": "Of course, dear. What's your name?"
+      },
+      {
+       "by": "sumi",
+       "bn": "সুমি! আমার আব্বা রিকশা চালান।",
+       "en": "Sumi! My Abba pulls a rickshaw."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "julekha_2",
+   "who": "fuchka",
+   "n": 2,
+   "title": {
+    "bn": "সুমির বান্ধবীরা",
+    "en": "Sumi's friends"
+   },
+   "unlock": {
+    "days": [
+     "fuchka",
+     3
+    ]
+   },
+   "panels": [
+    {
+     "scene": "school",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "খালা, আজ বান্ধবীদের নিয়ে এসেছি। সবাই আপনার ফুচকার গল্প শুনেছে।",
+       "en": "Khala, I've brought my friends today. They've all heard about your fuchka."
+      },
+      {
+       "by": "julekha",
+       "bn": "তাই নাকি! তাহলে আজ সবার প্লেটে একটা করে ফুচকা বেশি।",
+       "en": "Is that so! Then one extra fuchka on everyone's plate today."
+      },
+      {
+       "by": "rumana",
+       "bn": "জুলেখা আপা, স্কুলের মেলায় আপনার গাড়ি বসাবেন? বাচ্চারা খুব খুশি হবে।",
+       "en": "Julekha Apa, will you bring your cart to the school fair? The children would love it."
+      },
+      {
+       "by": "julekha",
+       "bn": "আপনি বললে অবশ্যই বসাব, আপা।",
+       "en": "If you ask, of course I will, Apa."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "julekha_3",
+   "who": "fuchka",
+   "n": 3,
+   "title": {
+    "bn": "টাকার টানাটানি",
+    "en": "Money runs short"
+   },
+   "unlock": {
+    "days": [
+     "fuchka",
+     6
+    ]
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "rana",
+       "bn": "মা, স্কুলের বেতন তিন মাস বাকি। স্যার বলেছেন না দিলে পরীক্ষা দিতে দেবেন না।",
+       "en": "Ma, three months of school fees are due. Sir says I can't sit the exam unless they're paid."
+      },
+      {
+       "by": "julekha",
+       "bn": "এই মাসে আলুর দাম দ্বিগুণ হয়ে গেছে। কোথা থেকে দেব...",
+       "en": "Potatoes cost twice as much this month. Where will it come from..."
+      },
+      {
+       "by": "rokeya",
+       "bn": "জুলেখা আপা, সুমির কাছে শুনলাম। আমাদের সমিতিতে আসুন, দরকারে সবাই পাশে দাঁড়ায়।",
+       "en": "Julekha Apa, Sumi told me. Join our samity; when someone's in need, we all stand together."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "জুলেখা খালা কী করবেন?",
+     "en": "What will Julekha Khala do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "জমা থেকে বেতন দিন, সমিতিতে যোগ দিন",
+       "en": "Pay from savings, join the samity"
+      },
+      "effects": {
+       "taka": -300,
+       "family": [
+        "fuchka",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "julekha",
+        "bn": "আপনার কথায় সাহস পেলাম। বেতনটা জমা থেকেই দেব, আর সমিতিতে নাম লেখাব।",
+        "en": "Your words give me courage. I'll pay the fees from my savings and join the samity."
+       },
+       {
+        "by": "rana",
+        "bn": "মা, আমি খুব ভালো করে পরীক্ষা দেব!",
+        "en": "Ma, I'll do really well in the exam!"
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "মহাজনের কাছে ধার নিন",
+       "en": "Borrow from the moneylender"
+      },
+      "effects": {
+       "taka": -500,
+       "family": [
+        "fuchka",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "mahajan",
+        "bn": "দেব টাকা, কিন্তু প্রতি সপ্তাহে সুদসহ ফেরত দিতে হবে।",
+        "en": "I'll lend it, but you'll pay it back every week, with interest."
+       },
+       {
+        "by": "julekha",
+        "bn": "সুদের টাকা অনেক... কিন্তু রানার পরীক্ষা তো আটকানো যাবে না।",
+        "en": "The interest is a lot... but Rana's exam can't be stopped."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "julekha_4",
+   "who": "fuchka",
+   "n": 4,
+   "title": {
+    "bn": "বৃষ্টির বিকেল",
+    "en": "A rainy afternoon"
+   },
+   "unlock": {
+    "days": [
+     "fuchka",
+     9
+    ]
+   },
+   "panels": [
+    {
+     "scene": "rain_night",
+     "lines": [
+      {
+       "by": "julekha",
+       "bn": "বৃষ্টি নামলে ফুচকা নরম হয়ে যায়, কেউ কিনতে চায় না।",
+       "en": "When it rains the puris go soft, and nobody wants them."
+      },
+      {
+       "by": "monir",
+       "bn": "জুলেখা আপা, গাড়িটা আমার দোকানের ছাউনির নিচে নিয়ে আসেন।",
+       "en": "Julekha Apa, bring the cart under my stall's awning."
+      },
+      {
+       "by": "julekha",
+       "bn": "আপনার কাস্টমার কমে যাবে না তো, মনির ভাই?",
+       "en": "Won't it take your customers, Monir Bhai?"
+      },
+      {
+       "by": "monir",
+       "bn": "চায়ের সাথে ফুচকা, কাস্টমার বরং বাড়বে!",
+       "en": "Tea and fuchka together? If anything, there'll be more!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "julekha_5",
+   "who": "fuchka",
+   "n": 5,
+   "title": {
+    "bn": "উচ্ছেদের নোটিশ",
+    "en": "An eviction notice"
+   },
+   "unlock": {
+    "days": [
+     "fuchka",
+     12
+    ]
+   },
+   "panels": [
+    {
+     "scene": "school",
+     "lines": [
+      {
+       "by": "officer",
+       "bn": "স্কুলের গেটের সামনে কোনো গাড়ি থাকবে না। কাল থেকে সরিয়ে নেবেন।",
+       "en": "No carts in front of the school gate. Move it from tomorrow."
+      },
+      {
+       "by": "julekha",
+       "bn": "বারো বছর এখানে বসছি। বাচ্চারা আমাকে চেনে।",
+       "en": "I've stood here twelve years. The children know me."
+      },
+      {
+       "by": "rumana",
+       "bn": "আপা, স্কুলের সবাই আপনার পাশে আছে। আমরা প্রধান শিক্ষকের সাথে কথা বলব।",
+       "en": "Apa, the whole school is with you. We'll speak to the head teacher."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "জুলেখা খালা কী করবেন?",
+     "en": "What will Julekha Khala do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "অভিভাবকদের সই নিয়ে আবেদন করুন",
+       "en": "Petition with the parents' signatures"
+      },
+      "effects": {
+       "npc": [
+        "rumana",
+        2
+       ],
+       "family": [
+        "fuchka",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "sumi",
+        "bn": "খালা, আমার আব্বা-আম্মাও সই দিয়েছেন!",
+        "en": "Khala, my Abba and Amma signed too!"
+       },
+       {
+        "by": "julekha",
+        "bn": "সবাই মিলে বললে নিশ্চয়ই শুনবে। গাড়িটা গেটের একপাশে সরিয়ে রাখব, যেন পথ আটকে না যায়।",
+        "en": "If we all speak together, surely they'll listen. I'll keep the cart to one side so it doesn't block the way."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "পাশের গলিতে সরে যান",
+       "en": "Move to the next lane"
+      },
+      "effects": {
+       "taka": -200
+      },
+      "lines": [
+       {
+        "by": "julekha",
+        "bn": "ঝামেলায় না গিয়ে পাশের গলিতেই বসি। কাস্টমার ঠিক খুঁজে নেবে।",
+        "en": "I won't make trouble; I'll set up in the next lane. My customers will find me."
+       },
+       {
+        "by": "rana",
+        "bn": "মা, আমি গলির মুখে একটা তীর এঁকে দেব, সবাই দেখতে পাবে!",
+        "en": "Ma, I'll paint an arrow at the corner so everyone can see!"
+       }
+      ]
+     }
+    ]
+   }
   }
  ],
  "scenes": [
@@ -2622,6 +2974,68 @@
        "by": "babu_ma",
        "bn": "দিও বাবা। মায়ের মন তো, অপেক্ষা করে থাকে।",
        "en": "Do, son. A mother's heart keeps waiting."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_high_fuchka",
+   "who": "fuchka",
+   "n": 0,
+   "title": {
+    "bn": "রানার খুশি",
+    "en": "Rana is happy"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "rana",
+       "bn": "মা, আজ তোমার জন্য চা বানিয়েছি। বসো একটু।",
+       "en": "Ma, I made you tea today. Sit down a while."
+      },
+      {
+       "by": "julekha",
+       "bn": "আমার ছেলে কবে এত বড় হয়ে গেল!",
+       "en": "When did my boy grow up so much!"
+      },
+      {
+       "by": "rana",
+       "bn": "তুমি ফোন ধরো, খোঁজ নাও, তাই আমার মন ভালো থাকে।",
+       "en": "You answer my calls and ask how I am; that keeps me happy."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_low_fuchka",
+   "who": "fuchka",
+   "n": 0,
+   "title": {
+    "bn": "রানার মন খারাপ",
+    "en": "Rana is sad"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "rana",
+       "bn": "মা, তুমি তো ফোনই ধরো না। সারাদিন একা বসে থাকি।",
+       "en": "Ma, you never answer the phone. I sit alone all day."
+      },
+      {
+       "by": "julekha",
+       "bn": "গাড়ির ভিড়ে ফোন শুনতে পাই না রে বাবা।",
+       "en": "With the crowd at the cart I can't hear the phone, son."
+      },
+      {
+       "by": "julekha",
+       "bn": "কাল থেকে ছুটির পর একবার হলেও তোর খোঁজ নেব।",
+       "en": "From tomorrow I'll check on you at least once after school."
       }
      ]
     }

@@ -30,12 +30,13 @@ const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
 const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 
-const WHO := ["rickshaw", "tea", "bus"]
+const WHO := ["rickshaw", "tea", "bus", "fuchka"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
 const PAGE_ICONS := {"hub": "home", "shop": "bag", "fund": "town", "story": "book", "people": "people"}
 const UPGRADE_ICONS := {
 	"new_rickshaw": "rickshaw", "battery_rickshaw": "bolt", "bench": "bench", "second_kettle": "kettle",
 	"awning": "awning", "fridge": "fridge", "notebook": "ledger", "change_bag": "purse", "loud_voice": "voice",
+	"stool": "bench", "umbrella": "rain", "doi": "kettle",
 }
 const PROJECT_ICONS := {"street_lights": "lamp", "drain_cleaning": "drain", "bus_shelter": "shelter"}
 
@@ -595,7 +596,7 @@ func _face(who: String, px: int, picked := false, open := true) -> Control:
 		style.shadow_size = 3
 	disc.add_theme_stylebox_override("panel", style)
 	var face := TextureRect.new()
-	face.texture = Look.icon_texture({"rickshaw": "rahim", "tea": "monir", "bus": "babu"}[who], px)
+	face.texture = Look.icon_texture({"rickshaw": "rahim", "tea": "monir", "bus": "babu", "fuchka": "julekha"}[who], px)
 	face.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	face.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	face.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -819,14 +820,14 @@ func _start_sheet(who: String) -> void:
 	_let_scroll(body)
 
 	var start := Look.chunky(s.t("start_" + who), Look.YELLOW, Look.OUTLINE, 26, 8, 22)
-	start.name = {"rickshaw": "Drive", "tea": "OpenStall", "bus": "Board"}[who]
+	start.name = {"rickshaw": "Drive", "tea": "OpenStall", "bus": "Board", "fuchka": "OpenCart"}[who]
 	start.icon = Look.icon_texture("play", 24)
 	start.add_theme_constant_override("icon_max_width", 24)
 	start.icon_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	start.custom_minimum_size = Vector2(0, 78)
-	start.pressed.connect(_start.bind(who, {"rickshaw": "res://scenes/rickshaw.tscn", "tea": "res://scenes/tea.tscn", "bus": "res://scenes/bus.tscn"}[who]))
+	start.pressed.connect(_start.bind(who, {"rickshaw": "res://scenes/rickshaw.tscn", "tea": "res://scenes/tea.tscn", "bus": "res://scenes/bus.tscn", "fuchka": "res://scenes/fuchka.tscn"}[who]))
 	col.add_child(start)
-	var secs := {"rickshaw": int(b.n("rickshaw.day_seconds")), "tea": int(b.n("tea_stall.day_seconds"))}
+	var secs := {"rickshaw": int(b.n("rickshaw.day_seconds")), "tea": int(b.n("tea_stall.day_seconds")), "fuchka": int(b.n("fuchka.day_seconds"))}
 	if secs.has(who) and secs[who] > 0:
 		var length := Look.label(s.t("playLength", {"n": int(round(secs[who] / 60.0))}), 14, true, Look.MUTED)
 		length.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -970,6 +971,8 @@ func _last_day_line(who: String) -> String:
 			return s.t("lastDay", {"money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.get("stars", 0)})
 		if who == "tea":
 			return s.t("teaLastDay", {"money": int(h.earned), "served": int(h.get("served", 0))})
+		if who == "fuchka":
+			return s.t("fuchkaLastDay", {"money": int(h.earned), "served": int(h.get("served", 0))})
 		return s.t("busLastDay", {"money": int(h.earned), "riders": int(h.get("riders", 0))})
 	return ""
 
@@ -1059,7 +1062,7 @@ func _shop_page(page: VBoxContainer) -> void:
 	page.add_child(_page_title(s.t("nav_shop")))
 	page.add_child(Look.label(s.t("shopHelp"), 15, false, Look.MUTED))
 	var tabs := GridContainer.new()
-	tabs.columns = 4
+	tabs.columns = 3
 	tabs.add_theme_constant_override("h_separation", 8)
 	var open := progress.open_characters()
 	for who in WHO + ["home"]:
@@ -1170,7 +1173,7 @@ func _owned_pill(col: VBoxContainer, text: String) -> void:
 ## A look: its colour (or the slot's picture), and buy, wear or take off.
 func _look_card(l: Dictionary, who: String) -> Control:
 	var tile := _tint_of(who)
-	for key in ["hood", "fill", "colour"]:
+	for key in ["hood", "fill", "colour", "body"]:
 		if l.has(key):
 			tile = Color(str(l[key])).lerp(Color.WHITE, 0.35)
 			break
@@ -1412,6 +1415,8 @@ func _fund_page(page: VBoxContainer) -> void:
 		var line := s.t("historyLine", {"day": int(h.day), "money": int(h.earned), "trips": int(h.get("trips", 0)), "stars": h.get("stars", 0)})
 		if h.get("who", "") == "tea":
 			line = s.t("teaHistoryLine", {"day": int(h.day), "money": int(h.earned), "served": int(h.get("served", 0))})
+		elif h.get("who", "") == "fuchka":
+			line = s.t("fuchkaHistoryLine", {"day": int(h.day), "money": int(h.earned), "served": int(h.get("served", 0))})
 		elif h.get("who", "") == "bus":
 			line = s.t("busHistoryLine", {"day": int(h.day), "money": int(h.earned), "riders": int(h.get("riders", 0))})
 		list.add_child(Look.label(line, 15, h.met, Look.PARROT_DARK if h.met else Look.OUTLINE))
@@ -2107,8 +2112,10 @@ func _board_page(page: VBoxContainer) -> void:
 ## A row of choices for the lists (periods, or characters).
 func _board_chips(ids: Array, picked: String, key: String, prefix: String, is_period: bool) -> Control:
 	var grid := GridContainer.new()
-	grid.columns = ids.size()
+	# Five characters do not fit in a row: three and two.
+	grid.columns = ids.size() if ids.size() <= 4 else 3
 	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
 	for id in ids:
 		var on: bool = id == picked
 		var chip := Look.chunky(s.t(key + str(id)), Look.SKY_DARK if on else Color.WHITE, Color.WHITE if on else Look.OUTLINE, 13, 3, 12)
@@ -2290,31 +2297,31 @@ func _icon_tile(icon_name: String, fill: Color, tint: Color, px := 48) -> Contro
 
 
 func _name_key(who: String) -> String:
-	return {"rickshaw": "rickshawName", "tea": "teaName", "bus": "busName"}[who]
+	return {"rickshaw": "rickshawName", "tea": "teaName", "bus": "busName", "fuchka": "fuchkaName"}[who]
 
 
 func _role_key(who: String) -> String:
-	return {"rickshaw": "rickshawRole", "tea": "teaRole", "bus": "busRole"}[who]
+	return {"rickshaw": "rickshawRole", "tea": "teaRole", "bus": "busRole", "fuchka": "fuchkaRole"}[who]
 
 
 ## Each character's colour.
 func _colour_of(who: String) -> Color:
-	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT, "bus": Look.SKY}[who]
+	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT, "bus": Look.SKY, "fuchka": Look.VERMILION}[who]
 
 
 ## Their colour dark enough for white words on it.
 func _deep_of(who: String) -> Color:
-	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT_DARK, "bus": Look.SKY_DARK}.get(who, Look.VERMILION)
+	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT_DARK, "bus": Look.SKY_DARK, "fuchka": Color("B3261E")}.get(who, Look.VERMILION)
 
 
 ## A pale wash of their colour, behind pictures.
 func _tint_of(who: String) -> Color:
-	return {"rickshaw": Color("FDE7F0"), "tea": Color("E6F4EC"), "bus": Color("D6ECF7")}.get(who, Color("FFF1D6"))
+	return {"rickshaw": Color("FDE7F0"), "tea": Color("E6F4EC"), "bus": Color("D6ECF7"), "fuchka": Color("FDE2DC")}.get(who, Color("FFF1D6"))
 
 
 ## What opens a character ("tea_stall" for the tea stall).
 func _unlock_of(who: String) -> String:
-	return {"rickshaw": "", "tea": "tea_stall", "bus": "bus"}[who]
+	return {"rickshaw": "", "tea": "tea_stall", "bus": "bus", "fuchka": "fuchka"}[who]
 
 
 func _unlock_early(what: String) -> void:

@@ -21,8 +21,11 @@ const UPGRADES := ["new_rickshaw", "battery_rickshaw"]
 ## The stall grows in this order (§৪.৩); the move to a shop comes with the story.
 const TEA_UPGRADES := ["bench", "second_kettle", "awning", "fridge"]
 const BUS_UPGRADES := ["notebook", "change_bag", "loud_voice"]
+## Julekha Khala's cart: a stool for waiting, an umbrella against the rain,
+## a pot of doi for doi fuchka.
+const FUCHKA_UPGRADES := ["stool", "umbrella", "doi"]
 ## Each character's upgrades, and where their prices are in the balance.
-const UPGRADE_LISTS := {"rickshaw": ["rickshaw", UPGRADES], "tea": ["tea_stall", TEA_UPGRADES], "bus": ["bus", BUS_UPGRADES]}
+const UPGRADE_LISTS := {"rickshaw": ["rickshaw", UPGRADES], "tea": ["tea_stall", TEA_UPGRADES], "bus": ["bus", BUS_UPGRADES], "fuchka": ["fuchka", FUCHKA_UPGRADES]}
 
 var b: Balance
 var path := DEFAULT_PATH
@@ -49,6 +52,7 @@ static func fresh() -> Dictionary:
 		"rickshaw": {"days": 0, "school": 0, "bestDay": 0, "trips": 0, "earned": 0, "teas": 0, "upgrades": []},
 		"tea": {"days": 0, "bestDay": 0, "served": 0, "happy": 0, "earned": 0, "upgrades": []},
 		"bus": {"days": 0, "bestDay": 0, "riders": 0, "earned": 0, "upgrades": []},
+		"fuchka": {"days": 0, "bestDay": 0, "served": 0, "exact": 0, "earned": 0, "upgrades": []},
 		"history": [],
 		"tara": 0,
 		"story": {"seen": []},
@@ -61,10 +65,10 @@ static func fresh() -> Dictionary:
 		# Where Rahim Chacha rides: "mirpur", or "old_dhaka" once open.
 		"area": "mirpur",
 		# How each one's family feels about them, 0–10 (calls from home).
-		"family": {"rickshaw": 5, "tea": 5, "bus": 5},
+		"family": {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5},
 		# Looks worn (bought ones are in "cosmetics"), by slot; things for
 		# Rahim Chacha's home; his own phone; the savings club.
-		"looks": {"rickshaw": {}, "tea": {}, "bus": {}},
+		"looks": {"rickshaw": {}, "tea": {}, "bus": {}, "fuchka": {}},
 		"home": [],
 		"phone": false,
 		"samity": {"in": false, "paid": 0, "rounds": 0},
@@ -273,7 +277,7 @@ func family(who: String) -> int:
 ## Moves `who`'s family feeling by `delta`, kept within 0–10.
 func add_family(who: String, delta: int) -> int:
 	if not data.has("family"):
-		data.family = {"rickshaw": 5, "tea": 5, "bus": 5}
+		data.family = {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5}
 	data.family[who] = clampi(family(who) + delta, 0, 10)
 	return int(data.family[who])
 
@@ -299,13 +303,15 @@ func unlocked(what: String) -> bool:
 	return level() >= int(b.n("unlocks." + what)) or (data.early as Array).has(what)
 
 
-## The characters that can be played: "rickshaw", "tea", "bus".
+## The characters that can be played: "rickshaw", "tea", "bus", "fuchka".
 func open_characters() -> Array:
 	var out := ["rickshaw"]
 	if unlocked("tea_stall"):
 		out.append("tea")
 	if unlocked("bus"):
 		out.append("bus")
+	if unlocked("fuchka"):
+		out.append("fuchka")
 	return out
 
 
@@ -503,6 +509,34 @@ func apply_bus_day(result: Dictionary) -> Dictionary:
 		bus.bestDay = earned
 	_day_done("bus", result, out)
 	_remember({"day": data.day, "who": "bus", "earned": earned, "riders": int(result.riders), "stars": snappedf(stars, 0.1), "met": true})
+	out.day = data.day
+	return out
+
+
+## Takes a day at Julekha Khala's cart ({earned, served, happy, exact,
+## lost, stars}) into the save: a tenth to the fund, the rest saved.
+func apply_fuchka_day(result: Dictionary) -> Dictionary:
+	var out := {}
+	var earned := _featured("fuchka", maxi(0, int(result.earned)), out)
+	var stars := float(result.stars)
+	out.earned = earned
+	var fund_cut := _to_fund(earned, out)
+	data.taka = int(data.taka) + earned - fund_cut
+	out.kept = earned - fund_cut
+	_gain_xp(stars, int(result.served) > 0, out)
+	data.day = int(data.day) + 1
+	if not data.has("fuchka"):
+		data["fuchka"] = {"days": 0, "bestDay": 0, "served": 0, "exact": 0, "earned": 0, "upgrades": []}
+	var f: Dictionary = data.fuchka
+	f.days = int(f.days) + 1
+	f.served = int(f.served) + int(result.served)
+	f.exact = int(f.get("exact", 0)) + int(result.get("exact", 0))
+	f.earned = int(f.earned) + earned
+	out.best = earned > int(f.bestDay) and earned > 0
+	if out.best:
+		f.bestDay = earned
+	_day_done("fuchka", result, out)
+	_remember({"day": data.day, "who": "fuchka", "earned": earned, "served": int(result.served), "stars": snappedf(stars, 0.1), "met": true})
 	out.day = data.day
 	return out
 

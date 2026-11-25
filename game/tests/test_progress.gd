@@ -343,7 +343,7 @@ func test_every_good_has_its_words() -> void:
 	var s := Strings.new()
 	for lang in ["bn", "en"]:
 		s.lang = lang
-		for who in ["rickshaw", "tea", "bus"]:
+		for who in ["rickshaw", "tea", "bus", "fuchka"]:
 			check(not Goods.looks(who).is_empty(), "looks for %s" % who)
 			for l in Goods.looks(who):
 				for key in ["look_" + l.id, "lookHelp_" + l.slot]:

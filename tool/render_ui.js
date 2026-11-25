@@ -8,7 +8,7 @@ const path = require('path');
 const SRC = path.join(__dirname, 'ui_art');
 const DIR = path.join(__dirname, '..', 'game', 'textures', 'ui');
 // Width in pixels to draw at; icons at 128 are scaled down in the game.
-const WIDTH = { mohalla: 1080, title_art: 1080, bunting: 1080, band: 104, rahim: 256, monir: 256, babu: 256 };
+const WIDTH = { mohalla: 1080, title_art: 1080, bunting: 1080, band: 104, rahim: 256, monir: 256, babu: 256, julekha: 256 };
 
 (async () => {
   const browser = await chromium.launch();

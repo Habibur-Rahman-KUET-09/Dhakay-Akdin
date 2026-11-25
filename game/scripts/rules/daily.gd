@@ -6,7 +6,7 @@
 extends RefCounted
 
 ## The characters in the order they open.
-const ORDER := ["rickshaw", "tea", "bus"]
+const ORDER := ["rickshaw", "tea", "bus", "fuchka"]
 
 ## Challenges: whose day, which number of the day's stats, the goal.
 const CHALLENGES := [
@@ -19,6 +19,9 @@ const CHALLENGES := [
 	{"id": "b_no_slip", "who": "bus", "stat": "no_slip", "goal": 1},
 	{"id": "b_on_time", "who": "bus", "stat": "on_time", "goal": 2},
 	{"id": "b_riders", "who": "bus", "stat": "riders", "goal": 40},
+	{"id": "f_exact", "who": "fuchka", "stat": "exact", "goal": 8},
+	{"id": "f_happy", "who": "fuchka", "stat": "happy", "goal": 15},
+	{"id": "f_money", "who": "fuchka", "stat": "earned", "goal": 700},
 ]
 
 

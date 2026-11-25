@@ -155,6 +155,21 @@
    "voice": "bn-BD-PradeepNeural",
    "pitch": "-14%",
    "rate": "-10%"
+  },
+  "julekha": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "-10%",
+   "rate": "-6%"
+  },
+  "rana": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+22%",
+   "rate": "+6%"
+  },
+  "officer": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-12%",
+   "rate": "-2%"
   }
  },
  "lines": {

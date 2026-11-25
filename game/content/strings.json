@@ -3122,5 +3122,249 @@
  "sticker_star": {
   "bn": "জীবন সুন্দর",
   "en": "Life is beautiful"
+ },
+ "fuchkaName": {
+  "bn": "জুলেখা খালা",
+  "en": "Julekha Khala"
+ },
+ "fuchkaRole": {
+  "bn": "ফুচকাওয়ালি",
+  "en": "Fuchka seller"
+ },
+ "start_fuchka": {
+  "bn": "গাড়ি খুলুন",
+  "en": "Open the cart"
+ },
+ "tip_fuchka": {
+  "bn": "কার্ডে দেখুন কে কতটা টক আর ঝাল চায়; ঠিক মাপে দিলে বখশিশ।",
+  "en": "See on each card how sour and how hot they want it; just right earns a tip."
+ },
+ "fuchkaLastDay": {
+  "bn": "শেষ দিন: {money} টাকা, {served} জন কাস্টমার",
+  "en": "Last day: Tk {money}, {served} customers"
+ },
+ "fuchkaHistoryLine": {
+  "bn": "দিন {day}: ফুচকা · {money} টাকা · {served} জন",
+  "en": "Day {day}: fuchka · Tk {money} · {served}"
+ },
+ "fuchkaLoading": {
+  "bn": "জুলেখা খালার গাড়ি সাজানো হচ্ছে…",
+  "en": "Setting up Julekha Khala's cart…"
+ },
+ "fuchkaSign": {
+  "bn": "জুলেখা খালার ফুচকা",
+  "en": "Julekha Khala's Fuchka"
+ },
+ "fuchkaStart": {
+  "bn": "মনিপুর স্কুলের গেটে! প্রথমে ফুচকা ফাটান, ভরুন, তারপর টক আর ঝাল মাপে দিন।",
+  "en": "At the gate of Monipur school! Crack the puris, fill them, then measure the sour and the chilli."
+ },
+ "fuchkaWinter": {
+  "bn": "শীতের বিকেল: আজ ফুচকার ভিড় বেশি!",
+  "en": "A winter afternoon: more people want fuchka today!"
+ },
+ "fuchkaSumi": {
+  "bn": "সুমি এসেছে! ও ঝাল খায় না, টক মাঝারি।",
+  "en": "Sumi is here! No chilli for her, medium sour."
+ },
+ "fuchkaWants": {
+  "bn": "টক {sour} · ঝাল {chilli}",
+  "en": "Sour {sour} · Hot {chilli}"
+ },
+ "fuchkaPlateEmpty": {
+  "bn": "হাতে প্লেট নেই: \"ফুচকা\" চাপুন",
+  "en": "No plate in hand: tap Fuchka"
+ },
+ "fuchkaPlatePuri": {
+  "bn": "৬টা ফুচকা",
+  "en": "6 fuchka"
+ },
+ "fuchkaNotReady": {
+  "bn": "আগে ফুচকা ফাটিয়ে আলু-মটর ভরুন",
+  "en": "Crack the puris and fill them first"
+ },
+ "fuchkaVerdict_exact": {
+  "bn": "একদম ঠিক মাপ! বখশিশ {tip} টাকা",
+  "en": "Just right! A tip of Tk {tip}"
+ },
+ "fuchkaVerdict_close": {
+  "bn": "প্রায় ঠিক, খুশি মনে খেলেন",
+  "en": "Nearly right; they enjoyed it"
+ },
+ "fuchkaVerdict_wrong": {
+  "bn": "মাপ মেলেনি, খুশি হননি",
+  "en": "Not as they wanted; not pleased"
+ },
+ "fuchkaRain": {
+  "bn": "বৃষ্টি! গাড়ি পলিথিনে ঢাকুন, নইলে ফুচকা নরম হয়ে যাবে",
+  "en": "Rain! Cover the cart, or the puris go soft"
+ },
+ "fuchkaRainCovered": {
+  "bn": "বৃষ্টি নামল, ছাতার নিচে গাড়ি শুকনো",
+  "en": "Rain, but the umbrella keeps the cart dry"
+ },
+ "fuchkaCover": {
+  "bn": "পলিথিনে ঢাকুন",
+  "en": "Cover the cart"
+ },
+ "fuchkaCovered": {
+  "bn": "গাড়ি ঢাকা হলো, ফুচকা মচমচে থাকবে",
+  "en": "Covered: the puris stay crisp"
+ },
+ "fuchkaServed": {
+  "bn": "{served} জনকে ফুচকা, {happy} জন খুশি",
+  "en": "Fuchka for {served}, {happy} pleased"
+ },
+ "fuchkaExact": {
+  "bn": "একদম ঠিক মাপে: {n} প্লেট",
+  "en": "Just right: {n} plates"
+ },
+ "fstep_puri": {
+  "bn": "ফুচকা",
+  "en": "Fuchka"
+ },
+ "fstep_filling": {
+  "bn": "আলু-মটর",
+  "en": "Filling"
+ },
+ "fstep_sour": {
+  "bn": "টক",
+  "en": "Sour"
+ },
+ "fstep_chilli": {
+  "bn": "ঝাল",
+  "en": "Chilli"
+ },
+ "fstep_doi": {
+  "bn": "দই",
+  "en": "Doi"
+ },
+ "fkind_child": {
+  "bn": "শিশু",
+  "en": "Child"
+ },
+ "fkind_student": {
+  "bn": "কলেজের ছাত্রী",
+  "en": "College student"
+ },
+ "fkind_office": {
+  "bn": "অফিসের লোক",
+  "en": "Office worker"
+ },
+ "fkind_family": {
+  "bn": "পরিবার",
+  "en": "Family"
+ },
+ "fkind_sumi": {
+  "bn": "সুমি",
+  "en": "Sumi"
+ },
+ "share_fuchka": {
+  "bn": "আজ জুলেখা খালা {n} জনকে ফুচকা খাওয়ালেন, আয় {money} টাকা!",
+  "en": "Today Julekha Khala served fuchka to {n} people and made Tk {money}!"
+ },
+ "act_crack": {
+  "bn": "ফুচকা ফাটান",
+  "en": "Crack the puris"
+ },
+ "act_crack_hint": {
+  "bn": "প্রতিটা ফুচকায় আলতো এক টোকা দিন; বেশিক্ষণ চাপলে ভেঙে যায়।",
+  "en": "Give each puri one light tap; press too long and it breaks."
+ },
+ "act_crack_broke": {
+  "bn": "ভেঙে গেল! আরও আলতো করে",
+  "en": "Broken! Lighter"
+ },
+ "act_tamarind": {
+  "bn": "টক ঢালুন",
+  "en": "Pour the tamarind water"
+ },
+ "act_tamarind_hint": {
+  "bn": "জগ চেপে ধরে রাখুন, টক বাড়বে; চাওয়া মাপে ছেড়ে দিয়ে \"হয়েছে\" চাপুন।",
+  "en": "Hold the jug to pour; let go at the level wanted and tap Done."
+ },
+ "act_tamarind_done": {
+  "bn": "হয়েছে",
+  "en": "Done"
+ },
+ "act_tamarind_level": {
+  "bn": "টক: {n}",
+  "en": "Sour: {n}"
+ },
+ "ch_f_exact": {
+  "bn": "একদম ঠিক মাপে {goal} প্লেট ফুচকা",
+  "en": "{goal} plates of fuchka just right"
+ },
+ "ch_f_happy": {
+  "bn": "{goal} জন কাস্টমারকে খুশি করুন",
+  "en": "Please {goal} customers"
+ },
+ "ch_f_money": {
+  "bn": "ফুচকায় এক দিনে {goal} টাকা",
+  "en": "Tk {goal} from fuchka in a day"
+ },
+ "lbWho_fuchka": {
+  "bn": "জুলেখা খালা",
+  "en": "Julekha Khala"
+ },
+ "log_fuchka_exact": {
+  "bn": "একদম ঠিক মাপের ফুচকা",
+  "en": "fuchka just right"
+ },
+ "log_fuchka_wrong": {
+  "bn": "মাপে ভুল ফুচকা",
+  "en": "fuchka not as wanted"
+ },
+ "caller_rana": {
+  "bn": "ছেলে রানা",
+  "en": "Her son Rana"
+ },
+ "up_stool": {
+  "bn": "টুল",
+  "en": "Stools"
+ },
+ "upHelp_stool": {
+  "bn": "বসার টুল: কাস্টমার ৪ সেকেন্ড বেশি অপেক্ষা করেন",
+  "en": "Stools to sit on: customers wait 4 seconds longer"
+ },
+ "up_umbrella": {
+  "bn": "বড় ছাতা",
+  "en": "A big umbrella"
+ },
+ "upHelp_umbrella": {
+  "bn": "বৃষ্টিতে গাড়ি সবসময় ঢাকা",
+  "en": "The cart is always covered in the rain"
+ },
+ "up_doi": {
+  "bn": "দইয়ের হাঁড়ি",
+  "en": "A pot of doi"
+ },
+ "upHelp_doi": {
+  "bn": "দই ফুচকা বিক্রি, ৬০ টাকা প্লেট",
+  "en": "Sell doi fuchka at Tk 60 a plate"
+ },
+ "look_cart_blue": {
+  "bn": "নীল গাড়ি",
+  "en": "A blue cart"
+ },
+ "look_cart_red": {
+  "bn": "লাল গাড়ি",
+  "en": "A red cart"
+ },
+ "look_cart_star": {
+  "bn": "বেগুনি-সোনালি গাড়ি (তারা)",
+  "en": "A purple and gold cart (stars)"
+ },
+ "lookHelp_cart": {
+  "bn": "ফুচকার গাড়ির নতুন রং",
+  "en": "A new colour for the fuchka cart"
+ },
+ "boost_price_board": {
+  "bn": "রঙিন দামের বোর্ড",
+  "en": "A bright price board"
+ },
+ "boostHelp_price_board": {
+  "bn": "পরের ফুচকার দিনে ৩০% বেশি কাস্টমার",
+  "en": "30% more customers on the cart's next day"
  }
 }

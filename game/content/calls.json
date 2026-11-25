@@ -22,6 +22,12 @@
    {"id": "b_sister", "by": "babu_ma", "kind": "news", "bn": "বাবা, তোর ছোট বোনটা এবার স্কুলে ভর্তি হলো!", "en": "Son, your little sister has started school!", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
    {"id": "b_calf", "by": "babu_ma", "kind": "news", "bn": "বাবা, আমাদের গরুটার বাছুর হয়েছে! নাম রেখেছি লালু।", "en": "Son, our cow has had a calf! I've named it Lalu.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
    {"id": "b_cold", "by": "babu_ma", "kind": "need", "bn": "বাবা, শীত পড়েছে, গায়ে দেওয়ার মতো কিছু নেই।", "en": "Son, the cold has come and I've nothing warm to wear.", "options": {"send": {"family": 2, "cost": 150}, "later": {"family": -2}}}
+  ],
+  "fuchka": [
+   {"id": "f_rana_exam", "by": "rana", "kind": "news", "bn": "মা, আজ অঙ্ক পরীক্ষায় আশি পেয়েছি! তাড়াতাড়ি আসবা?", "en": "Ma, I got eighty in the maths test today! Will you come home early?", "options": {"go": {"family": 2, "end_day": true}, "later": {"family": 0}}},
+   {"id": "f_rana_shoes", "by": "rana", "kind": "need", "bn": "মা, স্কুলের জুতা ছিঁড়ে গেছে। স্যার বলেছেন কাল নতুন জুতা পরে আসতে।", "en": "Ma, my school shoes are torn. Sir says to come in new shoes tomorrow.", "options": {"send": {"family": 2, "cost": 200}, "later": {"family": -2}}},
+   {"id": "f_rana_eat", "by": "rana", "kind": "chat", "bn": "মা, ভাত রান্না করে রেখেছি। তুমি খেয়েছ?", "en": "Ma, I've cooked the rice. Have you eaten?", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "f_rana_rain", "by": "rana", "kind": "chat", "bn": "মা, বৃষ্টি আসছে। গাড়িটা ঢেকে রেখো, আর তুমি ভিজো না।", "en": "Ma, rain is coming. Cover the cart, and don't get wet yourself.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
   ]
  }
 }

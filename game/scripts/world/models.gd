@@ -646,6 +646,53 @@ static func bench() -> ArrayMesh:
 
 ## Someone sitting on a bench (seat at y = 0.48), facing -Z: shirt PAINT_A,
 ## trousers or lungi PAINT_B.
+## Julekha Khala's fuchka cart: a painted wooden cart on two wheels, a
+## glass case of puris on top, the big pot of potato and peas, the
+## tamarind-water jug, the chilli bowl and a stack of plates; a pole with
+## a little canopy. Its front (-Z) faces the customers.
+static func fuchka_cart(body := Color("1C7C54"), trim := Color("F6B800")) -> ArrayMesh:
+	var b := Builder.new()
+	var wood := Color("8B5A2B")
+	# The cart: a box on two wheels, painted, with a trim band.
+	b.box(Vector3(1.9, 0.75, 0.9), Vector3(0, 0.75, 0), body)
+	b.box(Vector3(1.92, 0.1, 0.92), Vector3(0, 0.95, 0), trim)
+	b.box(Vector3(2.0, 0.05, 1.0), Vector3(0, 1.14, 0), wood.darkened(0.2))
+	for x in [-0.7, 0.7]:
+		b.cyl(0.36, 0.08, Vector3(x, 0.36, 0.48), Color("3C3F44"), Vector3(90, 0, 0), 16)
+		b.cyl(0.06, 0.1, Vector3(x, 0.36, 0.52), Color("C9CDD2"), Vector3(90, 0, 0), 8)
+	b.cyl(0.03, 0.4, Vector3(0, 0.2, -0.3), wood, Vector3.ZERO, 6)
+	# Rickshaw-art flowers on the front.
+	for i in 4:
+		var x := -0.6 + i * 0.4
+		b.ball(0.07, Vector3(x, 0.72, -0.46), Color("C2185B") if i % 2 == 0 else Color("2D8BD6"), Vector3(1, 1, 0.3))
+		b.ball(0.03, Vector3(x, 0.72, -0.48), trim, Vector3(1, 1, 0.3))
+	# The glass case of puris (left), its frame and the puris piled inside.
+	b.box(Vector3(0.8, 0.5, 0.6), Vector3(-0.45, 1.42, 0.1), Color("CFE8F2"))
+	for x in [-0.85, -0.05]:
+		b.box(Vector3(0.03, 0.52, 0.62), Vector3(x, 1.42, 0.1), wood)
+	for i in 12:
+		var x := -0.75 + (i % 6) * 0.12
+		var y := 1.25 + (i / 6) * 0.1
+		b.ball(0.06, Vector3(x, y, 0.05 + (i % 2) * 0.12), Color("E8C27A"), Vector3(1, 0.8, 1))
+	# The big aluminium pot of potato and peas (right), with a ladle.
+	b.cyl(0.24, 0.3, Vector3(0.45, 1.32, 0.12), Color("C9CDD2"), Vector3.ZERO, 16)
+	b.cyl(0.22, 0.02, Vector3(0.45, 1.48, 0.12), Color("E0C27A"), Vector3.ZERO, 16)
+	b.cyl(0.015, 0.4, Vector3(0.55, 1.62, 0.12), Color("9AA3A8"), Vector3(0, 0, 30), 6)
+	# The tamarind-water jug, the chilli bowl, the plates.
+	b.cyl(0.09, 0.22, Vector3(0.05, 1.28, -0.2), Color("7A4A2A"), Vector3.ZERO, 12)
+	b.cyl(0.08, 0.06, Vector3(0.12, 1.2, 0.3), Color("D7263D"), Vector3.ZERO, 12)
+	for i in 5:
+		b.cyl(0.14, 0.012, Vector3(-0.3, 1.18 + i * 0.015, -0.3), Color("F4F1E8"), Vector3.ZERO, 14)
+	# A pole and a little striped canopy.
+	b.cyl(0.03, 1.4, Vector3(0.85, 1.85, 0.35), Color("C8A96A"), Vector3.ZERO, 6)
+	for i in 6:
+		var a := i * TAU / 6
+		var c := Vector3(0.85, 2.55, 0.35)
+		b.quad(c, c + Vector3(cos(a) * 0.7, -0.25, sin(a) * 0.7), c + Vector3(cos(a + TAU / 6) * 0.7, -0.25, sin(a + TAU / 6) * 0.7), c,
+			Color("C2185B") if i % 2 == 0 else trim)
+	return b.commit()
+
+
 static func bench_sitter() -> ArrayMesh:
 	var b := Builder.new()
 	_body(b, Vector3(0, 0.5, 0), true, false)
