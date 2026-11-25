@@ -1,26 +1,48 @@
-# Temporary: keeps the two newest releases and deletes the rest (tags stay).
-# Runs once when this branch is pushed; the branch is then deleted.
+# Temporary storage clean-up; runs once when this branch is pushed.
+# Keeps the two newest releases (tags stay), deletes every Actions
+# artifact, keeps only the newest cache of each key, and keeps the five
+# newest runs of each workflow.
 name: cleanup-releases
 on:
   push:
     branches: [cleanup-releases]
 permissions:
   contents: write
+  actions: write
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - name: Keep the two newest releases
+      - name: Clean up
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
+          ME: ${{ github.run_id }}
         run: |
-          gh api --paginate "repos/$REPO/releases?per_page=100" --jq '.[] | [(.published_at // .created_at), .tag_name] | @tsv' | sort -r > all.tsv
-          echo "Releases: $(wc -l < all.tsv)"
-          echo "Keeping:"
-          head -2 all.tsv
-          tail -n +3 all.tsv | cut -f2 | while read -r tag; do
-            gh release delete "$tag" --repo "$REPO" --yes && echo "deleted $tag"
+          set -u
+          echo "== Releases: keep the two newest"
+          gh api --paginate "repos/$REPO/releases?per_page=100" --jq '.[] | [(.published_at // .created_at), .tag_name] | @tsv' | sort -r > rel.tsv
+          echo "releases: $(wc -l < rel.tsv)"
+          tail -n +3 rel.tsv | cut -f2 | while read -r tag; do gh release delete "$tag" --repo "$REPO" --yes && echo "deleted release $tag"; done
+
+          echo "== Artifacts: delete all"
+          gh api --paginate "repos/$REPO/actions/artifacts?per_page=100" --jq '.artifacts[] | [.id, .size_in_bytes, .name] | @tsv' > art.tsv
+          echo "artifacts: $(wc -l < art.tsv), $(awk '{s+=$2} END {printf "%.1f MB", s/1048576}' art.tsv)"
+          cut -f1 art.tsv | while read -r id; do gh api -X DELETE "repos/$REPO/actions/artifacts/$id" > /dev/null && echo "deleted artifact $id"; done
+
+          echo "== Caches: keep the newest of each key"
+          gh api --paginate "repos/$REPO/actions/caches?per_page=100" --jq '.actions_caches[] | [.key, .last_accessed_at, .id, .size_in_bytes] | @tsv' | sort -k1,1 -k2,2r > cache.tsv
+          echo "caches: $(wc -l < cache.tsv), $(awk '{s+=$4} END {printf "%.1f MB", s/1048576}' cache.tsv)"
+          awk -F'\t' 'seen[$1]++ {print $3}' cache.tsv | while read -r id; do gh api -X DELETE "repos/$REPO/actions/caches/$id" > /dev/null && echo "deleted cache $id"; done
+
+          echo "== Workflow runs: keep the five newest of each workflow"
+          gh api --paginate "repos/$REPO/actions/runs?per_page=100" --jq '.workflow_runs[] | select(.status == "completed") | [.workflow_id, .created_at, .id] | @tsv' | sort -k1,1 -k2,2r > runs.tsv
+          echo "finished runs: $(wc -l < runs.tsv)"
+          awk -F'\t' '++n[$1] > 5 {print $3}' runs.tsv | while read -r id; do
+            [ "$id" = "$ME" ] && continue
+            gh api -X DELETE "repos/$REPO/actions/runs/$id" > /dev/null && echo "deleted run $id"
           done
-          echo "Left:"
-          gh release list --repo "$REPO" --limit 10
+          echo "== Left"
+          gh release list --repo "$REPO" --limit 5
+          echo "artifacts left: $(gh api "repos/$REPO/actions/artifacts?per_page=1" --jq .total_count)"
+          echo "runs left: $(gh api "repos/$REPO/actions/runs?per_page=1" --jq .total_count)"
