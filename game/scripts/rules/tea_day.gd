@@ -32,6 +32,8 @@ enum Event {
 	WRONG_PERSON, ## handed to someone who did not order it
 	PHONE_PAY, ## paid by phone: check the SMS (settle_phone)
 	CHANGED, ## someone changed their (hidden) order: last_change
+	NO_CUPS, ## no clean cup left: wash some (wash)
+	CREDIT_ASK, ## a neighbour asks to pay later: credit_ask (settle_credit)
 }
 
 ## What can be ordered, in the order shown on the counter.
@@ -125,6 +127,22 @@ var _phone_rng := RandomNumberGenerator.new()
 var memory := false
 var remembered := 0
 var mixed_up := 0
+## Phase 6 (hands on). Cups: a tea takes a clean one, and the cup comes
+## back dirty; with none clean, wash some. The credit book: now and then a
+## neighbour asks to pay later ({npc, bill, items} in credit_ask while
+## Monir Mama decides). `ledger` is the save's book (shared, so it carries
+## over): [{npc, owed, written, days, tries}]; due ones are asked for at
+## the start of a day (collect). Own dice.
+var cups_total := 8
+var cups_clean := 8
+var cups_dirty := 0
+var washed := 0
+var credit_ask := {}
+var ledger: Array = []
+var credit_given := 0
+var credit_collected := 0
+var credit_lost := 0
+var _credit_rng := RandomNumberGenerator.new()
 
 
 func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") -> void:
@@ -135,15 +153,19 @@ func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") ->
 		weather.seed = seed_value + 7
 		_hand_rng.seed = seed_value + 13
 		_phone_rng.seed = seed_value + 17
+		_credit_rng.seed = seed_value + 19
 	else:
 		rng.randomize()
 		weather.randomize()
 		_hand_rng.randomize()
 		_phone_rng.randomize()
+		_credit_rng.randomize()
 	menu = (b.at("tea_stall.menu") as Dictionary).duplicate(true)
 	day_seconds = b.n("tea_stall.day_seconds")
 	kettle_size = int(b.n("tea_stall.kettle_cups"))
 	kettle = kettle_size
+	cups_total = int(b.n("tea_stall.cups"))
+	cups_clean = cups_total
 	rahim_at = rng.randf_range(0.2, 0.7) * day_seconds
 	babu_at = weather.randf_range(0.4, 0.9) * day_seconds
 	has_second = upgrades.has("second_kettle")
@@ -447,12 +469,17 @@ func tap(step: String, quality := -1.0) -> Array:
 			return [Event.REFILLING]
 		else:
 			return []
+	# A cup: there must be a clean one (hands on).
+	if step == "cup" and interactive and cups_clean <= 0 and not tray.has("cup"):
+		return [Event.NO_CUPS]
 	var next := tray.duplicate()
 	next.append(step)
 	if not _leads_somewhere(next):
-		tray.clear()
+		_clear_tray()
 		_quality.clear()
 		return [Event.WRONG_STEP]
+	if step == "cup" and interactive:
+		cups_clean -= 1
 	if quality >= 0.0:
 		_quality.append(quality)
 	var events := []
@@ -495,7 +522,7 @@ func give() -> Array:
 			who = c
 	if who.is_empty() and hidden:
 		return [Event.WHO]
-	tray.clear()
+	_clear_tray()
 	var q := _made_quality()
 	if who.is_empty():
 		return [Event.NOBODY_WANTS]
@@ -532,7 +559,7 @@ func give_to(seat: int) -> Array:
 		who.left = maxf(1.0, who.left - 2.0)
 		mixed_up += 1
 		return [Event.WRONG_PERSON]
-	tray.clear()
+	_clear_tray()
 	var q := _made_quality()
 	if order_hidden(who):
 		remembered += 1
@@ -588,8 +615,14 @@ func _hand(item: String, who: Dictionary, q: float) -> Array:
 			money += packet
 			who.bill = int(who.bill) + packet
 			iftar_sold += 1
+		# A neighbour may ask to have it written in the book: the bill
+		# waits on Monir Mama's answer.
+		if interactive and npc != "" and credit_ask.is_empty() and _credit_rng.randf() < b.n("tea_stall.credit_chance"):
+			credit_ask = {"npc": npc, "bill": int(who.bill), "items": (who.ordered as Array).duplicate()}
+			money -= int(who.bill)
+			events.append(Event.CREDIT_ASK)
 		# Now and then the bill comes by phone: it waits for the SMS check.
-		if interactive and phone_pay.is_empty() and _phone_rng.randf() < b.n("tea_stall.phone_pay_chance"):
+		elif interactive and phone_pay.is_empty() and _phone_rng.randf() < b.n("tea_stall.phone_pay_chance"):
 			var fake := _phone_rng.randf() < b.n("rickshaw.phone_fake_chance")
 			phone_pay = {"fare": int(who.bill), "npc": npc, "sms": Hands.phone_sms(_phone_rng, int(who.bill), level, fake)}
 			money -= int(who.bill)
@@ -616,5 +649,81 @@ func settle_phone(said_fake: bool) -> String:
 
 ## Throws away what is in the tray.
 func discard() -> void:
-	tray.clear()
+	_clear_tray()
 	_quality.clear()
+
+
+## Empties the tray: a cup in it is a dirty cup now (drunk from, or
+## thrown out).
+func _clear_tray() -> void:
+	if interactive and tray.has("cup"):
+		cups_dirty += 1
+	tray.clear()
+
+
+## Washes up to n dirty cups. Returns how many.
+func wash(n: int) -> int:
+	var k := clampi(n, 0, cups_dirty)
+	cups_dirty -= k
+	cups_clean += k
+	washed += k
+	return k
+
+
+## Monir Mama's answer to "write it down, I'll pay later": `give` credit
+## (the bill goes in the book as `written`; they are pleased) or not
+## (they pay now, a little put out). Returns "cash", or ledger_result's
+## word for what was written.
+func settle_credit(give: bool, written := -1) -> String:
+	if credit_ask.is_empty():
+		return ""
+	var ask := credit_ask
+	credit_ask = {}
+	var bill := int(ask.bill)
+	if not give:
+		money += bill
+		npc_log.append({"id": ask.npc, "delta": -1, "what": "no_credit"})
+		return "cash"
+	if written < 0:
+		written = bill
+	ledger.append({"npc": ask.npc, "owed": bill, "written": written, "days": 0, "tries": 0})
+	credit_given += bill
+	npc_log.append({"id": ask.npc, "delta": 1, "what": "credit"})
+	return Hands.ledger_result(written, bill)
+
+
+## Everything still owed in the book.
+func owed_total() -> int:
+	var n := 0
+	for e in ledger:
+		n += int(e.written)
+	return n
+
+
+## The start of a day: a day older for everyone in the book; those due
+## are asked, and pay (what was written; only what they had if more was
+## written, and they are put out) or not. After a few times asked, the
+## debt is given up. Returns [{npc, paid, amount}] for those asked.
+func collect() -> Array:
+	var out := []
+	for e in ledger.duplicate():
+		e.days = int(e.days) + 1
+		if int(e.days) < int(b.n("tea_stall.credit_days")):
+			continue
+		var paid := _credit_rng.randf() < Hands.repay_chance(int(relations.get(e.npc, 0)))
+		if paid:
+			var amount := mini(int(e.written), int(e.owed))
+			money += amount
+			credit_collected += amount
+			if int(e.written) > int(e.owed):
+				npc_log.append({"id": e.npc, "delta": -1, "what": "overcharged"})
+			ledger.erase(e)
+			out.append({"npc": e.npc, "paid": true, "amount": amount})
+			continue
+		e.tries = int(e.tries) + 1
+		out.append({"npc": e.npc, "paid": false, "amount": int(e.written)})
+		if int(e.tries) >= int(b.n("tea_stall.credit_tries")):
+			ledger.erase(e)
+			credit_lost += int(e.written)
+			npc_log.append({"id": e.npc, "delta": -1, "what": "unpaid"})
+	return out

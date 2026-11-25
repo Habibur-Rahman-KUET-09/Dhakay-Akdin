@@ -3366,5 +3366,293 @@
  "boostHelp_price_board": {
   "bn": "পরের ফুচকার দিনে ৩০% বেশি কাস্টমার",
   "en": "30% more customers on the cart's next day"
+ },
+ "act_chain": {
+  "bn": "চেইন পড়ে গেছে",
+  "en": "The chain's come off"
+ },
+ "act_chain_hint": {
+  "bn": "ঝুলে থাকা চেইনটা ধরে টেনে বড় চাকার ওপরের দাঁতে তুলুন।",
+  "en": "Take hold of the hanging chain and lift it onto the top teeth of the big gear."
+ },
+ "act_chain_turn": {
+  "bn": "এবার প্যাডেলটা একবার পুরো ঘোরান।",
+  "en": "Now turn the pedal once all the way round."
+ },
+ "hornSound": {
+  "bn": "পোঁ পোঁ!",
+  "en": "Honk honk!"
+ },
+ "chainOff": {
+  "bn": "চেইন পড়ে গেছে! পেছনে গাড়ি হর্ন দিচ্ছে।",
+  "en": "The chain's off! The cars behind are honking."
+ },
+ "chainOn": {
+  "bn": "চেইন লেগে গেছে, চলুন!",
+  "en": "Chain's back on: off you go!"
+ },
+ "chainSlow": {
+  "bn": "তাড়াহুড়োয় চেইন লাগাতে একটু সময় গেল।",
+  "en": "Done in a hurry: it took a little while."
+ },
+ "act_lost": {
+  "bn": "হারানো জিনিস",
+  "en": "Left behind"
+ },
+ "act_lost_hint": {
+  "bn": "মালিক কোথায় নেমেছিলেন?",
+  "en": "Where did its owner get off?"
+ },
+ "lostFound": {
+  "bn": "সিটে একটা {item} পড়ে আছে!",
+  "en": "There's {item} left on the seat!"
+ },
+ "lostQuestion_rickshaw": {
+  "bn": "{who} {item} ফেলে গেছেন! তাঁকে কোথায় নামিয়েছিলেন?",
+  "en": "{who} left {item} behind! Where did you drop them?"
+ },
+ "lostQuestion_bus": {
+  "bn": "সিট {seat}-এ বসা {who} {item} ফেলে গেছেন! তিনি কোন স্টপে নেমেছিলেন?",
+  "en": "{who} in seat {seat} left {item} behind! Which stop did they get off at?"
+ },
+ "lostWho_normal": {
+  "bn": "এক যাত্রী",
+  "en": "A passenger"
+ },
+ "lostWho_miser": {
+  "bn": "দরদামে পাকা সেই যাত্রী",
+  "en": "The hard bargainer"
+ },
+ "lostWho_hurry": {
+  "bn": "অফিসের তাড়ায় থাকা যাত্রী",
+  "en": "The one late for the office"
+ },
+ "lostWho_elder": {
+  "bn": "বয়স্ক যাত্রী",
+  "en": "The elderly passenger"
+ },
+ "lostWho_student": {
+  "bn": "এক ছাত্র",
+  "en": "A student"
+ },
+ "lostWho_needy": {
+  "bn": "বাচ্চা কোলে বা অসুস্থ যাত্রী",
+  "en": "The mother with a baby, or the one unwell,"
+ },
+ "lostWho_woman": {
+  "bn": "এক মহিলা যাত্রী",
+  "en": "A woman"
+ },
+ "lostItem_phone": {
+  "bn": "মোবাইল ফোন",
+  "en": "a phone"
+ },
+ "lostItem_umbrella": {
+  "bn": "ছাতা",
+  "en": "an umbrella"
+ },
+ "lostItem_file": {
+  "bn": "অফিসের ফাইল",
+  "en": "an office file"
+ },
+ "lostItem_glasses": {
+  "bn": "চশমা",
+  "en": "a pair of glasses"
+ },
+ "lostItem_book": {
+  "bn": "বই",
+  "en": "a book"
+ },
+ "lostItem_bag": {
+  "bn": "ব্যাগ",
+  "en": "a bag"
+ },
+ "lostItem_purse": {
+  "bn": "পার্স",
+  "en": "a purse"
+ },
+ "lost_police": {
+  "bn": "থানায় জমা দিন",
+  "en": "Hand it in to the police"
+ },
+ "lost_counter": {
+  "bn": "কাউন্টারে জমা দিন",
+  "en": "Leave it at the counter"
+ },
+ "lost_right": {
+  "bn": "ঠিক মনে আছে! মালিক ফিরে পেয়ে খুশি হয়ে {n} টাকা দিলেন।",
+  "en": "Right! The owner got it back and gave Tk {n}."
+ },
+ "lost_wrong": {
+  "bn": "ভুল জায়গা… মালিককে পাওয়া গেল না, জিনিসটা থানায় জমা দিলেন।",
+  "en": "Wrong place… the owner wasn't there: handed in to the police."
+ },
+ "lost_police_said": {
+  "bn": "জিনিসটা থানায় জমা দিলেন।",
+  "en": "Handed in to the police."
+ },
+ "lost_right_bus": {
+  "bn": "ঠিক! পরের বাসে ফেরত গেল, মালিক {n} টাকা দিলেন।",
+  "en": "Right! It went back on the next bus; the owner gave Tk {n}."
+ },
+ "lost_wrong_bus": {
+  "bn": "ভুল স্টপ… জিনিসটা কাউন্টারে জমা রাখলেন।",
+  "en": "Wrong stop… left at the counter."
+ },
+ "lost_counter_said": {
+  "bn": "জিনিসটা কাউন্টারে জমা রাখলেন।",
+  "en": "Left at the counter."
+ },
+ "lostLine": {
+  "bn": "হারানো জিনিস ফেরত দিলেন: {n}টা (+{money} টাকা)",
+  "en": "Lost things returned: {n} (+Tk {money})"
+ },
+ "act_wash": {
+  "bn": "কাপ ধোয়া",
+  "en": "Wash the cups"
+ },
+ "act_wash_hint": {
+  "bn": "প্রতিটা কাপের ওপর আঙুল গোল গোল ঘুরিয়ে ঘষুন, চকচকে হলেই হলো।",
+  "en": "Scrub each cup round and round with a finger until it shines."
+ },
+ "washCount": {
+  "bn": "ধোয়া হলো {n}/{of}",
+  "en": "Washed {n}/{of}"
+ },
+ "washClean": {
+  "bn": "পরিষ্কার",
+  "en": "Clean"
+ },
+ "noCups": {
+  "bn": "পরিষ্কার কাপ নেই! আগে কাপ ধুয়ে নিন।",
+  "en": "No clean cups! Wash some first."
+ },
+ "washButton": {
+  "bn": "কাপ ধোয়া ({n})",
+  "en": "Wash cups ({n})"
+ },
+ "cupsState": {
+  "bn": "কাপ {n}/{of}",
+  "en": "Cups {n}/{of}"
+ },
+ "washedSay": {
+  "bn": "{n}টা কাপ ধোয়া হলো",
+  "en": "{n} cups washed"
+ },
+ "act_ledger": {
+  "bn": "বাকির খাতা",
+  "en": "The credit book"
+ },
+ "act_ledger_hint": {
+  "bn": "বাকি দেবেন, নাকি নগদ চাইবেন?",
+  "en": "Give credit, or ask for cash?"
+ },
+ "act_ledger_ask": {
+  "bn": "{name} বললেন: \"খাতায় লিখে রাখেন, পরে দিমু।\"",
+  "en": "{name}: \"Write it in the book, I'll pay later.\""
+ },
+ "act_ledger_write": {
+  "bn": "খাতায় লিখুন: {name} মোট কত টাকা খেলেন?",
+  "en": "Write it down: how much did {name} have in all?"
+ },
+ "ledgerItem": {
+  "bn": "{item}: {n} টাকা",
+  "en": "{item}: Tk {n}"
+ },
+ "ledgerOwed": {
+  "bn": "খাতায় এখন মোট বাকি {n} টাকা",
+  "en": "Already owed in the book: Tk {n}"
+ },
+ "ledger_give": {
+  "bn": "বাকিতে দিন",
+  "en": "Give credit"
+ },
+ "ledger_cash": {
+  "bn": "নগদ চান",
+  "en": "Ask for cash"
+ },
+ "ledger_del": {
+  "bn": "মুছুন",
+  "en": "Del"
+ },
+ "ledger_ok": {
+  "bn": "লিখুন",
+  "en": "Write"
+ },
+ "ledgerLine": {
+  "bn": "{name} . . . {n} টাকা",
+  "en": "{name} . . . Tk {n}"
+ },
+ "credit_right": {
+  "bn": "খাতায় লেখা হলো: {name}, {n} টাকা",
+  "en": "In the book: {name}, Tk {n}"
+ },
+ "credit_short": {
+  "bn": "কম লিখে ফেললেন! {d} টাকা কম আসবে।",
+  "en": "Written too little! Tk {d} short when they pay."
+ },
+ "credit_over": {
+  "bn": "বেশি লিখে ফেললেন… টাকা দেওয়ার সময় মন খারাপ করবেন।",
+  "en": "Written too much… they'll be put out when they pay."
+ },
+ "credit_cash": {
+  "bn": "{name} নগদ দিলেন, একটু মন খারাপ করে।",
+  "en": "{name} paid cash, a little put out."
+ },
+ "creditCollected": {
+  "bn": "বাকি আদায়: {n} টাকা ({k} জন)",
+  "en": "Credit paid back: Tk {n} ({k})"
+ },
+ "creditNotPaid": {
+  "bn": "{name} আজও বাকি শোধ করলেন না।",
+  "en": "{name} still hasn't paid."
+ },
+ "creditGivenLine": {
+  "bn": "বাকি দিলেন: {n} টাকা",
+  "en": "Credit given: Tk {n}"
+ },
+ "creditCollectedLine": {
+  "bn": "বাকি আদায়: {n} টাকা",
+  "en": "Credit collected: Tk {n}"
+ },
+ "creditLostLine": {
+  "bn": "বাকি মার গেল: {n} টাকা",
+  "en": "Credit never paid: Tk {n}"
+ },
+ "ledgerTotalLine": {
+  "bn": "খাতায় মোট বাকি: {n} টাকা",
+  "en": "Still owed in the book: Tk {n}"
+ },
+ "washLine": {
+  "bn": "কাপ ধুলেন: {n}টা",
+  "en": "Cups washed: {n}"
+ },
+ "log_returned": {
+  "bn": "হারানো জিনিস ফেরত পেলেন",
+  "en": "got back something they lost"
+ },
+ "log_credit": {
+  "bn": "চায়ের দোকানে বাকি পেলেন",
+  "en": "was given credit at the tea stall"
+ },
+ "log_no_credit": {
+  "bn": "বাকি চেয়ে পেলেন না",
+  "en": "was refused credit"
+ },
+ "log_unpaid": {
+  "bn": "চায়ের বাকি শোধ করলেন না",
+  "en": "never paid the tea credit"
+ },
+ "log_overcharged": {
+  "bn": "খাতায় বেশি লেখা নিয়ে মন খারাপ",
+  "en": "upset at too much in the credit book"
+ },
+ "log_doubted": {
+  "bn": "ফোনের টাকা নিয়ে সন্দেহ করা হলো",
+  "en": "was doubted over a phone payment"
+ },
+ "iftarPacket": {
+  "bn": "ইফতারের প্যাকেট",
+  "en": "Iftar packet"
  }
 }

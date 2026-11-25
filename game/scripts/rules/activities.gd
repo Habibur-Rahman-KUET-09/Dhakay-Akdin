@@ -138,3 +138,71 @@ static func phone_result(sms: Dictionary, said_fake: bool) -> String:
 		return "caught" if said_fake else "fooled"
 	return "wrong" if said_fake else "fine"
 
+
+
+## The chain come off the gear (phase 6): back on within 4 seconds is
+## best, none by 12; meanwhile the rickshaw stands and the horns go.
+static func chain_score(seconds: float) -> float:
+	return clampf(1.0 - (seconds - 4.0) / 8.0, 0.0, 1.0)
+
+
+## What someone leaves behind on the seat, by the kind of passenger they
+## are: rickshaw passengers (normal, miser, hurry, elder) and bus riders
+## (student, needy, and "woman" for a woman of any other kind).
+const LOST_ITEMS := {
+	"normal": "phone", "miser": "umbrella", "hurry": "file", "elder": "glasses",
+	"student": "book", "needy": "bag", "woman": "purse",
+}
+
+
+static func lost_item(kind: String) -> String:
+	return str(LOST_ITEMS.get(kind, "phone"))
+
+
+## The places to choose from when remembering where someone got off:
+## the right one and the first others in `pool` (no repeats), `n` in all,
+## shuffled. Places are compared by `key` (dictionaries) or as they are.
+static func lost_choices(rng: RandomNumberGenerator, right, pool: Array, n := 3, key := "") -> Array:
+	var same := func(a, b) -> bool:
+		return (a[key] == b[key]) if key != "" else (a == b)
+	var out := [right]
+	for p in pool:
+		if out.size() >= n:
+			break
+		if not out.any(func(o): return same.call(o, p)):
+			out.append(p)
+	for i in out.size():
+		var j := rng.randi_range(i, out.size() - 1)
+		var x = out[i]
+		out[i] = out[j]
+		out[j] = x
+	return out
+
+
+## Washing the cups at the stall: scrubbing a cup round and round makes it
+## clean after this many turns; the score is the share of the dirty ones
+## washed.
+const WASH_TURNS := 1.5
+
+
+static func wash_score(washed: int, dirty: int) -> float:
+	return 1.0 if dirty <= 0 else clampf(float(washed) / dirty, 0.0, 1.0)
+
+
+## The credit book: the sum written down for what they had. "right";
+## "short" (written less: the difference is Monir Mama's loss); "over"
+## (written more: they will argue when they pay).
+static func ledger_result(written: int, owed: int) -> String:
+	if written == owed:
+		return "right"
+	return "short" if written < owed else "over"
+
+
+## The chance someone on credit pays when it falls due, by how they feel
+## about the mohalla (−5…5).
+static func repay_chance(relation: int) -> float:
+	if relation >= 2:
+		return 0.95
+	if relation >= 0:
+		return 0.75
+	return 0.4

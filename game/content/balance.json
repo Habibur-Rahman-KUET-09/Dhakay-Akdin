@@ -32,6 +32,7 @@
     "waiting_passengers": [3, 5],
     "haggle_rain_bonus": 0.15, "flat_chance": 0.1, "flat_speed": 0.55, "tube_cost": 30,
     "hood_tip": 10, "hood_drag": 0.92, "phone_pay_chance": 0.16, "phone_fake_chance": 0.25,
+    "chain_per_tile": 0.004, "chain_max_per_day": 2, "chain_quick_s": 4, "lost_chance": 0.12, "lost_reward": 50,
     "passengers": {
       "normal": {"offer": [0.9, 1.0], "counter_accept": 0.6, "weight": 50, "haggle": [0.1, 0.35]},
       "miser": {"offer": [0.6, 0.8], "counter_accept": 0.3, "weight": 20, "haggle": [0.0, 0.1]},
@@ -44,6 +45,7 @@
     }
   },
   "bus": {
+    "lost_chance": 0.02, "lost_reward": 30,
     "phone_pay_chance": 0.12, "needy_left_star_penalty": 0.3, "owed_phone_star_penalty": 0.1,
     "trips_per_day": 2, "seats": 24, "ladies_seats": 4, "elder_seats": 2, "standing": 10,
     "crowded_above": 30, "seconds_between_stops": [12, 15],
@@ -63,6 +65,7 @@
     }
   },
   "tea_stall": {
+    "cups": 8, "credit_chance": 0.35, "credit_days": 2, "credit_tries": 3,
     "phone_pay_chance": 0.12, "ramadan_day_arrivals": 2.5, "iftar_price": 40, "change_chance": 0.15,
     "start_hour": 6, "end_hour": 23, "day_seconds": 300, "rush_hours": [[7, 9], [17, 20]],
     "arrival_every_s": 6, "rush_arrival_every_s": 3,

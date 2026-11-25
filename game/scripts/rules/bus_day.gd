@@ -44,6 +44,7 @@ enum Event {
 	PUSHED, ## one more got on after a push
 	NEEDY_LEFT, ## someone who needed a seat gave up standing and got off
 	OWED_PHONE, ## change owed could not be made in notes: sent by phone
+	LOST_ITEM, ## something left on a seat found: which stop did they get off at? (return_lost)
 }
 
 ## Notes in use, smallest first.
@@ -142,6 +143,15 @@ var needy_left := 0
 ## Change owed that had to be sent by phone.
 var owed_by_phone := 0
 var last_seat := ""
+## Phase 6 (hands on): now and then someone getting off leaves something
+## on their seat, found a stop or two later: {item, who, seat, npc, stop,
+## choices} (stop ids) while Babu remembers where they got off; how many
+## went back, and what the owners gave. Own dice.
+var lost := {}
+var returned := 0
+var lost_rewards := 0
+var _left_behind := {}
+var _lost_rng := RandomNumberGenerator.new()
 
 
 func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
@@ -151,10 +161,12 @@ func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
 		rng.seed = seed_value
 		_seat_rng.seed = seed_value + 31
 		_phone_rng.seed = seed_value + 47
+		_lost_rng.seed = seed_value + 53
 	else:
 		rng.randomize()
 		_seat_rng.randomize()
 		_phone_rng.randomize()
+		_lost_rng.randomize()
 	route = (b.at("bus.route") as Array).duplicate()
 	trips = int(b.n("bus.trips_per_day"))
 	# The change bag, a conductor's float: notes worth 550 (4×5, 5×10, 4×20,
@@ -205,7 +217,7 @@ func bag_value() -> int:
 
 ## What the day has made: the bag's growth, bonuses, less fines.
 func earned() -> int:
-	return bag_value() - bag_start + bonus - fines - sent_home + phone_money
+	return bag_value() - bag_start + bonus - fines - sent_home + phone_money + lost_rewards
 
 
 ## Fare from stop a to stop b.
@@ -338,6 +350,7 @@ func _arrive(events: Array) -> void:
 			continue
 		riders.erase(r)
 		moved += 1
+		_maybe_left_behind(r)
 		if not r.paid:
 			slipped += 1
 			events.append(Event.SLIPPED)
@@ -385,6 +398,54 @@ func _arrive(events: Array) -> void:
 		fines += due
 		events.append(Event.CHECKER)
 	dwell_left = b.n("bus.dwell_s") + moved * b.n("bus.dwell_per_person_s")
+	_found(events)
+
+
+## Someone seated getting off may leave something behind.
+func _maybe_left_behind(r: Dictionary) -> void:
+	if not interactive or not _left_behind.is_empty() or not lost.is_empty() or returned >= 3:
+		return
+	if int(r.get("seat", -1)) < 0 or int(r.seat) >= SEATS or _lost_rng.randf() >= b.n("bus.lost_chance"):
+		return
+	var who := "student" if r.kind == "student" else ("needy" if r.kind == "needy" else ("woman" if r.woman else ("elder" if r.kind == "elder" else "normal")))
+	_left_behind = {"who": who, "seat": int(r.seat), "npc": str(r.get("npc", "")), "stop": stop_id(stop_i),
+		"found_at": mini(stop_i + _lost_rng.randi_range(1, 2), route.size() - 1)}
+
+
+## Found a stop or two on (or at the end of the line): LOST_ITEM, and the
+## stops passed this trip to choose from.
+func _found(events: Array) -> void:
+	if _left_behind.is_empty() or not lost.is_empty() or stop_i < int(_left_behind.found_at):
+		return
+	var d: Dictionary = _left_behind
+	_left_behind = {}
+	var passed := []
+	for i in range(stop_i, 0, -1):
+		passed.append(stop_id(i))
+	lost = {"item": Hands.lost_item(d.who), "who": d.who, "seat": d.seat, "npc": d.npc, "stop": d.stop,
+		"choices": Hands.lost_choices(_lost_rng, d.stop, passed, 3)}
+	events.append(Event.LOST_ITEM)
+
+
+## Where the owner got off, as Babu remembers it (an index into
+## lost.choices; −1: left at the bus company's counter). Right: it goes
+## back with the next bus, the owner gives something, the passengers think
+## better of the bus. Returns "right", "wrong" or "counter".
+func return_lost(choice: int) -> String:
+	if lost.is_empty():
+		return ""
+	var result := "counter"
+	if choice >= 0 and choice < (lost.choices as Array).size():
+		result = "right" if lost.choices[choice] == lost.stop else "wrong"
+	if result == "right":
+		var reward := int(b.n("bus.lost_reward"))
+		lost_rewards += reward
+		returned += 1
+		rating = clampf(rating + 0.2, 1.0, 5.0)
+		if str(lost.npc) != "":
+			npc_log.append({"id": lost.npc, "delta": 2, "what": "returned"})
+	lost = {}
+	return result
 
 
 ## n people get on at stop i, each for a later stop, and find a place.

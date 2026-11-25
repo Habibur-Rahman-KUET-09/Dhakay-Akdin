@@ -31,6 +31,7 @@ const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
 const CallAct = preload("res://scripts/ui/activities/call.gd")
 const Sms = preload("res://scripts/ui/activities/sms.gd")
+const LostAct = preload("res://scripts/ui/activities/lost.gd")
 const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const HomeCall = preload("res://scripts/rules/home_call.gd")
 
@@ -106,6 +107,8 @@ var _frames_logged := 0
 var _alive_left := 10.0
 ## The turn back was announced under a hand activity: say it again once it closes.
 var _trip_news := false
+## A lost thing found, to ask about once nothing else is open.
+var _lost_waiting := false
 ## Where each rider is drawn: their seat number, so a move is noticed.
 var _spot_of := {}
 var _problem_row: HBoxContainer
@@ -729,6 +732,10 @@ func _handle(events: Array) -> void:
 		_say(strings.t("owedShort"), Look.VERMILION, 3.0)
 	if events.has(BusDay.Event.OWED_PHONE):
 		_say(strings.t("owedPhone"), Look.SKY, 3.5)
+	if events.has(BusDay.Event.LOST_ITEM):
+		_say(strings.t("lostFound", {"item": strings.t("lostItem_" + str(bus.lost.item))}), Look.MAGENTA, 3.0)
+		_lost_waiting = true
+		_ask_lost.call_deferred()
 	if events.has(BusDay.Event.DEPARTED):
 		_sync_people()
 	if events.has(BusDay.Event.AT_DOOR):
@@ -777,10 +784,44 @@ func _open(act: Activity, key: String, then: Callable) -> void:
 
 func _closed() -> void:
 	_activity = null
+	if _lost_waiting and not bus.over:
+		_ask_lost.call_deferred()
 	if _trip_news:
 		_trip_news = false
 		_say(strings.t("tripBack", {"stop": _stop_name(bus.route.size() - 1)}), Look.SKY, 6.0)
 	_refresh()
+
+
+## Something left on a seat: which stop did its owner get off at? Asked
+## once nothing else is open.
+func _ask_lost() -> void:
+	if bus.lost.is_empty():
+		_lost_waiting = false
+		return
+	if _activity != null:
+		return
+	_lost_waiting = false
+	var lost: Dictionary = bus.lost
+	var act := LostAct.new()
+	act.item = str(lost.item)
+	var who := strings.t("lostWho_" + str(lost.who)) if str(lost.npc) == "" else neighbours.name_of(str(lost.npc), strings.lang)
+	act.question = strings.t("lostQuestion_bus", {"who": who, "seat": int(lost.seat) + 1, "item": strings.t("lostItem_" + act.item)})
+	act.choices = (lost.choices as Array).map(func(id): return strings.t("stop_" + str(id)))
+	act.hand_in_key = "lost_counter"
+	_open(act, "act_lost", _lost_answered.bind(act))
+
+
+func _lost_answered(_score: float, act) -> void:
+	var result := bus.return_lost(act.choice)
+	print("[bus] lost item: ", result)
+	match result:
+		"right":
+			_say(strings.t("lost_right_bus", {"n": int(b.n("bus.lost_reward"))}), Look.PARROT, 3.5)
+			_coin.play()
+		"wrong":
+			_say(strings.t("lost_wrong_bus"), Look.VERMILION, 3.0)
+		"counter":
+			_say(strings.t("lost_counter_said"), Look.SKY, 2.5)
 
 
 func _door_done(score: float) -> void:
@@ -1123,6 +1164,8 @@ func _end_trip() -> void:
 		lines.append(strings.t("onTime", {"n": bus.bonus}))
 	if bus.slipped > 0:
 		lines.append(strings.t("busSlipped", {"n": bus.slipped}))
+	if bus.returned > 0:
+		lines.append(strings.t("lostLine", {"n": bus.returned, "money": bus.lost_rewards}))
 	if bus.owed_by_phone > 0:
 		lines.append(strings.t("busOwedPhone", {"n": bus.owed_by_phone}))
 	if bus.needy_left > 0:

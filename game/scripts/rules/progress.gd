@@ -78,6 +78,8 @@ static func fresh() -> Dictionary:
 		# stars for the next day.
 		"board": Leaderboard.fresh(),
 		"boosts": {},
+		# Monir Mama's credit book (tea_day.gd): who owes what.
+		"ledger": [],
 	}
 
 

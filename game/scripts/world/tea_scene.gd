@@ -33,6 +33,8 @@ const DayEnd = preload("res://scripts/ui/day_end.gd")
 const Weather = preload("res://scripts/world/weather.gd")
 const CallAct = preload("res://scripts/ui/activities/call.gd")
 const Sms = preload("res://scripts/ui/activities/sms.gd")
+const Wash = preload("res://scripts/ui/activities/wash.gd")
+const LedgerAct = preload("res://scripts/ui/activities/ledger.gd")
 const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const HomeCall = preload("res://scripts/rules/home_call.gd")
 
@@ -74,6 +76,11 @@ var _rahim_rickshaw: Node3D
 var _layer: CanvasLayer
 ## The hand activity open over the counter, if any.
 var _activity: Activity
+## Activities that came while another was open, opened after it.
+var _queued: Array[Callable] = []
+## The wash-up button, and what the credit book did at the day's start.
+var _wash: Button
+var _collected: Array = []
 ## A call from home today: when (on the day's clock; -1 when none, or
 ## once it has rung), and how it went, for the day's end.
 var _call_at := -1.0
@@ -124,6 +131,12 @@ func _ready() -> void:
 	ids.shuffle()
 	day.npc_pool = ids.slice(0, 6)
 	day.relations = progress.data.npcs
+	# The credit book carries over from day to day: those due pay now.
+	if typeof(progress.data.get("ledger")) != TYPE_ARRAY:
+		progress.data["ledger"] = []
+	day.ledger = progress.data.ledger
+	if day.interactive:
+		_collected = day.collect()
 	set_process(false)
 	var loading := _loading_screen()
 	await _step("map")
@@ -175,6 +188,8 @@ func _ready() -> void:
 		_say(str(day.festival.greeting.get(strings.lang, day.festival.greeting.en)), Look.MAGENTA, 6.0)
 	elif day.hot:
 		_say(strings.t("teaHotFridge" if day.has("fridge") else "teaHot"), Look.VERMILION, 4.0)
+	if not _collected.is_empty():
+		get_tree().create_timer(6.0 if _notice_box.visible else 0.5).timeout.connect(_tell_collected)
 
 
 func _loading_screen() -> CanvasLayer:
@@ -489,6 +504,10 @@ func _build_hud() -> void:
 	_tray.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tray.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	hand_row.add_child(_tray)
+	_wash = Look.button("", Look.SKY.darkened(0.15), 14)
+	_wash.pressed.connect(_open_wash)
+	_wash.visible = day.interactive
+	hand_row.add_child(_wash)
 	_give = Look.button(strings.t("give"), Look.PARROT, 16)
 	_give.pressed.connect(_on_give)
 	hand_row.add_child(_give)
@@ -537,6 +556,8 @@ func _process(dt: float) -> void:
 	_handle(events)
 	if not is_processing():
 		return
+	if _activity == null and not _queued.is_empty():
+		_queued.pop_front().call()
 	# A call from home comes when the stall is quiet (one waiting at most),
 	# or after half a minute's wait for that.
 	if _call_at >= 0.0 and day.clock >= _call_at and _activity == null \
@@ -555,6 +576,11 @@ func _process(dt: float) -> void:
 func _handle(events: Array) -> void:
 	if events.has(TeaDay.Event.PHONE_PAY):
 		_check_sms.call_deferred()
+	if events.has(TeaDay.Event.CREDIT_ASK):
+		_queued.append(_ask_credit)
+	if events.has(TeaDay.Event.NO_CUPS):
+		_say(strings.t("noCups"), Look.VERMILION, 2.5)
+		_queued.append(_open_wash)
 	if events.has(TeaDay.Event.CHANGED):
 		var ch: Dictionary = day.last_change
 		var who := strings.t("kind_" + str(ch.kind)) if str(ch.npc) == "" else neighbours.name_of(str(ch.npc), strings.lang)
@@ -816,6 +842,10 @@ func _refresh() -> void:
 	else:
 		_kettle_button.text = strings.t("kettleCups", {"n": day.kettle})
 	_status.text = "%s\n%s" % [_clock_text(), strings.t("taka", {"n": day.money})]
+	if day.interactive:
+		_status.text += "\n" + strings.t("cupsState", {"n": day.cups_clean, "of": day.cups_total})
+		_wash.text = strings.t("washButton", {"n": day.cups_dirty})
+		_wash.disabled = day.cups_dirty <= 0
 
 
 ## One kettle of two: its cups, or that it is filling.
@@ -892,6 +922,75 @@ func _light() -> void:
 	_env.fog_density = lerpf(0.014, 0.03, _rain_k)
 
 
+## Washing up: the dirty cups, six at a time.
+func _open_wash() -> void:
+	if _activity != null or day.cups_dirty <= 0 or not is_processing():
+		return
+	var act := Wash.new()
+	act.dirty = mini(day.cups_dirty, 6)
+	_open(act, "act_wash", _washed.bind(act))
+
+
+func _washed(_score: float, act) -> void:
+	# Skipped: half of them rinsed in a hurry.
+	var n: int = ceili(act.dirty / 2.0) if act.quick else int(act.washed)
+	n = day.wash(n)
+	if n > 0:
+		_say(strings.t("washedSay", {"n": n}), Look.PARROT, 2.0)
+	_refresh()
+
+
+## "Write it in the book": the credit book opens.
+func _ask_credit() -> void:
+	var ask: Dictionary = day.credit_ask
+	if ask.is_empty():
+		return
+	var act := LedgerAct.new()
+	act.who = neighbours.name_of(str(ask.npc), strings.lang)
+	var listed := 0
+	for it in ask.items:
+		act.items.append([strings.t("item_" + str(it)), day.price(str(it))])
+		listed += day.price(str(it))
+	# Iftar time: the packet with it.
+	if int(ask.bill) > listed:
+		act.items.append([strings.t("iftarPacket"), int(ask.bill) - listed])
+	act.bill = int(ask.bill)
+	act.owed = day.owed_total()
+	_open(act, "act_ledger", _credit_answered.bind(act))
+
+
+func _credit_answered(_score: float, act) -> void:
+	var bill := int(day.credit_ask.get("bill", 0))
+	var result := day.settle_credit(act.give, act.written)
+	print("[tea] credit: ", result)
+	match result:
+		"cash":
+			_say(strings.t("credit_cash", {"name": act.who}), Look.SKY, 3.0)
+		"right":
+			_say(strings.t("credit_right", {"name": act.who, "n": act.written}), Look.PARROT, 3.0)
+		"short":
+			_say(strings.t("credit_short", {"d": bill - int(act.written)}), Look.VERMILION, 3.5)
+		"over":
+			_say(strings.t("credit_over"), Look.YELLOW.darkened(0.3), 3.5)
+	_refresh()
+
+
+## What the book brought in this morning, and who still has not paid.
+func _tell_collected() -> void:
+	var paid := _collected.filter(func(x): return x.paid)
+	var text := PackedStringArray()
+	if not paid.is_empty():
+		var n := 0
+		for x in paid:
+			n += int(x.amount)
+		text.append(strings.t("creditCollected", {"n": n, "k": paid.size()}))
+	for x in _collected:
+		if not x.paid:
+			text.append(strings.t("creditNotPaid", {"name": neighbours.name_of(str(x.npc), strings.lang)}))
+	if not text.is_empty():
+		_say("\n".join(text), Look.MAGENTA, 5.0)
+
+
 ## Paid by phone: check the SMS on Monir Mama's phone.
 func _check_sms() -> void:
 	if day.phone_pay.is_empty():
@@ -916,8 +1015,10 @@ func _sms_checked(_score: float, act) -> void:
 
 func _end_day() -> void:
 	set_process(false)
-	# An SMS not yet checked when the day ends: taken as it is.
+	# An SMS not yet checked when the day ends: taken as it is; credit
+	# not yet answered goes in the book as it was.
 	day.settle_phone(false)
+	day.settle_credit(true)
 	_rain_sound.stop()
 	_drops.emitting = false
 	var stats := {"happy": day.happy, "none_lost": 1 if day.lost == 0 and day.served >= 10 else 0, "milk_tea": int(day.sold_items.get("milk_tea", 0))}
@@ -935,6 +1036,16 @@ func _end_day() -> void:
 		lines.append(strings.t("teaLost", {"n": day.lost}))
 	if day.tips > 0:
 		lines.append(strings.t("teaTips", {"n": day.tips}))
+	if day.washed > 0:
+		lines.append(strings.t("washLine", {"n": day.washed}))
+	if day.credit_given > 0:
+		lines.append(strings.t("creditGivenLine", {"n": day.credit_given}))
+	if day.credit_collected > 0:
+		lines.append(strings.t("creditCollectedLine", {"n": day.credit_collected}))
+	if day.credit_lost > 0:
+		lines.append(strings.t("creditLostLine", {"n": day.credit_lost}))
+	if not day.ledger.is_empty():
+		lines.append(strings.t("ledgerTotalLine", {"n": day.owed_total()}))
 	if day.iftar_sold > 0:
 		lines.append(strings.t("iftarLine", {"n": day.iftar_sold, "money": day.iftar_sold * int(b.n("tea_stall.iftar_price"))}))
 	if not _call_result.is_empty():

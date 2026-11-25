@@ -41,6 +41,11 @@ const FREED := 26
 const HOOD := 27
 ## Paid by phone: check the SMS (settle_phone with what the player said).
 const PHONE_PAY := 28
+## The chain came off the gear: standing until it is put back (fix_chain).
+const CHAIN := 29
+## Something a passenger left on the seat has been found: where did they
+## get off? (return_lost with the choice).
+const LOST_ITEM := 30
 
 var fares: Fares
 var balance: Balance
@@ -138,6 +143,20 @@ var npc_log: Array = []
 ## ("detours"). Each finished trip's goes into `trip_times`.
 var trip_time := {}
 var trip_times: Array = []
+## Phase 6 (hands on): the chain coming off now and then with a passenger
+## aboard (standing until put back); things left on the seat, found a
+## ride or two later: {item, type, npc, place, choices} while Rahim Chacha
+## remembers where they got off; how many went back to their owners, and
+## what the owners gave. Their own dice, so the rest plays the same.
+var chain_off := false
+var chains := 0
+var lost := {}
+var returned := 0
+var lost_rewards := 0
+var drops: Array = []
+var _left_behind := {}
+var _chain_rng := RandomNumberGenerator.new()
+var _lost_rng := RandomNumberGenerator.new()
 var _last_remaining := -1
 var _last_dest := Vector2i(-1, -1)
 
@@ -147,8 +166,12 @@ func _init(road_map: RoadMap, b: Balance, seed_value := -1, date := "", trip := 
 	balance = b
 	if seed_value >= 0:
 		_hand_rng.seed = seed_value + 13
+		_chain_rng.seed = seed_value + 19
+		_lost_rng.seed = seed_value + 23
 	else:
 		_hand_rng.randomize()
+		_chain_rng.randomize()
+		_lost_rng.randomize()
 	fares = Fares.new(b)
 	_new_trip_time()
 	super(road_map, b.n("rickshaw.speed_tiles_per_s"), b.n("rickshaw.waterlog_speed"), trip, seed_value)
@@ -218,7 +241,7 @@ func update(dt: float) -> Array:
 	if clear_left > 0.0:
 		clear_left -= dt
 		room = maxf(room, 0.75)
-	if stuck:
+	if stuck or chain_off:
 		speed_factor = 0.0
 		speed_now = 0.0
 	# Held by the police: standing still, whatever the pedal says.
@@ -234,6 +257,7 @@ func update(dt: float) -> Array:
 		_police(events)
 	_talk(events)
 	_tea(events)
+	_found(events)
 	if clock >= day_seconds or worn_out:
 		over = true
 		events.append(DAY_OVER)
@@ -413,6 +437,13 @@ func _entered(events: Array) -> void:
 		_pushed_at = driver.cell
 		speed_now = 0.0
 		events.append(STUCK)
+	# Now and then the chain comes off with a passenger aboard.
+	if interactive and not riding.is_empty() and not chain_off and not stuck \
+			and chains < int(balance.n("rickshaw.chain_max_per_day")) and _chain_rng.randf() < balance.n("rickshaw.chain_per_tile"):
+		chain_off = true
+		chains += 1
+		speed_now = 0.0
+		events.append(CHAIN)
 	if not riding.is_empty():
 		if wet(driver.cell):
 			riding.flooded += 1
@@ -552,6 +583,58 @@ func push(hand: int) -> Array:
 	return []
 
 
+## The chain put back on the gear; `held`: seconds more standing (done
+## without care, by the quick button).
+func fix_chain(held_s := 0.0) -> void:
+	chain_off = false
+	held = maxf(held, held_s)
+
+
+## A thing left behind, found once the ride or two after it are under
+## way: LOST_ITEM, and `lost` says what and offers three places.
+func _found(events: Array) -> void:
+	if _left_behind.is_empty() or not lost.is_empty() or riding.is_empty() or trips < int(_left_behind.found_at):
+		return
+	var d: Dictionary = _left_behind
+	_left_behind = {}
+	# Today's other drop-offs first (the latest first), then anywhere.
+	var pool := drops.map(func(x): return x.place)
+	pool.reverse()
+	var anywhere := map.places.duplicate()
+	for i in anywhere.size():
+		var j := _lost_rng.randi_range(i, anywhere.size() - 1)
+		var x = anywhere[i]
+		anywhere[i] = anywhere[j]
+		anywhere[j] = x
+	pool.append_array(anywhere)
+	lost = {
+		"item": Hands.lost_item(str(d.type)), "type": d.type, "npc": d.npc, "place": d.place,
+		"choices": Hands.lost_choices(_lost_rng, d.place, pool, 3, "id"),
+	}
+	events.append(LOST_ITEM)
+
+
+## Where the owner of the lost thing got off, as Rahim Chacha remembers it
+## (an index into lost.choices; −1: he hands it in at the police box).
+## Right: it goes back, the owner gives something for it and a neighbour
+## thinks better of him. Returns "right", "wrong" or "police".
+func return_lost(choice: int) -> String:
+	if lost.is_empty():
+		return ""
+	var result := "police"
+	if choice >= 0 and choice < (lost.choices as Array).size():
+		result = "right" if lost.choices[choice].id == lost.place.id else "wrong"
+	if result == "right":
+		var reward := int(balance.n("rickshaw.lost_reward"))
+		money += reward
+		lost_rewards += reward
+		returned += 1
+		if str(lost.npc) != "":
+			npc_log.append({"id": lost.npc, "delta": 2, "what": "returned"})
+	lost = {}
+	return result
+
+
 ## The SMS checked: the player said it was fake, or not. Returns
 ## phone_result's word; the money and the rating follow from it.
 func settle_phone(said_fake: bool) -> String:
@@ -624,6 +707,11 @@ func _deliver(events: Array) -> void:
 		money += riding.fare + tip
 	trips += 1
 	stars_sum += given
+	drops.append({"place": riding.place, "type": riding.type, "npc": npc})
+	# Now and then they leave something on the seat, found a ride or two on.
+	if interactive and _left_behind.is_empty() and lost.is_empty() and returned < 3 \
+			and _lost_rng.randf() < balance.n("rickshaw.lost_chance"):
+		_left_behind = {"place": riding.place, "type": riding.type, "npc": npc, "found_at": trips + _lost_rng.randi_range(0, 1)}
 	trip_time["tiles"] = riding.get("tiles", 0)
 	trip_times.append(trip_time)
 	last_trip = {"fare": riding.fare, "tip": tip, "stars": given, "npc": npc, "thanks": thanks, "time": trip_time}

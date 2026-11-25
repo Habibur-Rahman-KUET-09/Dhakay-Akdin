@@ -25,6 +25,8 @@ const Push = preload("res://scripts/ui/activities/push.gd")
 const Hood = preload("res://scripts/ui/activities/hood.gd")
 const Sms = preload("res://scripts/ui/activities/sms.gd")
 const CallAct = preload("res://scripts/ui/activities/call.gd")
+const ChainAct = preload("res://scripts/ui/activities/chain.gd")
+const LostAct = preload("res://scripts/ui/activities/lost.gd")
 const HomeCall = preload("res://scripts/rules/home_call.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
 const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
@@ -114,6 +116,8 @@ var _whistle: AudioStreamPlayer
 var _coin: AudioStreamPlayer
 ## The hand activity open, if any (haggling, the pump, pushing).
 var _activity: Activity
+## Activities that came while another was open, opened after it.
+var _queued: Array[Callable] = []
 ## Passengers, the policeman and Rahim Chacha talking.
 var _voice: Voice
 ## Rain: how hard (0–1, eased), the drops, the sound, the water that
@@ -760,6 +764,16 @@ func _handle(events: Array) -> void:
 		_raise_hood()
 	if events.has(Day.PHONE_PAY):
 		_check_sms()
+	if events.has(Day.CHAIN):
+		_say(strings.t("chainOff"), Look.VERMILION, 3.0)
+		_voice.say("grumble", true)
+		_fix_chain()
+	if events.has(Day.LOST_ITEM):
+		_say(strings.t("lostFound", {"item": strings.t("lostItem_" + str(shift.lost.item))}), Look.MAGENTA, 3.0)
+		if _activity != null:
+			_queued.append(_ask_lost)
+		else:
+			_ask_lost()
 	if events.has(Day.RAIN_END):
 		_say(strings.t("rainEnd"), Look.SKY, 2.5)
 	if events.has(Day.DAY_OVER):
@@ -927,7 +941,7 @@ func _open(act: Activity, key: String, then: Callable) -> void:
 	print("[rickshaw] hands: ", key)
 	act.setup(strings, key, key + "_hint")
 	act.done.connect(then)
-	act.tree_exited.connect(func(): _activity = null)
+	act.tree_exited.connect(_closed)
 	_activity = act
 	# Hands off the pedal while the fingers are busy.
 	shift.cruise = false
@@ -937,6 +951,58 @@ func _open(act: Activity, key: String, then: Callable) -> void:
 	_swipes.clear()
 	_apply_controls()
 	hud.add_child(act)
+
+
+func _closed() -> void:
+	_activity = null
+	if not _queued.is_empty() and not shift.over:
+		_queued.pop_front().call_deferred()
+
+
+## The chain off the gear: lift it back on, turn the pedal.
+func _fix_chain() -> void:
+	if _activity != null:
+		# Busy with something else: he puts it back on, slowly.
+		shift.fix_chain(shift.balance.n("rickshaw.chain_quick_s"))
+		return
+	var act := ChainAct.new()
+	_open(act, "act_chain", _chain_fixed.bind(act))
+
+
+func _chain_fixed(score: float, act) -> void:
+	if act.quick or score <= 0.0:
+		shift.fix_chain(shift.balance.n("rickshaw.chain_quick_s"))
+		_say(strings.t("chainSlow"), Look.YELLOW.darkened(0.3), 2.5)
+	else:
+		shift.fix_chain()
+		_say(strings.t("chainOn"), Look.PARROT, 2.0)
+
+
+## Something left on the seat: where did its owner get off?
+func _ask_lost() -> void:
+	var lost: Dictionary = shift.lost
+	if lost.is_empty():
+		return
+	var act := LostAct.new()
+	act.item = str(lost.item)
+	var who := strings.t("lostWho_" + str(lost.type)) if str(lost.npc) == "" else neighbours.name_of(str(lost.npc), strings.lang)
+	act.question = strings.t("lostQuestion_rickshaw", {"who": who, "item": strings.t("lostItem_" + act.item)})
+	act.choices = (lost.choices as Array).map(func(p): return RoadMap.place_name(p, strings.lang))
+	act.hand_in_key = "lost_police"
+	_open(act, "act_lost", _lost_answered.bind(act))
+
+
+func _lost_answered(_score: float, act) -> void:
+	var result := shift.return_lost(act.choice)
+	print("[rickshaw] lost item: ", result)
+	match result:
+		"right":
+			_say(strings.t("lost_right", {"n": int(shift.balance.n("rickshaw.lost_reward"))}), Look.PARROT, 3.5)
+			_coin.play()
+		"wrong":
+			_say(strings.t("lost_wrong"), Look.VERMILION, 3.0)
+		"police":
+			_say(strings.t("lost_police_said"), Look.SKY, 2.5)
 
 
 ## The bell: once, or twice quickly to clear the way for longer.
@@ -1170,6 +1236,8 @@ func _end_day() -> void:
 		lines.append(strings.t("finesPaid", {"fines": shift.fines}))
 	if shift.teas > 0:
 		lines.append(strings.t("teaLine", {"n": shift.teas, "money": shift.tea_spent}))
+	if shift.returned > 0:
+		lines.append(strings.t("lostLine", {"n": shift.returned, "money": shift.lost_rewards}))
 	if not _call_result.is_empty():
 		lines.append(strings.t("familyLine", {"n": _call_result.family}))
 	var met := shift.money >= _target_money
