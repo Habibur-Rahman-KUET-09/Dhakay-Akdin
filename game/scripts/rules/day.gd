@@ -46,6 +46,8 @@ const CHAIN := 29
 ## Something a passenger left on the seat has been found: where did they
 ## get off? (return_lost with the choice).
 const LOST_ITEM := 30
+## Today's race (race.gd): at the finish.
+const RACE_DONE := 31
 
 var fares: Fares
 var balance: Balance
@@ -157,6 +159,15 @@ var drops: Array = []
 var _left_behind := {}
 var _chain_rng := RandomNumberGenerator.new()
 var _lost_rng := RandomNumberGenerator.new()
+## Phase 7: friends' tea stalls in this town (friends.gd shop_places);
+## now and then a passenger wants to go to one. Customers taken to each,
+## by friend's account (they are paid for them at their end).
+var friend_places: Array = []
+## Today's race (race.gd), when racing: the place to reach; no passengers
+## then, and the clock is the race's.
+var race_to := {}
+var friend_visits := {}
+var _friend_rng := RandomNumberGenerator.new()
 var _last_remaining := -1
 var _last_dest := Vector2i(-1, -1)
 
@@ -168,7 +179,9 @@ func _init(road_map: RoadMap, b: Balance, seed_value := -1, date := "", trip := 
 		_hand_rng.seed = seed_value + 13
 		_chain_rng.seed = seed_value + 19
 		_lost_rng.seed = seed_value + 23
+		_friend_rng.seed = seed_value + 29
 	else:
+		_friend_rng.randomize()
 		_hand_rng.randomize()
 		_chain_rng.randomize()
 		_lost_rng.randomize()
@@ -444,6 +457,9 @@ func _entered(events: Array) -> void:
 		chains += 1
 		speed_now = 0.0
 		events.append(CHAIN)
+	if not race_to.is_empty() and driver.cell == race_to.at and not over:
+		over = true
+		events.append(RACE_DONE)
 	if not riding.is_empty():
 		if wet(driver.cell):
 			riding.flooded += 1
@@ -708,13 +724,17 @@ func _deliver(events: Array) -> void:
 	trips += 1
 	stars_sum += given
 	drops.append({"place": riding.place, "type": riding.type, "npc": npc})
+	var friend := str(riding.place.get("friend", ""))
+	if friend != "":
+		friend_visits[friend] = int(friend_visits.get(friend, 0)) + 1
 	# Now and then they leave something on the seat, found a ride or two on.
 	if interactive and _left_behind.is_empty() and lost.is_empty() and returned < 3 \
 			and _lost_rng.randf() < balance.n("rickshaw.lost_chance"):
 		_left_behind = {"place": riding.place, "type": riding.type, "npc": npc, "found_at": trips + _lost_rng.randi_range(0, 1)}
 	trip_time["tiles"] = riding.get("tiles", 0)
 	trip_times.append(trip_time)
-	last_trip = {"fare": riding.fare, "tip": tip, "stars": given, "npc": npc, "thanks": thanks, "time": trip_time}
+	last_trip = {"fare": riding.fare, "tip": tip, "stars": given, "npc": npc, "thanks": thanks, "time": trip_time,
+		"friend": str(riding.place.get("name", "")) if friend != "" else ""}
 	_new_trip_time()
 	riding = {}
 	delivered += 1
@@ -728,7 +748,7 @@ func _deliver(events: Array) -> void:
 
 ## Keeps a few passengers waiting by the road, a short ride away.
 func _top_up() -> void:
-	if map == null or map.places.is_empty():
+	if map == null or map.places.is_empty() or not race_to.is_empty():
 		return
 	var roads := map.roads()
 	var tries := 0
@@ -746,6 +766,11 @@ func _top_up() -> void:
 		if choices.is_empty():
 			continue
 		var place_to: Dictionary = choices[rng.randi() % choices.size()]
+		# Now and then: to a friend's tea stall.
+		if not friend_places.is_empty() and _friend_rng.randf() < balance.n("rickshaw.friend_shop_chance"):
+			var stalls := friend_places.filter(func(pl): return dist.has(pl.at) and dist[pl.at] >= min_trip)
+			if not stalls.is_empty():
+				place_to = stalls[_friend_rng.randi() % stalls.size()]
 		var tiles: int = dist[place_to.at]
 		var who := fares.pick_type(rng)
 		if ramadan and who == "normal" and hour() >= 15.0 and _hand_rng.randf() < 0.5:
@@ -769,7 +794,10 @@ func _top_up() -> void:
 ## Where the arrow points: the drop-off with a passenger aboard, else the
 ## nearest waiting passenger.
 func _aim() -> void:
-	if riding.has("at"):
+	if not race_to.is_empty():
+		destination = race_to.at
+		place = race_to
+	elif riding.has("at"):
 		destination = riding.at
 		place = riding.place
 	elif not waiting.is_empty():
@@ -783,6 +811,21 @@ func _aim() -> void:
 		destination = driver.cell
 		place = {}
 	_measure()
+
+
+## Race today's ride (race.gd route): from its start, to its place, with
+## nobody waiting by the road; the day's clock and energy do not matter.
+func start_race(route: Dictionary) -> void:
+	race_to = route.place
+	waiting.clear()
+	offer_for = {}
+	riding = {}
+	driver.cell = route.start
+	driver.progress = 0.0
+	driver.heading = driver._first_exit()
+	day_seconds = 1e9
+	energy_factor = 0.0
+	_aim()
 
 
 ## Without passengers (tests of plain driving), behave as before.

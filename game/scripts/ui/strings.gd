@@ -17,6 +17,11 @@ func has(key: String) -> bool:
 	return _all.has(key)
 
 
+## A text in every language ({bn, en}), for things that keep both.
+func both(key: String) -> Dictionary:
+	return (_all.get(key, {"bn": key, "en": key}) as Dictionary).duplicate()
+
+
 func t(key: String, values: Dictionary = {}) -> String:
 	if not _all.has(key):
 		return key

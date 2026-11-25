@@ -16,6 +16,7 @@ extends RefCounted
 
 const Balance = preload("res://scripts/rules/balance.gd")
 const Daily = preload("res://scripts/rules/daily.gd")
+const RoadMap = preload("res://scripts/rules/road_map.gd")
 
 ## Letters that cannot be mistaken for one another (no I, O, 0, 1).
 const LETTERS := "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -48,6 +49,10 @@ static func fresh() -> Dictionary:
 		"legs_date": "", "legs": {},
 		# Weeks won, joint projects seen done, the day a relay paid stars.
 		"won": [], "joint_done": [], "relay_paid": "",
+		# Friends' tea stalls in my town (phase 7): customers my rickshaw
+		# took to each friend's stall, all told (on my card, for them),
+		# and those I have been paid for at mine, by friend.
+		"visits_sent": {}, "visits_got": {},
 	}
 
 
@@ -170,6 +175,7 @@ static func card(data: Dictionary, date: String) -> Dictionary:
 		"name": str(f.name), "code": str(f.code), "level": int(data.get("mohalla", {}).get("level", 1)),
 		"week": str(f.week), "week_taka": int(f.week_taka), "prev_week": str(f.prev_week), "prev_taka": int(f.prev_taka),
 		"given": int(f.given), "legs_date": date if not legs.is_empty() else "", "legs": legs.duplicate(), "art": art,
+		"visits": (f.visits_sent as Dictionary).duplicate(),
 	}
 
 
@@ -453,3 +459,74 @@ static func claim_relay(data: Dictionary, b: Balance, date: String) -> bool:
 	f.relay_paid = date
 	data.tara = int(data.get("tara", 0)) + int(b.n("friends.relay_tara"))
 	return true
+
+
+# --- A friend's stall in my town (phase 7) ------------------------------------------
+
+
+## Where friends' tea stalls stand in a town: one each for up to `most`
+## friends, on an ordinary road by the kerb, picked from the friend's
+## account so it is the same spot every day, and clear of the real
+## places and of each other. Places like the map's ({id, names, at}),
+## with `friend` (their account) and `name`; `names` from `formats`
+## ({bn, en} with {name} in them).
+static func shop_places(data: Dictionary, map: RoadMap, formats: Dictionary, most := 3) -> Array:
+	var out := []
+	var spots := []
+	for p in map.roads():
+		if map.kind_at(p) != RoadMap.Kind.ROAD:
+			continue
+		if map.places.any(func(pl): return absi(pl.at.x - p.x) + absi(pl.at.y - p.y) < 3):
+			continue
+		if absi(map.home.x - p.x) + absi(map.home.y - p.y) < 4:
+			continue
+		spots.append(p)
+	if spots.is_empty():
+		return out
+	for friend in of(data).list:
+		if out.size() >= most:
+			break
+		var name := clean_name(str(friend.get("name", "")))
+		if name == "":
+			continue
+		var i := absi(hash(str(friend.uid) + str(map.id))) % spots.size()
+		for k in spots.size():
+			var at: Vector2i = spots[(i + k * 7) % spots.size()]
+			if out.any(func(o): return absi(o.at.x - at.x) + absi(o.at.y - at.y) < 4):
+				continue
+			var names := {}
+			for lang in formats:
+				names[lang] = str(formats[lang]).replace("{name}", name)
+			out.append({"id": "friend_" + str(friend.uid), "names": names, "at": at, "friend": str(friend.uid), "name": name})
+			break
+	return out
+
+
+## Customers my rickshaw took to friends' stalls today: {friend: n}.
+static func note_visits(data: Dictionary, visits: Dictionary) -> void:
+	var f := of(data)
+	for uid in visits:
+		f.visits_sent[uid] = int(f.visits_sent.get(uid, 0)) + int(visits[uid])
+
+
+## Customers friends' rickshaws brought to my stall since I last looked
+## (their cards count them all told): paid into my savings.
+## Returns [{name, n, taka}].
+static func claim_visits(data: Dictionary, b: Balance, my_uid: String) -> Array:
+	var f := of(data)
+	var out := []
+	for p in f.list:
+		var c: Dictionary = f.cards.get(p.uid, {})
+		var sent = c.get("visits", {})
+		if typeof(sent) != TYPE_DICTIONARY:
+			continue
+		var total := int(sent.get(my_uid, 0))
+		var got := int(f.visits_got.get(p.uid, 0))
+		if total <= got:
+			continue
+		var n := total - got
+		f.visits_got[p.uid] = total
+		var taka := n * int(b.n("friends.shop_visit_taka"))
+		data.taka = int(data.get("taka", 0)) + taka
+		out.append({"name": str(p.name), "n": n, "taka": taka})
+	return out

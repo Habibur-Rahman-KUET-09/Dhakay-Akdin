@@ -29,6 +29,8 @@ const Goods = preload("res://scripts/rules/goods.gd")
 const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
 const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
+const League = preload("res://scripts/rules/league.gd")
+const Race = preload("res://scripts/rules/race.gd")
 
 const WHO := ["rickshaw", "tea", "bus", "fuchka"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
@@ -75,6 +77,9 @@ var _lb_who := "all"
 var _lb_rows: Array = []
 var _lb_rank := 0
 var _lb_state := ""
+## This week's area league as fetched: {area: {count, sum}}; "" / loading / ok.
+var _league_now := {}
+var _league_state := ""
 ## Reading aloud: on (kept from the setting), and a finger held down
 ## (where, since when) to read what is under it.
 var _read_aloud := false
@@ -154,6 +159,7 @@ func show_page(page: String) -> void:
 		_friends_news = []
 	if _page == "board" and page != "board":
 		_board_news = []
+		_league_state = ""
 	_page = page
 	_sheet = ""
 	_build()
@@ -813,6 +819,9 @@ func _start_sheet(who: String) -> void:
 	if who == "rickshaw":
 		body.add_child(_caption(s.t("whereTitle")))
 		body.add_child(_area_row())
+		var race := _race_card()
+		if race != null:
+			body.add_child(race)
 	body.add_child(_caption(s.t("todayDhaka")))
 	body.add_child(_today_chips(who))
 	body.add_child(_goals_card(who))
@@ -832,6 +841,35 @@ func _start_sheet(who: String) -> void:
 		var length := Look.label(s.t("playLength", {"n": int(round(secs[who] / 60.0))}), 14, true, Look.MUTED)
 		length.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		col.add_child(length)
+
+
+## Today's race with a ghost: the same ride for everyone today.
+func _race_card() -> Control:
+	var map = load("res://scripts/rules/road_map.gd").load_area(progress.rickshaw_area())
+	var route := Race.route(map, progress.date(), int(b.n("race.low_tiles")), int(b.n("race.high_tiles")))
+	if route.is_empty():
+		return null
+	var panel := _card(Color("EEF3FF"), 18)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 6)
+	panel.add_child(col)
+	col.add_child(Look.label(s.t("raceTitle"), 17, true, Look.SKY_DARK))
+	var about := Look.label(s.t("raceAbout", {"place": map.place_name(route.place, s.lang)}), 14)
+	about.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(about)
+	var ghost := Race.ghost(progress.data, progress.date())
+	var mine := Race.of(progress.data)
+	if str(mine.date) == progress.date() and float(mine.best) > 0.0:
+		col.add_child(Look.label(s.t("raceYourBest", {"s": "%.1f" % float(mine.best)}), 14, true, Look.PARROT_DARK))
+	if bool(ghost.get("friend", false)):
+		col.add_child(Look.label(s.t("raceFriendBest", {"name": str(ghost.name), "s": "%.1f" % float(ghost.time)}), 14, true, Look.MAGENTA))
+	var go := Look.chunky(s.t("raceGo"), Look.SKY_DARK, Color.WHITE, 17, 4, 14)
+	go.name = "RaceGo"
+	go.pressed.connect(func():
+		Race.next = true
+		_go("res://scenes/rickshaw.tscn"))
+	col.add_child(go)
+	return panel
 
 
 func _caption(text: String) -> Label:
@@ -1982,6 +2020,9 @@ func _refresh_friends() -> void:
 			uids.append(p.uid)
 		var got := await cloud.cards(uids)
 		Friends.take_cards(progress.data, got)
+		# Customers friends' rickshaws brought to my stall.
+		for v in Friends.claim_visits(progress.data, b, cloud.uid):
+			news.append(s.t("shopVisits", {"name": v.name, "n": v.n, "taka": v.taka}))
 		var items := await cloud.take_inbox()
 		if Friends.receive(progress.data, b, items) > 0:
 			news.append(s.t("friendsGotMail", {"n": items.size()}))
@@ -2003,6 +2044,23 @@ func _refresh_friends() -> void:
 		var stars := Leaderboard.settle(progress.data, b, check, rank)
 		if stars > 0:
 			board_news.append(s.t("lbWon", {"rank": rank, "period": s.t("lbPast_" + str(check.period)), "who": s.t("lbWho_" + str(check.who)), "n": stars}))
+	# Last week's area league: who won (once a week).
+	var last := Friends.last_week(progress.date())
+	if not (League.of(progress.data).claimed as Array).has(last):
+		var sides := {}
+		for a in League.AREAS:
+			var st := await cloud.stats_of(League.field(a, last))
+			if st.is_empty():
+				sides = {}
+				break
+			sides[a] = st
+		if not sides.is_empty():
+			var won := League.winner(b, sides)
+			var stars := League.settle(progress.data, b, progress.date(), won)
+			if stars > 0:
+				board_news.append(s.t("leagueWon", {"area": s.t("area_" + won), "n": stars}))
+			elif won != "":
+				board_news.append(s.t("leagueResult", {"area": s.t("area_" + won)}))
 	progress.save()
 	_friends_busy = false
 	if not news.is_empty():
@@ -2056,6 +2114,7 @@ func _board_page(page: VBoxContainer) -> void:
 		var news_card := _card(Look.YELLOW, 16)
 		news_card.add_child(Look.label(str(news), 15, true))
 		page.add_child(news_card)
+	page.add_child(_league_card())
 	# The name shown in the lists.
 	var name_row := HBoxContainer.new()
 	name_row.add_theme_constant_override("separation", 8)
@@ -2109,6 +2168,51 @@ func _board_page(page: VBoxContainer) -> void:
 	page.add_child(Look.label(s.t("lbHelp"), 13, false, Look.MUTED))
 
 
+## The area league this week: each side's average, my trips, last
+## week's winner.
+func _league_card() -> Control:
+	var panel := _card(Color("FFF1F6"), 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("leagueTitle"), 17, true, Look.MAGENTA))
+	if _league_state != "ok":
+		box.add_child(Look.label(s.t("leagueLoading"), 14, false, Look.MUTED))
+	else:
+		for a in League.AREAS:
+			var st: Dictionary = _league_now.get(a, {})
+			var name := s.t("area_" + a)
+			if int(st.get("count", 0)) > 0:
+				box.add_child(Look.label(s.t("leagueSide", {"area": name, "avg": "%.1f" % League.average(st), "n": int(st.count)}), 15, true))
+			else:
+				box.add_child(Look.label(s.t("leagueSideNone", {"area": name}), 15, false, Look.MUTED))
+	var area := progress.rickshaw_area()
+	var mine := League.mine(progress.data, area, progress.date())
+	box.add_child(Look.label(s.t("leagueMine", {"area": s.t("area_" + area), "n": mine}) if mine > 0 else s.t("leagueMineNone"), 14, true, Look.PARROT_DARK))
+	var w: Dictionary = League.of(progress.data).winner
+	if str(w.get("week", "")) == Friends.last_week(progress.date()):
+		box.add_child(Look.label(s.t("leagueLast", {"area": s.t("area_" + str(w.area))}), 14, false, Look.OUTLINE))
+	var help := Look.label(s.t("leagueHelp", {"n": int(b.n("league.win_tara"))}), 13, false, Look.MUTED)
+	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(help)
+	return panel
+
+
+## This week's league, fetched once per visit to the page.
+func _load_league() -> void:
+	if _league_state != "" or not cloud.enabled():
+		return
+	_league_state = "loading"
+	var week := Friends.week_of(progress.date())
+	var now := {}
+	for a in League.AREAS:
+		now[a] = await cloud.stats_of(League.field(a, week))
+	_league_now = now
+	_league_state = "ok"
+	if _page == "board":
+		_build()
+
+
 ## A row of choices for the lists (periods, or characters).
 func _board_chips(ids: Array, picked: String, key: String, prefix: String, is_period: bool) -> Control:
 	var grid := GridContainer.new()
@@ -2145,6 +2249,7 @@ func _load_board() -> void:
 	_lb_rank = 0
 	_build()
 	await cloud.publish_card(Leaderboard.card(progress.data, progress.date()))
+	_load_league()
 	var rows := await cloud.top(field, int(b.n("leaderboard.top")))
 	var mine := Leaderboard.mine(progress.data, _lb_period, _lb_who, progress.date())
 	var rank := await cloud.rank_of(field, mine)

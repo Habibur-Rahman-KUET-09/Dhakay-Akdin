@@ -12,6 +12,7 @@ const Daily = preload("res://scripts/rules/daily.gd")
 const Goods = preload("res://scripts/rules/goods.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
 const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
+const League = preload("res://scripts/rules/league.gd")
 
 const SCHEMA := 1
 const DEFAULT_PATH := "user://save.json"
@@ -80,6 +81,8 @@ static func fresh() -> Dictionary:
 		"boosts": {},
 		# Monir Mama's credit book (tea_day.gd): who owes what.
 		"ledger": [],
+		# The weekly area league (league.gd).
+		"league": League.fresh(),
 	}
 
 
@@ -449,6 +452,9 @@ func apply_day(result: Dictionary) -> Dictionary:
 	data.day = int(data.day) + 1
 	data.rickshaw.days = int(data.rickshaw.days) + 1
 	data.rickshaw.trips = int(data.rickshaw.trips) + trips
+	# For the area league, and customers taken to friends' stalls.
+	League.note(data, rickshaw_area(), trips, date())
+	Friends.note_visits(data, result.get("visits", {}))
 	data.rickshaw.earned = int(data.rickshaw.earned) + earned
 	# Cups of tea at the stalls: Monir Mama's regulars (§৬), kept for later.
 	data.rickshaw.teas = int(data.rickshaw.get("teas", 0)) + int(result.get("teas", 0))

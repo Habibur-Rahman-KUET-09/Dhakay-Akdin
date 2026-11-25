@@ -397,6 +397,27 @@ func rank_of(field: String, value: int) -> int:
 	return 0
 
 
+## How many cards have a number above 0 in a field, and its total
+## ({count, sum}; {} when it cannot be told): the area league's sides.
+func stats_of(field: String) -> Dictionary:
+	if await ensure_user() != "":
+		return {}
+	var q := {"structuredAggregationQuery": {
+		"structuredQuery": {"from": [{"collectionId": "profiles"}],
+			"where": {"fieldFilter": {"field": {"fieldPath": field}, "op": "GREATER_THAN", "value": {"integerValue": "0"}}}},
+		"aggregations": [{"alias": "n", "count": {}}, {"alias": "s", "sum": {"field": {"fieldPath": field}}}]}}
+	var reply := await _call(_docs() + ":runAggregationQuery", HTTPClient.METHOD_POST, JSON.stringify(q), _auth())
+	if not reply.ok:
+		return {}
+	for r in reply.data.get("list", []):
+		if typeof(r) == TYPE_DICTIONARY and r.has("result"):
+			var agg: Dictionary = r.result.get("aggregateFields", {})
+			var n = from_value(agg.get("n", {}))
+			var total = from_value(agg.get("s", {}))
+			return {"count": int(n) if n != null else 0, "sum": float(total) if total != null else 0.0}
+	return {}
+
+
 ## Lets go of the card and the code (when the account is deleted).
 func drop_friends(code: String) -> void:
 	await _call(_docs() + "/profiles/" + uid, HTTPClient.METHOD_DELETE, "", _auth())

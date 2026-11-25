@@ -33,6 +33,8 @@ const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
+const League = preload("res://scripts/rules/league.gd")
+const Race = preload("res://scripts/rules/race.gd")
 const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
@@ -116,6 +118,16 @@ var _whistle: AudioStreamPlayer
 var _coin: AudioStreamPlayer
 ## The hand activity open, if any (haggling, the pump, pushing).
 var _activity: Activity
+var _league_decked := false
+## Today's race (race.gd): on, the ride's points so far, the ghost to
+## race and its points, the race's own clock.
+var _race := false
+var _path := PackedVector2Array()
+var _path_left := 0.0
+var _ghost := {}
+var _ghost_points := PackedVector2Array()
+var _ghost_node: Node3D
+var _race_clock := 0.0
 ## Activities that came while another was open, opened after it.
 var _queued: Array[Callable] = []
 ## Passengers, the policeman and Rahim Chacha talking.
@@ -142,33 +154,43 @@ func _ready() -> void:
 	shift.follow_route = Driving.easy()
 	shift.easy = Driving.easy()
 	shift.level = progress.level()
-	# A chapter's mark on the next days: a rented old rickshaw, shorter
-	# days with Rokeya ill, more to earn for the flooded village.
-	_story_effect = progress.story_effect("rickshaw")
-	shift.day_seconds *= float(_story_effect.get("day_share", 1.0))
-	_call_rng.randomize()
-	var call_share := HomeCall.plan(_call_rng, progress.level())
-	if call_share >= 0.0:
-		_call_at = call_share * shift.day_seconds
-	_target_money = int(b.n("rickshaw.daily_target")) + int(_story_effect.get("target", 0))
-	shift.base_speed *= progress.speed_factor() * float(_story_effect.get("speed", 1.0))
-	shift.energy_factor = progress.energy_factor()
-	# Resting better at home (a bed, a fan): more energy to start with.
-	shift.energy_max += progress.home_energy()
-	# Cups of tea friends sent, and a friend's good morning at the stall
-	# (the relay day): more energy too.
-	_friend_energy = Friends.drink_tea(progress.data, b)
-	_relay_energy = Friends.relay_energy(progress.data, b, progress.date())
-	shift.energy_max += _friend_energy + _relay_energy
-	# A good meal bought with stars.
-	_boost = progress.take_boost("rickshaw")
-	shift.energy_max += float(_boost.get("energy", 0))
-	shift.energy = shift.energy_max
-	# A few of the named neighbours may need a ride today.
-	var ids := neighbours.ids()
-	ids.shuffle()
-	shift.npc_pool = ids.slice(0, 6)
-	shift.relations = progress.data.npcs
+	# Today's race instead of a working day, when chosen at home.
+	_race = Race.next
+	Race.next = false
+	var route := Race.route(map, progress.date(), int(b.n("race.low_tiles")), int(b.n("race.high_tiles"))) if _race else {}
+	_race = not route.is_empty()
+	if _race:
+		# No passengers, no calls, no boosts used up: just the ride.
+		shift.start_race(route)
+		shift.base_speed *= progress.speed_factor()
+	else:
+		# A chapter's mark on the next days: a rented old rickshaw, shorter
+		# days with Rokeya ill, more to earn for the flooded village.
+		_story_effect = progress.story_effect("rickshaw")
+		shift.day_seconds *= float(_story_effect.get("day_share", 1.0))
+		_call_rng.randomize()
+		var call_share := HomeCall.plan(_call_rng, progress.level())
+		if call_share >= 0.0:
+			_call_at = call_share * shift.day_seconds
+		_target_money = int(b.n("rickshaw.daily_target")) + int(_story_effect.get("target", 0))
+		shift.base_speed *= progress.speed_factor() * float(_story_effect.get("speed", 1.0))
+		shift.energy_factor = progress.energy_factor()
+		# Resting better at home (a bed, a fan): more energy to start with.
+		shift.energy_max += progress.home_energy()
+		# Cups of tea friends sent, and a friend's good morning at the stall
+		# (the relay day): more energy too.
+		_friend_energy = Friends.drink_tea(progress.data, b)
+		_relay_energy = Friends.relay_energy(progress.data, b, progress.date())
+		shift.energy_max += _friend_energy + _relay_energy
+		# A good meal bought with stars.
+		_boost = progress.take_boost("rickshaw")
+		shift.energy_max += float(_boost.get("energy", 0))
+		shift.energy = shift.energy_max
+		# A few of the named neighbours may need a ride today.
+		var ids := neighbours.ids()
+		ids.shuffle()
+		shift.npc_pool = ids.slice(0, 6)
+		shift.relations = progress.data.npcs
 	# Built a step per frame behind a loading screen, so a slow phone keeps
 	# responding, and the log shows which step a crash happened in.
 	set_process(false)
@@ -176,8 +198,17 @@ func _ready() -> void:
 	await _step("environment")
 	_environment()
 	await _step("town")
-	var town := City.build(map, strings.lang, Vector2i(-1, -1), shift.festival)
+	# Friends' tea stalls in town: passengers may ask for them.
+	shift.friend_places = Friends.shop_places(progress.data, map, strings.both("friendStall"))
+	# Last week's league won here: the streets decked out, as for a festival.
+	var decor: Dictionary = shift.festival
+	_league_decked = decor.is_empty() and League.decked(progress.data, map.id, progress.date())
+	if _league_decked:
+		decor = {"name": strings.both("leagueBanner"), "colours": ["C2185B", "F6B800", "2E9E6B", "2D8BD6"]}
+	var town := City.build(map, strings.lang, Vector2i(-1, -1), decor)
 	add_child(town)
+	for pl in shift.friend_places:
+		add_child(_friend_stall(map, pl))
 	await _step("clutter")
 	for hex in Traffic.PALETTE:
 		_palette.append(Color(hex))
@@ -233,6 +264,8 @@ func _ready() -> void:
 	_rider_seat.visible = false
 	rickshaw.add_child(_rider_seat)
 	add_child(rickshaw)
+	if _race:
+		_setup_ghost()
 	marker = _marker()
 	add_child(marker)
 	camera = Camera3D.new()
@@ -290,12 +323,21 @@ func _ready() -> void:
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
-	if not _story_effect.is_empty():
+	if _race:
+		var line := strings.t("raceStart", {"place": RoadMap.place_name(shift.race_to, strings.lang)})
+		if not _ghost.is_empty():
+			line += "\n" + (strings.t("ghostFriend", {"name": str(_ghost.name), "s": "%.1f" % float(_ghost.time)}) if _ghost.friend else strings.t("ghostMine", {"s": "%.1f" % float(_ghost.time)}))
+		_say(line, Look.MAGENTA, 6.0)
+	elif not _story_effect.is_empty():
 		_say(strings.t("after_" + str(_story_effect.note), {"n": int(_story_effect.left)}), Look.MAGENTA, 6.0)
 	elif not _boost.is_empty():
 		_say(strings.t("boostUsed", {"name": strings.t("boost_" + str(_boost.id))}), Look.SKY, 4.0)
 	elif not shift.festival.is_empty():
 		_say(str(shift.festival.greeting.get(strings.lang, shift.festival.greeting.en)), Look.MAGENTA, 6.0)
+	elif _league_decked:
+		_say(strings.t("leagueDecked", {"area": strings.t("area_" + str(progress.rickshaw_area()))}), Look.MAGENTA, 5.0)
+	elif not shift.friend_places.is_empty():
+		_say(strings.t("friendStallsHere", {"n": shift.friend_places.size()}), Look.SKY, 4.0)
 	elif shift.foggy:
 		_say(strings.t("fogMorning"), Look.SKY, 4.0)
 	elif shift.ramadan:
@@ -533,6 +575,8 @@ func _process(dt: float) -> void:
 	_handle(events)
 	if not is_processing():
 		return
+	if _race:
+		_race_tick(dt * pace)
 	hud.show_hood_down(shift.interactive and shift.hood_up and not shift.raining)
 	# A call from home comes when he is standing still (a signal, a jam),
 	# or after half a minute's wait for that.
@@ -631,6 +675,14 @@ func _update_hud() -> void:
 	hud.show_controls(shift.pedal or shift.cruise, shift.brake, shift.speed_now * City.T * 3.6)
 	hud.show_energy(shift.energy)
 	var status := "%s\n%s" % [_clock_text(), strings.t("taka", {"n": shift.money})]
+	if _race:
+		target = strings.t("raceTo", {"place": RoadMap.place_name(shift.race_to, strings.lang), "tiles": shift.remaining})
+		var hint := _way_text()
+		if hint != "":
+			target += "\n" + hint
+		status = strings.t("raceClock", {"s": "%.1f" % _race_clock})
+		if not _ghost.is_empty():
+			status += "\n" + strings.t("raceGhostTime", {"s": "%.1f" % float(_ghost.time)})
 	hud.refresh(target, status, angle, _notice, _notice_colour, me, shift.destination)
 
 
@@ -732,6 +784,8 @@ func _handle(events: Array) -> void:
 		var said := strings.t("delivered", {"fare": t.fare, "tip": tip_text, "stars": _stars(t.stars)})
 		if t.get("thanks", false):
 			said += "\n" + strings.t("npcThanks", {"name": neighbours.name_of(t.npc, strings.lang)})
+		if str(t.get("friend", "")) != "":
+			said += "\n" + strings.t("friendStallDelivered", {"name": str(t.friend)})
 		_say(said, Look.PARROT, 3.5)
 		_rider_seat.visible = false
 		_bell.play()
@@ -776,6 +830,8 @@ func _handle(events: Array) -> void:
 			_ask_lost()
 	if events.has(Day.RAIN_END):
 		_say(strings.t("rainEnd"), Look.SKY, 2.5)
+	if events.has(Day.RACE_DONE):
+		_end_race()
 	if events.has(Day.DAY_OVER):
 		_end_day()
 
@@ -1003,6 +1059,138 @@ func _lost_answered(_score: float, act) -> void:
 			_say(strings.t("lost_wrong"), Look.VERMILION, 3.0)
 		"police":
 			_say(strings.t("lost_police_said"), Look.SKY, 2.5)
+
+
+# --- Today's race with a ghost (race.gd) ---------------------------------------------
+
+
+## The ghost: a friend's best ride today (or my own), a pale rickshaw
+## with their name over it.
+func _setup_ghost() -> void:
+	_ghost = Race.ghost(progress.data, progress.date())
+	_ghost_points = Race.decode(str(_ghost.get("path", "")))
+	if _ghost_points.size() < 2:
+		_ghost = {}
+		return
+	_ghost_node = Models.player_rickshaw(Color(0.9, 0.95, 1.0), Color(0.7, 0.8, 1.0))
+	var pale := StandardMaterial3D.new()
+	pale.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	pale.albedo_color = Color(0.6, 0.78, 1.0, 0.55)
+	pale.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	for m in _ghost_node.find_children("*", "MeshInstance3D", true, false):
+		(m as MeshInstance3D).material_override = pale
+		(m as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var label := City._sign(str(_ghost.name) if _ghost.friend else strings.t("ghostYou"), Vector3(0, 2.6, 0), 40, Look.SKY)
+	_ghost_node.add_child(label)
+	add_child(_ghost_node)
+	_place_ghost()
+
+
+func _place_ghost() -> void:
+	if _ghost_node == null:
+		return
+	var p := Race.at_time(_ghost_points, _race_clock)
+	var ahead := Race.at_time(_ghost_points, _race_clock + Race.STEP) - p
+	_ghost_node.position = Vector3(p.x, 0, p.y)
+	if ahead.length() > 0.01:
+		_ghost_node.rotation.y = lerp_angle(_ghost_node.rotation.y, atan2(-ahead.x, -ahead.y), 0.3)
+
+
+## The race's clock, the ride written down, the ghost moved on.
+func _race_tick(dt: float) -> void:
+	# The clock starts with the first push of the pedals.
+	if _race_clock <= 0.0 and shift.speed_now < 0.02:
+		return
+	_race_clock += dt
+	_path_left -= dt
+	if _path_left <= 0.0 and _path.size() < Race.MAX_POINTS:
+		_path_left += Race.STEP
+		_path.append(Vector2(rickshaw.position.x, rickshaw.position.z))
+	_place_ghost()
+
+
+## At the finish: the time, against the ghost; today's best kept and sent
+## to the card; stars; again, or home.
+func _end_race() -> void:
+	set_process(false)
+	shift.pedal = false
+	shift.cruise = false
+	_rain_sound.stop()
+	_drops.emitting = false
+	_path.append(Vector2(rickshaw.position.x, rickshaw.position.z))
+	var got := Race.finish(progress.data, progress.b, progress.date(), _race_clock, Race.encode(_path), _ghost)
+	progress.save()
+	load("res://scripts/ui/cloud.gd").backup(self, progress.data)
+	CrashWatch.stop()
+	print("[race] %.1f s, ghost %s, %s" % [_race_clock, str(_ghost.get("time", "-")), str(got)])
+	var lines := [strings.t("raceTime", {"s": "%.1f" % _race_clock})]
+	if not _ghost.is_empty():
+		var key := "raceBeat" if _race_clock < float(_ghost.time) else "raceLost"
+		if not _ghost.friend:
+			key = "raceBeatSelf" if _race_clock < float(_ghost.time) else "raceLostSelf"
+		lines.append(strings.t(key, {"name": str(_ghost.name), "s": "%.1f" % float(_ghost.time)}))
+	if got.best:
+		lines.append(strings.t("raceBest"))
+	if int(got.stars) > 0:
+		lines.append(strings.t("raceStars", {"n": int(got.stars)}))
+	lines.append(strings.t("raceShare"))
+	var layer := CanvasLayer.new()
+	layer.layer = 5
+	add_child(layer)
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0, 0, 0.45)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(shade)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Look.card(Look.CREAM, 18, 3))
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.custom_minimum_size = Vector2(420, 0)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	layer.add_child(panel)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	panel.add_child(col)
+	col.add_child(Look.title(strings.t("raceOver"), 32))
+	for l in lines:
+		var label := Look.label(str(l), 17, true)
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(label)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 10)
+	var again := Look.chunky(strings.t("raceAgain"), Look.YELLOW, Look.OUTLINE, 18)
+	again.pressed.connect(func():
+		Race.next = true
+		_play_again())
+	var home := Look.chunky(strings.t("back"), Color.WHITE, Look.OUTLINE, 18)
+	home.pressed.connect(_go_home)
+	for button in [again, home]:
+		button.autowrap_mode = TextServer.AUTOWRAP_OFF
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size = Vector2(0, 58)
+		row.add_child(button)
+	col.add_child(row)
+	ReadAloud.say("\n".join(lines), strings.lang)
+
+
+## A friend's tea stall by the road, with their name over it.
+func _friend_stall(map: RoadMap, place: Dictionary) -> Node3D:
+	var node := Node3D.new()
+	node.name = "FriendStall"
+	var at: Vector2i = place.at
+	var inward := City._inward(map, at)
+	node.position = City._side(map, at) + Vector3(0, 0.15, 0)
+	# The counter faces the road.
+	node.rotation.y = atan2(inward.x, inward.z)
+	var stall := MeshInstance3D.new()
+	stall.mesh = Models.tea_stall()
+	stall.material_override = Models.material()
+	stall.scale = Vector3.ONE * 0.8
+	node.add_child(stall)
+	var board := City._sign(RoadMap.place_name(place, strings.lang), Vector3(0, 3.0, 0), 44, Look.MAGENTA)
+	node.add_child(board)
+	return node
 
 
 ## The bell: once, or twice quickly to clear the way for longer.
@@ -1238,13 +1426,18 @@ func _end_day() -> void:
 		lines.append(strings.t("teaLine", {"n": shift.teas, "money": shift.tea_spent}))
 	if shift.returned > 0:
 		lines.append(strings.t("lostLine", {"n": shift.returned, "money": shift.lost_rewards}))
+	var to_friends := 0
+	for uid in shift.friend_visits:
+		to_friends += int(shift.friend_visits[uid])
+	if to_friends > 0:
+		lines.append(strings.t("friendStallLine", {"n": to_friends}))
 	if not _call_result.is_empty():
 		lines.append(strings.t("familyLine", {"n": _call_result.family}))
 	var met := shift.money >= _target_money
 	print("[day] rickshaw: %d trips, %.1f s a trip on average" % [shift.trips, shift.average_trip_seconds()])
 	# Into the save: savings, school fee, fund, XP, the record.
 	var stats := {"good_trips": shift.good_trips, "clean": 1 if shift.fines == 0 and shift.trips >= 3 else 0, "earned": shift.money}
-	var got := progress.apply_day({"earned": shift.money, "trips": shift.trips, "stars": shift.average_stars(), "fines": shift.fines, "teas": shift.teas, "stats": stats, "npcs": shift.npc_log})
+	var got := progress.apply_day({"earned": shift.money, "trips": shift.trips, "stars": shift.average_stars(), "fines": shift.fines, "teas": shift.teas, "stats": stats, "npcs": shift.npc_log, "visits": shift.friend_visits})
 	progress.save()
 	# And a copy online, if this build has it (not waited for).
 	load("res://scripts/ui/cloud.gd").backup(self, progress.data)

@@ -12,6 +12,8 @@ extends RefCounted
 const Balance = preload("res://scripts/rules/balance.gd")
 const Daily = preload("res://scripts/rules/daily.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
+const League = preload("res://scripts/rules/league.gd")
+const Race = preload("res://scripts/rules/race.gd")
 
 const WHO := ["all", "rickshaw", "tea", "bus", "fuchka"]
 const PERIODS := ["day", "week", "month", "ever"]
@@ -137,6 +139,10 @@ static func fields(data: Dictionary, date: String) -> Dictionary:
 static func card(data: Dictionary, date: String) -> Dictionary:
 	var c := Friends.card(data, date)
 	c.merge(fields(data, date))
+	c.merge(League.fields(data, date))
+	# Today's ghost-race ride, or nothing (the field is then cleared).
+	var race := Race.card(data, date)
+	c["race"] = race.get("race", {})
 	return c
 
 

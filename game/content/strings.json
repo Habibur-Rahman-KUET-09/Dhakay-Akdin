@@ -3654,5 +3654,161 @@
  "iftarPacket": {
   "bn": "ইফতারের প্যাকেট",
   "en": "Iftar packet"
+ },
+ "friendStall": {
+  "bn": "{name}-এর চায়ের দোকান",
+  "en": "{name}'s tea stall"
+ },
+ "leagueBanner": {
+  "bn": "এলাকা লীগে জয়ী!",
+  "en": "League winners!"
+ },
+ "leagueDecked": {
+  "bn": "গত সপ্তাহের এলাকা লীগে {area} জিতেছে! রাস্তায় রাস্তায় উৎসবের সাজ।",
+  "en": "{area} won last week's area league! The streets are decked out."
+ },
+ "friendStallsHere": {
+  "bn": "এই শহরে বন্ধুদের চায়ের দোকান আছে ({n}টা)। যাত্রী সেখানে যেতে চাইলে পৌঁছে দিন!",
+  "en": "Your friends' tea stalls are in town ({n}). Take passengers there when they ask!"
+ },
+ "friendStallDelivered": {
+  "bn": "{name}-এর দোকানে কাস্টমার পৌঁছে দিলেন, বন্ধু আয় পাবেন!",
+  "en": "A customer for {name}'s stall: your friend earns from it!"
+ },
+ "friendStallLine": {
+  "bn": "বন্ধুর দোকানে কাস্টমার পৌঁছালেন: {n} জন",
+  "en": "Customers taken to friends' stalls: {n}"
+ },
+ "shopVisits": {
+  "bn": "{name}-এর রিকশা আপনার চায়ের দোকানে {n} জন কাস্টমার এনেছে: +{taka} টাকা",
+  "en": "{name}'s rickshaw brought {n} customers to your stall: +Tk {taka}"
+ },
+ "leagueTitle": {
+  "bn": "এলাকা লীগ: মিরপুর বনাম পুরান ঢাকা",
+  "en": "Area league: Mirpur v Old Dhaka"
+ },
+ "leagueSide": {
+  "bn": "{area}: গড়ে {avg}টা ট্রিপ · {n} জন",
+  "en": "{area}: {avg} trips on average · {n} players"
+ },
+ "leagueSideNone": {
+  "bn": "{area}: এই সপ্তাহে এখনো কেউ চালাননি",
+  "en": "{area}: nobody has ridden here this week yet"
+ },
+ "leagueMine": {
+  "bn": "আপনি এই সপ্তাহে {area}-এ {n}টা ট্রিপ দিয়েছেন",
+  "en": "You've made {n} trips in {area} this week"
+ },
+ "leagueMineNone": {
+  "bn": "এই সপ্তাহে আপনি এখনো রিকশা চালাননি",
+  "en": "You haven't ridden the rickshaw this week yet"
+ },
+ "leagueLast": {
+  "bn": "গত সপ্তাহে জিতেছে {area}: সেখানে এই সপ্তাহে উৎসবের সাজ",
+  "en": "{area} won last week: its streets are decked out this week"
+ },
+ "leagueWon": {
+  "bn": "গত সপ্তাহের এলাকা লীগে {area} জিতেছে! আপনি সেখানে রিকশা চালিয়েছিলেন: +{n} তারা",
+  "en": "{area} won last week's area league, and you rode there: +{n} stars"
+ },
+ "leagueResult": {
+  "bn": "গত সপ্তাহের এলাকা লীগে জিতেছে {area}",
+  "en": "{area} won last week's area league"
+ },
+ "leagueLoading": {
+  "bn": "লীগের হিসাব আসছে…",
+  "en": "Fetching the league…"
+ },
+ "leagueHelp": {
+  "bn": "প্রতিটা রিকশা ট্রিপ যে এলাকায় চালান, সেই এলাকার পক্ষে গোনা হয়। যে এলাকার খেলোয়াড়দের গড় ট্রিপ বেশি, সে সপ্তাহ শেষে জেতে। জয়ী এলাকায় পরের সপ্তাহে উৎসবের সাজ, আর সেখানে চালানো সবাই +{n} তারা।",
+  "en": "Every rickshaw trip counts for the area you ride in. The area whose players made more trips on average wins the week: its streets are decked out the next week, and everyone who rode there gets +{n} stars."
+ },
+ "raceTitle": {
+  "bn": "আজকের দৌড়: ভূত-রিকশার সাথে",
+  "en": "Today's race: against a ghost"
+ },
+ "raceAbout": {
+  "bn": "আজ সবার জন্য একই পথ: {place} পর্যন্ত যত দ্রুত পারেন। বন্ধুর আজকের সেরা দৌড়ের আবছা রিকশা পাশে চলবে। প্রথমবার শেষ করলে আর বন্ধুকে হারালে তারা।",
+  "en": "The same ride for everyone today: to {place}, as fast as you can. A friend's best ride today runs beside you as a pale rickshaw. Stars for your first finish and for beating a friend."
+ },
+ "raceYourBest": {
+  "bn": "আপনার আজকের সেরা: {s} সেকেন্ড",
+  "en": "Your best today: {s} s"
+ },
+ "raceFriendBest": {
+  "bn": "{name}-এর আজকের সেরা: {s} সেকেন্ড",
+  "en": "{name}'s best today: {s} s"
+ },
+ "raceGo": {
+  "bn": "দৌড় শুরু",
+  "en": "Race"
+ },
+ "raceStart": {
+  "bn": "আজকের দৌড়: {place} পর্যন্ত, যত দ্রুত পারেন!",
+  "en": "Today's race: to {place}, as fast as you can!"
+ },
+ "ghostFriend": {
+  "bn": "পাশে {name}-এর ভূত-রিকশা ({s} সেকেন্ড)",
+  "en": "Beside you: {name}'s ghost ({s} s)"
+ },
+ "ghostMine": {
+  "bn": "পাশে আপনার আগের সেরা দৌড়ের ভূত ({s} সেকেন্ড)",
+  "en": "Beside you: the ghost of your best ride ({s} s)"
+ },
+ "ghostYou": {
+  "bn": "আপনার আগের দৌড়",
+  "en": "Your best"
+ },
+ "raceTo": {
+  "bn": "দৌড়: {place} · আর {tiles} ব্লক",
+  "en": "Race: {place} · {tiles} blocks to go"
+ },
+ "raceClock": {
+  "bn": "সময় {s} সে.",
+  "en": "Time {s} s"
+ },
+ "raceGhostTime": {
+  "bn": "ভূত: {s} সে.",
+  "en": "Ghost: {s} s"
+ },
+ "raceOver": {
+  "bn": "দৌড় শেষ!",
+  "en": "Finished!"
+ },
+ "raceTime": {
+  "bn": "আপনার সময়: {s} সেকেন্ড",
+  "en": "Your time: {s} seconds"
+ },
+ "raceBeat": {
+  "bn": "{name}-কে হারিয়েছেন! ({s} সেকেন্ড)",
+  "en": "You beat {name}! ({s} s)"
+ },
+ "raceLost": {
+  "bn": "{name} এগিয়ে ({s} সেকেন্ড)। আবার চেষ্টা করুন!",
+  "en": "{name} was faster ({s} s). Try again!"
+ },
+ "raceBeatSelf": {
+  "bn": "নিজের আগের সেরা ({s} সেকেন্ড) ছাড়িয়ে গেলেন!",
+  "en": "Faster than your best ({s} s)!"
+ },
+ "raceLostSelf": {
+  "bn": "আগের সেরা ছিল {s} সেকেন্ড।",
+  "en": "Your best was {s} s."
+ },
+ "raceBest": {
+  "bn": "আজকের নতুন সেরা সময়! বন্ধুরা এটাকে ভূত হিসেবে দেখবে।",
+  "en": "A new best today! Friends will race its ghost."
+ },
+ "raceStars": {
+  "bn": "+{n} তারা",
+  "en": "+{n} stars"
+ },
+ "raceShare": {
+  "bn": "কাল নতুন পথে নতুন দৌড়।",
+  "en": "Tomorrow brings a new ride."
+ },
+ "raceAgain": {
+  "bn": "আবার দৌড়",
+  "en": "Race again"
  }
 }
