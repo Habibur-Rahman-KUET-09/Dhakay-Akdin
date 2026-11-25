@@ -3040,6 +3040,743 @@
      ]
     }
    ]
+  },
+  {
+   "id": "tg_flood_0",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "এক বন্যার রাত",
+    "en": "A night of floods"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আম্মার গা আগুনের মতো গরম। কাল আমার বৃত্তি পরীক্ষা, আব্বা।",
+       "en": "Ammu is burning up. And tomorrow's my scholarship exam, Abba."
+      },
+      {
+       "by": "rahim",
+       "bn": "চিন্তা কোরো না মা। বাবুকে ফোন করেছি, ও ফার্মেসি থেকে ওষুধ আনছে।",
+       "en": "Don't worry, dear. I've called Babu: he's bringing medicine from the pharmacy."
+      },
+      {
+       "by": "rokeya",
+       "bn": "বাইরে হাঁটু পানি… তোমরা সাবধানে থেকো।",
+       "en": "The water outside is knee-deep… all of you, be careful."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_flood_1",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "রাত ৯টা: শেষ বাস",
+    "en": "9 pm: the last bus"
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "ওস্তাদ, আগারগাঁওয়ে আটকে গেছি! ওষুধটা রহিম চাচার কাছে পৌঁছাতে হবে।",
+       "en": "Ostad, we're stuck at Agargaon! This medicine has to reach Rahim Chacha."
+      },
+      {
+       "by": "ostad",
+       "bn": "বাস তো এক চুলও নড়বে না রে বাবু। দরজা দিয়ে হাত বাড়া!",
+       "en": "The bus won't move an inch, Babu. Reach out from the door!"
+      },
+      {
+       "by": "babu",
+       "bn": "ওই তো চাচার রিকশা! চাচা, হাতটা ধরেন!",
+       "en": "There's Chacha's rickshaw! Chacha, take my hand!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_flood_2",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "রাত ১১টা: হারিকেনের আলো",
+    "en": "11 pm: by lantern light"
+   },
+   "panels": [
+    {
+     "scene": "stall_night",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "কারেন্ট নেই, দোকানে বিশজন মানুষ আশ্রয় নিয়েছে। হারিকেনটা জ্বালাই।",
+       "en": "No power, and twenty people sheltering in the stall. Let me light the lantern."
+      },
+      {
+       "by": "man",
+       "bn": "মামা, এক কাপ গরম চা হবে? সারা গা ভিজে গেছে।",
+       "en": "Mama, a cup of hot tea? I'm soaked through."
+      },
+      {
+       "by": "monir",
+       "bn": "হবে, হবে। আর কার বাসার গলিতে পানি কম, সেটা রহিম ভাইরে ফোনে জানাই।",
+       "en": "Coming up. And whoever knows which lanes are dry, I'll phone it to Rahim Bhai."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_flood_3",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "মাঝরাত: ডোবা রাস্তা",
+    "en": "Midnight: the drowned road"
+   },
+   "panels": [
+    {
+     "scene": "rain_night",
+     "lines": [
+      {
+       "by": "rahim",
+       "bn": "নার্স নাসরিন আপাকে নিয়ে যেতে হবে, রোকেয়ার জ্বর কমছে না।",
+       "en": "I have to take Nurse Nasrin home: Rokeya's fever won't come down."
+      },
+      {
+       "by": "nasrin",
+       "bn": "রহিম ভাই, রিকশা তো ডুবে যাচ্ছে! নামতে হবে?",
+       "en": "Rahim Bhai, the rickshaw's going under! Should I get down?"
+      },
+      {
+       "by": "rahim",
+       "bn": "আপনি বসেন আপা। আমি ঠেলে নিয়ে যাই।",
+       "en": "Stay seated, Apa. I'll push us through."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_flood_good",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "সকাল: সব ঠিক",
+    "en": "Morning: all is well"
+   },
+   "panels": [
+    {
+     "scene": "home_dawn",
+     "lines": [
+      {
+       "by": "rokeya",
+       "bn": "জ্বর নেমে গেছে। তোমরা সবাই সারারাত জেগে ছিলে…",
+       "en": "The fever's gone. You were all up the whole night…"
+      },
+      {
+       "by": "monir",
+       "bn": "চলেন, সবাই আমার দোকানে, গরম চা আর পরোটা!",
+       "en": "Come on, everyone to my stall: hot tea and parathas!"
+      },
+      {
+       "by": "sumi",
+       "bn": "আব্বা, আমি পরীক্ষা দিতে যাচ্ছি। তোমার রিকশায়!",
+       "en": "Abba, I'm off to my exam. On your rickshaw!"
+      },
+      {
+       "by": "babu",
+       "bn": "সুমি, ভালো করে লিখিস। আমরা সবাই আছি।",
+       "en": "Write well, Sumi. We're all with you."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_flood_ok",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "সকাল: কোনোমতে",
+    "en": "Morning: just about"
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "rahim",
+       "bn": "রাতটা কোনোমতে পার হলো। রোকেয়া এখনো দুর্বল।",
+       "en": "We got through the night, just about. Rokeya's still weak."
+      },
+      {
+       "by": "sumi",
+       "bn": "আম্মাকে রেখে যেতে মন চায় না, আব্বা।",
+       "en": "I don't want to leave Ammu, Abba."
+      },
+      {
+       "by": "rokeya",
+       "bn": "যাও মা, পরীক্ষাটা দাও। আমি ঠিক আছি।",
+       "en": "Go, dear, sit your exam. I'm all right."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_flood_hard",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "সকাল: হাসপাতালে",
+    "en": "Morning: at the hospital"
+   },
+   "panels": [
+    {
+     "scene": "hospital",
+     "lines": [
+      {
+       "by": "nasrin",
+       "bn": "জ্বর খুব বেড়েছিল, তাই হাসপাতালে আনলাম। ভয় নেই, এখন সামলে নেওয়া যাবে।",
+       "en": "The fever went very high, so we brought her in. Don't be afraid: it's in hand now."
+      },
+      {
+       "by": "rahim",
+       "bn": "সুমির পরীক্ষাটা… মেয়েটা সারারাত মায়ের পাশে বসে ছিল।",
+       "en": "Sumi's exam… she sat by her mother all night."
+      },
+      {
+       "by": "monir",
+       "bn": "রহিম ভাই, মন খারাপ কইরেন না। পরের বছর আবার পরীক্ষা আছে, আমরা সবাই আছি।",
+       "en": "Don't lose heart, Rahim Bhai. There's the exam again next year, and we're all here."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_eid_0",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "ঈদের আগের রাত",
+    "en": "The night before Eid"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "rokeya",
+       "bn": "সবাই গ্রামে যাচ্ছে। আম্মা বলেছেন এবার ঈদে যেতেই হবে।",
+       "en": "Everyone's going to their village. Amma says we must come this Eid."
+      },
+      {
+       "by": "rahim",
+       "bn": "টিকিট নেই রোকেয়া। বাবু বলেছে ওস্তাদের শেষ বাসে দুটো সিট রাখবে।",
+       "en": "There are no tickets, Rokeya. Babu says he'll keep two seats on Ostad's last bus."
+      },
+      {
+       "by": "sumi",
+       "bn": "নানুর বাড়ি! আব্বা, তুমিও চলো না?",
+       "en": "Nanu's house! Abba, won't you come too?"
+      },
+      {
+       "by": "rahim",
+       "bn": "আমি থাকি মা। ঈদের রাতে রিকশায় ভালো আয় হয়।",
+       "en": "I'll stay, dear. The rickshaw earns well on Eid night."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_eid_1",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "শেষ ট্রিপ",
+    "en": "The last trip"
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "ostad",
+       "bn": "বাবু, ছাদে মাল তোল, ভেতরে মানুষ সামলা। আজ শেষ ট্রিপ!",
+       "en": "Babu, the luggage on the roof, and keep the crowd in order. Last trip tonight!"
+      },
+      {
+       "by": "dalal",
+       "bn": "এই কন্ডাক্টর, সিট দুইটা আমারে দে। ডাবল দামে বেচমু, তোরেও ভাগ দিমু।",
+       "en": "Hey, conductor, give me those two seats. I'll sell them at double and cut you in."
+      },
+      {
+       "by": "babu",
+       "bn": "সিট দুইটা রহিম চাচার পরিবারের জন্য রাখা…",
+       "en": "Those two seats are kept for Rahim Chacha's family…"
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "বাবু কী করবে?",
+     "en": "What will Babu do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "সিট ছাড়বে না",
+       "en": "Keep the seats"
+      },
+      "effects": {
+       "together": 0.2
+      },
+      "lines": [
+       {
+        "by": "dalal",
+        "bn": "পস্তাবি কিন্তু!",
+        "en": "You'll regret it!"
+       },
+       {
+        "by": "babu",
+        "bn": "পস্তালে পস্তাব। এ সিট চাচি আর সুমির।",
+        "en": "Then I'll regret it. These seats are for Chachi and Sumi."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "সিট বেচে দেবে",
+       "en": "Sell the seats"
+      },
+      "effects": {
+       "together": -0.3,
+       "taka": 300
+      },
+      "lines": [
+       {
+        "by": "babu",
+        "bn": "টাকাটা পকেটে… কিন্তু চাচির সিট?",
+        "en": "Money in my pocket… but Chachi's seats?"
+       },
+       {
+        "by": "ostad",
+        "bn": "ছাদে বসাইস, আর কী!",
+        "en": "Put them on the roof, what else!"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "tg_eid_2",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "বাক্স-পোটলা",
+    "en": "Boxes and bundles"
+   },
+   "panels": [
+    {
+     "scene": "street_night",
+     "lines": [
+      {
+       "by": "rahim",
+       "bn": "রোকেয়া, সুমি, বাক্স-পোটলা সব রিকশায় তোলো। তাড়াতাড়ি!",
+       "en": "Rokeya, Sumi, all the boxes and bundles on the rickshaw. Quick!"
+      },
+      {
+       "by": "sumi",
+       "bn": "আব্বা, চাকা তো বসে গেছে!",
+       "en": "Abba, the tyre's gone flat!"
+      },
+      {
+       "by": "rahim",
+       "bn": "এত ভারে হাওয়া কমে গেছে। দাঁড়াও, পাম্প দিই।",
+       "en": "Too much weight. Wait, let me pump it."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_eid_3",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "স্ট্যান্ডের ভিড়",
+    "en": "The crowd at the stand"
+   },
+   "panels": [
+    {
+     "scene": "stall_night",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "স্ট্যান্ডে হাজার মানুষ, সবার মুখ শুকনা। চুলায় কেটলি বসাই।",
+       "en": "A thousand people at the stand, all weary. The kettle goes on."
+      },
+      {
+       "by": "man",
+       "bn": "মামা, দুই চামচ চিনি দিয়া এক কাপ। বাস কখন আসবে কে জানে।",
+       "en": "Mama, a cup with two sugars. Who knows when the bus will come."
+      },
+      {
+       "by": "monir",
+       "bn": "শেষ বাস আসা পর্যন্ত চা চলবে! রোকেয়া ভাবি এলে আগে সিটে তুলে দিব।",
+       "en": "Tea till the last bus comes! When Rokeya Bhabi arrives, I'll get her to her seat first."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_eid_good",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "বাড়ির পথে",
+    "en": "On the way home"
+   },
+   "panels": [
+    {
+     "scene": "street_night",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "চাচি, সুমি, এই যে আপনাদের সিট। জানালার পাশে!",
+       "en": "Chachi, Sumi, here are your seats. By the window!"
+      },
+      {
+       "by": "rokeya",
+       "bn": "বাবু, তুই না থাকলে আজ যাওয়াই হতো না।",
+       "en": "Babu, without you we'd never have gone."
+      },
+      {
+       "by": "monir",
+       "bn": "ঈদের সকালে আমার দোকানে সেমাই, তিনজনে মিলে খাব।",
+       "en": "Shemai at my stall on Eid morning: the three of us."
+      },
+      {
+       "by": "rahim",
+       "bn": "তিনজনে মিলে ফাঁকা শহর… এটাও একরকম ঈদ।",
+       "en": "The three of us and an empty city… that's an Eid too."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_eid_ok",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "ছাদে বসে",
+    "en": "Up on the roof"
+   },
+   "panels": [
+    {
+     "scene": "street_night",
+     "lines": [
+      {
+       "by": "ostad",
+       "bn": "সিট নাই, ছাদে বসাইলাম। শক্ত করে ধরে বসেন চাচি!",
+       "en": "No seats left, so it's the roof. Hold on tight, Chachi!"
+      },
+      {
+       "by": "rokeya",
+       "bn": "কষ্ট হবে, কিন্তু আম্মার কাছে তো পৌঁছাব।",
+       "en": "It'll be hard, but we'll reach Amma."
+      },
+      {
+       "by": "rahim",
+       "bn": "সাবধানে যেও। পৌঁছে ফোন দিও।",
+       "en": "Go carefully. Call when you get there."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_eid_hard",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "শেষ বাস চলে গেল",
+    "en": "The last bus has gone"
+   },
+   "panels": [
+    {
+     "scene": "street_night",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "শেষ বাসটা চলে গেল… চাচি, মাফ করবেন।",
+       "en": "The last bus has gone… forgive me, Chachi."
+      },
+      {
+       "by": "sumi",
+       "bn": "আব্বা, নানুর বাড়ি যাওয়া হলো না?",
+       "en": "Abba, we're not going to Nanu's?"
+      },
+      {
+       "by": "rahim",
+       "bn": "মন খারাপ করিস না মা। কাল সকালে আমরা একসাথে ঈদ করব।",
+       "en": "Don't be sad, dear. Tomorrow morning we'll have Eid together."
+      },
+      {
+       "by": "monir",
+       "bn": "আমার দোকানে সবার দাওয়াত। ঈদ মানে তো একসাথে থাকা।",
+       "en": "You're all invited to my stall. Eid means being together."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_bday_0",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "সুমির জন্মদিন",
+    "en": "Sumi's birthday"
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "কাল সুমির জন্মদিন। চুপিচুপি একটা আয়োজন করি, কী বলেন?",
+       "en": "Tomorrow's Sumi's birthday. Shall we plan something on the quiet?"
+      },
+      {
+       "by": "babu",
+       "bn": "আমি চকবাজার থেকে বেলুন আনব!",
+       "en": "I'll bring balloons from Chawkbazar!"
+      },
+      {
+       "by": "rokeya",
+       "bn": "আমি ঘর সাজাব। কিন্তু সুমি যেন কিছু টের না পায়।",
+       "en": "I'll decorate the room. But Sumi mustn't suspect a thing."
+      },
+      {
+       "by": "rahim",
+       "bn": "ওকে আমি স্কুল থেকে ঘুরিয়ে আনব। বাহানা একটা বের করতেই হবে।",
+       "en": "I'll take the long way home from school with her. I'll need some excuses."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_bday_1",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "ভিড়ের বাসে বেলুন",
+    "en": "Balloons on a crowded bus"
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "বিশটা বেলুন, ভিড়ের বাস… একটাও যেন না ফাটে!",
+       "en": "Twenty balloons and a packed bus… not one must pop!"
+      },
+      {
+       "by": "man",
+       "bn": "এই ছেলে, বেলুন সরাও, আমার ছাতা লাগছে!",
+       "en": "Hey, boy, move those balloons, they're hitting my umbrella!"
+      },
+      {
+       "by": "babu",
+       "bn": "ভাই একটু সাবধানে, এগুলা জন্মদিনের!",
+       "en": "Careful, brother, they're for a birthday!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_bday_2",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "প্রথম কেক",
+    "en": "The first cake"
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "জীবনে প্রথম কেক বানাচ্ছি। দোকানও চালাতে হবে!",
+       "en": "My first cake ever. And the stall to run too!"
+      },
+      {
+       "by": "julekha",
+       "bn": "মনির ভাই, চিনি দুই চামচ, বেশি না। তারপর ভালো করে ফেটান।",
+       "en": "Monir Bhai, two spoons of sugar, no more. Then beat it well."
+      },
+      {
+       "by": "monir",
+       "bn": "জুলেখা আপা, আপনি না থাকলে কেকটা পুড়াইতাম!",
+       "en": "Julekha Apa, without you I'd have burnt it!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_bday_3",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "ঘুরপথে বাড়ি",
+    "en": "The long way home"
+   },
+   "panels": [
+    {
+     "scene": "school",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, আজ এত ঘুরে ঘুরে যাচ্ছ কেন?",
+       "en": "Abba, why are we going round and round today?"
+      },
+      {
+       "by": "rahim",
+       "bn": "আহা, চলো না মা, একটু ঘুরে আসি…",
+       "en": "Oh, come on, dear, let's take a little ride…"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_bday_good",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "শুভ জন্মদিন!",
+    "en": "Happy birthday!"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "এ কী! এত বেলুন! কেক! আমার জন্য?",
+       "en": "What! So many balloons! A cake! For me?"
+      },
+      {
+       "by": "rokeya",
+       "bn": "শুভ জন্মদিন, মা আমার।",
+       "en": "Happy birthday, my darling."
+      },
+      {
+       "by": "babu",
+       "bn": "একটাও ফাটেনি, দেখ!",
+       "en": "Not one popped, look!"
+      },
+      {
+       "by": "monir",
+       "bn": "কেকটা প্রথমবার বানালাম, কেমন হয়েছে বল?",
+       "en": "My first cake: tell me, how is it?"
+      },
+      {
+       "by": "sumi",
+       "bn": "পৃথিবীর সবচেয়ে মজার কেক, মামা!",
+       "en": "The tastiest cake in the world, Mama!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_bday_ok",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "একটু একটু টের পেয়েছিলাম",
+    "en": "I'd half guessed"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আমি কিন্তু একটু একটু বুঝে গিয়েছিলাম, আব্বা!",
+       "en": "I'd half guessed, you know, Abba!"
+      },
+      {
+       "by": "rahim",
+       "bn": "তাও তো খুশি হয়েছিস, না মা?",
+       "en": "But you're happy all the same, aren't you?"
+      },
+      {
+       "by": "sumi",
+       "bn": "অনেক খুশি! কেকটা একটু বাঁকা, কিন্তু মজা!",
+       "en": "Very happy! The cake's a bit lopsided, but it's yummy!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tg_bday_hard",
+   "who": "together",
+   "n": 0,
+   "title": {
+    "bn": "সব জানা ছিল",
+    "en": "She knew all along"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, তুমি আমাকে ঘোরাচ্ছিলে কেন, আমি তো সব বুঝে গেছি…",
+       "en": "Abba, I knew why you were taking me round…"
+      },
+      {
+       "by": "babu",
+       "bn": "বেলুন অর্ধেক ফেটে গেছে, কেকটাও একটু পুড়ে গেছে।",
+       "en": "Half the balloons popped, and the cake's a little burnt."
+      },
+      {
+       "by": "rokeya",
+       "bn": "তাতে কী? আমরা সবাই তো একসাথে আছি। শুভ জন্মদিন, সুমি!",
+       "en": "So what? We're all together. Happy birthday, Sumi!"
+      },
+      {
+       "by": "sumi",
+       "bn": "এটাই আমার সবচেয়ে ভালো জন্মদিন।",
+       "en": "This is my best birthday ever."
+      }
+     ]
+    }
+   ]
   }
  ]
 }

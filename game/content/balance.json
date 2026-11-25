@@ -102,6 +102,7 @@
   },
   "league": {"min_players": 1, "win_tara": 5},
   "race": {"finish_tara": 2, "beat_tara": 3, "low_tiles": 14, "high_tiles": 26},
+  "together": {"good": 0.7, "ok": 0.4, "tara": [5, 10, 15], "help_pushes": 0.6},
   "leaderboard": {"top": 20, "prizes": {"day": [5, 3, 2], "week": [15, 10, 5], "month": [40, 25, 15]}},
   "friends": {
     "max_friends": 20, "shop_visit_taka": 20, "gifts_per_day": 3, "stickers_per_day": 10,

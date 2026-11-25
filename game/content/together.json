@@ -1,0 +1,259 @@
+{
+ "note": "Co-op stories on one phone (phase 7): each step is one character's turn, a story scene (story.json) then a hand activity; the steps' scores make the ending.",
+ "stories": [
+  {
+   "id": "flood",
+   "title": {
+    "bn": "এক বন্যার রাত",
+    "en": "A night of floods"
+   },
+   "about": {
+    "bn": "শ্রাবণের রাত, মিরপুরে হাঁটু পানি। রোকেয়ার জ্বর, সুমির কাল বৃত্তি পরীক্ষা। বাবু ওষুধ আনে, মনির আশ্রয় দেয়, রহিম নার্সকে পৌঁছায়।",
+    "en": "A monsoon night, knee-deep water in Mirpur. Rokeya has a fever; Sumi's exam is tomorrow. Babu brings medicine, Monir gives shelter, Rahim fetches the nurse."
+   },
+   "after": "",
+   "opening": "tg_flood_0",
+   "steps": [
+    {
+     "who": "babu",
+     "scene": "tg_flood_1",
+     "game": "door",
+     "title": "tg_door",
+     "good": {
+      "bn": "ওষুধের প্যাকেট ঠিকঠাক রহিম চাচার হাতে।",
+      "en": "The medicine is safe in Rahim Chacha's hands."
+     },
+     "bad": {
+      "bn": "প্যাকেটটা পানিতে পড়ে গিয়েছিল, তুলতে সময় গেল।",
+      "en": "The packet fell in the water; picking it up took time."
+     }
+    },
+    {
+     "who": "monir",
+     "scene": "tg_flood_2",
+     "game": "pour",
+     "title": "tg_pour",
+     "good": {
+      "bn": "চা খেয়ে সবাই বলল: মসজিদের গলিতে পানি কম। খবর গেল রহিম চাচার কাছে।",
+      "en": "Over tea they all said: the mosque lane is driest. Word went to Rahim Chacha."
+     },
+     "bad": {
+      "bn": "চা ছলকে পড়ল; কোন গলিতে পানি কম, ঠিকমতো জানা হলো না।",
+      "en": "The tea spilt; nobody quite worked out which lane was dry."
+     }
+    },
+    {
+     "who": "rahim",
+     "scene": "tg_flood_3",
+     "game": "push",
+     "title": "tg_push",
+     "helped_by": 1,
+     "good": {
+      "bn": "নাসরিন আপা সময়মতো পৌঁছে ওষুধ দিলেন।",
+      "en": "Nurse Nasrin arrived in time with the medicine."
+     },
+     "bad": {
+      "bn": "অনেক দেরি হয়ে গেল; জ্বর আরও বাড়ল।",
+      "en": "It took far too long; the fever rose."
+     }
+    }
+   ],
+   "endings": [
+    "tg_flood_hard",
+    "tg_flood_ok",
+    "tg_flood_good"
+   ]
+  },
+  {
+   "id": "eid",
+   "title": {
+    "bn": "ঈদের আগের রাত",
+    "en": "The night before Eid"
+   },
+   "about": {
+    "bn": "সবাই গ্রামে যাবে, কিন্তু টিকিট নেই। বাবু শেষ বাসে সিট আগলায়, রহিম বাক্স-পোটলা নিয়ে স্ট্যান্ডে আসে, মনির অপেক্ষার ভিড়কে চা খাওয়ায়।",
+    "en": "Everyone's going home, but there are no tickets. Babu guards two seats on the last bus, Rahim brings the luggage to the stand, Monir serves tea to the waiting crowd."
+   },
+   "after": "flood",
+   "opening": "tg_eid_0",
+   "steps": [
+    {
+     "who": "babu",
+     "scene": "tg_eid_1",
+     "game": "crowd",
+     "title": "tg_crowd",
+     "good": {
+      "bn": "ভিড় সামলে সবাইকে ঠিকঠাক তোলা গেল।",
+      "en": "The crowd was kept in order; everyone got on."
+     },
+     "bad": {
+      "bn": "দরজায় ধাক্কাধাক্কি; অনেকে উঠতে পারল না।",
+      "en": "A crush at the door; many couldn't get on."
+     }
+    },
+    {
+     "who": "rahim",
+     "scene": "tg_eid_2",
+     "game": "pump",
+     "title": "tg_pump",
+     "good": {
+      "bn": "চাকা টাইট, রিকশা ছুটল স্ট্যান্ডের দিকে।",
+      "en": "The tyre's firm; off to the stand."
+     },
+     "bad": {
+      "bn": "চাকা ঠিকমতো হলো না, ধীরে ধীরে পৌঁছাতে হলো।",
+      "en": "The tyre wasn't right; it was a slow ride."
+     }
+    },
+    {
+     "who": "monir",
+     "scene": "tg_eid_3",
+     "game": "stir",
+     "spoons": 2,
+     "title": "tg_stir",
+     "good": {
+      "bn": "ঠিক মাপের চা; ভিড়ের মুখে হাসি।",
+      "en": "Tea just right; smiles in the crowd."
+     },
+     "bad": {
+      "bn": "চায়ে চিনি এলোমেলো, লোকজন বিরক্ত।",
+      "en": "The sugar was all wrong; people grumbled."
+     }
+    }
+   ],
+   "endings": [
+    "tg_eid_hard",
+    "tg_eid_ok",
+    "tg_eid_good"
+   ]
+  },
+  {
+   "id": "bday",
+   "title": {
+    "bn": "সুমির জন্মদিন",
+    "en": "Sumi's birthday"
+   },
+   "about": {
+    "bn": "সবাই লুকিয়ে আয়োজন করছে। বাবু ভিড়ের বাসে বেলুন আনে, মনির প্রথমবার কেক বানায়, রহিম সুমিকে ঘুরপথে বাড়ি আনে।",
+    "en": "A secret party. Babu brings balloons on a packed bus, Monir bakes his first cake, Rahim takes Sumi the long way home."
+   },
+   "after": "eid",
+   "opening": "tg_bday_0",
+   "steps": [
+    {
+     "who": "babu",
+     "scene": "tg_bday_1",
+     "game": "balloons",
+     "title": "tg_balloons",
+     "good": {
+      "bn": "বেলুনগুলো আস্ত পৌঁছেছে!",
+      "en": "The balloons arrived whole!"
+     },
+     "bad": {
+      "bn": "কয়েকটা বেলুন ফটাস!",
+      "en": "A few balloons went pop!"
+     }
+    },
+    {
+     "who": "monir",
+     "scene": "tg_bday_2",
+     "game": "stir",
+     "spoons": 2,
+     "title": "tg_cake",
+     "good": {
+      "bn": "কেকের মিশ্রণ একদম ঠিক।",
+      "en": "The cake mix is just right."
+     },
+     "bad": {
+      "bn": "মিশ্রণে গোলমাল; কেকটা বাঁকা হবে।",
+      "en": "The mix went wrong; the cake will be lopsided."
+     }
+    },
+    {
+     "who": "rahim",
+     "scene": "tg_bday_3",
+     "game": "choose",
+     "title": "tg_excuse",
+     "rounds": [
+      {
+       "q": {
+        "bn": "আব্বা, আজ সোজা বাসায় যাচ্ছি না কেন?",
+        "en": "Abba, why aren't we going straight home?"
+       },
+       "options": [
+        {
+         "bn": "চেইনটা একটু মিস্ত্রিকে দেখাতে হবে মা।",
+         "en": "The chain needs a look at the mechanic's, dear."
+        },
+        {
+         "bn": "বাসায় একটা চমক… না না, কিছু না!",
+         "en": "There's a surprise at home… no, nothing!"
+        },
+        {
+         "bn": "এমনি, ইচ্ছা হলো।",
+         "en": "No reason."
+        }
+       ],
+       "right": 0
+      },
+      {
+       "q": {
+        "bn": "আম্মা ফোন ধরছে না কেন?",
+        "en": "Why isn't Ammu answering?"
+       },
+       "options": [
+        {
+         "bn": "আম্মা বেলুন ফোলাচ্ছে মনে হয়।",
+         "en": "She must be blowing up balloons."
+        },
+        {
+         "bn": "জানি না তো।",
+         "en": "I don't know."
+        },
+        {
+         "bn": "রান্না করছে হয়তো, হাত ভেজা।",
+         "en": "Cooking, probably: wet hands."
+        }
+       ],
+       "right": 2
+      },
+      {
+       "q": {
+        "bn": "জুলেখা খালার ফুচকা খাবো?",
+        "en": "Can we have Julekha Khala's fuchka?"
+       },
+       "options": [
+        {
+         "bn": "না, বাসায় কেক আছে।",
+         "en": "No, there's cake at home."
+        },
+        {
+         "bn": "চল, ফুচকা খাই!",
+         "en": "Come on, fuchka it is!"
+        },
+        {
+         "bn": "আজ না মা।",
+         "en": "Not today, dear."
+        }
+       ],
+       "right": 1
+      }
+     ],
+     "good": {
+      "bn": "সুমি কিছুই টের পায়নি!",
+      "en": "Sumi didn't suspect a thing!"
+     },
+     "bad": {
+      "bn": "সুমির মনে সন্দেহ জেগেছে…",
+      "en": "Sumi's getting suspicious…"
+     }
+    }
+   ],
+   "endings": [
+    "tg_bday_hard",
+    "tg_bday_ok",
+    "tg_bday_good"
+   ]
+  }
+ ]
+}

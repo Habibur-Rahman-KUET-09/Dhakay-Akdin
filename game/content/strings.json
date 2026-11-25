@@ -3810,5 +3810,209 @@
  "raceAgain": {
   "bn": "আবার দৌড়",
   "en": "Race again"
+ },
+ "tgTitle": {
+  "bn": "একসাথে খেলুন: এক ফোনে গল্প",
+  "en": "Play together: stories on one phone"
+ },
+ "tgCardLine": {
+  "bn": "বন্যার রাত, ঈদের আগের রাত, সুমির জন্মদিন: রহিম, মনির আর বাবু পালা করে।",
+  "en": "A flood night, Eid eve, Sumi's birthday: Rahim, Monir and Babu take turns."
+ },
+ "tgLocked": {
+  "bn": "বাসের বাবু খুললে খেলা যাবে।",
+  "en": "Opens once Babu's bus is open."
+ },
+ "tgHelp": {
+  "bn": "এক থেকে তিনজন এক ফোনে খেলুন। প্রতিটা পালায় একজন চরিত্রের গল্প আর একটা ছোট খেলা; পালা শেষে ফোনটা পরের জনকে দিন। সবাই মিলে যত ভালো খেলবেন, গল্পের শেষ তত ভালো।",
+  "en": "One to three players on one phone. Each turn is one character's scene and a little game; then pass the phone on. The better you all play, the better the ending."
+ },
+ "tgBest": {
+  "bn": "সেরা শেষ: {ending}",
+  "en": "Best ending: {ending}"
+ },
+ "tgEndName_0": {
+  "bn": "কষ্টের",
+  "en": "a hard one"
+ },
+ "tgEndName_1": {
+  "bn": "কোনোমতে",
+  "en": "just about"
+ },
+ "tgEndName_2": {
+  "bn": "সব ঠিক",
+  "en": "all well"
+ },
+ "tgPrize": {
+  "bn": "সবচেয়ে ভালো শেষে +{n} তারা",
+  "en": "Up to +{n} stars for the best ending"
+ },
+ "tgPlay": {
+  "bn": "খেলুন",
+  "en": "Play"
+ },
+ "tgAfter": {
+  "bn": "আগে «{name}» খেলুন।",
+  "en": "Play «{name}» first."
+ },
+ "tgHowMany": {
+  "bn": "কতজন খেলবেন?",
+  "en": "How many players?"
+ },
+ "tgPlayers": {
+  "bn": "{n} জন",
+  "en": "{n} players"
+ },
+ "tgTurn": {
+  "bn": "{name}-এর পালা",
+  "en": "{name}'s turn"
+ },
+ "tgPass": {
+  "bn": "ফোনটা যিনি {name} হয়ে খেলবেন, তাঁর হাতে দিন।",
+  "en": "Pass the phone to whoever plays {name}."
+ },
+ "tgReady": {
+  "bn": "আমি তৈরি",
+  "en": "I'm ready"
+ },
+ "tgGood": {
+  "bn": "ভালো হয়েছে!",
+  "en": "Well done!"
+ },
+ "tgBad": {
+  "bn": "ঠিকমতো হলো না…",
+  "en": "That didn't go well…"
+ },
+ "tgNext": {
+  "bn": "পরের পালা",
+  "en": "Next turn"
+ },
+ "tgEnding": {
+  "bn": "গল্পের শেষ",
+  "en": "The ending"
+ },
+ "tgEnd_0": {
+  "bn": "কষ্টের শেষ, তবু সবাই একসাথে।",
+  "en": "A hard ending, but they're together."
+ },
+ "tgEnd_1": {
+  "bn": "কোনোমতে পার হলো।",
+  "en": "They got through, just about."
+ },
+ "tgEnd_2": {
+  "bn": "সব ঠিক! সবচেয়ে ভালো শেষ।",
+  "en": "All well! The best ending."
+ },
+ "tgStars": {
+  "bn": "+{n} তারা",
+  "en": "+{n} stars"
+ },
+ "tgNoNewStars": {
+  "bn": "এর চেয়ে ভালো শেষ আগেই হয়েছে।",
+  "en": "You've had a better ending before."
+ },
+ "tgFamilyUp": {
+  "bn": "তিন পরিবারেরই মন ভালো: +১",
+  "en": "All three families are happier: +1"
+ },
+ "tgTaka": {
+  "bn": "সিট বেচার টাকা: {n} টাকা",
+  "en": "Money from the seats: Tk {n}"
+ },
+ "tgAgain": {
+  "bn": "আবার খেলুন",
+  "en": "Play again"
+ },
+ "tg_door": {
+  "bn": "দরজা থেকে ওষুধ দিন",
+  "en": "Medicine from the door"
+ },
+ "tg_door_hint": {
+  "bn": "বাস দুলছে: ফোন কাত করে বা পাশে টেনে সোজা থাকুন, তারপর রহিম চাচার হাতটা ধরে ভেতরের দিকে টানুন।",
+  "en": "The bus sways: tilt the phone or drag sideways to stay upright, then take Rahim Chacha's hand and pull inwards."
+ },
+ "tg_pour": {
+  "bn": "সবার জন্য গরম চা",
+  "en": "Hot tea for everyone"
+ },
+ "tg_pour_hint": {
+  "bn": "ওপর থেকে লম্বা করে চা ঢালুন, ফেনা হোক; বেশি উঁচু করলে ছলকে পড়বে।",
+  "en": "Pour from high up for a froth; too high and it spills."
+ },
+ "tg_push": {
+  "bn": "ডোবা রাস্তায় ঠেলা",
+  "en": "Push through the flood"
+ },
+ "tg_push_hint": {
+  "bn": "রিকশা ঠেলুন: বাঁ দিক, ডান দিক, পালা করে চাপুন। যত দ্রুত, তত ভালো।",
+  "en": "Push the rickshaw: tap left, right, left… The quicker the better."
+ },
+ "tg_crowd": {
+  "bn": "ভিড় সামলান",
+  "en": "Keep the crowd in order"
+ },
+ "tg_crowd_hint": {
+  "bn": "দরজার কাছে দাঁড়ানো লোকদের টেনে ভেতরে সরান, যাতে বাইরের সবাই উঠতে পারে।",
+  "en": "Drag the people by the door further in so everyone outside can get on."
+ },
+ "tg_pump": {
+  "bn": "চাকায় পাম্প",
+  "en": "Pump the tyre"
+ },
+ "tg_pump_hint": {
+  "bn": "হ্যান্ডেল টেনে নিচে নামান, আবার ওপরে; কাঁটা সবুজ ঘরে এলে থামুন।",
+  "en": "Drag the handle down and up; stop when the needle is in the green."
+ },
+ "tg_stir": {
+  "bn": "ভিড়ের জন্য চা",
+  "en": "Tea for the crowd"
+ },
+ "tg_stir_hint": {
+  "bn": "চিনির বয়ামে যত চামচ চাওয়া হয়েছে তত বার চাপুন, তারপর কাপের ওপর আঙুল ঘুরিয়ে নাড়ুন।",
+  "en": "Tap the jar for each spoon asked for, then stir round the cup."
+ },
+ "tg_cake": {
+  "bn": "কেকের মিশ্রণ",
+  "en": "The cake mix"
+ },
+ "tg_cake_hint": {
+  "bn": "চিনি দুই চামচ, তারপর আঙুল ঘুরিয়ে ভালো করে ফেটান।",
+  "en": "Two spoons of sugar, then beat it round and round."
+ },
+ "tg_balloons": {
+  "bn": "বেলুন বাঁচান",
+  "en": "Save the balloons"
+ },
+ "tg_balloons_hint": {
+  "bn": "ছাতার খোঁচা আর কনুই এগিয়ে আসছে: বেলুনে লাগার আগেই চেপে সরিয়ে দিন।",
+  "en": "Umbrella tips and elbows are coming: tap them away before they touch a balloon."
+ },
+ "tg_excuse": {
+  "bn": "সুমির প্রশ্ন",
+  "en": "Sumi's questions"
+ },
+ "tg_excuse_hint": {
+  "bn": "এমন উত্তর দিন যাতে সুমি কিছু টের না পায়।",
+  "en": "Answer so that Sumi suspects nothing."
+ },
+ "balloonPop": {
+  "bn": "ফটাস!",
+  "en": "Pop!"
+ },
+ "balloonCount": {
+  "bn": "বেলুন বাকি {n}/{of}",
+  "en": "Balloons left {n}/{of}"
+ },
+ "chooseOk": {
+  "bn": "বিশ্বাস করেছে!",
+  "en": "She believed it!"
+ },
+ "chooseNo": {
+  "bn": "সন্দেহ জাগল…",
+  "en": "Now she's suspicious…"
+ },
+ "chooseRound": {
+  "bn": "প্রশ্ন {n}/{of}",
+  "en": "Question {n}/{of}"
  }
 }

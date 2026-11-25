@@ -31,6 +31,7 @@ const Friends = preload("res://scripts/rules/friends.gd")
 const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 const League = preload("res://scripts/rules/league.gd")
 const Race = preload("res://scripts/rules/race.gd")
+const Together = preload("res://scripts/rules/together.gd")
 
 const WHO := ["rickshaw", "tea", "bus", "fuchka"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
@@ -287,6 +288,8 @@ func _app_page() -> void:
 			_friends_page(page)
 		"board":
 			_board_page(page)
+		"together":
+			_together_page(page)
 		_:
 			_hub_page(page, margin)
 	_let_scroll(margin)
@@ -444,6 +447,7 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 	var challenge := _challenge_card()
 	if challenge != null:
 		inner.add_child(challenge)
+	inner.add_child(_together_card())
 	var friends := _friends_card()
 	if friends != null:
 		inner.add_child(friends)
@@ -2072,6 +2076,76 @@ func _refresh_friends() -> void:
 
 
 # --- Leaderboards (leaderboard.gd) ---------------------------------------------------
+
+
+# --- Playing together on one phone (together.gd) ----------------------------------------
+
+
+## On the mohalla page: the stories to play together, and the way in.
+func _together_card() -> Control:
+	var panel := _card(Color("FDEFE3"))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	row.add_child(_icon_tile("book", Look.VERMILION, Color.WHITE))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_theme_constant_override("separation", 0)
+	row.add_child(text)
+	text.add_child(Look.label(s.t("tgTitle"), 18, true))
+	var open := progress.open_characters().has("bus")
+	var line := Look.label(s.t("tgCardLine") if open else s.t("tgLocked"), 14, false, Look.MUTED)
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_child(line)
+	var go := Look.chunky(s.t("friendsOpen"), Look.YELLOW, Look.OUTLINE, 16, 4, 14)
+	go.name = "TogetherOpen"
+	go.autowrap_mode = TextServer.AUTOWRAP_OFF
+	go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	go.pressed.connect(show_page.bind("together"))
+	row.add_child(go)
+	return panel
+
+
+func _together_page(page: VBoxContainer) -> void:
+	var back := Look.chunky(s.t("friendsBack"), Color.WHITE, Look.OUTLINE, 15, 3, 14)
+	back.name = "TogetherBack"
+	back.autowrap_mode = TextServer.AUTOWRAP_OFF
+	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	back.pressed.connect(show_page.bind("hub"))
+	page.add_child(back)
+	page.add_child(_page_title(s.t("tgTitle")))
+	var help := Look.label(s.t("tgHelp"), 14, false, Look.MUTED)
+	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(help)
+	var t := Together.new()
+	var chars := progress.open_characters()
+	var best: Dictionary = Together.of(progress.data).best
+	var tara: Array = b.at("together.tara")
+	for st in t.stories:
+		var panel := _card(Color.WHITE, 18)
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override("separation", 6)
+		panel.add_child(col)
+		col.add_child(Look.label(str(st.title.get(s.lang, st.title.en)), 19, true, Look.MAGENTA))
+		var about := Look.label(str(st.about.get(s.lang, st.about.en)), 14)
+		about.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(about)
+		var open := t.is_open(progress.data, chars, str(st.id))
+		if best.has(st.id):
+			col.add_child(Look.label(s.t("tgBest", {"ending": s.t("tgEndName_%d" % int(best[st.id]))}), 14, true, Look.PARROT_DARK))
+		else:
+			col.add_child(Look.label(s.t("tgPrize", {"n": int(tara.back())}), 14, true, Look.PARROT_DARK))
+		if open:
+			var go := Look.chunky(s.t("tgPlay"), Look.YELLOW, Look.OUTLINE, 17, 4, 14)
+			go.name = "TogetherPlay_" + str(st.id)
+			go.pressed.connect(func():
+				Together.next = str(st.id)
+				_go("res://scenes/together.tscn"))
+			col.add_child(go)
+		else:
+			var why := s.t("tgLocked") if not chars.has("bus") else s.t("tgAfter", {"name": str(t.story(str(st.after)).title.get(s.lang, ""))})
+			col.add_child(Look.label(why, 14, true, Look.MUTED))
+		page.add_child(panel)
 
 
 ## On the mohalla page: the leaderboards, and the way in.

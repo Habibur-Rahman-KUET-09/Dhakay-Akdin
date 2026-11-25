@@ -249,8 +249,10 @@ func _draw_picture() -> void:
 				var rx := fmod(i * 37.0 + _t * 220.0, area.x + 40.0) - 20.0
 				var ry := fmod(i * 53.0 + _t * 520.0, area.y)
 				_picture.draw_line(Vector2(rx, ry), Vector2(rx - 6, ry + 18), Color(0.8, 0.85, 0.95, 0.5), 1.5)
-		"tea_stall":
+		"tea_stall", "stall_night":
 			_stall(Vector2(area.x * 0.7, ground))
+		"street_night":
+			_rickshaw(Vector2(area.x * 0.72, ground + 4), 1.0)
 		"school":
 			_building(Vector2(area.x * 0.68, ground), Color("E8D9B0"), true)
 		"hospital":
