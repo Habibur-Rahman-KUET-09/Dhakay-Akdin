@@ -11,6 +11,7 @@ const Balance = preload("res://scripts/rules/balance.gd")
 const Daily = preload("res://scripts/rules/daily.gd")
 const Goods = preload("res://scripts/rules/goods.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
+const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 
 const SCHEMA := 1
 const DEFAULT_PATH := "user://save.json"
@@ -69,6 +70,10 @@ static func fresh() -> Dictionary:
 		"samity": {"in": false, "paid": 0, "rounds": 0},
 		# Playing with friends (friends.gd): the code, the list, gifts…
 		"friends": Friends.fresh(),
+		# The leaderboards' numbers (leaderboard.gd); boosts bought with
+		# stars for the next day.
+		"board": Leaderboard.fresh(),
+		"boosts": {},
 	}
 
 
@@ -108,9 +113,17 @@ func owns_look(id: String) -> bool:
 ## not affordable.
 func buy_look(who: String, id: String) -> bool:
 	var l := Goods.look(who, id)
-	if l.is_empty() or bool(l.get("prize", false)) or owns_look(id) or int(data.taka) < int(l.price):
+	if l.is_empty() or bool(l.get("prize", false)) or owns_look(id):
 		return false
-	data.taka = int(data.taka) - int(l.price)
+	# Some are bought with stars instead of money.
+	if l.has("tara"):
+		if int(data.tara) < int(l.tara):
+			return false
+		data.tara = int(data.tara) - int(l.tara)
+	elif int(data.taka) < int(l.get("price", 0)):
+		return false
+	else:
+		data.taka = int(data.taka) - int(l.price)
 	data.cosmetics.append(id)
 	wear_look(who, id)
 	return true
@@ -135,6 +148,32 @@ func wear_look(who: String, id: String) -> bool:
 func worn(who: String, slot: String) -> Dictionary:
 	var id: String = (data.looks.get(who, {}) as Dictionary).get(slot, "")
 	return Goods.look(who, id) if id != "" else {}
+
+
+## A boost bought with stars for `who`'s next day (one waiting at a
+## time). False if one is waiting already or the stars are short.
+func buy_boost(id: String) -> bool:
+	var x := Goods.boost(id)
+	if x.is_empty() or has_boost(str(x.who)) or int(data.tara) < int(x.tara):
+		return false
+	data.tara = int(data.tara) - int(x.tara)
+	if not data.has("boosts"):
+		data["boosts"] = {}
+	data.boosts[str(x.who)] = id
+	return true
+
+
+func has_boost(who: String) -> bool:
+	return str((data.get("boosts", {}) as Dictionary).get(who, "")) != ""
+
+
+## The boost waiting for `who`'s day, used up now ({} if none).
+func take_boost(who: String) -> Dictionary:
+	if not has_boost(who):
+		return {}
+	var x := Goods.boost(str(data.boosts[who]))
+	data.boosts.erase(who)
+	return x
 
 
 func has_home(id: String) -> bool:
@@ -561,6 +600,7 @@ func _day_done(who: String, result: Dictionary, out: Dictionary) -> void:
 	apply_npcs(result.get("npcs", []), who)
 	# This week's earnings and today's relay leg, for friends to see.
 	Friends.note_day(data, who, int(out.get("earned", 0)), float(result.get("stars", 0.0)), date())
+	Leaderboard.note(data, who, int(out.get("earned", 0)), date())
 	out.relay_done = Friends.claim_relay(data, b, date())
 
 

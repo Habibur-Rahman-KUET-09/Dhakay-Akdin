@@ -96,6 +96,7 @@ var _activity: Activity
 ## A call from home today: when (on the day's clock; -1 when none, or
 ## once it has rung), and how it went, for the day's end.
 var _call_at := -1.0
+var _boost_name := ""
 var _call_rng := RandomNumberGenerator.new()
 var _call_result := {}
 var _slap_button: Button
@@ -122,6 +123,11 @@ func _ready() -> void:
 	bus = BusDay.new(b, -1, progress.data.bus.upgrades)
 	bus.interactive = Activity.wanted()
 	bus.level = progress.level()
+	# A bundle of small notes bought with stars.
+	var boost := progress.take_boost("bus")
+	if not boost.is_empty():
+		bus.add_float(boost.get("notes", {}))
+		_boost_name = strings.t("boost_" + str(boost.id))
 	_call_rng.randomize()
 	var call_share := HomeCall.plan(_call_rng, progress.level())
 	if call_share >= 0.0:
@@ -202,7 +208,7 @@ func _ready() -> void:
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
-	_say(strings.t("busStart"), Look.SKY, 4.0)
+	_say(strings.t("busStart") + ("\n" + strings.t("boostUsed", {"name": _boost_name}) if _boost_name != "" else ""), Look.SKY, 4.0)
 
 
 func _loading_screen() -> CanvasLayer:
@@ -721,6 +727,8 @@ func _handle(events: Array) -> void:
 		_say(strings.t("slipped", {"n": events.count(BusDay.Event.SLIPPED)}), Look.VERMILION, 3.0)
 	if events.has(BusDay.Event.OWED_SHORT):
 		_say(strings.t("owedShort"), Look.VERMILION, 3.0)
+	if events.has(BusDay.Event.OWED_PHONE):
+		_say(strings.t("owedPhone"), Look.SKY, 3.5)
 	if events.has(BusDay.Event.DEPARTED):
 		_sync_people()
 	if events.has(BusDay.Event.AT_DOOR):
@@ -1115,6 +1123,8 @@ func _end_trip() -> void:
 		lines.append(strings.t("onTime", {"n": bus.bonus}))
 	if bus.slipped > 0:
 		lines.append(strings.t("busSlipped", {"n": bus.slipped}))
+	if bus.owed_by_phone > 0:
+		lines.append(strings.t("busOwedPhone", {"n": bus.owed_by_phone}))
 	if bus.needy_left > 0:
 		lines.append(strings.t("busNeedyLeft", {"n": bus.needy_left}))
 	if bus.arguments > 0:

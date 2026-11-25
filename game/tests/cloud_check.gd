@@ -36,6 +36,7 @@ func _run() -> void:
 	var ok: bool = not back.is_empty() and int(back.save.get("taka", 0)) == 123 and int(back.day) == 7
 	print("cloud: read back ", "ok" if ok else "WRONG")
 	var code: String = await _friends(cloud)
+	await _board(cloud)
 	e = await cloud.delete_account(code)
 	print("cloud: cleaned up ", "ok" if e == "" else e)
 	quit(0 if ok else 1)
@@ -73,3 +74,17 @@ func _friends(cloud) -> String:
 	var inbox_ok: bool = inbox.size() == 1 and str(inbox[0].get("kind", "")) == "tea"
 	print("cloud: friends ", "ok" if card_ok and inbox_ok else "WRONG (card %s, inbox %s)" % [card_ok, inbox_ok])
 	return code
+
+
+## The leaderboards: a card with a number, found at the top of its list
+## and given its place.
+func _board(cloud) -> void:
+	var field := "lb_check_%d" % (randi() % 100000)
+	var e: String = await cloud.publish_card({"name": "check", field: 77})
+	if e != "":
+		print("cloud: leaderboard: card failed: ", e)
+		return
+	var rows: Array = await cloud.top(field, 3)
+	var rank: int = await cloud.rank_of(field, 77)
+	var ok: bool = rows.size() == 1 and str(rows[0].uid) == cloud.uid and int(rows[0].value) == 77 and rank == 1
+	print("cloud: leaderboard ", "ok" if ok else "WRONG (rows %s, rank %d)" % [rows.size(), rank])

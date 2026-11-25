@@ -61,13 +61,12 @@ static func backup(parent: Node, data: Dictionary) -> void:
 	cloud._copy_all(data)
 
 
-## The save, then the card friends see (once there is a friend code).
+## The save, then the public card (leaderboards, friends).
 func _copy_all(data: Dictionary) -> void:
 	await upload(data)
-	var f = data.get("friends", {})
-	if typeof(f) == TYPE_DICTIONARY and str(f.get("code", "")) != "":
-		var friends_rules = load("res://scripts/rules/friends.gd")
-		await publish_card(friends_rules.card(data, Time.get_date_string_from_system()))
+	# The public card: the leaderboards' numbers, and the friends' part.
+	var board = load("res://scripts/rules/leaderboard.gd")
+	await publish_card(board.card(data, Time.get_date_string_from_system()))
 
 
 func enabled() -> bool:
@@ -360,6 +359,42 @@ func take_inbox() -> Array:
 		out.append(from_fields(d.get("fields", {})))
 		await _call("https://firestore.googleapis.com/v1/" + str(d.name), HTTPClient.METHOD_DELETE, "", _auth())
 	return out
+
+
+## A leaderboard: the top `n` cards by a field, highest first:
+## [{uid, name, value}] ([] for none or no network).
+func top(field: String, n: int) -> Array:
+	var out := []
+	if await ensure_user() != "":
+		return out
+	var q := {"structuredQuery": {"from": [{"collectionId": "profiles"}],
+		"orderBy": [{"field": {"fieldPath": field}, "direction": "DESCENDING"}], "limit": n}}
+	var reply := await _call(_docs() + ":runQuery", HTTPClient.METHOD_POST, JSON.stringify(q), _auth())
+	if not reply.ok:
+		return out
+	for r in reply.data.get("list", []):
+		if typeof(r) == TYPE_DICTIONARY and r.has("document"):
+			var f := from_fields(r.document.get("fields", {}))
+			out.append({"uid": str(r.document.name).get_file(), "name": str(f.get("name", "")), "value": int(f.get(field, 0))})
+	return out
+
+
+## Where a number stands in a leaderboard: 1 + how many are higher
+## (0 when it cannot be told).
+func rank_of(field: String, value: int) -> int:
+	if value <= 0 or await ensure_user() != "":
+		return 0
+	var q := {"structuredAggregationQuery": {
+		"structuredQuery": {"from": [{"collectionId": "profiles"}],
+			"where": {"fieldFilter": {"field": {"fieldPath": field}, "op": "GREATER_THAN", "value": {"integerValue": str(value)}}}},
+		"aggregations": [{"alias": "n", "count": {}}]}}
+	var reply := await _call(_docs() + ":runAggregationQuery", HTTPClient.METHOD_POST, JSON.stringify(q), _auth())
+	if not reply.ok:
+		return 0
+	for r in reply.data.get("list", []):
+		if typeof(r) == TYPE_DICTIONARY and r.has("result"):
+			return 1 + int(from_value(r.result.get("aggregateFields", {}).get("n", {})))
+	return 0
 
 
 ## Lets go of the card and the code (when the account is deleted).

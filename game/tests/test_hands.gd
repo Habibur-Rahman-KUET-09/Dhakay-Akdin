@@ -160,9 +160,9 @@ func test_fares_go_into_the_hand_until_sorted() -> void:
 	t.give({20: 1, 10: 1})
 	eq(t.loose, [50], "the 50 crumpled in his hand")
 	eq(t.earned(), 20, "still counts as earned")
-	eq(int(t.bag.get(50, 0)), 1, "not yet between the fingers")
+	eq(int(t.bag.get(50, 0)), 2, "not yet between the fingers")
 	check(t.sort_note(50), "sorted")
-	eq(int(t.bag.get(50, 0)), 2, "now it can be given as change")
+	eq(int(t.bag.get(50, 0)), 3, "now it can be given as change")
 	check(not t.sort_note(50), "none left")
 
 

@@ -22,7 +22,7 @@ func test_fares_by_distance() -> void:
 	eq(t.fare(0, 1), 10, "one stop: 10")
 	eq(t.fare(0, 3), 20, "three stops: 20")
 	eq(t.fare(0, 8), 35, "all the way: 35 at most")
-	eq(t.bag_value(), 200, "200 taka of change to start")
+	eq(t.bag_value(), 550, "550 taka of change to start")
 	check(not t.riders.is_empty(), "people get on at Mirpur 10")
 
 
@@ -32,7 +32,7 @@ func test_right_change_settles() -> void:
 	eq(t.change_due(), 30, "30 back from 50")
 	var got := t.give({20: 1, 10: 1})
 	eq(got, [BusDay.Event.SETTLED], "settled")
-	eq(t.bag_value(), 200 + 20, "the bag is 20 up")
+	eq(t.bag_value(), 550 + 20, "the bag is 20 up")
 	eq(t.earned(), 20, "earned the fare")
 
 
@@ -41,7 +41,7 @@ func test_short_change_starts_an_argument() -> void:
 	t.ask(_rider(t, 20, 50))
 	eq(t.give({20: 1}), [BusDay.Event.ARGUMENT], "20 is short of 30")
 	near(t.rating, 4.5, "rating down")
-	eq(t.bag_value(), 200, "nothing changed hands")
+	eq(t.bag_value(), 550, "nothing changed hands")
 	eq(t.give({20: 1, 10: 1}), [], "held up while they argue")
 	for i in 40:
 		t.update(0.1)
@@ -261,7 +261,7 @@ func test_the_checker_fines_fares_not_taken() -> void:
 
 func test_upgrades_bag_and_voice() -> void:
 	var t := BusDay.new(Balance.new(), 1, ["change_bag", "loud_voice"])
-	eq(t.bag_value(), 400, "a bigger bag: 400 of change")
+	eq(t.bag_value(), 1100, "a bigger bag: 1100 of change")
 	near(t.perfect_zone(), 0.12, "a louder voice: a wider perfect call", 1e-6)
 
 
@@ -316,3 +316,33 @@ func test_a_needy_rider_left_standing_gets_off() -> void:
 	check(not t.riders.has(sick) and t.riders.has(seated), "only the one standing")
 	eq(t.needy_left, 1, "counted")
 	check(t.rating < 4.0, "the bus thinks less of Babu")
+
+
+func test_change_owed_is_never_lost() -> void:
+	var t := _bus()
+	t.riders.clear()
+	t.stop_i = 0
+	t.bag = {5: 0, 10: 0, 20: 0, 50: 0, 100: 0, 500: 1}
+	var r := _person(t, 1, "normal", false, 3)
+	r.to = 1
+	r.owed = 470
+	var events := []
+	t._arrive(events)
+	check(events.has(BusDay.Event.OWED_PAID), "the 500 broken by asking round: paid in notes")
+	t = _bus()
+	t.riders.clear()
+	t.stop_i = 0
+	t.bag = {5: 0, 10: 0, 20: 0, 50: 0, 100: 0, 500: 0}
+	t.loose = []
+	var start := t.earned()
+	r = _person(t, 2, "normal", false, 3)
+	r.to = 1
+	r.owed = 470
+	t.rating = 4.0
+	events = []
+	t._arrive(events)
+	check(events.has(BusDay.Event.OWED_PHONE) and not events.has(BusDay.Event.OWED_SHORT), "no notes at all: sent by phone")
+	eq(t.earned(), start - 470, "it comes off the day's money")
+	near(t.rating, 3.9, "only a little dent", 0.01)
+	var fresh := _bus()
+	check(not fresh.make_change(475).is_empty(), "the float changes a 500 from the start")

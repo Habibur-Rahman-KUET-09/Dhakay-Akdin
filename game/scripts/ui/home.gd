@@ -28,6 +28,7 @@ const Driving = preload("res://scripts/ui/driving.gd")
 const Goods = preload("res://scripts/rules/goods.gd")
 const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
+const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 
 const WHO := ["rickshaw", "tea", "bus"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
@@ -65,6 +66,14 @@ var _settings_open := false
 var _friends_news: Array = []
 var _friends_note: Label
 var _friends_busy := false
+## Leaderboards: stars just won, the list showing (period, character),
+## the rows fetched for it and my place.
+var _board_news: Array = []
+var _lb_period := "day"
+var _lb_who := "all"
+var _lb_rows: Array = []
+var _lb_rank := 0
+var _lb_state := ""
 ## Reading aloud: on (kept from the setting), and a finger held down
 ## (where, since when) to read what is under it.
 var _read_aloud := false
@@ -142,11 +151,15 @@ func show_page(page: String) -> void:
 	_title_done = true
 	if _page == "friends" and page != "friends":
 		_friends_news = []
+	if _page == "board" and page != "board":
+		_board_news = []
 	_page = page
 	_sheet = ""
 	_build()
 	if page == "friends":
 		_refresh_friends()
+	if page == "board":
+		_load_board()
 
 
 func open_sheet(who: String) -> void:
@@ -265,6 +278,8 @@ func _app_page() -> void:
 			_people_page(page)
 		"friends":
 			_friends_page(page)
+		"board":
+			_board_page(page)
 		_:
 			_hub_page(page, margin)
 	_let_scroll(margin)
@@ -425,6 +440,9 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 	var friends := _friends_card()
 	if friends != null:
 		inner.add_child(friends)
+	var leaders := _leader_card()
+	if leaders != null:
+		inner.add_child(leaders)
 	inner.add_child(_news_card())
 	inner.add_child(_season_card())
 	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 12, false, Color("8A8178"))
@@ -1070,6 +1088,12 @@ func _shop_page(page: VBoxContainer) -> void:
 	page.add_child(looks)
 	for l in Goods.looks(_shop_who):
 		looks.add_child(_look_card(l, _shop_who))
+	# Bought with stars (won in the leaderboards, challenges, the story).
+	page.add_child(_caption(s.t("starShopTitle", {"n": int(progress.data.tara)})))
+	var boosts := _two_columns()
+	page.add_child(boosts)
+	for x in Goods.boosts(_shop_who):
+		boosts.add_child(_boost_card(x))
 
 
 func _two_columns() -> GridContainer:
@@ -1103,11 +1127,11 @@ func _goods_card(icon: String, tile_fill: Color, title: String, help_text: Strin
 
 
 ## A price button (greyed with how much more is needed when short).
-func _price_button(col: VBoxContainer, cost: int, then: Callable, button_name: String) -> void:
-	var short := cost - int(progress.data.taka)
-	var buy := Look.chunky(str(cost), Look.YELLOW, Look.OUTLINE, 18, 5, 14)
+func _price_button(col: VBoxContainer, cost: int, then: Callable, button_name: String, stars := false) -> void:
+	var short := cost - int(progress.data.tara if stars else progress.data.taka)
+	var buy := Look.chunky(str(cost), Look.SKY if stars else Look.YELLOW, Color.WHITE if stars else Look.OUTLINE, 18, 5, 14)
 	buy.name = button_name
-	buy.icon = Look.icon_texture("coin", 24)
+	buy.icon = Look.icon_texture("star" if stars else "coin", 24)
 	Look.true_colours(buy)
 	buy.add_theme_constant_override("icon_max_width", 24)
 	buy.custom_minimum_size = Vector2(0, 52)
@@ -1115,9 +1139,25 @@ func _price_button(col: VBoxContainer, cost: int, then: Callable, button_name: S
 	buy.pressed.connect(then)
 	col.add_child(buy)
 	if short > 0:
-		var more := Look.label(s.t("needMore", {"n": short}), 13, true, Look.MUTED)
+		var more := Look.label(s.t("needMoreTara" if stars else "needMore", {"n": short}), 13, true, Look.MUTED)
 		more.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		col.add_child(more)
+
+
+## A boost for the next day, bought with stars (one waiting at a time).
+func _boost_card(x: Dictionary) -> Control:
+	var parts := _goods_card(str(x.get("icon", "star")), Color("E3EEF9"), s.t("boost_" + x.id), s.t("boostHelp_" + x.id))
+	if progress.has_boost(str(x.who)):
+		_owned_pill(parts[1], s.t("boostWaiting"))
+	else:
+		_price_button(parts[1], int(x.tara), _buy_boost.bind(str(x.id)), "Boost_" + str(x.id), true)
+	return parts[0]
+
+
+func _buy_boost(id: String) -> void:
+	if progress.buy_boost(id):
+		progress.save()
+		_build()
 
 
 func _owned_pill(col: VBoxContainer, text: String) -> void:
@@ -1139,7 +1179,8 @@ func _look_card(l: Dictionary, who: String) -> Control:
 	if not progress.owns_look(l.id) and bool(l.get("prize", false)):
 		col.add_child(Look.label(s.t("lookPrize"), 13, true, Look.MAGENTA))
 	elif not progress.owns_look(l.id):
-		_price_button(col, int(l.price), _buy_look.bind(who, l.id), "Look_" + l.id)
+		var stars := l.has("tara")
+		_price_button(col, int(l.tara) if stars else int(l.price), _buy_look.bind(who, l.id), "Look_" + l.id, stars)
 	else:
 		var on: bool = progress.worn(who, l.slot).get("id", "") == l.id
 		var wear := Look.chunky(s.t("lookTakeOff" if on else "lookWear"), Look.PARROT if not on else Color.WHITE, Color.WHITE if not on else Look.OUTLINE, 16, 4, 14)
@@ -1798,7 +1839,7 @@ func _make_code(name_edit: LineEdit, go: Button) -> void:
 	f.name = chosen
 	f.code = code
 	progress.save()
-	await cloud.publish_card(Friends.card(progress.data, progress.date()))
+	await cloud.publish_card(Leaderboard.card(progress.data, progress.date()))
 	_build()
 
 
@@ -1822,7 +1863,7 @@ func _rename_go(edit: LineEdit) -> void:
 		return
 	Friends.of(progress.data).name = chosen
 	progress.save()
-	cloud.publish_card(Friends.card(progress.data, progress.date()))
+	cloud.publish_card(Leaderboard.card(progress.data, progress.date()))
 	_build()
 
 
@@ -1925,29 +1966,188 @@ func _friend_drop(uid: String, and_block: bool) -> void:
 ## changed, or the friends page is open.
 func _refresh_friends() -> void:
 	var f := Friends.of(progress.data)
-	if _friends_busy or not cloud.enabled() or str(f.code) == "":
+	if _friends_busy or not cloud.enabled():
 		return
 	_friends_busy = true
-	await cloud.publish_card(Friends.card(progress.data, progress.date()))
-	var uids := []
-	for p in f.list:
-		uids.append(p.uid)
-	var got := await cloud.cards(uids)
-	Friends.take_cards(progress.data, got)
+	await cloud.publish_card(Leaderboard.card(progress.data, progress.date()))
 	var news := []
-	var items := await cloud.take_inbox()
-	if Friends.receive(progress.data, b, items) > 0:
-		news.append(s.t("friendsGotMail", {"n": items.size()}))
-	var won := Friends.claim_week(progress.data, b, progress.date())
-	if won != "":
-		news.append(s.t("friendsWon_" + won, {"n": int(b.n("friends.week_tara"))}))
-	for id in Friends.claim_joint(progress.data, b):
-		news.append(s.t("jointDone", {"name": s.t("joint_" + id), "n": int(b.n("friends.joint_tara"))}))
+	if str(f.code) != "":
+		var uids := []
+		for p in f.list:
+			uids.append(p.uid)
+		var got := await cloud.cards(uids)
+		Friends.take_cards(progress.data, got)
+		var items := await cloud.take_inbox()
+		if Friends.receive(progress.data, b, items) > 0:
+			news.append(s.t("friendsGotMail", {"n": items.size()}))
+		var won := Friends.claim_week(progress.data, b, progress.date())
+		if won != "":
+			news.append(s.t("friendsWon_" + won, {"n": int(b.n("friends.week_tara"))}))
+		for id in Friends.claim_joint(progress.data, b):
+			news.append(s.t("jointDone", {"name": s.t("joint_" + id), "n": int(b.n("friends.joint_tara"))}))
+	# The leaderboards just over: stars for a place in the top three.
+	var board_news := []
+	for check in Leaderboard.to_check(progress.data, progress.date()):
+		var top3 := await cloud.top(str(check.field), 3)
+		if top3.is_empty():
+			continue
+		var rank := 0
+		for i in top3.size():
+			if top3[i].uid == cloud.uid:
+				rank = i + 1
+		var stars := Leaderboard.settle(progress.data, b, check, rank)
+		if stars > 0:
+			board_news.append(s.t("lbWon", {"rank": rank, "period": s.t("lbPast_" + str(check.period)), "who": s.t("lbWho_" + str(check.who)), "n": stars}))
 	progress.save()
 	_friends_busy = false
 	if not news.is_empty():
 		_friends_news = news
-	if not news.is_empty() or _page == "friends":
+	if not board_news.is_empty():
+		_board_news = board_news
+	if not news.is_empty() or not board_news.is_empty() or _page == "friends":
+		_build()
+
+
+# --- Leaderboards (leaderboard.gd) ---------------------------------------------------
+
+
+## On the mohalla page: the leaderboards, and the way in.
+func _leader_card() -> Control:
+	if not cloud.enabled():
+		return null
+	var panel := _card(Color("E8F1FB"))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	row.add_child(_icon_tile("star", Look.SKY_DARK, Color.WHITE))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_theme_constant_override("separation", 0)
+	row.add_child(text)
+	text.add_child(Look.label(s.t("lbTitle"), 18, true))
+	var line: String = _board_news[0] if not _board_news.is_empty() else s.t("lbCardLine")
+	text.add_child(Look.label(line, 14, not _board_news.is_empty(), Look.PARROT_DARK if not _board_news.is_empty() else Look.MUTED))
+	var go := Look.chunky(s.t("friendsOpen"), Look.YELLOW, Look.OUTLINE, 16, 4, 14)
+	go.name = "BoardOpen"
+	go.autowrap_mode = TextServer.AUTOWRAP_OFF
+	go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	go.pressed.connect(show_page.bind("board"))
+	row.add_child(go)
+	return panel
+
+
+func _board_page(page: VBoxContainer) -> void:
+	var back := Look.chunky(s.t("friendsBack"), Color.WHITE, Look.OUTLINE, 15, 3, 14)
+	back.name = "BoardBack"
+	back.autowrap_mode = TextServer.AUTOWRAP_OFF
+	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	back.pressed.connect(show_page.bind("hub"))
+	page.add_child(back)
+	page.add_child(_page_title(s.t("lbTitle")))
+	if not cloud.enabled():
+		page.add_child(Look.label(s.t("friendsOff"), 15, false, Look.MUTED))
+		return
+	for news in _board_news:
+		var news_card := _card(Look.YELLOW, 16)
+		news_card.add_child(Look.label(str(news), 15, true))
+		page.add_child(news_card)
+	# The name shown in the lists.
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 8)
+	var my_name := str(Friends.of(progress.data).name)
+	var who_am_i := Look.label(s.t("lbYourName", {"name": my_name}) if my_name != "" else s.t("lbNameHint"), 14, true, Look.OUTLINE if my_name != "" else Look.MAGENTA)
+	who_am_i.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	who_am_i.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	name_row.add_child(who_am_i)
+	var rename := Look.chunky(s.t("friendsRename") if my_name != "" else s.t("lbSetName"), Color.WHITE, Look.OUTLINE, 14, 3, 14)
+	rename.name = "BoardName"
+	rename.autowrap_mode = TextServer.AUTOWRAP_OFF
+	rename.pressed.connect(_rename_form)
+	name_row.add_child(rename)
+	page.add_child(name_row)
+	page.add_child(_board_chips(Leaderboard.PERIODS, _lb_period, "lbPeriod_", "BoardPeriod_", true))
+	page.add_child(_board_chips(Leaderboard.WHO, _lb_who, "lbWho_", "BoardWho_", false))
+	if _lb_period == "ever":
+		page.add_child(Look.label(s.t("lbNoPrize"), 13, false, Look.MUTED))
+	else:
+		page.add_child(Look.label(s.t("lbPrizes", {"a": Leaderboard.prize(b, _lb_period, 1), "b": Leaderboard.prize(b, _lb_period, 2), "c": Leaderboard.prize(b, _lb_period, 3)}), 13, true, Look.PARROT_DARK))
+	var panel := _card(Color.WHITE, 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	if _lb_state != "ok":
+		box.add_child(Look.label(s.t("lbLoading") if _lb_state == "loading" else s.t("lbEmpty"), 15, false, Look.MUTED))
+	for i in _lb_rows.size():
+		var r: Dictionary = _lb_rows[i]
+		var me: bool = r.uid == cloud.uid
+		if i > 0:
+			box.add_child(_dash())
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var rank := Look.title(str(i + 1), 26, [Look.YELLOW, Look.MUTED, Look.VERMILION][i] if i < 3 else Look.OUTLINE, false)
+		rank.custom_minimum_size = Vector2(36, 0)
+		rank.autowrap_mode = TextServer.AUTOWRAP_OFF
+		row.add_child(rank)
+		var who := Look.label((s.t("friendsYou") + " · " if me else "") + Leaderboard.shown_name(str(r.name), str(r.uid), s.t("lbAnon")), 16, true, Look.MAGENTA if me else Look.OUTLINE)
+		who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(who)
+		var money := Look.label(s.t("takaN", {"n": int(r.value)}), 15, true)
+		money.autowrap_mode = TextServer.AUTOWRAP_OFF
+		row.add_child(money)
+		box.add_child(row)
+	page.add_child(panel)
+	var mine := Leaderboard.mine(progress.data, _lb_period, _lb_who, progress.date())
+	var you := s.t("lbYouNone")
+	if mine > 0:
+		you = s.t("lbYou", {"rank": _lb_rank, "n": mine}) if _lb_rank > 0 else s.t("lbYouNoRank", {"n": mine})
+	page.add_child(Look.label(you, 15, true, Look.MAGENTA))
+	page.add_child(Look.label(s.t("lbHelp"), 13, false, Look.MUTED))
+
+
+## A row of choices for the lists (periods, or characters).
+func _board_chips(ids: Array, picked: String, key: String, prefix: String, is_period: bool) -> Control:
+	var grid := GridContainer.new()
+	grid.columns = ids.size()
+	grid.add_theme_constant_override("h_separation", 6)
+	for id in ids:
+		var on: bool = id == picked
+		var chip := Look.chunky(s.t(key + str(id)), Look.SKY_DARK if on else Color.WHITE, Color.WHITE if on else Look.OUTLINE, 13, 3, 12)
+		chip.name = prefix + str(id)
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		chip.custom_minimum_size = Vector2(0, 44)
+		chip.pressed.connect(_pick_board.bind(str(id), is_period))
+		grid.add_child(chip)
+	return grid
+
+
+func _pick_board(id: String, is_period: bool) -> void:
+	if is_period:
+		_lb_period = id
+	else:
+		_lb_who = id
+	_load_board()
+
+
+## Fetches the list showing (my card goes out first, so I am in it).
+func _load_board() -> void:
+	if not cloud.enabled():
+		return
+	var field := Leaderboard.field(_lb_period, _lb_who, progress.date())
+	_lb_state = "loading"
+	_lb_rows = []
+	_lb_rank = 0
+	_build()
+	await cloud.publish_card(Leaderboard.card(progress.data, progress.date()))
+	var rows := await cloud.top(field, int(b.n("leaderboard.top")))
+	var mine := Leaderboard.mine(progress.data, _lb_period, _lb_who, progress.date())
+	var rank := await cloud.rank_of(field, mine)
+	# Another list asked for meanwhile: this one is stale.
+	if field != Leaderboard.field(_lb_period, _lb_who, progress.date()):
+		return
+	_lb_rows = rows
+	_lb_rank = rank
+	_lb_state = "ok" if not rows.is_empty() else "empty"
+	if _page == "board":
 		_build()
 
 

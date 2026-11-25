@@ -39,6 +39,18 @@ static func home_item(id: String) -> Dictionary:
 	return {}
 
 
+## Things bought with stars for a character's next day.
+static func boosts(who: String) -> Array:
+	return (data().get("boosts", []) as Array).filter(func(x): return x.who == who)
+
+
+static func boost(id: String) -> Dictionary:
+	for x in data().get("boosts", []):
+		if x.id == id:
+			return x
+	return {}
+
+
 static func phone() -> Dictionary:
 	return data().get("phone", {})
 

@@ -100,6 +100,7 @@ var _friend_energy := 0.0
 var _relay_energy := 0.0
 var _call_result := {}
 var _story_effect := {}
+var _boost := {}
 var _way := {"turn": -1, "tiles": -1}
 var _way_key := []
 var _said_way := []
@@ -155,6 +156,9 @@ func _ready() -> void:
 	_friend_energy = Friends.drink_tea(progress.data, b)
 	_relay_energy = Friends.relay_energy(progress.data, b, progress.date())
 	shift.energy_max += _friend_energy + _relay_energy
+	# A good meal bought with stars.
+	_boost = progress.take_boost("rickshaw")
+	shift.energy_max += float(_boost.get("energy", 0))
 	shift.energy = shift.energy_max
 	# A few of the named neighbours may need a ride today.
 	var ids := neighbours.ids()
@@ -284,6 +288,8 @@ func _ready() -> void:
 	set_process(true)
 	if not _story_effect.is_empty():
 		_say(strings.t("after_" + str(_story_effect.note), {"n": int(_story_effect.left)}), Look.MAGENTA, 6.0)
+	elif not _boost.is_empty():
+		_say(strings.t("boostUsed", {"name": strings.t("boost_" + str(_boost.id))}), Look.SKY, 4.0)
 	elif not shift.festival.is_empty():
 		_say(str(shift.festival.greeting.get(strings.lang, shift.festival.greeting.en)), Look.MAGENTA, 6.0)
 	elif shift.foggy:

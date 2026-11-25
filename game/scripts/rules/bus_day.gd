@@ -43,6 +43,7 @@ enum Event {
 	DOOR_JAM, ## the standing crowd blocks the door: push them back
 	PUSHED, ## one more got on after a push
 	NEEDY_LEFT, ## someone who needed a seat gave up standing and got off
+	OWED_PHONE, ## change owed could not be made in notes: sent by phone
 }
 
 ## Notes in use, smallest first.
@@ -138,6 +139,8 @@ var _phone_rng := RandomNumberGenerator.new()
 var sent_home := 0
 ## Riders who needed a seat, never got one, and got off early.
 var needy_left := 0
+## Change owed that had to be sent by phone.
+var owed_by_phone := 0
 var last_seat := ""
 
 
@@ -154,15 +157,24 @@ func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
 		_phone_rng.randomize()
 	route = (b.at("bus.route") as Array).duplicate()
 	trips = int(b.n("bus.trips_per_day"))
-	# The change bag: small notes worth 200 (4×5, 5×10, 4×20, 1×50); twice
-	# that with the bigger bag.
+	# The change bag, a conductor's float: notes worth 550 (4×5, 5×10, 4×20,
+	# 2×50, 3×100), enough to change a 500 from the start; twice that with
+	# the bigger bag.
 	var k := 2 if has("change_bag") else 1
-	bag = {5: 4 * k, 10: 5 * k, 20: 4 * k, 50: 1 * k, 100: 0, 500: 0}
+	bag = {5: 4 * k, 10: 5 * k, 20: 4 * k, 50: 2 * k, 100: 3 * k, 500: 0}
 	bag_start = bag_value()
 	var between: Array = b.at("bus.seconds_between_stops")
 	var per_stop := (float(between[0]) + float(between[1])) / 2.0 + b.n("bus.dwell_s") + 4.0 * b.n("bus.dwell_per_person_s")
 	target_time = (per_stop + 1.0) * (route.size() - 1) + 6.0
 	_start_trip()
+
+
+## More small notes in the bag from the start (a bundle bought with
+## stars): they are the float, not the day's money.
+func add_float(notes: Dictionary) -> void:
+	for k in notes:
+		bag[int(k)] = int(bag.get(int(k), 0)) + int(notes[k])
+	bag_start = bag_value()
 
 
 func has(upgrade: String) -> bool:
@@ -330,13 +342,7 @@ func _arrive(events: Array) -> void:
 			slipped += 1
 			events.append(Event.SLIPPED)
 		elif r.owed > 0:
-			var notes := make_change(r.owed)
-			if notes.is_empty():
-				rating -= b.n("bus.late_owed_star_penalty") * 2.0
-				events.append(Event.OWED_SHORT)
-			else:
-				_take_from_bag(notes)
-				events.append(Event.OWED_PAID)
+			events.append(_pay_owed(r))
 		events.append(Event.ALIGHTED)
 	# A mother with a child, or someone unwell, left standing since the
 	# last stop: they give up and get off here (paid or not), and the bus
@@ -770,17 +776,47 @@ func later() -> Array:
 	return [Event.SETTLED]
 
 
-## Asks round the bus for change: the biggest note in the bag is broken
-## into small ones, at the cost of a few seconds.
-func swap() -> Array:
+## Change owed at their stop. So nobody goes off without it: the notes in
+## hand are put in the bag, big notes are broken by asking round (no wait
+## at a stop); and if it still cannot be made, Babu sends it by phone (it
+## comes off the day's money, a little dent in the rating, no loss to them).
+func _pay_owed(r: Dictionary) -> int:
+	var notes := make_change(int(r.owed))
+	if notes.is_empty():
+		for note in loose:
+			bag[note] = int(bag.get(note, 0)) + 1
+		loose.clear()
+		for i in 4:
+			notes = make_change(int(r.owed))
+			if not notes.is_empty() or not _break_one():
+				break
+	if notes.is_empty():
+		phone_money -= int(r.owed)
+		owed_by_phone += 1
+		rating = clampf(rating - b.n("bus.owed_phone_star_penalty"), 1.0, 5.0)
+		return Event.OWED_PHONE
+	_take_from_bag(notes)
+	return Event.OWED_PAID
+
+
+## Breaks the biggest note in the bag into small ones; false if none.
+func _break_one() -> bool:
 	for note in [500, 100, 50, 20]:
 		if int(bag.get(note, 0)) > 0:
 			bag[note] = int(bag[note]) - 1
 			for small in BREAK[note]:
 				bag[small] = int(bag.get(small, 0)) + 1
-			locked_left = b.n("bus.swap_s")
-			return [Event.SWAPPED]
-	return []
+			return true
+	return false
+
+
+## Asks round the bus for change: the biggest note in the bag is broken
+## into small ones, at the cost of a few seconds.
+func swap() -> Array:
+	if not _break_one():
+		return []
+	locked_left = b.n("bus.swap_s")
+	return [Event.SWAPPED]
 
 
 func _collect() -> void:

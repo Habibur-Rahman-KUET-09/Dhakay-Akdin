@@ -2954,5 +2954,173 @@
  "after_match_night": {
   "bn": "গল্প: ক্রিকেট ফাইনাল! দোকানের টিভির সামনে দ্বিগুণ ভিড় (আজকের দিন)",
   "en": "Story: the cricket final! Twice the crowd at the stall's TV (today)"
+ },
+ "owedPhone": {
+  "bn": "ভাংতি জোগাড় হলো না, বাবু মোবাইলে ফেরত পাঠালেন",
+  "en": "No change in notes: Babu sent it back by phone"
+ },
+ "busOwedPhone": {
+  "bn": "মোবাইলে ভাংতি ফেরত: {n} জন",
+  "en": "Change sent back by phone: {n}"
+ },
+ "lbTitle": {
+  "bn": "লিডারবোর্ড",
+  "en": "Leaderboards"
+ },
+ "lbCardLine": {
+  "bn": "আজ, এই সপ্তাহ, এই মাস আর সব সময়ের সেরা আয়; শীর্ষ ৩ জন তারা পান",
+  "en": "The best earnings today, this week, this month and of all time; the top three win stars"
+ },
+ "lbPeriod_day": {
+  "bn": "আজ",
+  "en": "Today"
+ },
+ "lbPeriod_week": {
+  "bn": "সপ্তাহ",
+  "en": "Week"
+ },
+ "lbPeriod_month": {
+  "bn": "মাস",
+  "en": "Month"
+ },
+ "lbPeriod_ever": {
+  "bn": "সব সময়",
+  "en": "All time"
+ },
+ "lbWho_all": {
+  "bn": "সব মিলিয়ে",
+  "en": "Overall"
+ },
+ "lbWho_rickshaw": {
+  "bn": "রহিম চাচা",
+  "en": "Rahim Chacha"
+ },
+ "lbWho_tea": {
+  "bn": "মনির মামা",
+  "en": "Monir Mama"
+ },
+ "lbWho_bus": {
+  "bn": "বাবু",
+  "en": "Babu"
+ },
+ "lbPrizes": {
+  "bn": "শেষে শীর্ষ ৩ জন পাবেন: ১ম {a}, ২য় {b}, ৩য় {c} তারা",
+  "en": "At the end the top three win: 1st {a}, 2nd {b}, 3rd {c} stars"
+ },
+ "lbNoPrize": {
+  "bn": "সব সময়ের তালিকা শেষ হয় না, তাই পুরস্কার নেই, শুধু সম্মান।",
+  "en": "The all-time list never ends, so no prize: just the honour."
+ },
+ "lbLoading": {
+  "bn": "তালিকা আনা হচ্ছে…",
+  "en": "Fetching the list…"
+ },
+ "lbEmpty": {
+  "bn": "এখনো কেউ নেই, অথবা ইন্টারনেট নেই।",
+  "en": "Nobody yet, or no internet."
+ },
+ "lbYou": {
+  "bn": "আপনি: {rank} নম্বরে, {n} টাকা",
+  "en": "You: number {rank}, Tk {n}"
+ },
+ "lbYouNoRank": {
+  "bn": "আপনি: {n} টাকা",
+  "en": "You: Tk {n}"
+ },
+ "lbYouNone": {
+  "bn": "এই তালিকায় আপনার এখনো আয় নেই। একটা দিন খেলুন!",
+  "en": "Nothing of yours in this list yet. Play a day!"
+ },
+ "lbAnon": {
+  "bn": "খেলোয়াড়",
+  "en": "Player"
+ },
+ "lbYourName": {
+  "bn": "তালিকায় আপনার নাম: {name}",
+  "en": "Your name in the lists: {name}"
+ },
+ "lbNameHint": {
+  "bn": "তালিকায় আপনার নাম দেখাতে একটা নাম দিন",
+  "en": "Choose a name to show in the lists"
+ },
+ "lbSetName": {
+  "bn": "নাম দিন",
+  "en": "Set a name"
+ },
+ "lbHelp": {
+  "bn": "প্রতিটা দিনের শেষে আর মহল্লায় ফিরলে আপনার আয় তালিকায় যায় (ইন্টারনেট লাগে)। দিন, সপ্তাহ (শনিবার থেকে) বা মাস শেষ হলে শীর্ষ ৩ জন পরেরবার খেলা খুললে তারা পান। তারা দিয়ে দোকানে বিশেষ জিনিস কেনা যায়।",
+  "en": "Your earnings go into the lists at the end of each day and when you come back to the mohalla (online). When a day, week (from Saturday) or month is over, the top three get their stars the next time they open the game. Stars buy special things in the shop."
+ },
+ "lbWon": {
+  "bn": "{period} {who} তালিকায় আপনি {rank} নম্বর! +{n} তারা",
+  "en": "Number {rank} in {period} {who} list! +{n} stars"
+ },
+ "lbPast_day": {
+  "bn": "গতকালের",
+  "en": "yesterday's"
+ },
+ "lbPast_week": {
+  "bn": "গত সপ্তাহের",
+  "en": "last week's"
+ },
+ "lbPast_month": {
+  "bn": "গত মাসের",
+  "en": "last month's"
+ },
+ "needMoreTara": {
+  "bn": "আরও {n} তারা লাগবে",
+  "en": "{n} more stars needed"
+ },
+ "starShopTitle": {
+  "bn": "তারা দিয়ে কেনা (আপনার আছে {n} তারা)",
+  "en": "Bought with stars (you have {n})"
+ },
+ "boost_meal": {
+  "bn": "ভালো খাবার",
+  "en": "A good meal"
+ },
+ "boostHelp_meal": {
+  "bn": "পরের রিকশার দিনে শুরুতে +৩০ শক্তি",
+  "en": "+30 energy at the start of the next rickshaw day"
+ },
+ "boost_mike": {
+  "bn": "মাইকে প্রচার",
+  "en": "A loudspeaker"
+ },
+ "boostHelp_mike": {
+  "bn": "পরের দোকানের দিনে ৩০% বেশি কাস্টমার",
+  "en": "30% more customers on the stall's next day"
+ },
+ "boost_change_pack": {
+  "bn": "খুচরা নোটের বান্ডিল",
+  "en": "A bundle of small notes"
+ },
+ "boostHelp_change_pack": {
+  "bn": "পরের বাসের দিনে ভাংতির থলেতে বাড়তি ২৩০ টাকার ছোট নোট",
+  "en": "Tk 230 more in small notes in the change bag on the next bus day"
+ },
+ "boostWaiting": {
+  "bn": "পরের দিনের জন্য রাখা",
+  "en": "Waiting for the next day"
+ },
+ "boostUsed": {
+  "bn": "তারা দিয়ে কেনা: {name}",
+  "en": "Bought with stars: {name}"
+ },
+ "look_paint_night": {
+  "bn": "রাতের আকাশ রং (তারা)",
+  "en": "Night-sky paint (stars)"
+ },
+ "look_sign_star": {
+  "bn": "তারার সাইনবোর্ড",
+  "en": "Starry signboard"
+ },
+ "look_sticker_star": {
+  "bn": "তারার স্টিকার",
+  "en": "Star sticker"
+ },
+ "sticker_star": {
+  "bn": "জীবন সুন্দর",
+  "en": "Life is beautiful"
  }
 }

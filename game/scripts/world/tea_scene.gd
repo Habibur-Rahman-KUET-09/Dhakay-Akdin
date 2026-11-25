@@ -78,6 +78,7 @@ var _activity: Activity
 ## once it has rung), and how it went, for the day's end.
 var _call_at := -1.0
 var _story_effect := {}
+var _boost := {}
 var _call_rng := RandomNumberGenerator.new()
 var _call_result := {}
 var _status: Label
@@ -105,11 +106,16 @@ func _ready() -> void:
 	progress = Progress.new(b)
 	day = TeaDay.new(b, -1, progress.data.tea.upgrades, progress.date())
 	day.interactive = Activity.wanted()
-	day.memory = day.interactive
+	# Remembering hidden orders was taken out (too fiddly): every order
+	# stays on its card.
+	day.memory = false
 	day.level = progress.level()
 	# A chapter's mark on the day: the stall moved on, or the cricket final.
 	_story_effect = progress.story_effect("tea")
 	day.arrival_factor = float(_story_effect.get("arrivals", 1.0))
+	# A loudspeaker bought with stars.
+	_boost = progress.take_boost("tea")
+	day.arrival_factor *= float(_boost.get("arrivals", 1.0))
 	_call_rng.randomize()
 	var call_share := HomeCall.plan(_call_rng, progress.level())
 	if call_share >= 0.0:
@@ -163,6 +169,8 @@ func _ready() -> void:
 	set_process(true)
 	if not _story_effect.is_empty():
 		_say(strings.t("after_" + str(_story_effect.note), {"n": int(_story_effect.left)}), Look.MAGENTA, 6.0)
+	elif not _boost.is_empty():
+		_say(strings.t("boostUsed", {"name": strings.t("boost_" + str(_boost.id))}), Look.SKY, 4.0)
 	elif not day.festival.is_empty():
 		_say(str(day.festival.greeting.get(strings.lang, day.festival.greeting.en)), Look.MAGENTA, 6.0)
 	elif day.hot:

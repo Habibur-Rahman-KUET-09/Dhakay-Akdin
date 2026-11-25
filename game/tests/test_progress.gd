@@ -348,7 +348,7 @@ func test_every_good_has_its_words() -> void:
 			for l in Goods.looks(who):
 				for key in ["look_" + l.id, "lookHelp_" + l.slot]:
 					check(s.t(key) != key, "%s: %s" % [lang, key])
-				check(int(l.price) > 0 or bool(l.get("prize", false)), "%s has a price (or is a prize)" % l.id)
+				check(int(l.get("price", 0)) > 0 or int(l.get("tara", 0)) > 0 or bool(l.get("prize", false)), "%s has a price (or is a prize)" % l.id)
 				if who == "bus":
 					check(s.t(l.id) != l.id, "%s: the sign's words" % l.id)
 		for h in Goods.home_items():
@@ -396,3 +396,23 @@ func test_a_chapter_changes_the_next_days() -> void:
 		for a in afters:
 			if not a.is_empty():
 				check(s.t("after_" + str(a.note)) != "after_" + str(a.note), "words for %s" % a.note)
+
+
+func test_things_bought_with_stars() -> void:
+	var p := _fresh()
+	p.data.tara = 45
+	p.data.taka = 0
+	check(p.buy_look("rickshaw", "paint_night"), "a paint bought with 40 stars")
+	eq(int(p.data.tara), 5, "stars spent, not money")
+	check(not p.buy_boost("meal"), "8 stars for a meal: 5 is not enough")
+	p.data.tara = 20
+	check(p.buy_boost("meal"), "a meal for the next day")
+	check(not p.buy_boost("meal"), "one waiting at a time")
+	eq(int(p.take_boost("rickshaw").get("energy", 0)), 30, "used on the day")
+	eq(p.take_boost("rickshaw"), {}, "and gone")
+	const BusDay = preload("res://scripts/rules/bus_day.gd")
+	var bus := BusDay.new(preload("res://scripts/rules/balance.gd").new(), 1)
+	var before := bus.earned()
+	bus.add_float({"10": 5, "20": 4, "50": 2})
+	eq(bus.bag_value(), 550 + 230, "more small notes in the bag")
+	eq(bus.earned(), before, "the float is not the day's money")
