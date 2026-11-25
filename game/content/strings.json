@@ -4250,5 +4250,233 @@
  "share_night": {
   "bn": "রহিম চাচা আজ রাতের শিফটে {n} জন যাত্রী পৌঁছে দিলেন, আয় {money} টাকা!",
   "en": "Rahim Chacha took {n} passengers home on the night shift and made Tk {money}!"
+ },
+ "hawkerName": {
+  "bn": "কাশেম ভাই",
+  "en": "Kashem Bhai"
+ },
+ "hawkerRole": {
+  "bn": "বাসের বাদামওয়ালা",
+  "en": "Peanut seller on the buses"
+ },
+ "start_hawker": {
+  "bn": "ঝুড়ি নিয়ে বের হোন",
+  "en": "Take the basket out"
+ },
+ "tip_hawker": {
+  "bn": "ভালো করে ডাক দিলে বেশি হাত ওঠে। দুই স্টপের পর নেমে যান, নাহলে কন্ডাক্টর নামিয়ে দেবে।",
+  "en": "A good call raises more hands. Get off after two stops, or the conductor puts you off."
+ },
+ "hawkerLastDay": {
+  "bn": "শেষ দিন: {money} টাকা, {sold} প্যাকেট",
+  "en": "Last day: Tk {money}, {sold} packets"
+ },
+ "hawkerHistoryLine": {
+  "bn": "দিন {day}: বাদাম · {money} টাকা · {sold} প্যাকেট",
+  "en": "Day {day}: peanuts · Tk {money} · {sold} packets"
+ },
+ "share_hawker": {
+  "bn": "আজ কাশেম ভাই বাসে বাসে {n} প্যাকেট বাদাম বেচলেন, লাভ {money} টাকা!",
+  "en": "Today Kashem Bhai sold {n} packets of peanuts on the buses: Tk {money} profit!"
+ },
+ "lbWho_hawker": {
+  "bn": "কাশেম",
+  "en": "Kashem"
+ },
+ "caller_amena": {
+  "bn": "আমেনা (বউ)",
+  "en": "Amena (his wife)"
+ },
+ "ch_h_sold": {
+  "bn": "এক দিনে {goal} প্যাকেট বাদাম বেচুন",
+  "en": "Sell {goal} packets of peanuts in a day"
+ },
+ "ch_h_clean": {
+  "bn": "একবারও নামিয়ে না দিয়ে ৩০ প্যাকেট বেচুন",
+  "en": "Sell 30 packets without once being put off a bus"
+ },
+ "ch_h_money": {
+  "bn": "বাদামে এক দিনে {goal} টাকা লাভ",
+  "en": "Tk {goal} profit from peanuts in a day"
+ },
+ "up_big_basket": {
+  "bn": "বড় ঝুড়ি",
+  "en": "A bigger basket"
+ },
+ "upHelp_big_basket": {
+  "bn": "৬০-এর জায়গায় ৯০ প্যাকেট ধরে",
+  "en": "Holds 90 packets instead of 60"
+ },
+ "up_masala": {
+  "bn": "মশলা বাদাম",
+  "en": "Masala peanuts"
+ },
+ "upHelp_masala": {
+  "bn": "প্রতি প্যাকেট ১৫ টাকায় বিকোয়",
+  "en": "Sells at Tk 15 a packet"
+ },
+ "up_cooler": {
+  "bn": "ঠান্ডা পানির বাক্স",
+  "en": "A cooler box of water"
+ },
+ "upHelp_cooler": {
+  "bn": "পানির বোতলও বেচা যায়, গরমের দিনে বেশি",
+  "en": "Sell bottles of water too, most on a hot day"
+ },
+ "look_basket_green": {
+  "bn": "সবুজ ঝুড়ি, হলুদ কাপড়",
+  "en": "Green basket, yellow cloth"
+ },
+ "look_basket_red": {
+  "bn": "লাল ঝুড়ি, সাদা কাপড়",
+  "en": "Red basket, white cloth"
+ },
+ "look_basket_star": {
+  "bn": "বেগুনি ঝুড়ি, সোনালি কাপড়",
+  "en": "Purple basket, golden cloth"
+ },
+ "lookHelp_basket": {
+  "bn": "কাশেম ভাইয়ের বাদামের ঝুড়ি",
+  "en": "Kashem Bhai's peanut basket"
+ },
+ "boost_fresh_roast": {
+  "bn": "গরম গরম ভাজা বাদাম",
+  "en": "Freshly roasted peanuts"
+ },
+ "boostHelp_fresh_roast": {
+  "bn": "পরের দিন ৩০% বেশি লোক বাদাম চাইবে",
+  "en": "30% more people want peanuts on Kashem Bhai's next day"
+ },
+ "hawkerLoading": {
+  "bn": "বাসস্টপে যাচ্ছেন…",
+  "en": "Off to the bus stop…"
+ },
+ "hawkerStart": {
+  "bn": "বাদামের ঝুড়ি ভরা। বাস এলে উঠে পড়ুন!",
+  "en": "The basket's full. Get on when a bus comes!"
+ },
+ "hkWaiting": {
+  "bn": "{stop} স্টপে বাসের অপেক্ষায়…",
+  "en": "Waiting for a bus at {stop}…"
+ },
+ "hkBusCame": {
+  "bn": "বাস এসেছে, উঠে পড়লেন! এবার ডাক দিন।",
+  "en": "A bus! You're on. Now call out."
+ },
+ "hkBabuBus": {
+  "bn": "এটা বাবুর বাস! বাবু: \"কাশেম ভাই, চার স্টপ থাকেন, সমস্যা নাই।\"",
+  "en": "It's Babu's bus! Babu: \"Kashem Bhai, stay four stops, no problem.\""
+ },
+ "hkCallTitle": {
+  "bn": "ডাক দিন: বাদাম! বাদাম!",
+  "en": "Call out: Peanuts! Peanuts!"
+ },
+ "hkCallButton": {
+  "bn": "বাদাম! বাদাম!",
+  "en": "Peanuts! Peanuts!"
+ },
+ "hkCall_perfect": {
+  "bn": "দারুণ ডাক! {n} জন হাত তুলল।",
+  "en": "A great call! {n} hands went up."
+ },
+ "hkCall_good": {
+  "bn": "ভালো ডাক। {n} জন হাত তুলল।",
+  "en": "A good call. {n} hands went up."
+ },
+ "hkCall_miss": {
+  "bn": "ডাক কেউ শুনল না ঠিকমতো। {n} জন হাত তুলল।",
+  "en": "Hardly anyone heard. {n} hands went up."
+ },
+ "hkCalled": {
+  "bn": "ডাক দেওয়া হয়েছে। পরের স্টপের পর আবার।",
+  "en": "Called. Again after the next stop."
+ },
+ "hkBuyer": {
+  "bn": "{seat} নম্বর সিট: {item} × {n} · {taka} টাকা",
+  "en": "Seat {seat}: {item} × {n} · Tk {taka}"
+ },
+ "hkNoBuyers": {
+  "bn": "কেউ হাত তোলেনি এখনো",
+  "en": "No hands up yet"
+ },
+ "item_badam": {
+  "bn": "বাদাম",
+  "en": "peanuts"
+ },
+ "item_water": {
+  "bn": "পানি",
+  "en": "water"
+ },
+ "hkSold": {
+  "bn": "{item} {n}টা, {taka} টাকা",
+  "en": "{item} × {n}: Tk {taka}"
+ },
+ "hkSoldOut": {
+  "bn": "ঝুড়ি খালি! সব বাদাম বিক্রি।",
+  "en": "The basket's empty! All the peanuts sold."
+ },
+ "hkWarned": {
+  "bn": "কন্ডাক্টর: \"ভাই, পরের স্টপে নামেন কিন্তু!\"",
+  "en": "The conductor: \"Brother, off at the next stop!\""
+ },
+ "hkThrown": {
+  "bn": "কন্ডাক্টর নামিয়ে দিল! ধাক্কায় {n} প্যাকেট পড়ে গেল।",
+  "en": "The conductor put you off! {n} packets fell in the shove."
+ },
+ "hkGetOff": {
+  "bn": "নামুন",
+  "en": "Get off"
+ },
+ "hkGotOff": {
+  "bn": "নেমে পড়লেন। পরের বাসের অপেক্ষা।",
+  "en": "Off you get. Wait for the next bus."
+ },
+ "hkStops": {
+  "bn": "স্টপ {n}/{free}",
+  "en": "Stop {n}/{free}"
+ },
+ "hkBasket": {
+  "bn": "ঝুড়িতে {n}",
+  "en": "{n} in basket"
+ },
+ "hkRain": {
+  "bn": "বৃষ্টি! বাদাম কম লোক চায়।",
+  "en": "Rain! Fewer people want peanuts."
+ },
+ "hkHot": {
+  "bn": "আজ খুব গরম। পানির চাহিদা বেশি।",
+  "en": "A hot day. Water sells well."
+ },
+ "hkDayOver": {
+  "bn": "কাশেম ভাইয়ের দিন শেষ!",
+  "en": "Kashem Bhai's day is done!"
+ },
+ "hkSoldLine": {
+  "bn": "{n} প্যাকেট বাদাম বিক্রি",
+  "en": "{n} packets of peanuts sold"
+ },
+ "hkWaterLine": {
+  "bn": "{n} বোতল পানি বিক্রি",
+  "en": "{n} bottles of water sold"
+ },
+ "hkBusesLine": {
+  "bn": "{n}টা বাসে উঠেছেন",
+  "en": "Rode {n} buses"
+ },
+ "hkThrownLine": {
+  "bn": "{n} বার নামিয়ে দিয়েছে",
+  "en": "Put off {n} times"
+ },
+ "hkOwedLine": {
+  "bn": "পাইকারকে শোধ: {n} টাকা",
+  "en": "Paid the wholesaler: Tk {n}"
+ },
+ "hkRatingLine": {
+  "bn": "দিনের তারা {stars}",
+  "en": "Day's stars {stars}"
+ },
+ "hkGoHome": {
+  "bn": "ঝুড়ি খালি, বাড়ি চলুন",
+  "en": "Basket empty: home"
  }
 }

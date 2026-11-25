@@ -150,6 +150,21 @@
    "bn": "দারোয়ান",
    "en": "The guard",
    "colour": "37474F"
+  },
+  "kashem": {
+   "bn": "কাশেম ভাই",
+   "en": "Kashem Bhai",
+   "colour": "A0722F"
+  },
+  "amena": {
+   "bn": "আমেনা",
+   "en": "Amena",
+   "colour": "0F7C8C"
+  },
+  "rashid": {
+   "bn": "রশিদ পাইকার",
+   "en": "Rashid the wholesaler",
+   "colour": "5D4037"
   }
  },
  "chapters": [
@@ -3029,6 +3044,371 @@
      }
     ]
    }
+  },
+  {
+   "id": "kashem_1",
+   "who": "hawker",
+   "n": 1,
+   "title": {
+    "bn": "বাদাম! বাদাম!",
+    "en": "Peanuts! Peanuts!"
+   },
+   "unlock": {
+    "start": "hawker"
+   },
+   "panels": [
+    {
+     "scene": "home_dawn",
+     "lines": [
+      {
+       "by": "amena",
+       "bn": "আজকে কোন রুটে যাবা? মিরপুর দশ থেকে মতিঝিল?",
+       "en": "Which route today? Mirpur 10 to Motijheel?"
+      },
+      {
+       "by": "kashem",
+       "bn": "হ্যাঁ। ওই রুটে লোক বেশি, বাসও বেশি।",
+       "en": "Yes. More people on that route, more buses too."
+      },
+      {
+       "by": "amena",
+       "bn": "শাথীর খাতা শেষ। ফেরার সময় মনে রাইখো।",
+       "en": "Shathi's out of exercise books. Remember on your way back."
+      }
+     ]
+    },
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "rashid",
+       "bn": "ষাট প্যাকেট দিলাম, কাশেম। সন্ধ্যায় যা বেচবা তার দাম দিয়া যাইবা।",
+       "en": "Sixty packets, Kashem. Pay for what you sell this evening."
+      },
+      {
+       "by": "kashem",
+       "bn": "রশিদ ভাই, পড়ে গেলেও কিন্তু টাকা লাগে, জানি।",
+       "en": "And the ones I drop are paid for too, Rashid Bhai, I know."
+      },
+      {
+       "by": "rashid",
+       "bn": "জোরে ডাক দিবা। চুপচাপ বাদামওয়ালার ঝুড়ি খালি হয় না।",
+       "en": "Call out loud. A quiet peanut seller never empties his basket."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kashem_2",
+   "who": "hawker",
+   "n": 2,
+   "title": {
+    "bn": "বাবুর বাস",
+    "en": "Babu's bus"
+   },
+   "unlock": {
+    "days": [
+     "hawker",
+     3
+    ]
+   },
+   "panels": [
+    {
+     "scene": "bus_inside",
+     "lines": [
+      {
+       "by": "babu",
+       "bn": "কাশেম ভাই! উঠেন উঠেন। আমার বাসে চার স্টপ থাকেন, কেউ কিছু কইব না।",
+       "en": "Kashem Bhai! Up you get. Stay four stops on my bus, nobody'll say a thing."
+      },
+      {
+       "by": "kashem",
+       "bn": "অন্য বাসের কন্ডাক্টর তো দুই স্টপেই ঠেলা দেয়, বাবু।",
+       "en": "On the other buses the conductor shoves me off after two, Babu."
+      },
+      {
+       "by": "babu",
+       "bn": "সবারই পেট আছে ভাই। আমি এক প্যাকেট নিলাম, টাকা নেন।",
+       "en": "Everyone has a stomach to fill, brother. I'll take a packet: here's the money."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kashem_3",
+   "who": "hawker",
+   "n": 3,
+   "title": {
+    "bn": "উচ্ছেদ অভিযান",
+    "en": "The clearance drive"
+   },
+   "unlock": {
+    "days": [
+     "hawker",
+     6
+    ]
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "police",
+       "bn": "এই! স্টপে দাঁড়ানো যাবে না। আজ হকার উচ্ছেদ। সবাই সরেন!",
+       "en": "Hey! No standing at the stop. Hawkers are being cleared today. Move!"
+      },
+      {
+       "by": "kashem",
+       "bn": "স্যার, আমরা তো বাসে উঠে বেচি, রাস্তায় দোকান দেই না।",
+       "en": "Sir, we sell on the buses, we don't set up on the pavement."
+      },
+      {
+       "by": "police",
+       "bn": "অর্ডার আছে। পরের স্টপে যান, এখানে না।",
+       "en": "Those are the orders. Go to the next stop, not here."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "কাশেম ভাই কী করবেন?",
+     "en": "What will Kashem Bhai do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "চুপচাপ পরের স্টপে চলে যান",
+       "en": "Quietly walk to the next stop"
+      },
+      "effects": {
+       "family": [
+        "hawker",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "kashem",
+        "bn": "ঝামেলা করে লাভ নাই। আজকের দিনটা যেন নষ্ট না হয়।",
+        "en": "No good in trouble. Just don't let the day go to waste."
+       },
+       {
+        "by": "amena",
+        "bn": "ভালো করছো। তুমি ঠিক থাকলেই আমরা ঠিক।",
+        "en": "Good. As long as you're all right, we're all right."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "হকারদের নিয়ে কাউন্সিলরের কাছে যান",
+       "en": "Take the hawkers to the councillor"
+      },
+      "effects": {
+       "taka": -100,
+       "family": [
+        "hawker",
+        -1
+       ]
+      },
+      "lines": [
+       {
+        "by": "kashem",
+        "bn": "বিশজন মিলে গেলে কথা শুনবে। একটা কার্ড পাইলে আর কেউ তাড়াবে না।",
+        "en": "Twenty of us together, he'll listen. With a card nobody can chase us off."
+       },
+       {
+        "by": "amena",
+        "bn": "সারাদিন বিক্রি নাই, তার ওপর চাঁদা দিলা? সাবধানে থাইকো।",
+        "en": "No sales all day, and you gave money too? Do be careful."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "kashem_4",
+   "who": "hawker",
+   "n": 4,
+   "title": {
+    "bn": "শাথীর স্কুল",
+    "en": "Shathi's school"
+   },
+   "unlock": {
+    "days": [
+     "hawker",
+     9
+    ]
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "amena",
+       "bn": "শাথীর স্কুলে শুক্রবার বাবা-মায়েদের অনুষ্ঠান। ও খুব চায় তুমি যাও।",
+       "en": "Shathi's school has a parents' day on Friday. She really wants you there."
+      },
+      {
+       "by": "kashem",
+       "bn": "শুক্রবার বাসে ভিড় কম, কিন্তু পার্কের সামনে বাদাম ভালো চলে।",
+       "en": "Fewer people on Friday buses, but peanuts sell well outside the park."
+      },
+      {
+       "by": "amena",
+       "bn": "টাকা তো রোজই লাগবে। মেয়েটা কিন্তু একবারই ছোট থাকবে।",
+       "en": "We'll always need money. She'll only be little once."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "শুক্রবার কাশেম ভাই কোথায় যাবেন?",
+     "en": "Where will Kashem Bhai go on Friday?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "শাথীর স্কুলে যান",
+       "en": "Go to Shathi's school"
+      },
+      "effects": {
+       "family": [
+        "hawker",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "kashem",
+        "bn": "শাথী মঞ্চে কবিতা বলল, আমি সবার আগে হাততালি দিলাম।",
+        "en": "Shathi recited a poem on stage, and I clapped first of all."
+       },
+       {
+        "by": "amena",
+        "bn": "ও বলছে, বাবা আসছে বলেই ভয় পায় নাই।",
+        "en": "She says she wasn't scared because her father came."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "পার্কের সামনে বাদাম বেচুন",
+       "en": "Sell outside the park"
+      },
+      "effects": {
+       "taka": 200
+      },
+      "lines": [
+       {
+        "by": "kashem",
+        "bn": "ছুটির দিনে পার্কে লোকে লোকারণ্য। ঝুড়ি দুপুরেই খালি।",
+        "en": "The park was packed on the holiday. Basket empty by noon."
+       },
+       {
+        "by": "amena",
+        "bn": "শাথী জানালার পাশে বসে ছিল অনেকক্ষণ।",
+        "en": "Shathi sat by the window a long while."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "kashem_5",
+   "who": "hawker",
+   "n": 5,
+   "title": {
+    "bn": "মনির মামার প্রস্তাব",
+    "en": "Monir Mama's offer"
+   },
+   "unlock": {
+    "days": [
+     "hawker",
+     12
+    ]
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "monir",
+       "bn": "কাশেম ভাই, আমার দোকানের পাশে এক কোনা খালি আছে। ওইখানে বাদামের চুলা বসান।",
+       "en": "Kashem Bhai, there's an empty corner by my stall. Set up a peanut roaster there."
+      },
+      {
+       "by": "kashem",
+       "bn": "বাসে বাসে দৌড়ানো আর এই বয়সে কুলায় না, মামা।",
+       "en": "Running from bus to bus is getting hard at my age, Mama."
+      },
+      {
+       "by": "monir",
+       "bn": "চায়ের সাথে গরম বাদাম! দুইজনেরই বিক্রি বাড়বে।",
+       "en": "Hot peanuts with the tea! We'll both sell more."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "কাশেম ভাই কী করবেন?",
+     "en": "What will Kashem Bhai do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "সকালে বাস, বিকেলে মনির মামার কোনা",
+       "en": "Buses in the morning, Monir's corner in the evening"
+      },
+      "effects": {
+       "taka": 150
+      },
+      "lines": [
+       {
+        "by": "kashem",
+        "bn": "দুইটাই চলুক। সকালের ভিড় বাসে, বিকেলের আড্ডা চায়ের দোকানে।",
+        "en": "Let's do both. Morning crowds on the buses, evening chat at the tea stall."
+       },
+       {
+        "by": "monir",
+        "bn": "এই না হলে মহল্লা!",
+        "en": "That's what a mohalla is!"
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "বাসেই থাকুন, কোনাটা অন্য কাউকে দিন",
+       "en": "Stay on the buses; give the corner to someone else"
+      },
+      "effects": {
+       "family": [
+        "hawker",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "kashem",
+        "bn": "রহমত চাচার পা ভাঙা, বাসে উঠতে পারে না। কোনাটা উনাকে দেন, মামা।",
+        "en": "Rahmat Chacha's leg is broken, he can't climb on buses. Give him the corner, Mama."
+       },
+       {
+        "by": "amena",
+        "bn": "তোমার এই মনটার জন্যই তো তোমারে বিয়া করছিলাম।",
+        "en": "That's the heart I married you for."
+       }
+      ]
+     }
+    ]
+   }
   }
  ],
  "scenes": [
@@ -4229,6 +4609,68 @@
        "by": "ratul",
        "bn": "কাল থেকে প্রতি অর্ডারের ফাঁকে একবার তোমাকে জানাব।",
        "en": "From tomorrow I'll text you between orders."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_high_hawker",
+   "who": "hawker",
+   "n": 0,
+   "title": {
+    "bn": "আমেনার হাসি",
+    "en": "Amena's smile"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "amena",
+       "bn": "আজ তোমার জন্য শুঁটকি ভর্তা করছি। শাথী নিজে মরিচ বেটে দিছে।",
+       "en": "I made dried-fish bhorta for you. Shathi ground the chillies herself."
+      },
+      {
+       "by": "kashem",
+       "bn": "শাথীর নতুন খাতা আর তোমার জন্য একটা চুড়ি আনছি।",
+       "en": "I brought Shathi's new books, and a bangle for you."
+      },
+      {
+       "by": "amena",
+       "bn": "বাদামওয়ালার বউ হইয়া আমার কোনো আফসোস নাই।",
+       "en": "I've no regrets being a peanut seller's wife."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_low_hawker",
+   "who": "hawker",
+   "n": 0,
+   "title": {
+    "bn": "আমেনার চিন্তা",
+    "en": "Amena is worried"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "amena",
+       "bn": "রোজ রাত করে ফেরো, গায়ে ব্যথা নিয়া। শাথী বাবারে দেখেই না।",
+       "en": "You come home late every night, aching all over. Shathi hardly sees her father."
+      },
+      {
+       "by": "kashem",
+       "bn": "বাসের ভিড়ে ঠেলাঠেলি, আমেনা। পাইকারের টাকা শোধ না দিয়া ফিরি কেমনে?",
+       "en": "It's all shoving on those buses, Amena. How can I come back before paying the wholesaler?"
+      },
+      {
+       "by": "kashem",
+       "bn": "কাল থেকে মাগরিবের আগেই ফিরব। কথা দিলাম।",
+       "en": "From tomorrow I'll be home before sunset. I promise."
       }
      ]
     }

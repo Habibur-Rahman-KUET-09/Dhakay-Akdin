@@ -34,6 +34,12 @@
    {"id": "d_ma_medicine", "by": "ratul_ma", "kind": "need", "bn": "বাবা, আমার প্রেশারের ওষুধ শেষ। আসার সময় নিয়ে আসিস।", "en": "Son, my blood-pressure pills have run out. Bring some on your way home.", "options": {"send": {"family": 2, "cost": 150}, "later": {"family": -2}}},
    {"id": "d_ma_exam", "by": "ratul_ma", "kind": "news", "bn": "তোর কলেজ থেকে ফোন করেছিল, কাল থেকে পরীক্ষা! আজ তাড়াতাড়ি আয়।", "en": "Your college phoned: exams start tomorrow! Come home early tonight.", "options": {"go": {"family": 2, "end_day": true}, "later": {"family": 0}}},
    {"id": "d_ma_rain", "by": "ratul_ma", "kind": "chat", "bn": "বৃষ্টি নামছে। রেইনকোট পরে নিস, ভিজে জ্বর বাধাস না।", "en": "It's starting to rain. Put your raincoat on: don't catch a fever.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
+  ],
+  "hawker": [
+   {"id": "h_amena_eat", "by": "amena", "kind": "chat", "bn": "দুপুরে কিছু খাইছো? খালি বাদাম খাইয়া থাইকো না।", "en": "Have you eaten lunch? Don't live on peanuts alone.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "h_amena_books", "by": "amena", "kind": "need", "bn": "শাথীর খাতা-কলম শেষ, কাল পরীক্ষা। বিকাশে কিছু টাকা পাঠাও।", "en": "Shathi's out of books and pens, and her exam's tomorrow. Send a little money by bKash.", "options": {"send": {"family": 2, "cost": 120}, "later": {"family": -2}}},
+   {"id": "h_amena_fever", "by": "amena", "kind": "news", "bn": "শাথীর জ্বর আসছে। আজ একটু তাড়াতাড়ি আসতে পারবা?", "en": "Shathi has a fever. Can you come home a bit early today?", "options": {"go": {"family": 2, "end_day": true}, "later": {"family": 0}}},
+   {"id": "h_amena_rain", "by": "amena", "kind": "chat", "bn": "বৃষ্টি নামছে। ঝুড়ি পলিথিনে ঢাইকা রাখো, বাদাম ভিজলে নষ্ট।", "en": "It's raining. Cover the basket with plastic: wet peanuts are ruined.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
   ]
  }
 }

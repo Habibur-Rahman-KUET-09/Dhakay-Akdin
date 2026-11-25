@@ -185,6 +185,21 @@
    "voice": "bn-BD-PradeepNeural",
    "pitch": "-12%",
    "rate": "-4%"
+  },
+  "kashem": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-6%",
+   "rate": "+2%"
+  },
+  "amena": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "+2%",
+   "rate": "-2%"
+  },
+  "rashid": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-14%",
+   "rate": "-6%"
   }
  },
  "lines": {

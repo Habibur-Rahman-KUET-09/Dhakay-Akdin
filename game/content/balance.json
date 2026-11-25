@@ -12,7 +12,7 @@
     "xp_level_step": 40,
     "max_level": 50
   },
-  "unlocks": {"tea_stall": 2, "bus": 4, "old_dhaka": 5, "fuchka": 6, "delivery": 7, "early_unlock_tara": 30},
+  "unlocks": {"tea_stall": 2, "bus": 4, "old_dhaka": 5, "fuchka": 6, "delivery": 7, "hawker": 8, "early_unlock_tara": 30},
   "tara": {"daily_challenge": 3, "chapter": 5, "rewarded_ad": 2, "retry_cost": 5,
            "streak": [5, 5, 10, 10, 10, 15]},
   "ads": {"double_per_day": 3, "retry_per_day": 2, "tara_per_day": 3,
@@ -106,6 +106,13 @@
     "max_orders": 3, "offer_every_s": 9, "offer_s": 12, "cook_s": 8, "hot_s": 70, "rain_cooling": 1.4,
     "base_pay": 30, "pay_per_tile": 3, "min_tiles": 6, "max_tiles": 16, "tip_hot": 15, "rain_tip": 10, "gate_chance": 0.3,
     "upgrades": {"gear_cycle": {"cost": 1200, "speed": 1.15}, "hot_bag": {"cost": 900, "cooling": 0.6}, "raincoat": {"cost": 700, "tip": 10}}
+  },
+  "hawker": {
+    "start_hour": 10, "end_hour": 18, "day_seconds": 300, "daily_target": 250, "capacity": 60, "wholesale": 5,
+    "price": 10, "water_price": 20, "riders": [10, 18], "want_chance": 0.4, "rain_wants": 0.6, "water_share": 0.15,
+    "hot_water_share": 0.4, "free_stops": 2, "babu_free_stops": 4, "dwell_s": 3, "dropped": 2,
+    "rain_chance_per_day": 0.3, "rain_seconds": 60, "hot_chance_per_day": 0.3,
+    "upgrades": {"big_basket": {"cost": 700, "capacity": 90}, "masala": {"cost": 1200, "price": 15}, "cooler": {"cost": 1800}}
   },
   "night": {
     "start_hour": 22, "end_hour": 26, "day_seconds": 240, "unlock_level": 5, "waiting_passengers": [2, 3],
