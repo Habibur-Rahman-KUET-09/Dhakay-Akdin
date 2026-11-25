@@ -12,6 +12,7 @@ const Balance = preload("res://scripts/rules/balance.gd")
 const Signals = preload("res://scripts/rules/signals.gd")
 const Calendar = preload("res://scripts/rules/calendar.gd")
 const Hands = preload("res://scripts/rules/activities.gd")
+const Night = preload("res://scripts/rules/night.gd")
 
 ## Events added to the driver's (which run 0-4).
 const OFFER := 10
@@ -48,6 +49,11 @@ const CHAIN := 29
 const LOST_ITEM := 30
 ## Today's race (race.gd): at the finish.
 const RACE_DONE := 31
+## The night shift: a pothole in an unlit lane (without the hands: a
+## jolt and a moment's stop; with them it is a FLAT), and a night guard's
+## question (settle_guard).
+const POTHOLE := 32
+const GUARD := 33
 
 var fares: Fares
 var balance: Balance
@@ -171,6 +177,18 @@ var race_to := {}
 var delivery = null
 ## Whose working hours the clock shows ("delivery": 4 pm to 10 pm).
 var hours_key := "rickshaw"
+## The night shift (night.gd): on, the unlit lanes, the guards and the
+## ones met tonight, a guard's question waiting ({at, question}), the
+## rickshaw's lamp (an upgrade: fewer potholes).
+var night := false
+var dark := {}
+var guards: Array = []
+var guard_ask := {}
+var lamp := false
+var potholes := 0
+var _guards_met := {}
+var _guard_qs: Array = []
+var _night_rng := RandomNumberGenerator.new()
 var friend_visits := {}
 var _friend_rng := RandomNumberGenerator.new()
 var _last_remaining := -1
@@ -442,6 +460,8 @@ func _entered(events: Array) -> void:
 	var before := _last_remaining
 	# Every tile costs energy, more in the rain.
 	var cost := balance.n("rickshaw.energy_per_tile_rain" if raining else "rickshaw.energy_per_tile")
+	if night:
+		cost *= balance.n("night.energy")
 	energy = maxf(0.0, energy - cost * energy_factor)
 	if energy < balance.n("rickshaw.tired_below") and not _was_tired:
 		_was_tired = true
@@ -473,6 +493,8 @@ func _entered(events: Array) -> void:
 	if delivery != null:
 		var got: Array = delivery.arrive(driver.cell)
 		events.append_array(got)
+	if night:
+		_night_tile(events)
 	if not race_to.is_empty() and driver.cell == race_to.at and not over:
 		over = true
 		events.append(RACE_DONE)
@@ -718,6 +740,9 @@ func _deliver(events: Array) -> void:
 	if thanks:
 		tip += 20
 	# Kept dry under the hood in the rain.
+	# Seen safely past a night guard.
+	if riding.get("safe", false):
+		tip += int(balance.n("night.guard_tip"))
 	if riding.get("dry", false):
 		tip += int(balance.n("rickshaw.hood_tip"))
 	# A festival puts everyone in a giving mood.
@@ -789,11 +814,15 @@ func _top_up() -> void:
 				place_to = stalls[_friend_rng.randi() % stalls.size()]
 		var tiles: int = dist[place_to.at]
 		var who := fares.pick_type(rng)
+		if night and who == "normal" and _night_rng.randf() < balance.n("night.hurry_share"):
+			who = "hurry"
 		if ramadan and who == "normal" and hour() >= 15.0 and _hand_rng.randf() < 0.5:
 			who = "hurry"
 		var fair_fare := fares.fair(tiles)
 		if easy:
 			fair_fare = fares.round_fare(fair_fare * balance.n("rickshaw.easy_fare"))
+		if night:
+			fair_fare = fares.round_fare(fair_fare * balance.n("night.fare"))
 		_next_id += 1
 		var offered := fares.offer(who, fair_fare, rng)
 		var w := {
@@ -846,6 +875,63 @@ func start_race(route: Dictionary) -> void:
 	day_seconds = 1e9
 	energy_factor = 0.0
 	_aim()
+
+
+## The night shift: ten to two, fewer people about, higher fares, the
+## unlit lanes and the guards, one tea stall still open.
+func start_night(seed_value := -1) -> void:
+	night = true
+	hours_key = "night"
+	day_seconds = balance.n("night.day_seconds")
+	if seed_value >= 0:
+		_night_rng.seed = seed_value + 37
+	else:
+		_night_rng.randomize()
+	var range_of: Array = balance.at("night.waiting_passengers")
+	_want_waiting = _night_rng.randi_range(int(range_of[0]), int(range_of[1]))
+	while waiting.size() > _want_waiting:
+		waiting.pop_back()
+	dark = Night.dark_tiles(map, balance.n("night.dark_share"))
+	guards = Night.guard_tiles(map, int(balance.n("night.guards")))
+	_guard_qs = Night.questions()
+	if _tea_tiles.size() > 1:
+		_tea_tiles = [_tea_tiles[0]]
+	_aim()
+
+
+## Into a tile at night: a pothole in an unlit lane now and then, a night
+## guard's question once each.
+func _night_tile(events: Array) -> void:
+	var cell := driver.cell
+	if dark.has(cell) and not flat:
+		var chance := balance.n("night.pothole_chance") * (balance.n("night.lamp_potholes") if lamp else 1.0)
+		if _night_rng.randf() < chance:
+			potholes += 1
+			events.append(POTHOLE)
+			if interactive:
+				flat = true
+				events.append(FLAT)
+			else:
+				held = maxf(held, 1.5)
+	if guards.has(cell) and not _guards_met.has(cell) and guard_ask.is_empty():
+		_guards_met[cell] = true
+		var q: Dictionary = _guard_qs[_night_rng.randi() % _guard_qs.size()] if not _guard_qs.is_empty() else {}
+		guard_ask = {"at": cell, "question": q}
+		events.append(GUARD)
+
+
+## A night guard's question answered: a good answer and the passenger
+## feels safe (a tip at the end); a bad one and he keeps Rahim Chacha a
+## while.
+func settle_guard(ok: bool) -> void:
+	if guard_ask.is_empty():
+		return
+	guard_ask = {}
+	if ok:
+		if not riding.is_empty():
+			riding["safe"] = true
+	else:
+		held = maxf(held, balance.n("night.guard_hold_s"))
 
 
 ## Ratul's evening: orders instead of passengers.

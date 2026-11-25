@@ -176,6 +176,10 @@ func _ready() -> void:
 		# days with Rokeya ill, more to earn for the flooded village.
 		_story_effect = progress.story_effect("rickshaw")
 		shift.day_seconds *= float(_story_effect.get("day_share", 1.0))
+		# The night shift: ten to two, fewer about, higher fares.
+		if mode == "night":
+			shift.start_night()
+			shift.lamp = progress.has_upgrade("battery_rickshaw")
 		_call_rng.randomize()
 		var call_share := HomeCall.plan(_call_rng, progress.level())
 		if call_share >= 0.0:
@@ -219,6 +223,8 @@ func _ready() -> void:
 		add_child(_friend_stall(map, pl))
 	if _delivery != null:
 		add_child(_kitchen_signs())
+	for g in shift.guards:
+		add_child(_night_guard(map, g))
 	await _step("clutter")
 	for hex in Traffic.PALETTE:
 		_palette.append(Color(hex))
@@ -284,6 +290,16 @@ func _ready() -> void:
 	_rider_seat.visible = false
 	rickshaw.add_child(_rider_seat)
 	add_child(rickshaw)
+	if shift.night:
+		# The rickshaw's lamp lights the road ahead.
+		var lamp := SpotLight3D.new()
+		lamp.position = Vector3(0, 1.0, -1.3)
+		lamp.rotation_degrees = Vector3(-12, 0, 0)
+		lamp.light_energy = 3.0 if shift.lamp else 1.8
+		lamp.spot_range = 16.0
+		lamp.spot_angle = 32.0
+		lamp.light_color = Color("FFF1C9")
+		rickshaw.add_child(lamp)
 	if _race:
 		_setup_ghost()
 	marker = _marker()
@@ -346,6 +362,8 @@ func _ready() -> void:
 	set_process(true)
 	if _delivery != null:
 		_say(strings.t("deliveryStart"), Look.VERMILION, 5.0)
+	elif shift.night:
+		_say(strings.t("nightStart"), Look.SKY, 6.0)
 	elif _race:
 		var line := strings.t("raceStart", {"place": RoadMap.place_name(shift.race_to, strings.lang)})
 		if not _ghost.is_empty():
@@ -863,6 +881,11 @@ func _handle(events: Array) -> void:
 		_say(strings.t("rainEnd"), Look.SKY, 2.5)
 	if events.has(Day.RACE_DONE):
 		_end_race()
+	if events.has(Day.POTHOLE):
+		_say(strings.t("pothole"), Look.YELLOW.darkened(0.3), 3.0)
+		Activity.buzz(120)
+	if events.has(Day.GUARD):
+		_ask_night_guard()
 	if _delivery != null:
 		_delivery_events(events)
 	if events.has(Day.DAY_OVER):
@@ -1098,6 +1121,50 @@ func _lost_answered(_score: float, act) -> void:
 			_say(strings.t("lost_wrong"), Look.VERMILION, 3.0)
 		"police":
 			_say(strings.t("lost_police_said"), Look.SKY, 2.5)
+
+
+# --- The night shift (night.gd) -----------------------------------------------------------
+
+
+## A night guard by the road: khaki, a whistle, a torch.
+func _night_guard(map: RoadMap, at: Vector2i) -> Node3D:
+	var node := Node3D.new()
+	node.name = "NightGuard"
+	node.position = City._side(map, at) + Vector3(0, 0.15, 0)
+	var face := City.centre(at) - node.position
+	node.rotation.y = atan2(-face.x, -face.z)
+	var body := MeshInstance3D.new()
+	body.mesh = _person_mesh if _person_mesh != null else Models.person()
+	var paint := Models.traffic_material(PackedColorArray([Color("8C7A4B"), Color("3E3A2E")]), false)
+	paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
+	body.material_override = paint
+	node.add_child(body)
+	var torch := OmniLight3D.new()
+	torch.position = Vector3(0.3, 1.2, -0.3)
+	torch.light_color = Color("FFE7A0")
+	torch.light_energy = 1.2
+	torch.omni_range = 4.0
+	node.add_child(torch)
+	node.add_child(City._sign(strings.t("nightGuardName"), Vector3(0, 2.3, 0), 36, Look.SKY))
+	return node
+
+
+## A night guard's question; without the hands he just waves him on.
+func _ask_night_guard() -> void:
+	var q: Dictionary = shift.guard_ask.get("question", {})
+	if not shift.interactive or q.is_empty() or _activity != null:
+		shift.settle_guard(true)
+		_say(strings.t("guardWave"), Look.SKY, 2.5)
+		return
+	var act := Choose.new()
+	act.rounds = [q]
+	_open(act, "act_guard", _guard_answered)
+
+
+func _guard_answered(score: float) -> void:
+	var ok := score >= 0.5
+	shift.settle_guard(ok)
+	_say(strings.t("guardOk" if ok else "guardHeld"), Look.PARROT if ok else Look.VERMILION, 3.0)
 
 
 # --- Ratul's deliveries (delivery.gd) --------------------------------------------------
@@ -1642,6 +1709,12 @@ func _end_day() -> void:
 		lines.append(strings.t("finesPaid", {"fines": shift.fines}))
 	if shift.teas > 0:
 		lines.append(strings.t("teaLine", {"n": shift.teas, "money": shift.tea_spent}))
+	if shift.night:
+		if shift.potholes > 0:
+			lines.append(strings.t("potholeLine", {"n": shift.potholes}))
+		# Rokeya sat up waiting.
+		var fam := progress.add_family("rickshaw", -int(progress.b.n("night.family_worry")))
+		lines.append(strings.t("nightFamilyLine", {"n": fam}))
 	if shift.returned > 0:
 		lines.append(strings.t("lostLine", {"n": shift.returned, "money": shift.lost_rewards}))
 	var to_friends := 0
@@ -1679,7 +1752,7 @@ func _end_day() -> void:
 		"sub": strings.t("avgRating", {"stars": _stars(snappedf(shift.average_stars(), 0.1))}),
 		"money": shift.money,
 		"lines": lines,
-		"share": strings.t("share_rickshaw_rain" if shift.rain_at >= 0.0 else "share_rickshaw", {"n": shift.trips, "money": shift.money}) if shift.trips > 0 else "",
+		"share": strings.t("share_night" if shift.night else ("share_rickshaw_rain" if shift.rain_at >= 0.0 else "share_rickshaw"), {"n": shift.trips, "money": shift.money}) if shift.trips > 0 else "",
 		"kept_label": strings.t("gainKeptLabel"),
 		"extras": [strings.t("targetMet" if met else "targetMissed", {"target": _target_money})],
 		"good": met,

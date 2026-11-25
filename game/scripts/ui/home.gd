@@ -827,6 +827,7 @@ func _start_sheet(who: String) -> void:
 		var race := _race_card()
 		if race != null:
 			body.add_child(race)
+		body.add_child(_night_card())
 	body.add_child(_caption(s.t("todayDhaka")))
 	body.add_child(_today_chips(who))
 	body.add_child(_goals_card(who))
@@ -846,6 +847,27 @@ func _start_sheet(who: String) -> void:
 		var length := Look.label(s.t("playLength", {"n": int(round(secs[who] / 60.0))}), 14, true, Look.MUTED)
 		length.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		col.add_child(length)
+
+
+## The night shift: ten to two, from mohalla level 5.
+func _night_card() -> Control:
+	var panel := _card(Color("1E2A44"), 18)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 6)
+	panel.add_child(col)
+	col.add_child(Look.label(s.t("nightTitle"), 17, true, Look.YELLOW))
+	var about := Look.label(s.t("nightAbout"), 14, false, Color("E8E0CF"))
+	about.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(about)
+	var level := int(b.n("night.unlock_level"))
+	if progress.level() >= level:
+		var go := Look.chunky(s.t("nightGo"), Look.YELLOW, Look.OUTLINE, 17, 4, 14)
+		go.name = "NightGo"
+		go.pressed.connect(_go.bind("res://scenes/night.tscn"))
+		col.add_child(go)
+	else:
+		col.add_child(Look.label(s.t("nightLocked", {"n": level}), 14, true, Look.YELLOW))
+	return panel
 
 
 ## Today's race with a ghost: the same ride for everyone today.

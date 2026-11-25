@@ -107,6 +107,11 @@
     "base_pay": 30, "pay_per_tile": 3, "min_tiles": 6, "max_tiles": 16, "tip_hot": 15, "rain_tip": 10, "gate_chance": 0.3,
     "upgrades": {"gear_cycle": {"cost": 1200, "speed": 1.15}, "hot_bag": {"cost": 900, "cooling": 0.6}, "raincoat": {"cost": 700, "tip": 10}}
   },
+  "night": {
+    "start_hour": 22, "end_hour": 26, "day_seconds": 240, "unlock_level": 5, "waiting_passengers": [2, 3],
+    "fare": 1.5, "hurry_share": 0.35, "energy": 1.25, "dark_share": 0.3, "pothole_chance": 0.06, "lamp_potholes": 0.5,
+    "guards": 3, "guard_hold_s": 4, "guard_tip": 15, "family_worry": 1
+  },
   "race": {"finish_tara": 2, "beat_tara": 3, "low_tiles": 14, "high_tiles": 26},
   "together": {"good": 0.7, "ok": 0.4, "tara": [5, 10, 15], "help_pushes": 0.6},
   "leaderboard": {"top": 20, "prizes": {"day": [5, 3, 2], "week": [15, 10, 5], "month": [40, 25, 15]}},

@@ -4190,5 +4190,65 @@
  "appRating": {
   "bn": "অ্যাপের রেটিং: {stars}/৫",
   "en": "App rating: {stars}/5"
+ },
+ "nightTitle": {
+  "bn": "রাতের শিফট (রাত ১০টা – ২টা)",
+  "en": "Night shift (10 pm – 2 am)"
+ },
+ "nightAbout": {
+  "bn": "রাতে যাত্রী কম, ভাড়া দেড় গুণ। অন্ধকার গলিতে গর্ত, নাইটগার্ডের প্রশ্ন, একটাই চায়ের দোকান খোলা। রোকেয়া জেগে বসে থাকেন।",
+  "en": "Fewer passengers at night, fares half as much again. Potholes in the unlit lanes, night guards' questions, one tea stall open. Rokeya sits up waiting."
+ },
+ "nightGo": {
+  "bn": "রাতের শিফট শুরু",
+  "en": "Start the night shift"
+ },
+ "nightLocked": {
+  "bn": "মহল্লা লেভেল {n}-এ খোলে",
+  "en": "Opens at mohalla level {n}"
+ },
+ "nightStart": {
+  "bn": "রাত ১০টা। রাস্তা ফাঁকা, ভাড়া বেশি। অন্ধকার গলিতে সাবধানে!",
+  "en": "Ten at night. Empty streets, higher fares. Careful in the dark lanes!"
+ },
+ "pothole": {
+  "bn": "অন্ধকার গলিতে গর্তে পড়ল রিকশা!",
+  "en": "A pothole in the dark lane!"
+ },
+ "nightGuardName": {
+  "bn": "নাইটগার্ড",
+  "en": "Night guard"
+ },
+ "act_guard": {
+  "bn": "নাইটগার্ডের প্রশ্ন",
+  "en": "The night guard asks"
+ },
+ "act_guard_hint": {
+  "bn": "ভদ্রভাবে উত্তর দিন; ভালো উত্তরে যাত্রী নিশ্চিন্ত হন।",
+  "en": "Answer politely; a good answer puts the passenger at ease."
+ },
+ "guardWave": {
+  "bn": "নাইটগার্ড বাঁশি বাজিয়ে হাত নাড়লেন",
+  "en": "The night guard waves you on with his whistle"
+ },
+ "guardOk": {
+  "bn": "নাইটগার্ড: আচ্ছা চাচা, সাবধানে যান। যাত্রী নিশ্চিন্ত!",
+  "en": "Night guard: Go carefully, Chacha. The passenger feels safe!"
+ },
+ "guardHeld": {
+  "bn": "নাইটগার্ড কিছুক্ষণ আটকে রাখলেন…",
+  "en": "The night guard kept you a while…"
+ },
+ "potholeLine": {
+  "bn": "অন্ধকার গলির গর্ত: {n} বার",
+  "en": "Potholes in the dark: {n}"
+ },
+ "nightFamilyLine": {
+  "bn": "রোকেয়া সারারাত জেগে ছিলেন: পরিবারের মন {n}/১০",
+  "en": "Rokeya stayed up all night: family {n}/10"
+ },
+ "share_night": {
+  "bn": "রহিম চাচা আজ রাতের শিফটে {n} জন যাত্রী পৌঁছে দিলেন, আয় {money} টাকা!",
+  "en": "Rahim Chacha took {n} passengers home on the night shift and made Tk {money}!"
  }
 }

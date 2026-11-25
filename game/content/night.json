@@ -1,0 +1,89 @@
+{
+ "note": "Rahim Chacha's night shift (phase 8): what the night guards ask.",
+ "guards": [
+  {
+   "q": {
+    "bn": "নাইটগার্ড: এত রাতে কই যান চাচা?",
+    "en": "Night guard: Where are you off to this late, Chacha?"
+   },
+   "options": [
+    {
+     "bn": "তোমার কী?",
+     "en": "What's it to you?"
+    },
+    {
+     "bn": "হাসপাতালে রোগী নিয়ে যাচ্ছি ভাই।",
+     "en": "Taking a patient to hospital, brother."
+    },
+    {
+     "bn": "জানি না।",
+     "en": "Don't know."
+    }
+   ],
+   "right": 1
+  },
+  {
+   "q": {
+    "bn": "নাইটগার্ড: সামনের গলিতে বাতি নাই, সাবধানে যাইয়েন।",
+    "en": "Night guard: No lights in the lane ahead: go carefully."
+   },
+   "options": [
+    {
+     "bn": "ধন্যবাদ ভাই, বড় রাস্তা দিয়ে ঘুরে যাই।",
+     "en": "Thanks, brother: I'll go round by the main road."
+    },
+    {
+     "bn": "বাতি না থাকলে কী!",
+     "en": "Who needs lights!"
+    },
+    {
+     "bn": "আপনি আপনার কাজ করেন।",
+     "en": "Mind your own business."
+    }
+   ],
+   "right": 0
+  },
+  {
+   "q": {
+    "bn": "নাইটগার্ড: রিকশার বাতি জ্বালান নাই কেন?",
+    "en": "Night guard: Why isn't your rickshaw's lamp on?"
+   },
+   "options": [
+    {
+     "bn": "ব্যাটারি নাই, কিছু হবে না।",
+     "en": "No battery: it'll be fine."
+    },
+    {
+     "bn": "আপনার এত মাথাব্যথা কেন?",
+     "en": "Why do you care?"
+    },
+    {
+     "bn": "এখনই জ্বালাচ্ছি ভাই।",
+     "en": "Switching it on now, brother."
+    }
+   ],
+   "right": 2
+  },
+  {
+   "q": {
+    "bn": "নাইটগার্ড: যাত্রী কি মহল্লার?",
+    "en": "Night guard: Is your passenger from the mohalla?"
+   },
+   "options": [
+    {
+     "bn": "হ্যাঁ ভাই, বাসায় পৌঁছে দিচ্ছি। আপনি ভালো থাকেন।",
+     "en": "Yes, brother, I'm taking them home. Take care."
+    },
+    {
+     "bn": "এত প্রশ্ন কেন?",
+     "en": "Why all the questions?"
+    },
+    {
+     "bn": "জানি না।",
+     "en": "No idea."
+    }
+   ],
+   "right": 0
+  }
+ ]
+}
