@@ -40,6 +40,12 @@
    {"id": "h_amena_books", "by": "amena", "kind": "need", "bn": "শাথীর খাতা-কলম শেষ, কাল পরীক্ষা। বিকাশে কিছু টাকা পাঠাও।", "en": "Shathi's out of books and pens, and her exam's tomorrow. Send a little money by bKash.", "options": {"send": {"family": 2, "cost": 120}, "later": {"family": -2}}},
    {"id": "h_amena_fever", "by": "amena", "kind": "news", "bn": "শাথীর জ্বর আসছে। আজ একটু তাড়াতাড়ি আসতে পারবা?", "en": "Shathi has a fever. Can you come home a bit early today?", "options": {"go": {"family": 2, "end_day": true}, "later": {"family": 0}}},
    {"id": "h_amena_rain", "by": "amena", "kind": "chat", "bn": "বৃষ্টি নামছে। ঝুড়ি পলিথিনে ঢাইকা রাখো, বাদাম ভিজলে নষ্ট।", "en": "It's raining. Cover the basket with plastic: wet peanuts are ruined.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
+  ],
+  "boat": [
+   {"id": "o_kamala_eat", "by": "kamala", "kind": "chat", "bn": "দুপুরে ভাত খাইতে আসবা? মাছের ঝোল রানছি।", "en": "Coming home for lunch? I've made fish curry.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "o_kamala_medicine", "by": "kamala", "kind": "need", "bn": "তোমার হাঁপানির ইনহেলার শেষ। ফেরার সময় কিনা আনো, টাকা পাঠাও।", "en": "Your asthma inhaler has run out. Buy one on your way back, or send the money.", "options": {"send": {"family": 2, "cost": 150}, "later": {"family": -2}}},
+   {"id": "o_kamala_storm", "by": "kamala", "kind": "news", "bn": "রেডিওতে কইলো ঝড় আসতেছে, তিন নম্বর সিগন্যাল! নৌকা বাইন্ধা বাড়ি আসো।", "en": "The radio says a storm is coming, signal number three! Tie up the boat and come home.", "options": {"go": {"family": 2, "end_day": true}, "later": {"family": 0}}},
+   {"id": "o_bablu_school", "by": "bablu", "kind": "chat", "bn": "দাদু, আজ অংকে দশে দশ পাইছি! স্যার কইছে তুমি খুশি হইবা।", "en": "Grandpa, I got ten out of ten in maths today! Sir said you'd be pleased.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
   ]
  }
 }

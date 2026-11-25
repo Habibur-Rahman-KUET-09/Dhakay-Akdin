@@ -200,6 +200,26 @@
    "voice": "bn-BD-PradeepNeural",
    "pitch": "-14%",
    "rate": "-6%"
+  },
+  "haripada": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-16%",
+   "rate": "-8%"
+  },
+  "kamala": {
+   "voice": "bn-BD-NabanitaNeural",
+   "pitch": "-10%",
+   "rate": "-6%"
+  },
+  "bablu": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "+22%",
+   "rate": "+6%"
+  },
+  "sarang": {
+   "voice": "bn-BD-PradeepNeural",
+   "pitch": "-10%",
+   "rate": "+4%"
   }
  },
  "lines": {

@@ -33,7 +33,7 @@ const League = preload("res://scripts/rules/league.gd")
 const Race = preload("res://scripts/rules/race.gd")
 const Together = preload("res://scripts/rules/together.gd")
 
-const WHO := ["rickshaw", "tea", "bus", "fuchka", "delivery", "hawker"]
+const WHO := ["rickshaw", "tea", "bus", "fuchka", "delivery", "hawker", "boat"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
 const PAGE_ICONS := {"hub": "home", "shop": "bag", "fund": "town", "story": "book", "people": "people"}
 const UPGRADE_ICONS := {
@@ -42,6 +42,7 @@ const UPGRADE_ICONS := {
 	"stool": "bench", "umbrella": "rain", "doi": "kettle",
 	"gear_cycle": "bolt", "hot_bag": "bag", "raincoat": "rain",
 	"big_basket": "bag", "masala": "star", "cooler": "fridge",
+	"new_oars": "bolt", "chhoi": "awning", "big_boat": "bench",
 }
 const PROJECT_ICONS := {"street_lights": "lamp", "drain_cleaning": "drain", "bus_shelter": "shelter"}
 
@@ -568,16 +569,21 @@ func _character_spot(who: String) -> Control:
 	var face_box := CenterContainer.new()
 	face_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(face_box)
-	# Six on the street: a little smaller, so all fit across a phone.
+	# Six or seven on the street: smaller, so all fit across a phone.
 	var many := WHO.size() > 5
-	face_box.add_child(_face(who, (84 if many else 104) if picked else (72 if many else 90), picked, open))
+	var px := 104 if picked else 90
+	if WHO.size() > 6:
+		px = 66 if picked else 56
+	elif many:
+		px = 84 if picked else 72
+	face_box.add_child(_face(who, px, picked, open))
 	var plate_box := CenterContainer.new()
 	plate_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(plate_box)
 	var name_text := s.t(_name_key(who))
 	if not open:
 		name_text = s.t("lockedPlate", {"name": name_text, "level": int(b.n("unlocks." + _unlock_of(who)))})
-	var plate := Look.pill("", name_text, Color.WHITE, Look.OUTLINE, 13 if many else 15)
+	var plate := Look.pill("", name_text, Color.WHITE, Look.OUTLINE, (11 if WHO.size() > 6 else 13) if many else 15)
 	plate_box.add_child(plate)
 	# The whole spot is one button, drawn over it.
 	var wrap := MarginContainer.new()
@@ -610,7 +616,7 @@ func _face(who: String, px: int, picked := false, open := true) -> Control:
 		style.shadow_size = 3
 	disc.add_theme_stylebox_override("panel", style)
 	var face := TextureRect.new()
-	face.texture = Look.icon_texture({"rickshaw": "rahim", "tea": "monir", "bus": "babu", "fuchka": "julekha", "delivery": "ratul", "hawker": "kashem"}[who], px)
+	face.texture = Look.icon_texture({"rickshaw": "rahim", "tea": "monir", "bus": "babu", "fuchka": "julekha", "delivery": "ratul", "hawker": "kashem", "boat": "haripada"}[who], px)
 	face.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	face.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	face.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -838,14 +844,14 @@ func _start_sheet(who: String) -> void:
 	_let_scroll(body)
 
 	var start := Look.chunky(s.t("start_" + who), Look.YELLOW, Look.OUTLINE, 26, 8, 22)
-	start.name = {"rickshaw": "Drive", "tea": "OpenStall", "bus": "Board", "fuchka": "OpenCart", "delivery": "StartDeliveries", "hawker": "StartSelling"}[who]
+	start.name = {"rickshaw": "Drive", "tea": "OpenStall", "bus": "Board", "fuchka": "OpenCart", "delivery": "StartDeliveries", "hawker": "StartSelling", "boat": "StartRowing"}[who]
 	start.icon = Look.icon_texture("play", 24)
 	start.add_theme_constant_override("icon_max_width", 24)
 	start.icon_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	start.custom_minimum_size = Vector2(0, 78)
-	start.pressed.connect(_start.bind(who, {"rickshaw": "res://scenes/rickshaw.tscn", "tea": "res://scenes/tea.tscn", "bus": "res://scenes/bus.tscn", "fuchka": "res://scenes/fuchka.tscn", "delivery": "res://scenes/delivery.tscn", "hawker": "res://scenes/hawker.tscn"}[who]))
+	start.pressed.connect(_start.bind(who, {"rickshaw": "res://scenes/rickshaw.tscn", "tea": "res://scenes/tea.tscn", "bus": "res://scenes/bus.tscn", "fuchka": "res://scenes/fuchka.tscn", "delivery": "res://scenes/delivery.tscn", "hawker": "res://scenes/hawker.tscn", "boat": "res://scenes/boat.tscn"}[who]))
 	col.add_child(start)
-	var secs := {"rickshaw": int(b.n("rickshaw.day_seconds")), "tea": int(b.n("tea_stall.day_seconds")), "fuchka": int(b.n("fuchka.day_seconds")), "delivery": int(b.n("delivery.day_seconds")), "hawker": int(b.n("hawker.day_seconds"))}
+	var secs := {"rickshaw": int(b.n("rickshaw.day_seconds")), "tea": int(b.n("tea_stall.day_seconds")), "fuchka": int(b.n("fuchka.day_seconds")), "delivery": int(b.n("delivery.day_seconds")), "hawker": int(b.n("hawker.day_seconds")), "boat": int(b.n("boat.day_seconds"))}
 	if secs.has(who) and secs[who] > 0:
 		var length := Look.label(s.t("playLength", {"n": int(round(secs[who] / 60.0))}), 14, true, Look.MUTED)
 		length.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -980,7 +986,7 @@ func _goals_card(who: String) -> Control:
 	col.add_theme_constant_override("separation", 10)
 	panel.add_child(col)
 	var rows := 0
-	if who == "rickshaw" or who == "delivery" or who == "hawker":
+	if who == "rickshaw" or who == "delivery" or who == "hawker" or who == "boat":
 		col.add_child(_goal_row("coin", s.t("goalTarget"), s.t("takaN", {"n": int(b.n(who + ".daily_target"))}), Color.WHITE))
 		rows += 1
 	var c := progress.challenge()
@@ -1045,6 +1051,8 @@ func _last_day_line(who: String) -> String:
 			return s.t("deliveryLastDay", {"money": int(h.earned), "orders": int(h.get("orders", 0))})
 		if who == "hawker":
 			return s.t("hawkerLastDay", {"money": int(h.earned), "sold": int(h.get("sold", 0))})
+		if who == "boat":
+			return s.t("boatLastDay", {"money": int(h.earned), "carried": int(h.get("carried", 0))})
 		return s.t("busLastDay", {"money": int(h.earned), "riders": int(h.get("riders", 0))})
 	return ""
 
@@ -1493,6 +1501,8 @@ func _fund_page(page: VBoxContainer) -> void:
 			line = s.t("deliveryHistoryLine", {"day": int(h.day), "money": int(h.earned), "orders": int(h.get("orders", 0))})
 		elif h.get("who", "") == "hawker":
 			line = s.t("hawkerHistoryLine", {"day": int(h.day), "money": int(h.earned), "sold": int(h.get("sold", 0))})
+		elif h.get("who", "") == "boat":
+			line = s.t("boatHistoryLine", {"day": int(h.day), "money": int(h.earned), "carried": int(h.get("carried", 0))})
 		elif h.get("who", "") == "bus":
 			line = s.t("busHistoryLine", {"day": int(h.day), "money": int(h.earned), "riders": int(h.get("riders", 0))})
 		list.add_child(Look.label(line, 15, h.met, Look.PARROT_DARK if h.met else Look.OUTLINE))
@@ -2510,31 +2520,31 @@ func _icon_tile(icon_name: String, fill: Color, tint: Color, px := 48) -> Contro
 
 
 func _name_key(who: String) -> String:
-	return {"rickshaw": "rickshawName", "tea": "teaName", "bus": "busName", "fuchka": "fuchkaName", "delivery": "deliveryName", "hawker": "hawkerName"}[who]
+	return {"rickshaw": "rickshawName", "tea": "teaName", "bus": "busName", "fuchka": "fuchkaName", "delivery": "deliveryName", "hawker": "hawkerName", "boat": "boatName"}[who]
 
 
 func _role_key(who: String) -> String:
-	return {"rickshaw": "rickshawRole", "tea": "teaRole", "bus": "busRole", "fuchka": "fuchkaRole", "delivery": "deliveryRole", "hawker": "hawkerRole"}[who]
+	return {"rickshaw": "rickshawRole", "tea": "teaRole", "bus": "busRole", "fuchka": "fuchkaRole", "delivery": "deliveryRole", "hawker": "hawkerRole", "boat": "boatRole"}[who]
 
 
 ## Each character's colour.
 func _colour_of(who: String) -> Color:
-	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT, "bus": Look.SKY, "fuchka": Look.VERMILION, "delivery": Color("F26B1D"), "hawker": Color("A0722F")}[who]
+	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT, "bus": Look.SKY, "fuchka": Look.VERMILION, "delivery": Color("F26B1D"), "hawker": Color("A0722F"), "boat": Color("1F6E8C")}[who]
 
 
 ## Their colour dark enough for white words on it.
 func _deep_of(who: String) -> Color:
-	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT_DARK, "bus": Look.SKY_DARK, "fuchka": Color("B3261E"), "delivery": Color("B84A0E"), "hawker": Color("6E4A1E")}.get(who, Look.VERMILION)
+	return {"rickshaw": Look.MAGENTA, "tea": Look.PARROT_DARK, "bus": Look.SKY_DARK, "fuchka": Color("B3261E"), "delivery": Color("B84A0E"), "hawker": Color("6E4A1E"), "boat": Color("134B60")}.get(who, Look.VERMILION)
 
 
 ## A pale wash of their colour, behind pictures.
 func _tint_of(who: String) -> Color:
-	return {"rickshaw": Color("FDE7F0"), "tea": Color("E6F4EC"), "bus": Color("D6ECF7"), "fuchka": Color("FDE2DC"), "delivery": Color("FEEBDD"), "hawker": Color("F4E8D4")}.get(who, Color("FFF1D6"))
+	return {"rickshaw": Color("FDE7F0"), "tea": Color("E6F4EC"), "bus": Color("D6ECF7"), "fuchka": Color("FDE2DC"), "delivery": Color("FEEBDD"), "hawker": Color("F4E8D4"), "boat": Color("DCEEF3")}.get(who, Color("FFF1D6"))
 
 
 ## What opens a character ("tea_stall" for the tea stall).
 func _unlock_of(who: String) -> String:
-	return {"rickshaw": "", "tea": "tea_stall", "bus": "bus", "fuchka": "fuchka", "delivery": "delivery", "hawker": "hawker"}[who]
+	return {"rickshaw": "", "tea": "tea_stall", "bus": "bus", "fuchka": "fuchka", "delivery": "delivery", "hawker": "hawker", "boat": "boat"}[who]
 
 
 func _unlock_early(what: String) -> void:

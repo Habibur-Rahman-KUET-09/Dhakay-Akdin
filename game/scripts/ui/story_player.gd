@@ -15,7 +15,7 @@ const Voice = preload("res://scripts/ui/voice.gd")
 signal finished(chapter_id: String, effects: Dictionary)
 
 ## Women in the cast (drawn with long hair and a dress).
-const WOMEN := ["rokeya", "sumi", "nasrin", "rumana", "joya", "sultana", "babu_ma", "sister", "tania"]
+const WOMEN := ["rokeya", "sumi", "nasrin", "rumana", "joya", "sultana", "babu_ma", "sister", "tania", "ratul_ma", "amena", "kamala"]
 
 var story: Story
 var chapter: Dictionary
@@ -215,9 +215,9 @@ func _draw_picture() -> void:
 	var inside := scene == "bus_inside" or scene == "hospital"
 	# Sky.
 	var top: Color = {"home_dawn": Color("F2A65A"), "street_morning": Color("9DC3E6"), "tea_stall": Color("E9C27A"),
-		"school": Color("A7D3F0"), "hospital": Color("DDEBE4"), "bus_inside": Color("EFE6D2")}.get(scene, Color("1E2A44"))
+		"school": Color("A7D3F0"), "hospital": Color("DDEBE4"), "bus_inside": Color("EFE6D2"), "river": Color("A9C9DD")}.get(scene, Color("1E2A44"))
 	var low: Color = {"home_dawn": Color("F8D9A0"), "street_morning": Color("E2EEF5"), "tea_stall": Color("F6E3B8"),
-		"school": Color("E4F2FA"), "hospital": Color("F4F8F5"), "bus_inside": Color("D9CDB4")}.get(scene, Color("3A4566"))
+		"school": Color("E4F2FA"), "hospital": Color("F4F8F5"), "bus_inside": Color("D9CDB4"), "river": Color("F1E6CF")}.get(scene, Color("3A4566"))
 	for i in 12:
 		var y0 := area.y * i / 12.0
 		_picture.draw_rect(Rect2(0, y0, area.x, area.y / 12.0 + 1), top.lerp(low, i / 11.0))
@@ -257,6 +257,18 @@ func _draw_picture() -> void:
 			_building(Vector2(area.x * 0.68, ground), Color("E8D9B0"), true)
 		"hospital":
 			_building(Vector2(area.x * 0.68, ground), Color("F4F4F0"), false)
+		"river":
+			# The Buriganga in front of the far bank's town, a ferry boat.
+			_picture.draw_rect(Rect2(0, ground - area.y * 0.08, area.x, area.y - ground + area.y * 0.08), Color("5E6B55"))
+			for i in 14:
+				var wx := fmod(i * 61.0 + _t * 18.0, area.x + 40.0) - 20.0
+				var wy := ground - area.y * 0.04 + (i % 4) * area.y * 0.05
+				_picture.draw_line(Vector2(wx, wy), Vector2(wx + 22, wy), Color("7E8C72"), 2.0)
+			var bx := area.x * 0.7
+			var by := ground + area.y * 0.02
+			_picture.draw_colored_polygon(PackedVector2Array([Vector2(bx - 90, by - 22), Vector2(bx + 90, by - 22), Vector2(bx + 60, by), Vector2(bx - 60, by)]), Color("3A2A1E"))
+			_picture.draw_rect(Rect2(bx - 70, by - 26, 140, 5), Color("2E7D4F"))
+			_picture.draw_line(Vector2(bx + 50, by - 22), Vector2(bx + 80, by + 18), Color("A0784A"), 3.0)
 		"bus_inside":
 			for i in 5:
 				_picture.draw_rect(Rect2(20 + i * area.x / 5.0, area.y * 0.15, area.x / 5.0 - 30, area.y * 0.3), Color("9DC3E6"))

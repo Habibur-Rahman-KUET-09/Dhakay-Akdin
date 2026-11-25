@@ -15,7 +15,7 @@ const Friends = preload("res://scripts/rules/friends.gd")
 const League = preload("res://scripts/rules/league.gd")
 const Race = preload("res://scripts/rules/race.gd")
 
-const WHO := ["all", "rickshaw", "tea", "bus", "fuchka", "delivery", "hawker"]
+const WHO := ["all", "rickshaw", "tea", "bus", "fuchka", "delivery", "hawker", "boat"]
 const PERIODS := ["day", "week", "month", "ever"]
 ## The periods that end, and so have prizes.
 const ENDING := ["day", "week", "month"]

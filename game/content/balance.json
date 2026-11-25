@@ -12,7 +12,7 @@
     "xp_level_step": 40,
     "max_level": 50
   },
-  "unlocks": {"tea_stall": 2, "bus": 4, "old_dhaka": 5, "fuchka": 6, "delivery": 7, "hawker": 8, "early_unlock_tara": 30},
+  "unlocks": {"tea_stall": 2, "bus": 4, "old_dhaka": 5, "fuchka": 6, "delivery": 7, "hawker": 8, "boat": 9, "early_unlock_tara": 30},
   "tara": {"daily_challenge": 3, "chapter": 5, "rewarded_ad": 2, "retry_cost": 5,
            "streak": [5, 5, 10, 10, 10, 15]},
   "ads": {"double_per_day": 3, "retry_per_day": 2, "tara_per_day": 3,
@@ -106,6 +106,14 @@
     "max_orders": 3, "offer_every_s": 9, "offer_s": 12, "cook_s": 8, "hot_s": 70, "rain_cooling": 1.4,
     "base_pay": 30, "pay_per_tile": 3, "min_tiles": 6, "max_tiles": 16, "tip_hot": 15, "rain_tip": 10, "gate_chance": 0.3,
     "upgrades": {"gear_cycle": {"cost": 1200, "speed": 1.15}, "hot_bag": {"cost": 900, "cooling": 0.6}, "raincoat": {"cost": 700, "tip": 10}}
+  },
+  "boat": {
+    "start_hour": 7, "end_hour": 17, "day_seconds": 300, "daily_target": 350, "width": 120, "ghat_half": 12,
+    "capacity": 8, "arrive_s": [1.5, 3.5], "patience_s": 30, "fare": 10, "luggage_fare": 20, "luggage_chance": 0.2,
+    "stroke": 1.3, "same_hand": 0.6, "rushed": 0.3, "rushed_s": 0.22, "turn": 0.5, "pole": 0.8, "drag": 0.8,
+    "current": 0.5, "rain_current": 0.9, "rain_arrivals": 0.5, "rain_chance_per_day": 0.3, "rain_seconds": 70,
+    "good_trip_s": 40, "tip": 2, "launch_every_s": [14, 22], "launch_speed": [4, 6], "launch_half_len": 15, "launch_half_w": 3.5,
+    "upgrades": {"new_oars": {"cost": 1000, "stroke": 1.2}, "chhoi": {"cost": 1500}, "big_boat": {"cost": 2500, "capacity": 12}}
   },
   "hawker": {
     "start_hour": 10, "end_hour": 18, "day_seconds": 300, "daily_target": 250, "capacity": 60, "wholesale": 5,

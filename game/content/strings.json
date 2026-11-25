@@ -4478,5 +4478,241 @@
  "hkGoHome": {
   "bn": "ঝুড়ি খালি, বাড়ি চলুন",
   "en": "Basket empty: home"
+ },
+ "boatName": {
+  "bn": "হরিপদ মাঝি",
+  "en": "Haripada Majhi"
+ },
+ "boatRole": {
+  "bn": "বুড়িগঙ্গার খেয়া মাঝি",
+  "en": "Ferryman on the Buriganga"
+ },
+ "start_boat": {
+  "bn": "নৌকা ঘাটে লাগান",
+  "en": "Bring the boat to the ghat"
+ },
+ "tip_boat": {
+  "bn": "এক বৈঠা তারপর অন্যটা টানলে নৌকা সোজা যায়। স্রোত ভাটিতে টানে, তাই ঘাটের একটু উজানে তাক করুন।",
+  "en": "One oar, then the other, keeps the boat straight. The current pulls it downstream, so aim a little above the ghat."
+ },
+ "boatLastDay": {
+  "bn": "শেষ দিন: {money} টাকা, {carried} জন যাত্রী",
+  "en": "Last day: Tk {money}, {carried} passengers"
+ },
+ "boatHistoryLine": {
+  "bn": "দিন {day}: খেয়া · {money} টাকা · {carried} জন",
+  "en": "Day {day}: ferry · Tk {money} · {carried} passengers"
+ },
+ "share_boat": {
+  "bn": "আজ হরিপদ মাঝি বুড়িগঙ্গা পার করালেন {n} জনকে, আয় {money} টাকা!",
+  "en": "Today Haripada Majhi rowed {n} people across the Buriganga and made Tk {money}!"
+ },
+ "lbWho_boat": {
+  "bn": "হরিপদ",
+  "en": "Haripada"
+ },
+ "caller_kamala": {
+  "bn": "কমলা (বউ)",
+  "en": "Kamala (his wife)"
+ },
+ "ch_o_crossings": {
+  "bn": "এক দিনে {goal} বার নদী পার",
+  "en": "Cross the river {goal} times in a day"
+ },
+ "ch_o_clean": {
+  "bn": "লঞ্চে একবারও না ঠেকে ৪ বার পার",
+  "en": "Cross 4 times without once bumping a launch"
+ },
+ "ch_o_money": {
+  "bn": "খেয়ায় এক দিনে {goal} টাকা",
+  "en": "Tk {goal} from the ferry in a day"
+ },
+ "up_new_oars": {
+  "bn": "নতুন বৈঠা",
+  "en": "New oars"
+ },
+ "upHelp_new_oars": {
+  "bn": "প্রতি টানে নৌকা বেশি এগোয়",
+  "en": "Each stroke takes the boat further"
+ },
+ "up_chhoi": {
+  "bn": "ছই",
+  "en": "A chhoi (boat roof)"
+ },
+ "upHelp_chhoi": {
+  "bn": "বৃষ্টিতেও যাত্রী কমে না",
+  "en": "Passengers come even in the rain"
+ },
+ "up_big_boat": {
+  "bn": "বড় নৌকা",
+  "en": "A bigger boat"
+ },
+ "upHelp_big_boat": {
+  "bn": "৮-এর জায়গায় ১২ জন যাত্রী",
+  "en": "12 passengers instead of 8"
+ },
+ "look_boat_blue": {
+  "bn": "নীল আর সাদা নৌকা",
+  "en": "Blue and white boat"
+ },
+ "look_boat_red": {
+  "bn": "লাল আর হলুদ নৌকা",
+  "en": "Red and yellow boat"
+ },
+ "look_boat_star": {
+  "bn": "বেগুনি আর সোনালি নৌকা",
+  "en": "Purple and gold boat"
+ },
+ "lookHelp_boat": {
+  "bn": "হরিপদ মাঝির নৌকার রং",
+  "en": "The colours of Haripada's boat"
+ },
+ "boost_early_ghat": {
+  "bn": "ভোরে সবার আগে ঘাটে",
+  "en": "First at the ghat at dawn"
+ },
+ "boostHelp_early_ghat": {
+  "bn": "পরের দিন ঘাটে ৩০% বেশি যাত্রী",
+  "en": "30% more passengers at the ghat on Haripada's next day"
+ },
+ "boatLoading": {
+  "bn": "ঘাটে যাচ্ছেন…",
+  "en": "Off to the ghat…"
+ },
+ "boatStart": {
+  "bn": "যাত্রীরা নৌকায় উঠছেন। যখন খুশি নৌকা ছাড়ুন!",
+  "en": "Passengers are stepping aboard. Push off when you like!"
+ },
+ "ghat_sadarghat": {
+  "bn": "সদরঘাট",
+  "en": "Sadarghat"
+ },
+ "ghat_jinjira": {
+  "bn": "জিনজিরা ঘাট",
+  "en": "Jinjira ghat"
+ },
+ "boatAtGhat": {
+  "bn": "{ghat}: নৌকায় {n}/{cap} জন",
+  "en": "{ghat}: {n}/{cap} aboard"
+ },
+ "boatCrossing": {
+  "bn": "{ghat}-এর দিকে · আর {m} মিটার",
+  "en": "To {ghat} · {m} m to go"
+ },
+ "boatPoling": {
+  "bn": "পাড় ঘেঁষে {ghat}-এর দিকে ঠেলুন",
+  "en": "Pole along the bank to {ghat}"
+ },
+ "boatTrips": {
+  "bn": "পারাপার {n}",
+  "en": "Crossings {n}"
+ },
+ "boatPatience": {
+  "bn": "যাত্রীদের ধৈর্য",
+  "en": "Passengers' patience"
+ },
+ "boatGo": {
+  "bn": "নৌকা ছাড়ুন ({n} জন)",
+  "en": "Push off ({n} aboard)"
+ },
+ "boatWaiting": {
+  "bn": "যাত্রীর অপেক্ষা…",
+  "en": "Waiting for passengers…"
+ },
+ "boatRowHint": {
+  "bn": "এক বৈঠা, তারপর অন্যটা। স্রোতের উল্টো দিকে ঘুরতে একই বৈঠা দুইবার।",
+  "en": "One oar, then the other. The same oar twice to turn against the current."
+ },
+ "oarLeft": {
+  "bn": "বাম বৈঠা",
+  "en": "Left oar"
+ },
+ "oarRight": {
+  "bn": "ডান বৈঠা",
+  "en": "Right oar"
+ },
+ "stroke_good": {
+  "bn": "ছপ! ভালো টান।",
+  "en": "Splash! A good stroke."
+ },
+ "stroke_same": {
+  "bn": "একই বৈঠা: নৌকা ঘুরছে",
+  "en": "Same oar: the boat turns"
+ },
+ "stroke_rushed": {
+  "bn": "আস্তে! তাড়াহুড়ায় টান হয় না।",
+  "en": "Easy! Rushing makes weak strokes."
+ },
+ "stroke_pole": {
+  "bn": "লগি ঠেলে ঘাটের দিকে",
+  "en": "Poling towards the ghat"
+ },
+ "boatOff": {
+  "bn": "নৌকা ছাড়লেন!",
+  "en": "Off you go!"
+ },
+ "boatGaveUp": {
+  "bn": "একজন বিরক্ত হয়ে নেমে গেলেন",
+  "en": "Someone got tired of waiting and stepped off"
+ },
+ "boatHorn": {
+  "bn": "লঞ্চের ভোঁ! লঞ্চ আসছে, সাবধান।",
+  "en": "A launch's horn! One is coming: careful."
+ },
+ "boatWake": {
+  "bn": "লঞ্চের ঢেউ! নৌকা দুলছে।",
+  "en": "A launch's wake! The boat rocks."
+ },
+ "boatBump": {
+  "bn": "লঞ্চের গায়ে ধাক্কা! যাত্রীরা ভয় পেয়েছেন।",
+  "en": "Bumped a launch! The passengers are frightened."
+ },
+ "boatOffGhat": {
+  "bn": "ঘাট ছাড়িয়ে গেছেন! পাড় ঘেঁষে ঘাটে যান।",
+  "en": "You've missed the ghat! Pole along the bank to it."
+ },
+ "boatArrived": {
+  "bn": "ঘাটে পৌঁছালেন! {n} জন, ভাড়া {fares} টাকা",
+  "en": "Landed! {n} passengers, fares Tk {fares}"
+ },
+ "boatTip": {
+  "bn": "তাড়াতাড়ি, নিরাপদে পার: বখশিশ {n} টাকা",
+  "en": "A quick, calm crossing: Tk {n} in tips"
+ },
+ "boatRain": {
+  "bn": "বৃষ্টি নামল! স্রোত বেড়েছে।",
+  "en": "Rain! The current is stronger."
+ },
+ "boatDayOver": {
+  "bn": "হরিপদ মাঝির দিন শেষ!",
+  "en": "Haripada's day is done!"
+ },
+ "boatCrossLine": {
+  "bn": "{n} বার নদী পার",
+  "en": "Crossed the river {n} times"
+ },
+ "boatCarriedLine": {
+  "bn": "{n} জন যাত্রী",
+  "en": "{n} passengers"
+ },
+ "boatTipsLine": {
+  "bn": "বখশিশ {n} টাকা",
+  "en": "Tips Tk {n}"
+ },
+ "boatBumpsLine": {
+  "bn": "{n} বার লঞ্চে ধাক্কা",
+  "en": "Bumped a launch {n} times"
+ },
+ "boatGaveUpLine": {
+  "bn": "{n} জন অপেক্ষা করে চলে গেছেন",
+  "en": "{n} people gave up waiting"
+ },
+ "boatRatingLine": {
+  "bn": "দিনের তারা {stars}",
+  "en": "Day's stars {stars}"
+ },
+ "caller_bablu": {
+  "bn": "বাবলু (নাতি)",
+  "en": "Bablu (his grandson)"
  }
 }

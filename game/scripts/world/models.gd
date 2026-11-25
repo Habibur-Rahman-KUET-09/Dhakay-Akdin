@@ -891,6 +891,82 @@ static func bus() -> ArrayMesh:
 	return b.commit()
 
 
+# --- The Buriganga ---------------------------------------------------------
+
+
+## Haripada's wooden ferry boat (a kheya nouka), facing -Z: a long tarred
+## hull rising to a pointed bow and stern, a painted band (PAINT_A) and
+## rim (PAINT_B), cross planks to sit on, and Haripada standing at the
+## stern. With the chhoi: an arched bamboo-mat roof over the middle.
+## The waterline is at y = 0. The oars are separate (boat_oar).
+static func boat(chhoi := false) -> ArrayMesh:
+	var b := Builder.new()
+	var tar := Color("3A2A1E")
+	# The hull: a flat bottom, two sides leaning out, end pieces rising.
+	b.box(Vector3(1.0, 0.12, 6.2), Vector3(0, -0.05, 0), tar)
+	for side in [-1, 1]:
+		b.box(Vector3(0.08, 0.6, 6.0), Vector3(side * 0.62, 0.2, 0), WOOD, Vector3(0, 0, side * -18))
+		b.box(Vector3(0.1, 0.1, 6.0), Vector3(side * 0.72, 0.5, 0), Color.WHITE, Vector3.ZERO, PAINT_B)
+		b.box(Vector3(0.03, 0.18, 5.6), Vector3(side * 0.69, 0.3, 0), Color.WHITE, Vector3(0, 0, side * -18), PAINT_A)
+	for end in [-1, 1]:
+		b.box(Vector3(1.05, 0.5, 1.4), Vector3(0, 0.25, end * 3.4), WOOD, Vector3(end * 22, 0, 0))
+		b.box(Vector3(0.16, 0.9, 0.16), Vector3(0, 0.75, end * 3.95), Color.WHITE, Vector3(end * 25, 0, 0), PAINT_B)
+	# Planks across to sit on.
+	for z in [-2.2, -1.1, 0.0, 1.1]:
+		b.box(Vector3(1.3, 0.05, 0.28), Vector3(0, 0.32, z), Color("9B7246"))
+	if chhoi:
+		# An arch across the boat, 2.6 m long, bamboo ribs over the mat.
+		var mat := Color("C9A86A")
+		for i in 8:
+			var a0 := PI * i / 8.0
+			var a1 := PI * (i + 1) / 8.0
+			var p0 := Vector3(cos(a0) * 0.7, 0.5 + sin(a0) * 0.75, 0)
+			var p1 := Vector3(cos(a1) * 0.7, 0.5 + sin(a1) * 0.75, 0)
+			b.quad(p0 + Vector3(0, 0, -1.9), p1 + Vector3(0, 0, -1.9), p1 + Vector3(0, 0, 0.7), p0 + Vector3(0, 0, 0.7), mat.darkened(0.08 * (i % 2)))
+		for z in [-1.9, -0.6, 0.7]:
+			for i in 8:
+				var a0 := PI * i / 8.0
+				var a1 := PI * (i + 1) / 8.0
+				var m := (Vector3(cos(a0), sin(a0), 0) + Vector3(cos(a1), sin(a1), 0)) * 0.5
+				b.box(Vector3(0.05, 0.3, 0.05), Vector3(m.x * 0.71, 0.5 + m.y * 0.76, z), WOOD, Vector3(0, 0, rad_to_deg((a0 + a1) * 0.5)))
+	# Haripada at the stern, in a white vest and a checked lungi.
+	_body(b, Vector3(0, 0.25, 2.6), false, false)
+	return b.commit()
+
+
+## One long bamboo oar with a flat blade, its grip at the origin, the
+## blade down along -Y.
+static func boat_oar() -> ArrayMesh:
+	var b := Builder.new()
+	b.cyl(0.035, 2.4, Vector3(0, -1.2, 0), Color("A0784A"), Vector3.ZERO, 6)
+	b.box(Vector3(0.03, 0.55, 0.22), Vector3(0, -2.3, 0), Color("6B4A2B"))
+	return b.commit()
+
+
+## A Sadarghat launch, facing -Z: a long three-deck river steamer, white
+## with a painted band (PAINT_A) and trim (PAINT_B), rows of windows,
+## railings, a funnel, a bridge at the bow. About 30 m long, 7 m wide;
+## the waterline at y = 0.
+static func launch() -> ArrayMesh:
+	var b := Builder.new()
+	b.box(Vector3(7.0, 2.0, 28.0), Vector3(0, 0.4, 0), Color.WHITE, Vector3.ZERO, PAINT_A)
+	b.box(Vector3(5.0, 1.8, 3.0), Vector3(0, 0.6, -14.8), Color.WHITE, Vector3(-12, 0, 0), PAINT_A)
+	b.box(Vector3(7.05, 0.3, 28.05), Vector3(0, 1.35, 0), Color.WHITE, Vector3.ZERO, PAINT_B)
+	for deck in 2:
+		var y := 2.6 + deck * 2.2
+		var length := 26.0 - deck * 4.0
+		b.box(Vector3(6.8 - deck * 0.6, 2.0, length), Vector3(0, y, 1.0 + deck), Color("F4F1E8"))
+		b.box(Vector3(6.9 - deck * 0.6, 0.12, length + 0.2), Vector3(0, y + 1.05, 1.0 + deck), Color.WHITE, Vector3.ZERO, PAINT_B)
+		for side in [-1, 1]:
+			for k in int(length / 1.6):
+				b.box(Vector3(0.05, 0.7, 0.9), Vector3(side * (3.42 - deck * 0.3), y + 0.2, 1.0 + deck - length / 2 + 1.0 + k * 1.6), Color("27343C"))
+	b.box(Vector3(3.0, 1.4, 2.4), Vector3(0, 6.6, -6.0), Color("F4F1E8"))
+	b.box(Vector3(3.05, 0.5, 2.45), Vector3(0, 6.8, -7.2), Color("27343C"))
+	b.cyl(0.6, 2.4, Vector3(0, 7.4, 4.0), Color("1A1A1A"))
+	b.cyl(0.62, 0.4, Vector3(0, 8.2, 4.0), Color.WHITE, Vector3.ZERO, 10, PAINT_A)
+	return b.commit()
+
+
 # --- The shader that colours and moves the traffic --------------------------
 
 

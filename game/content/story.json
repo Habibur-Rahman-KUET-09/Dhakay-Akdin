@@ -165,6 +165,26 @@
    "bn": "রশিদ পাইকার",
    "en": "Rashid the wholesaler",
    "colour": "5D4037"
+  },
+  "haripada": {
+   "bn": "হরিপদ মাঝি",
+   "en": "Haripada Majhi",
+   "colour": "1F6E8C"
+  },
+  "kamala": {
+   "bn": "কমলা",
+   "en": "Kamala",
+   "colour": "C2185B"
+  },
+  "bablu": {
+   "bn": "বাবলু",
+   "en": "Bablu",
+   "colour": "F6B800"
+  },
+  "sarang": {
+   "bn": "লঞ্চের সারেং",
+   "en": "The launch captain",
+   "colour": "37474F"
   }
  },
  "chapters": [
@@ -3409,6 +3429,381 @@
      }
     ]
    }
+  },
+  {
+   "id": "haripada_1",
+   "who": "boat",
+   "n": 1,
+   "title": {
+    "bn": "খেয়াঘাটের ভোর",
+    "en": "Dawn at the ferry ghat"
+   },
+   "unlock": {
+    "start": "boat"
+   },
+   "panels": [
+    {
+     "scene": "home_dawn",
+     "lines": [
+      {
+       "by": "kamala",
+       "bn": "কুয়াশা কাটে নাই এখনো। এত ভোরে কে নদী পার হইবো?",
+       "en": "The fog hasn't lifted yet. Who crosses the river this early?"
+      },
+      {
+       "by": "haripada",
+       "bn": "জিনজিরার কারখানার লোক, কমলা। সাতটায় হাজিরা। ঘাটে আমারেই খুঁজবো।",
+       "en": "The Jinjira factory workers, Kamala. They sign in at seven. They'll be looking for me at the ghat."
+      },
+      {
+       "by": "kamala",
+       "bn": "গামছাটা নিয়া যাও। আর বাবলুরে কইয়ো ইস্কুলে যাইতে।",
+       "en": "Take your gamchha. And tell Bablu to go to school."
+      }
+     ]
+    },
+    {
+     "scene": "river",
+     "lines": [
+      {
+       "by": "haripada",
+       "bn": "চল্লিশ বছর এই নদীতে বৈঠা বাই। বাবার কাছে শিখছিলাম।",
+       "en": "Forty years I've rowed this river. My father taught me."
+      },
+      {
+       "by": "bablu",
+       "bn": "দাদু, স্রোত তো নৌকা ভাটিতে নিয়া যায়!",
+       "en": "Grandpa, the current carries the boat downstream!"
+      },
+      {
+       "by": "haripada",
+       "bn": "তাই তো ঘাটের একটু উজানে তাক করি। নদীরে বুঝতে হয়, দাদাভাই।",
+       "en": "That's why I aim a little above the ghat. You have to understand the river, little one."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "haripada_2",
+   "who": "boat",
+   "n": 2,
+   "title": {
+    "bn": "লঞ্চের ঢেউ",
+    "en": "The launch's wake"
+   },
+   "unlock": {
+    "days": [
+     "boat",
+     3
+    ]
+   },
+   "panels": [
+    {
+     "scene": "river",
+     "lines": [
+      {
+       "by": "sarang",
+       "bn": "ভোঁওও! সরো মাঝি, লঞ্চ আসতেছে!",
+       "en": "Hooonk! Out of the way, boatman, the launch is coming!"
+      },
+      {
+       "by": "haripada",
+       "bn": "সবাই বসেন, নড়বেন না! ঢেউ আসতেছে, নৌকা দুলবো কিন্তু ডুববো না।",
+       "en": "Everyone sit down, don't move! The wave's coming. The boat will rock but it won't sink."
+      },
+      {
+       "by": "bablu",
+       "bn": "দাদু, একটা ছেলের ব্যাগ পানিতে পড়ছে! স্কুলের বই!",
+       "en": "Grandpa, a boy's bag fell in the water! His school books!"
+      },
+      {
+       "by": "haripada",
+       "bn": "বৈঠা দিয়া টাইনা তুলছি। বই শুকাইয়া নিও বাবা, পড়া থামাইও না।",
+       "en": "I hooked it with the oar. Dry the books, son, and don't stop studying."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "haripada_3",
+   "who": "boat",
+   "n": 3,
+   "title": {
+    "bn": "ইঞ্জিনের নৌকা",
+    "en": "The engine boats"
+   },
+   "unlock": {
+    "days": [
+     "boat",
+     6
+    ]
+   },
+   "panels": [
+    {
+     "scene": "river",
+     "lines": [
+      {
+       "by": "haripada",
+       "bn": "ঘাটে এখন ভটভটি নৌকা। দুই মিনিটে পার, লোকে ওইদিকেই দৌড়ায়।",
+       "en": "There are engine boats at the ghat now. Two minutes across, and people run to them."
+      },
+      {
+       "by": "kamala",
+       "bn": "তুমিও একটা ইঞ্জিন লাগাও। সমিতি থেকে ধার পাওয়া যায়।",
+       "en": "Get an engine too. The savings club will lend."
+      },
+      {
+       "by": "haripada",
+       "bn": "ইঞ্জিনের তেলের খরচ, ধোঁয়া, শব্দ... বৈঠার নৌকায় নদীর গান শোনা যায়, কমলা।",
+       "en": "Fuel, smoke, noise... In a rowing boat you can hear the river sing, Kamala."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "হরিপদ কী করবেন?",
+     "en": "What will Haripada do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "বৈঠার নৌকাতেই থাকুন",
+       "en": "Stay with the oars"
+      },
+      "effects": {
+       "family": [
+        "boat",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "haripada",
+        "bn": "যারা ধীরে যাইতে চায়, বুড়া-বুড়ি, ছোট বাচ্চা নিয়া মা, তারা আমার নৌকায় ওঠে।",
+        "en": "The ones who want it slow, the old folk, mothers with small children, they come to my boat."
+       },
+       {
+        "by": "kamala",
+        "bn": "তোমার জেদ আর তোমার নদী। আমি জানি।",
+        "en": "You and your stubbornness and your river. I know."
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "ভাড়ায় ইঞ্জিনের নৌকায় কাজ নিন",
+       "en": "Take work on an engine boat"
+      },
+      "effects": {
+       "taka": 200,
+       "family": [
+        "boat",
+        -1
+       ]
+      },
+      "lines": [
+       {
+        "by": "haripada",
+        "bn": "সপ্তাহে দুইদিন ইঞ্জিনের নৌকা চালাই। টাকা বেশি, তবু মনটা খচখচ করে।",
+        "en": "Two days a week I drive an engine boat. More money, but my heart isn't in it."
+       },
+       {
+        "by": "bablu",
+        "bn": "দাদু, তোমার বৈঠার নৌকাটা ঘাটে একা দোলে।",
+        "en": "Grandpa, your rowing boat rocks alone at the ghat."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "haripada_4",
+   "who": "boat",
+   "n": 4,
+   "title": {
+    "bn": "বিসর্জনের দিন",
+    "en": "Immersion day"
+   },
+   "unlock": {
+    "days": [
+     "boat",
+     9
+    ]
+   },
+   "panels": [
+    {
+     "scene": "river",
+     "lines": [
+      {
+       "by": "bablu",
+       "bn": "দাদু, আজ দশমী! শাঁখারীবাজারের পূজামণ্ডপের প্রতিমা নদীতে যাইবো।",
+       "en": "Grandpa, it's Dashami! The goddess from the Shankhari Bazar pandal goes to the river today."
+      },
+      {
+       "by": "haripada",
+       "bn": "প্রতিবছর আমার নৌকায় যায়। ঢাকের বাড়ি, শঙ্খ, উলু... নদী তখন উৎসবের মতো লাগে।",
+       "en": "Every year she goes in my boat. Drums, conch shells, ululation... the river feels like a festival."
+      },
+      {
+       "by": "kamala",
+       "bn": "পূজা কমিটি এইবার ভাড়া দিতে চাইছে। নিবা?",
+       "en": "The puja committee wants to pay this year. Will you take it?"
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "হরিপদ কী বলবেন?",
+     "en": "What will Haripada say?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "মায়ের কাজে ভাড়া নেই",
+       "en": "No fare for the goddess"
+      },
+      "effects": {
+       "family": [
+        "boat",
+        2
+       ]
+      },
+      "lines": [
+       {
+        "by": "haripada",
+        "bn": "মায়েরে বিদায় দিমু, তার আবার ভাড়া কিসের? এইটা আমার পূজা।",
+        "en": "Seeing the goddess off, what fare is there in that? This is my worship."
+       },
+       {
+        "by": "bablu",
+        "bn": "দাদু, আমি ঢোল বাজামু নৌকায়!",
+        "en": "Grandpa, I'll play the drum in the boat!"
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "কমিটির দেওয়া টাকা নিন",
+       "en": "Take the committee's money"
+      },
+      "effects": {
+       "taka": 250
+      },
+      "lines": [
+       {
+        "by": "haripada",
+        "bn": "ঠিক আছে, নিলাম। বাবলুর নতুন জামা হবে পূজার পরে।",
+        "en": "All right, I'll take it. Bablu will get new clothes after the puja."
+       },
+       {
+        "by": "kamala",
+        "bn": "মা দুর্গা সব দেখেন। ঠিক আছে।",
+        "en": "Mother Durga sees everything. It's all right."
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "haripada_5",
+   "who": "boat",
+   "n": 5,
+   "title": {
+    "bn": "কালো পানি",
+    "en": "Black water"
+   },
+   "unlock": {
+    "days": [
+     "boat",
+     12
+    ]
+   },
+   "panels": [
+    {
+     "scene": "river",
+     "lines": [
+      {
+       "by": "haripada",
+       "bn": "ছোটবেলায় এই নদীর পানি খাইতাম। এখন কালো, গন্ধ। ট্যানারি আর কারখানার ময়লা।",
+       "en": "As a boy I drank this river's water. Now it's black and it stinks. Tannery and factory waste."
+      },
+      {
+       "by": "bablu",
+       "bn": "দাদু, ভার্সিটির ভাইয়া-আপুরা শনিবার নদী পরিষ্কার করবে। নৌকা লাগবো।",
+       "en": "Grandpa, university students are cleaning the river on Saturday. They need boats."
+      },
+      {
+       "by": "haripada",
+       "bn": "শনিবার তো সবচেয়ে বেশি যাত্রী হয়...",
+       "en": "Saturday is my busiest day..."
+      }
+     ]
+    }
+   ],
+   "choice": {
+    "prompt": {
+     "bn": "হরিপদ কী করবেন?",
+     "en": "What will Haripada do?"
+    },
+    "options": [
+     {
+      "label": {
+       "bn": "সারাদিন নৌকা দিন পরিষ্কারের কাজে",
+       "en": "Give the boat to the clean-up all day"
+      },
+      "effects": {
+       "family": [
+        "boat",
+        2
+       ],
+       "taka": -100
+      },
+      "lines": [
+       {
+        "by": "haripada",
+        "bn": "নদী আমারে চল্লিশ বছর খাওয়াইছে। একদিন আমি ওর জন্য খাটি।",
+        "en": "The river has fed me for forty years. One day I'll work for her."
+       },
+       {
+        "by": "bablu",
+        "bn": "দাদু, আমরা তিন নৌকা প্লাস্টিক তুলছি! টিভিতে দেখাইবো!",
+        "en": "Grandpa, we pulled out three boatloads of plastic! It'll be on TV!"
+       }
+      ]
+     },
+     {
+      "label": {
+       "bn": "সকালে খেয়া, বিকেলে পরিষ্কার",
+       "en": "Ferry in the morning, clean in the afternoon"
+      },
+      "effects": {
+       "taka": 100,
+       "family": [
+        "boat",
+        1
+       ]
+      },
+      "lines": [
+       {
+        "by": "haripada",
+        "bn": "সকালের কারখানার লোকরে পার করাইয়া আসি, তারপর বিকালে তোমাদের সাথে।",
+        "en": "I'll take the factory workers across in the morning, then join you in the afternoon."
+       },
+       {
+        "by": "kamala",
+        "bn": "দুই কাজই হইল। বুদ্ধি আছে বুড়ার।",
+        "en": "Both jobs done. The old man has sense."
+       }
+      ]
+     }
+    ]
+   }
   }
  ],
  "scenes": [
@@ -4671,6 +5066,68 @@
        "by": "kashem",
        "bn": "কাল থেকে মাগরিবের আগেই ফিরব। কথা দিলাম।",
        "en": "From tomorrow I'll be home before sunset. I promise."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_high_boat",
+   "who": "boat",
+   "n": 0,
+   "title": {
+    "bn": "কমলার হাসি",
+    "en": "Kamala's smile"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "kamala",
+       "bn": "আজ ইলিশ আনছো! কতদিন পর সর্ষে ইলিশ রান্ধি।",
+       "en": "You brought hilsa today! It's been so long since I made shorshe ilish."
+      },
+      {
+       "by": "haripada",
+       "bn": "নদী আজ ভালো দিছে, কমলা। বাবলুর খাতাও আনছি।",
+       "en": "The river was kind today, Kamala. I brought Bablu's books too."
+      },
+      {
+       "by": "bablu",
+       "bn": "দাদু, আমি বড় হইলে তোমার নৌকায় ছই লাগামু!",
+       "en": "Grandpa, when I grow up I'll put a roof on your boat!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_low_boat",
+   "who": "boat",
+   "n": 0,
+   "title": {
+    "bn": "কমলার চিন্তা",
+    "en": "Kamala is worried"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "kamala",
+       "bn": "এই বয়সে সারাদিন বৈঠা! হাত কাঁপে তোমার, দেখছি আমি।",
+       "en": "Rowing all day at your age! Your hands shake, I've seen it."
+      },
+      {
+       "by": "haripada",
+       "bn": "নদী না বাইলে খামু কী, কমলা?",
+       "en": "If I don't row, what will we eat, Kamala?"
+      },
+      {
+       "by": "haripada",
+       "bn": "আচ্ছা, দুপুরে একটু জিরামু। কথা দিলাম।",
+       "en": "All right, I'll rest a while at noon. I promise."
       }
      ]
     }

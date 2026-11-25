@@ -30,8 +30,10 @@ const DELIVERY_UPGRADES := ["gear_cycle", "hot_bag", "raincoat"]
 ## Kashem Bhai's basket (phase 8): a bigger one, masala peanuts, a cooler box
 ## for water.
 const HAWKER_UPGRADES := ["big_basket", "masala", "cooler"]
+## Haripada's boat (phase 8): new oars, a chhoi (roof), a bigger boat.
+const BOAT_UPGRADES := ["new_oars", "chhoi", "big_boat"]
 ## Each character's upgrades, and where their prices are in the balance.
-const UPGRADE_LISTS := {"rickshaw": ["rickshaw", UPGRADES], "tea": ["tea_stall", TEA_UPGRADES], "bus": ["bus", BUS_UPGRADES], "fuchka": ["fuchka", FUCHKA_UPGRADES], "delivery": ["delivery", DELIVERY_UPGRADES], "hawker": ["hawker", HAWKER_UPGRADES]}
+const UPGRADE_LISTS := {"rickshaw": ["rickshaw", UPGRADES], "tea": ["tea_stall", TEA_UPGRADES], "bus": ["bus", BUS_UPGRADES], "fuchka": ["fuchka", FUCHKA_UPGRADES], "delivery": ["delivery", DELIVERY_UPGRADES], "hawker": ["hawker", HAWKER_UPGRADES], "boat": ["boat", BOAT_UPGRADES]}
 
 var b: Balance
 var path := DEFAULT_PATH
@@ -61,6 +63,7 @@ static func fresh() -> Dictionary:
 		"fuchka": {"days": 0, "bestDay": 0, "served": 0, "exact": 0, "earned": 0, "upgrades": []},
 		"delivery": {"days": 0, "bestDay": 0, "orders": 0, "earned": 0, "upgrades": []},
 		"hawker": {"days": 0, "bestDay": 0, "sold": 0, "earned": 0, "upgrades": []},
+		"boat": {"days": 0, "bestDay": 0, "carried": 0, "earned": 0, "upgrades": []},
 		"history": [],
 		"tara": 0,
 		"story": {"seen": []},
@@ -73,10 +76,10 @@ static func fresh() -> Dictionary:
 		# Where Rahim Chacha rides: "mirpur", or "old_dhaka" once open.
 		"area": "mirpur",
 		# How each one's family feels about them, 0–10 (calls from home).
-		"family": {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5, "delivery": 5, "hawker": 5},
+		"family": {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5, "delivery": 5, "hawker": 5, "boat": 5},
 		# Looks worn (bought ones are in "cosmetics"), by slot; things for
 		# Rahim Chacha's home; his own phone; the savings club.
-		"looks": {"rickshaw": {}, "tea": {}, "bus": {}, "fuchka": {}, "delivery": {}, "hawker": {}},
+		"looks": {"rickshaw": {}, "tea": {}, "bus": {}, "fuchka": {}, "delivery": {}, "hawker": {}, "boat": {}},
 		"home": [],
 		"phone": false,
 		"samity": {"in": false, "paid": 0, "rounds": 0},
@@ -289,7 +292,7 @@ func family(who: String) -> int:
 ## Moves `who`'s family feeling by `delta`, kept within 0–10.
 func add_family(who: String, delta: int) -> int:
 	if not data.has("family"):
-		data.family = {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5, "delivery": 5, "hawker": 5}
+		data.family = {"rickshaw": 5, "tea": 5, "bus": 5, "fuchka": 5, "delivery": 5, "hawker": 5, "boat": 5}
 	data.family[who] = clampi(family(who) + delta, 0, 10)
 	return int(data.family[who])
 
@@ -316,7 +319,7 @@ func unlocked(what: String) -> bool:
 
 
 ## The characters that can be played: "rickshaw", "tea", "bus", "fuchka",
-## "delivery", "hawker".
+## "delivery", "hawker", "boat".
 func open_characters() -> Array:
 	var out := ["rickshaw"]
 	if unlocked("tea_stall"):
@@ -329,6 +332,8 @@ func open_characters() -> Array:
 		out.append("delivery")
 	if unlocked("hawker"):
 		out.append("hawker")
+	if unlocked("boat"):
+		out.append("boat")
 	return out
 
 
@@ -611,6 +616,33 @@ func apply_hawker_day(result: Dictionary) -> Dictionary:
 		r.bestDay = earned
 	_day_done("hawker", result, out)
 	_remember({"day": data.day, "who": "hawker", "earned": earned, "sold": int(result.sold), "stars": snappedf(stars, 0.1), "met": true})
+	out.day = data.day
+	return out
+
+
+## Takes a day of Haripada's crossings ({earned, carried, stars}) into the
+## save: a tenth to the fund, the rest saved.
+func apply_boat_day(result: Dictionary) -> Dictionary:
+	var out := {}
+	var earned := _featured("boat", maxi(0, int(result.earned)), out)
+	var stars := float(result.stars)
+	out.earned = earned
+	var fund_cut := _to_fund(earned, out)
+	data.taka = int(data.taka) + earned - fund_cut
+	out.kept = earned - fund_cut
+	_gain_xp(stars, int(result.carried) > 0, out)
+	data.day = int(data.day) + 1
+	if typeof(data.get("boat")) != TYPE_DICTIONARY:
+		data["boat"] = {"days": 0, "bestDay": 0, "carried": 0, "earned": 0, "upgrades": []}
+	var r: Dictionary = data.boat
+	r.days = int(r.days) + 1
+	r.carried = int(r.get("carried", 0)) + int(result.carried)
+	r.earned = int(r.earned) + earned
+	out.best = earned > int(r.bestDay) and earned > 0
+	if out.best:
+		r.bestDay = earned
+	_day_done("boat", result, out)
+	_remember({"day": data.day, "who": "boat", "earned": earned, "carried": int(result.carried), "stars": snappedf(stars, 0.1), "met": true})
 	out.day = data.day
 	return out
 
