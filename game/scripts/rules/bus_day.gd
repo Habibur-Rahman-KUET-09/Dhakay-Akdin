@@ -17,6 +17,7 @@
 extends RefCounted
 
 const Balance = preload("res://scripts/rules/balance.gd")
+const Hands = preload("res://scripts/rules/activities.gd")
 
 enum Event {
 	CALL_OPEN, ## the next stop is near: call it now
@@ -41,6 +42,7 @@ enum Event {
 	TOO_EARLY, ## "go" slapped while people were still getting on
 	DOOR_JAM, ## the standing crowd blocks the door: push them back
 	PUSHED, ## one more got on after a push
+	NEEDY_LEFT, ## someone who needed a seat gave up standing and got off
 }
 
 ## Notes in use, smallest first.
@@ -125,8 +127,17 @@ var _go_wait := 0.0
 ## are like ("phone", "tired", "reading", "plain"), so Babu can choose whom
 ## to ask to stand. Own dice, so the rest of the day plays the same.
 var _seat_rng := RandomNumberGenerator.new()
+## Paid by phone (hands on): {fare, npc, sms} while the SMS is checked;
+## what the phone brought in; what came of each; the mohalla level.
+var phone_pay := {}
+var phone_money := 0
+var phone_log: Array = []
+var level := 1
+var _phone_rng := RandomNumberGenerator.new()
 ## Money sent home by phone today (a call from home), out of the day's.
 var sent_home := 0
+## Riders who needed a seat, never got one, and got off early.
+var needy_left := 0
 var last_seat := ""
 
 
@@ -136,9 +147,11 @@ func _init(balance: Balance, seed_value := -1, owned: Array = []) -> void:
 	if seed_value >= 0:
 		rng.seed = seed_value
 		_seat_rng.seed = seed_value + 31
+		_phone_rng.seed = seed_value + 47
 	else:
 		rng.randomize()
 		_seat_rng.randomize()
+		_phone_rng.randomize()
 	route = (b.at("bus.route") as Array).duplicate()
 	trips = int(b.n("bus.trips_per_day"))
 	# The change bag: small notes worth 200 (4×5, 5×10, 4×20, 1×50); twice
@@ -180,7 +193,7 @@ func bag_value() -> int:
 
 ## What the day has made: the bag's growth, bonuses, less fines.
 func earned() -> int:
-	return bag_value() - bag_start + bonus - fines - sent_home
+	return bag_value() - bag_start + bonus - fines - sent_home + phone_money
 
 
 ## Fare from stop a to stop b.
@@ -325,6 +338,18 @@ func _arrive(events: Array) -> void:
 				_take_from_bag(notes)
 				events.append(Event.OWED_PAID)
 		events.append(Event.ALIGHTED)
+	# A mother with a child, or someone unwell, left standing since the
+	# last stop: they give up and get off here (paid or not), and the bus
+	# thinks less of Babu.
+	for r in riders.duplicate():
+		if r.kind == "needy" and int(r.seat) >= SEATS and int(r.from) < stop_i and r.to != stop_i:
+			riders.erase(r)
+			if asking.get("id", -1) == r.id:
+				asking = {}
+			needy_left += 1
+			rating -= b.n("bus.needy_left_star_penalty")
+			moved += 1
+			events.append(Event.NEEDY_LEFT)
 	rating = clampf(rating, 1.0, 5.0)
 	# On: more at the big stops, and more for a good call. Not at the end.
 	var before := _next_id
@@ -700,6 +725,39 @@ func give(notes: Dictionary) -> Array:
 		overpaid += total - due
 		return [Event.OVERPAID]
 	return [Event.SETTLED]
+
+
+## Now and then (hands on) the one being asked pays by phone instead: the
+## SMS to check (settle_phone). True when they do.
+func offer_phone() -> bool:
+	if not interactive or asking.is_empty() or not phone_pay.is_empty():
+		return false
+	if _phone_rng.randf() >= b.n("bus.phone_pay_chance"):
+		return false
+	var fake := _phone_rng.randf() < b.n("rickshaw.phone_fake_chance")
+	phone_pay = {"fare": asking_fare, "npc": str(asking.get("npc", "")), "sms": Hands.phone_sms(_phone_rng, asking_fare, level, fake)}
+	return true
+
+
+## The SMS checked: the fare is in unless a fake was believed; a real one
+## called fake costs half a star (and a neighbour remembers). They count
+## as paid either way.
+func settle_phone(said_fake: bool) -> String:
+	if phone_pay.is_empty():
+		return ""
+	var result := Hands.phone_result(phone_pay.sms, said_fake)
+	if result != "fooled":
+		phone_money += int(phone_pay.fare)
+	if result == "wrong":
+		rating = clampf(rating - 0.5, 1.0, 5.0)
+		if str(phone_pay.npc) != "":
+			npc_log.append({"id": phone_pay.npc, "delta": -1, "what": "doubted"})
+	if not asking.is_empty():
+		asking.paid = true
+		asking = {}
+	phone_log.append(result)
+	phone_pay = {}
+	return result
 
 
 ## No change: Babu takes the note and owes the change till their stop.

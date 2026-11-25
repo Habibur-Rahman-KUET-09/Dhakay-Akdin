@@ -44,7 +44,7 @@ def wanted():
         for i, line in enumerate(lines):
             out[f'{group}_{i}'] = (line['by'], line['bn'])
     story = json.load(open(os.path.join(CONTENT, 'story.json'), encoding='utf-8'))
-    for c in story['chapters']:
+    for c in story['chapters'] + story.get('scenes', []):
         lines = [l for p in c['panels'] for l in p['lines']]
         for o in c.get('choice', {}).get('options', []):
             lines += o['lines']

@@ -241,3 +241,35 @@ func test_settling_a_phone_payment() -> void:
 	eq(d.settle_phone(true), "wrong", "a real one called fake")
 	near(d.stars_sum, 3.0, "a star less")
 	eq(d.money - before, 120, "still paid")
+
+
+func test_phone_payments_at_the_stall_and_on_the_bus() -> void:
+	var b := Balance.new()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	var t := TeaDay.new(b, 4)
+	t.money = 100
+	t.happy = 2
+	t.phone_pay = {"fare": 30, "npc": "", "sms": Hands.phone_sms(rng, 30, 1, true)}
+	eq(t.settle_phone(true), "caught", "a fake spotted at the stall")
+	eq(t.money, 130, "they pay cash")
+	t.phone_pay = {"fare": 30, "npc": "", "sms": Hands.phone_sms(rng, 30, 1, true)}
+	eq(t.settle_phone(false), "fooled", "a fake believed")
+	eq(t.money, 130, "the bill is lost")
+	t.phone_pay = {"fare": 30, "npc": "rafiq", "sms": Hands.phone_sms(rng, 30, 1, false)}
+	eq(t.settle_phone(true), "wrong", "a real one doubted")
+	eq(t.money, 160, "still paid")
+	eq(t.happy, 1, "but not happy")
+	eq(t.npc_log.back().what, "doubted", "and a neighbour remembers")
+	eq(t.settle_phone(false), "", "nothing waiting")
+	var bus := BusDay.new(b, 5)
+	check(not bus.offer_phone(), "no phone payments without the hands")
+	bus.interactive = true
+	var start := bus.earned()
+	bus.asking = {"id": 1, "fare": 20, "note": 20, "paid": false, "npc": ""}
+	bus.asking_fare = 20
+	var r: Dictionary = bus.asking
+	bus.phone_pay = {"fare": 20, "npc": "", "sms": Hands.phone_sms(rng, 20, 1, false)}
+	eq(bus.settle_phone(false), "fine", "a real SMS on the bus")
+	eq(bus.earned(), start + 20, "the fare counts")
+	check(r.paid and bus.asking.is_empty(), "paid, and the next one can be asked")

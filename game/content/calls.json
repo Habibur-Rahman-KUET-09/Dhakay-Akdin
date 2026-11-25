@@ -4,17 +4,24 @@
   "rickshaw": [
    {"id": "r_drawing", "by": "sumi", "kind": "news", "bn": "আব্বা! আজ স্কুলে ছবি আঁকায় আমি প্রথম হয়েছি! তুমি কখন আসবে?", "en": "Abba! I came first in drawing at school today! When are you coming?", "options": {"go": {"family": 2, "end_day": true}, "later": {"family": 0}}},
    {"id": "r_fever", "by": "rokeya", "kind": "need", "bn": "সুমির জ্বর এসেছে। ওষুধ কিনতে হবে, টাকা নেই।", "en": "Sumi has a fever. We need medicine, and there is no money.", "options": {"go": {"family": 2, "end_day": true}, "send": {"family": 1, "cost": 100}, "later": {"family": -2}}},
-   {"id": "r_lunch", "by": "rokeya", "kind": "chat", "bn": "খেয়েছেন তো? দুপুরে ঠিকমতো খাবেন কিন্তু।", "en": "Have you eaten? Mind you eat properly at noon.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
+   {"id": "r_lunch", "by": "rokeya", "kind": "chat", "bn": "খেয়েছেন তো? দুপুরে ঠিকমতো খাবেন কিন্তু।", "en": "Have you eaten? Mind you eat properly at noon.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "r_rain", "by": "rokeya", "kind": "chat", "bn": "বৃষ্টি নামছে, পলিথিনটা নিয়েছেন তো? ভিজে ভিজে রিকশা চালাবেন না।", "en": "It's starting to rain. Did you take the plastic sheet? Don't pedal along soaked.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "r_exam", "by": "sumi", "kind": "news", "bn": "আব্বা, কাল আমার অঙ্ক পরীক্ষা! রাতে একটু পড়া ধরবে?", "en": "Abba, I have a maths test tomorrow! Will you test me tonight?", "options": {"go": {"family": 2, "end_day": true}, "later": {"family": 0}}},
+   {"id": "r_rice", "by": "rokeya", "kind": "need", "bn": "চাল ফুরিয়ে গেছে। আসার পথে দুই কেজি চাল আনবেন, নাকি টাকা পাঠাবেন?", "en": "We're out of rice. Will you bring two kilos on the way, or send the money?", "options": {"send": {"family": 1, "cost": 120}, "later": {"family": -1}}}
   ],
   "tea": [
    {"id": "t_medicine", "by": "sister", "kind": "need", "bn": "ভাই, মায়ের ওষুধের টাকাটা এই মাসে পাঠাতে পারবি?", "en": "Brother, can you send Ma's medicine money this month?", "options": {"send": {"family": 2, "cost": 150}, "later": {"family": -2}}},
    {"id": "t_shakil", "by": "sister", "kind": "news", "bn": "ভাই, শাকিল এবার ক্লাসে প্রথম হয়েছে! তোর কথা খুব বলে।", "en": "Brother, Shakil came first in his class! He talks about you a lot.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
-   {"id": "t_eid", "by": "sister", "kind": "chat", "bn": "ভাই, এবার ঈদে বাড়ি আসবি তো?", "en": "Brother, will you come home for Eid this time?", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
+   {"id": "t_eid", "by": "sister", "kind": "chat", "bn": "ভাই, এবার ঈদে বাড়ি আসবি তো?", "en": "Brother, will you come home for Eid this time?", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "t_ma", "by": "sister", "kind": "chat", "bn": "ভাই, মা তোর কথা খুব বলে। একটু কথা বলবি মায়ের সাথে?", "en": "Brother, Ma talks about you all the time. Will you speak to her a little?", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "t_fee", "by": "sister", "kind": "need", "bn": "ভাই, শাকিলের স্কুলের বেতন দুই মাস বাকি পড়েছে।", "en": "Brother, Shakil's school fees are two months behind.", "options": {"send": {"family": 2, "cost": 100}, "later": {"family": -2}}}
   ],
   "bus": [
    {"id": "b_eat", "by": "babu_ma", "kind": "chat", "bn": "বাবা, তুই ঠিকমতো খাস তো? শরীরটা ভালো আছে?", "en": "Son, are you eating properly? Are you well?", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
    {"id": "b_roof", "by": "babu_ma", "kind": "need", "bn": "বাবা, ঘরের চালটা ফুটো হয়ে গেছে, বৃষ্টি হলেই পানি পড়ে।", "en": "Son, the roof has a hole; when it rains the water comes in.", "options": {"send": {"family": 2, "cost": 120}, "later": {"family": -2}}},
-   {"id": "b_sister", "by": "babu_ma", "kind": "news", "bn": "বাবা, তোর ছোট বোনটা এবার স্কুলে ভর্তি হলো!", "en": "Son, your little sister has started school!", "options": {"talk": {"family": 1}, "busy": {"family": -1}}}
+   {"id": "b_sister", "by": "babu_ma", "kind": "news", "bn": "বাবা, তোর ছোট বোনটা এবার স্কুলে ভর্তি হলো!", "en": "Son, your little sister has started school!", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "b_calf", "by": "babu_ma", "kind": "news", "bn": "বাবা, আমাদের গরুটার বাছুর হয়েছে! নাম রেখেছি লালু।", "en": "Son, our cow has had a calf! I've named it Lalu.", "options": {"talk": {"family": 1}, "busy": {"family": -1}}},
+   {"id": "b_cold", "by": "babu_ma", "kind": "need", "bn": "বাবা, শীত পড়েছে, গায়ে দেওয়ার মতো কিছু নেই।", "en": "Son, the cold has come and I've nothing warm to wear.", "options": {"send": {"family": 2, "cost": 150}, "later": {"family": -2}}}
   ]
  }
 }

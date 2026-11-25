@@ -88,7 +88,20 @@ static func next_day(date: String) -> String:
 ## [{key, values}] for the strings file: a festival today or tomorrow,
 ## Ramadan, and the month's weather (rain, fog, heat) so the day can be
 ## planned.
-func news(date: String) -> Array:
+## The weather's seed for a date: the rickshaw's day draws its rain from it.
+static func weather_seed(date: String) -> int:
+	return hash("weather " + date)
+
+
+## Whether Rahim Chacha's day on `date` has a shower, as Day decides it
+## (the first draw from the date's weather, against the month's chance).
+func rains_on(date: String, usual: float) -> bool:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = weather_seed(date)
+	return rng.randf() < rain_chance(usual, date)
+
+
+func news(date: String, rain_usual := -1.0) -> Array:
 	var out := []
 	var today := festival(date)
 	var tomorrow := festival(next_day(date))
@@ -99,7 +112,9 @@ func news(date: String) -> Array:
 	if ramadan(date):
 		out.append({"key": "news_ramadan", "values": {}})
 	var w := weather(date)
-	if float(w.rain) >= 2.0:
+	if rain_usual >= 0.0 and rains_on(next_day(date), rain_usual):
+		out.append({"key": "news_rain_tomorrow", "values": {}})
+	elif float(w.rain) >= 2.0:
 		out.append({"key": "news_rain", "values": {}})
 	elif float(w.fog) >= 0.5:
 		out.append({"key": "news_fog", "values": {}})

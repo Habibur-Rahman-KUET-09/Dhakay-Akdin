@@ -2124,8 +2124,8 @@
   "en": "Easy driving"
  },
  "easyDrivingHelp": {
-  "bn": "মোড়ে থেমে গেলে রিকশা নিজেই গন্তব্যের পথ ধরবে।",
-  "en": "At a junction where it would stop, the rickshaw takes the way to where it is going."
+  "bn": "মোড়ে থেমে গেলে রিকশা নিজেই গন্তব্যের পথ ধরবে; রাস্তায় গাড়ি কম, জরিমানা অর্ধেক। বদলে ভাড়া ১০% কম।",
+  "en": "At a junction the rickshaw takes the way by itself; less traffic and half fines. In return, fares are 10% lower."
  },
  "act_hood": {
   "bn": "বৃষ্টি! হুড তুলুন",
@@ -2152,12 +2152,12 @@
   "en": "Too slow: the passenger got wet"
  },
  "act_sms": {
-  "bn": "মোবাইলে ভাড়া",
+  "bn": "মোবাইলে টাকা",
   "en": "Paid by phone"
  },
  "act_sms_hint": {
-  "bn": "ভাড়া {fare} টাকা। SMS-টা আসল কিনা মিলিয়ে দেখুন: টাকার অঙ্ক, কে পাঠাল, কখন।",
-  "en": "The fare is Tk {fare}. Is the SMS real? Check the amount, who sent it, and when."
+  "bn": "{fare} টাকা পাওয়ার কথা। SMS-টা আসল কিনা মিলিয়ে দেখুন: টাকার অঙ্ক, কে পাঠাল, কখন।",
+  "en": "Tk {fare} is due. Is the SMS real? Check the amount, who sent it, and when."
  },
  "sms_service": {
   "bn": "টাকাফোন",
@@ -2168,7 +2168,7 @@
   "en": "TakaFone"
  },
  "sms_number": {
-  "bn": "০১৭১৫-৩৮২৯৪০",
+  "bn": "01715-382940",
   "en": "01715-382940"
  },
  "sms_body": {
@@ -2180,7 +2180,7 @@
   "en": "just now"
  },
  "sms_old": {
-  "bn": "গতকাল সন্ধ্যা ৭:৪০",
+  "bn": "গতকাল সন্ধ্যা 7:40",
   "en": "yesterday 7:40 pm"
  },
  "sms_ok": {
@@ -2196,7 +2196,7 @@
   "en": "The money came: all fine"
  },
  "phone_caught": {
-  "bn": "ধরে ফেলেছেন! যাত্রী নগদে {fare} টাকা দিলেন",
+  "bn": "ধরে ফেলেছেন! নগদে {fare} টাকা পেলেন",
   "en": "Caught it! They paid Tk {fare} in cash"
  },
  "phone_fooled": {
@@ -2204,8 +2204,8 @@
   "en": "It was a fake SMS! Tk {fare} lost"
  },
  "phone_wrong": {
-  "bn": "SMS আসল ছিল, যাত্রী মনে কষ্ট পেলেন (এক তারা কম)",
-  "en": "The SMS was real: the passenger was hurt (a star less)"
+  "bn": "SMS আসল ছিল; সন্দেহ করায় মনে কষ্ট পেলেন",
+  "en": "The SMS was real; they were hurt to be doubted"
  },
  "fix_need": {
   "bn": "বসার জায়গা করে দিন",
@@ -2548,8 +2548,8 @@
   "en": "Read aloud"
  },
  "readAloudHelp": {
-  "bn": "খেলার লেখাগুলো ফোনের নিজের কণ্ঠে পড়ে শোনাবে: নোটিশ, কাজের নির্দেশ, দিনের হিসাব। ফোনে বাংলা কণ্ঠ (Google-এর text-to-speech) থাকতে হবে।",
-  "en": "The game's words read out in the phone's own voice: notices, instructions, the day's summary. The phone needs a voice for the language (Google's text-to-speech)."
+  "bn": "খেলার লেখাগুলো ফোনের নিজের কণ্ঠে পড়ে শোনাবে: নোটিশ, কাজের নির্দেশ, দিনের হিসাব। মহল্লায় কোনো কার্ড বা বোতামে আঙুল একটু চেপে ধরে রাখলে সেটাও পড়বে। ফোনে বাংলা কণ্ঠ (Google-এর text-to-speech) থাকতে হবে।",
+  "en": "The game's words read out in the phone's own voice: notices, instructions, the day's summary. In the mohalla, hold a finger on any card or button to hear it. The phone needs a voice for the language (Google's text-to-speech)."
  },
  "readAloudOn": {
   "bn": "এখন থেকে খেলার লেখা পড়ে শোনানো হবে।",
@@ -2862,5 +2862,97 @@
  "sticker_eid": {
   "bn": "ঈদ মোবারক",
   "en": "Eid Mubarak"
+ },
+ "share_rickshaw": {
+  "bn": "আজ রহিম চাচা {n} জন যাত্রীকে পৌঁছে দিলেন, আয় {money} টাকা!",
+  "en": "Today Rahim Chacha took {n} passengers home and made Tk {money}!"
+ },
+ "share_rickshaw_rain": {
+  "bn": "আজ রহিম চাচা বৃষ্টির মধ্যেও {n} জন যাত্রীকে পৌঁছে দিলেন, আয় {money} টাকা!",
+  "en": "Today Rahim Chacha took {n} passengers home, rain and all, and made Tk {money}!"
+ },
+ "share_tea": {
+  "bn": "আজ মনির মামা {n} জনকে চা খাওয়ালেন, আয় {money} টাকা!",
+  "en": "Today Monir Mama served tea to {n} people and made Tk {money}!"
+ },
+ "share_bus": {
+  "bn": "আজ বাবু {n} জন যাত্রী নিয়ে ঢাকা ঘুরলেন, আয় {money} টাকা!",
+  "en": "Today Babu took {n} riders across Dhaka and made Tk {money}!"
+ },
+ "share_whatsapp": {
+  "bn": "WhatsApp-এ পাঠান",
+  "en": "Send on WhatsApp"
+ },
+ "share_facebook": {
+  "bn": "Facebook-এ দিন",
+  "en": "Post on Facebook"
+ },
+ "sharePlay": {
+  "bn": "আপনিও খেলুন:",
+  "en": "Play it too:"
+ },
+ "hoodDownButton": {
+  "bn": "হুড নামান",
+  "en": "Fold the hood"
+ },
+ "hoodDown": {
+  "bn": "হুড নামানো হলো, রিকশা আবার জোরে চলবে",
+  "en": "Hood folded: full speed again"
+ },
+ "homeSceneAgain": {
+  "bn": "দৃশ্যটা দেখুন",
+  "en": "See the scene"
+ },
+ "neighbourFeel": {
+  "bn": "আপনার সম্পর্কে মন: {n}",
+  "en": "How they feel about you: {n}"
+ },
+ "neighbourHelp": {
+  "bn": "মন +৩ বা বেশি হলে বাড়তি বখশিশ দেন; ভালো ব্যবহারে বাড়ে, খারাপে কমে।",
+  "en": "At +3 or more they tip extra; good turns raise it, bad ones lower it."
+ },
+ "neighbourStory": {
+  "bn": "তাঁর গল্প: {n}/{all} অধ্যায় পড়েছেন",
+  "en": "Their story: {n} of {all} chapters read"
+ },
+ "news_rain_tomorrow": {
+  "bn": "কাল দিনের কোনো এক সময়ে বৃষ্টি নামবে। রহিম চাচা, হুডটা ঠিক আছে তো?",
+  "en": "Rain is due some time tomorrow. Rahim Chacha, is the hood in order?"
+ },
+ "iftarLine": {
+  "bn": "ইফতারের ছোলা-পেয়াজু: {n} প্যাকেট, {money} টাকা",
+  "en": "Iftar chola and peyaju: {n} packets, Tk {money}"
+ },
+ "orderChanged": {
+  "bn": "{who}: \"না মামা, {item}-ই দেন!\"",
+  "en": "{who}: \"No, make it {item}!\""
+ },
+ "needyLeft": {
+  "bn": "কেউ সিট ছাড়েনি, তিনি দাঁড়াতে না পেরে নেমে গেলেন",
+  "en": "Nobody gave up a seat; they could not stand and got off"
+ },
+ "busNeedyLeft": {
+  "bn": "সিট না পেয়ে নেমে গেছেন: {n} জন",
+  "en": "Got off for want of a seat: {n}"
+ },
+ "after_rented_rickshaw": {
+  "bn": "গল্প: নিজের রিকশা থানায় আটকা, ভাড়ার পুরনো রিকশা ধীরে চলে (আরও {n} দিন)",
+  "en": "Story: his rickshaw is held at the station; the rented old one is slower ({n} more days)"
+ },
+ "after_rokeya_ill": {
+  "bn": "গল্প: রোকেয়া অসুস্থ, রহিম চাচা আগে বাসায় ফেরেন; দিন ছোট (আরও {n} দিন)",
+  "en": "Story: Rokeya is ill, Rahim Chacha goes home early; shorter days ({n} more days)"
+ },
+ "after_flood_home": {
+  "bn": "গল্প: গ্রামে বন্যা, দিনের লক্ষ্য ২০০ টাকা বেশি (আরও {n} দিন)",
+  "en": "Story: floods in the village; the day's target is Tk 200 more ({n} more days)"
+ },
+ "after_evicted": {
+  "bn": "গল্প: উচ্ছেদের পর নতুন জায়গা, কাস্টমার কম (আজকের দিন)",
+  "en": "Story: a new spot after the eviction, fewer customers (today)"
+ },
+ "after_match_night": {
+  "bn": "গল্প: ক্রিকেট ফাইনাল! দোকানের টিভির সামনে দ্বিগুণ ভিড় (আজকের দিন)",
+  "en": "Story: the cricket final! Twice the crowd at the stall's TV (today)"
  }
 }

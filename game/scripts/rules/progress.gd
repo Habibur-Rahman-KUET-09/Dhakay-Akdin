@@ -206,6 +206,26 @@ func _samity_day(out: Dictionary) -> void:
 		out.samity_payout = back
 
 
+## A family scene now due (story.json's scenes): once, when a family's
+## feeling reaches 8 ("family_high_<who>") or falls to 2 ("family_low_<who>").
+## "" if none.
+func family_scene_due() -> String:
+	var shown: Array = data.story.get("scenes", [])
+	for who in open_characters():
+		var f := family(who)
+		var id: String = "family_high_" + who if f >= 8 else ("family_low_" + who if f <= 2 else "")
+		if id != "" and not shown.has(id):
+			return id
+	return ""
+
+
+func scene_shown(id: String) -> void:
+	if not data.story.has("scenes"):
+		data.story["scenes"] = []
+	if not (data.story.scenes as Array).has(id):
+		data.story.scenes.append(id)
+
+
 ## How `who`'s family feels, 0–10.
 func family(who: String) -> int:
 	return int((data.get("family", {}) as Dictionary).get(who, 5))
@@ -510,6 +530,7 @@ func _featured(who: String, earned: int, out: Dictionary) -> int:
 ## the seventh), the challenge (stars if met), the neighbours.
 func _day_done(who: String, result: Dictionary, out: Dictionary) -> void:
 	_samity_day(out)
+	_story_effect_day(who)
 	var today_state := daily()
 	var streak: Dictionary = data.streak
 	out.streak_stars = 0
@@ -568,7 +589,29 @@ func finish_chapter(chapter_id: String, effects := {}) -> Dictionary:
 		apply_npcs([{"id": effects.npc[0], "delta": int(effects.npc[1]), "what": "story"}], "story")
 	if effects.has("family"):
 		add_family(str(effects.family[0]), int(effects.family[1]))
+	if effects.has("after") and typeof(effects.after) == TYPE_DICTIONARY and str(effects.after.get("who", "")) != "":
+		var a: Dictionary = (effects.after as Dictionary).duplicate()
+		a["left"] = int(a.get("days", 1))
+		if not data.has("after"):
+			data["after"] = {}
+		data.after[str(a.who)] = a
 	return out
+
+
+## What a chapter still changes in `who`'s days ({speed, day_share,
+## target, arrivals, note, left}), or {}.
+func story_effect(who: String) -> Dictionary:
+	var a = (data.get("after", {}) as Dictionary).get(who, {})
+	return a if typeof(a) == TYPE_DICTIONARY and int(a.get("left", 0)) > 0 else {}
+
+
+func _story_effect_day(who: String) -> void:
+	var a := story_effect(who)
+	if a.is_empty():
+		return
+	a.left = int(a.left) - 1
+	if int(a.left) <= 0:
+		data.after.erase(who)
 
 
 # --- The neighbours (§৬.১) ----------------------------------------------------

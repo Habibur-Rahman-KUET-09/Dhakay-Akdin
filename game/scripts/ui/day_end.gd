@@ -2,7 +2,8 @@
 ## the money (with how the day went), where the money went (savings, the
 ## school fee, the mohalla fund), the XP towards the next level and what a
 ## new level opens, the day's extras (challenge, run of days, a record),
-## and two ways on: back to the mohalla, or straight into the next day.
+## a card to share the day (WhatsApp, Facebook), and two ways on: back to
+## the mohalla, or straight into the next day.
 extends Control
 
 const Look = preload("res://scripts/ui/look.gd")
@@ -23,7 +24,8 @@ var progress: Progress
 var got: Dictionary
 ## title, stars (0-5), sub (a line under the stars), money, lines (how the
 ## day went), extras (lines of the character's own, as the target met),
-## good (whether the day reached its target), kept_label.
+## good (whether the day reached its target), kept_label, share (the
+## day in a line, to share with friends; none, no card).
 var info: Dictionary
 
 
@@ -77,6 +79,8 @@ func _ready() -> void:
 	page.add_child(sub)
 	page.add_child(_money_card())
 	page.add_child(_progress_card())
+	if str(info.get("share", "")) != "":
+		page.add_child(_share_card())
 	_let_scroll(margin)
 
 	var buttons := VBoxContainer.new()
@@ -175,6 +179,64 @@ func _money_card() -> Control:
 	grid.add_child(_gain(s.t("fundTitle"), int(got.get("fund", 0)), Color("E6F4EC")))
 	col.add_child(grid)
 	return panel
+
+
+## Where the game is for anyone to play, in a browser.
+const GAME_URL := "https://pranerdhaka.web.app"
+
+
+## The day in a rickshaw-art frame, and buttons to send it to friends.
+func _share_card() -> Control:
+	var frame := PanelContainer.new()
+	var outer := Look.card(Look.MAGENTA, 22, 4)
+	outer.content_margin_left = 8
+	outer.content_margin_right = 8
+	outer.content_margin_top = 8
+	outer.content_margin_bottom = 8
+	frame.add_theme_stylebox_override("panel", outer)
+	var inner := PanelContainer.new()
+	var st := Look.card(Look.YELLOW, 16, 3)
+	st.content_margin_left = 14
+	st.content_margin_right = 14
+	st.content_margin_top = 12
+	st.content_margin_bottom = 12
+	inner.add_theme_stylebox_override("panel", st)
+	frame.add_child(inner)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	inner.add_child(col)
+	var title := Look.title(s.t("appTitle"), 26, Look.MAGENTA, false)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(title)
+	var line := Look.label(str(info.share), 18, true)
+	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(line)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	for way in ["whatsapp", "facebook"]:
+		var go := Look.chunky(s.t("share_" + way), Color("25D366") if way == "whatsapp" else Color("1877F2"), Color.WHITE, 16, 4, 14)
+		go.name = "Share_" + way
+		go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		go.custom_minimum_size = Vector2(0, 52)
+		go.pressed.connect(_share.bind(way))
+		grid.add_child(go)
+	col.add_child(grid)
+	return frame
+
+
+## Opens WhatsApp (or Facebook) with the day's line and the game's link;
+## in a browser that can, the phone's own share sheet.
+func _share(way: String) -> void:
+	var text := "%s\n%s %s" % [str(info.share), s.t("sharePlay"), GAME_URL]
+	if OS.has_feature("web") and way == "whatsapp":
+		var js := "navigator.share ? (navigator.share({text: %s}), true) : false" % JSON.stringify(text)
+		if bool(JavaScriptBridge.eval(js, true)):
+			return
+	if way == "facebook":
+		OS.shell_open("https://www.facebook.com/sharer/sharer.php?u=%s&quote=%s" % [GAME_URL.uri_encode(), str(info.share).uri_encode()])
+	else:
+		OS.shell_open("https://wa.me/?text=" + text.uri_encode())
 
 
 ## XP towards the next level, what a new level opens, and the extras.

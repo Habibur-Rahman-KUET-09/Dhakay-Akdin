@@ -12,6 +12,7 @@
 extends RefCounted
 
 const Balance = preload("res://scripts/rules/balance.gd")
+const Hands = preload("res://scripts/rules/activities.gd")
 const Calendar = preload("res://scripts/rules/calendar.gd")
 
 enum Event {
@@ -29,6 +30,8 @@ enum Event {
 	DAY_OVER,
 	WHO, ## ready, but whose order was it? Tap them (give_to)
 	WRONG_PERSON, ## handed to someone who did not order it
+	PHONE_PAY, ## paid by phone: check the SMS (settle_phone)
+	CHANGED, ## someone changed their (hidden) order: last_change
 }
 
 ## What can be ordered, in the order shown on the counter.
@@ -81,6 +84,15 @@ var weather := RandomNumberGenerator.new()
 ## Today's festival (when the scene gives the date): happy customers tip
 ## half the festival's extra.
 var festival := {}
+## Ramadan: few come for tea while people fast; before iftar (17:00 to
+## 19:00) everyone served also takes a packet of chola and peyaju.
+var ramadan := false
+var iftar_sold := 0
+## "No, make it a black tea": {seat, from, to} of the last change.
+var last_change := {}
+## More or fewer customers than usual (a story day: the eviction, the
+## cricket final), 1 as usual.
+var arrival_factor := 1.0
 var _weights := {}
 ## Things sold by kind (for the day's challenge).
 var sold_items := {}
@@ -99,6 +111,12 @@ var interactive := false
 var perfect := 0
 var _quality: Array = []
 var _hand_rng := RandomNumberGenerator.new()
+## Paid by phone (hands on): {fare, npc, sms} while the SMS is checked;
+## what came of each; the mohalla level (harder fakes later).
+var phone_pay := {}
+var phone_log: Array = []
+var level := 1
+var _phone_rng := RandomNumberGenerator.new()
 ## Remembering orders (with the hands on): in the rush an order is said
 ## once and shown for a few seconds, then it is up to Monir Mama to
 ## remember it; Rahim Chacha and Babu are never asked, he knows their
@@ -116,10 +134,12 @@ func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") ->
 		rng.seed = seed_value
 		weather.seed = seed_value + 7
 		_hand_rng.seed = seed_value + 13
+		_phone_rng.seed = seed_value + 17
 	else:
 		rng.randomize()
 		weather.randomize()
 		_hand_rng.randomize()
+		_phone_rng.randomize()
 	menu = (b.at("tea_stall.menu") as Dictionary).duplicate(true)
 	day_seconds = b.n("tea_stall.day_seconds")
 	kettle_size = int(b.n("tea_stall.kettle_cups"))
@@ -138,6 +158,7 @@ func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") ->
 		rain_chance = calendar.rain_chance(rain_chance, date)
 		hot_chance = calendar.hot_chance(hot_chance, date)
 		festival = calendar.festival(date)
+		ramadan = calendar.ramadan(date)
 	if weather.randf() < rain_chance:
 		rain_at = weather.randf_range(0.15, 0.75) * day_seconds
 		rain_seconds = b.n("tea_stall.rain_seconds")
@@ -168,6 +189,36 @@ func hour() -> float:
 
 
 ## In the morning or evening rush?
+## From level 3, now and then someone whose order is already hidden
+## changes their tea (milk tea to black, or back): once each, said aloud.
+func _change_orders(events: Array) -> void:
+	if not memory or level < 3:
+		return
+	for c in customers:
+		if c.has("changed") or not order_hidden(c) or c.kind in ["rahim", "babu"]:
+			continue
+		c["changed"] = true
+		if _phone_rng.randf() >= b.n("tea_stall.change_chance"):
+			continue
+		var i := (c.items as Array).find("milk_tea")
+		var to := "liquor_tea"
+		if i < 0:
+			i = (c.items as Array).find("liquor_tea")
+			to = "milk_tea"
+		if i < 0:
+			continue
+		var from: String = c.items[i]
+		c.items[i] = to
+		c.bill = int(c.bill) - price(from) + price(to)
+		last_change = {"seat": int(c.seat), "from": from, "to": to, "kind": str(c.kind), "npc": str(c.get("npc", ""))}
+		events.append(Event.CHANGED)
+
+
+## Ramadan's hour before iftar, when the stall sells iftar too.
+func iftar_time() -> bool:
+	return ramadan and hour() >= 17.0 and hour() < 19.0
+
+
 func rush() -> bool:
 	var h := hour()
 	for r in b.at("tea_stall.rush_hours"):
@@ -223,6 +274,7 @@ func update(dt: float) -> Array:
 			if c.get("npc", "") != "":
 				npc_log.append({"id": c.npc, "delta": -1, "what": "waited"})
 			events.append(Event.LEFT)
+	_change_orders(events)
 	_next_in -= dt
 	if _next_in <= 0.0:
 		var every := b.n("tea_stall.rush_arrival_every_s" if rush() else "tea_stall.arrival_every_s")
@@ -231,6 +283,9 @@ func update(dt: float) -> Array:
 		# Rain keeps people away, unless there is an awning to sit under.
 		if raining and not has("awning"):
 			every /= b.n("tea_stall.rain_arrivals")
+		if ramadan:
+			every *= b.n("tea_stall.ramadan_day_arrivals") if hour() < 17.0 else 1.0
+		every /= maxf(0.1, arrival_factor)
 		_next_in = every * rng.randf_range(0.6, 1.4)
 		if _arrive():
 			events.append(Event.ARRIVED)
@@ -527,7 +582,36 @@ func _hand(item: String, who: Dictionary, q: float) -> Array:
 		last_served = {"kind": who.kind, "bill": who.bill, "tip": tip, "happy": glad, "npc": npc, "thanks": thanks, "perfect": just_right,
 			"remembered": int(who.get("remembered", 0)) > 0}
 		events.append(Event.SERVED)
+		# Ramadan, before iftar: a packet of chola and peyaju with it.
+		if iftar_time():
+			var packet := int(b.n("tea_stall.iftar_price"))
+			money += packet
+			who.bill = int(who.bill) + packet
+			iftar_sold += 1
+		# Now and then the bill comes by phone: it waits for the SMS check.
+		if interactive and phone_pay.is_empty() and _phone_rng.randf() < b.n("tea_stall.phone_pay_chance"):
+			var fake := _phone_rng.randf() < b.n("rickshaw.phone_fake_chance")
+			phone_pay = {"fare": int(who.bill), "npc": npc, "sms": Hands.phone_sms(_phone_rng, int(who.bill), level, fake)}
+			money -= int(who.bill)
+			events.append(Event.PHONE_PAY)
 	return events
+
+
+## The SMS checked: the bill is taken unless a fake was believed; a real
+## one called fake leaves them unhappy (and a neighbour remembers).
+func settle_phone(said_fake: bool) -> String:
+	if phone_pay.is_empty():
+		return ""
+	var result := Hands.phone_result(phone_pay.sms, said_fake)
+	if result != "fooled":
+		money += int(phone_pay.fare)
+	if result == "wrong":
+		happy = maxi(0, happy - 1)
+		if str(phone_pay.npc) != "":
+			npc_log.append({"id": phone_pay.npc, "delta": -1, "what": "doubted"})
+	phone_log.append(result)
+	phone_pay = {}
+	return result
 
 
 ## Throws away what is in the tray.

@@ -355,3 +355,44 @@ func test_every_good_has_its_words() -> void:
 			for key in ["home_" + h.id, "homeHelp_" + h.id]:
 				check(s.t(key) != key, "%s: %s" % [lang, key])
 	check(int(Goods.phone().price) > 0 and int(Goods.samity().daily) > 0, "phone and samity priced")
+
+
+func test_family_scenes_when_feelings_run_high_or_low() -> void:
+	var p := _fresh()
+	eq(p.family_scene_due(), "", "nothing at 5")
+	p.add_family("rickshaw", 3)
+	eq(p.family_scene_due(), "family_high_rickshaw", "8: a happy evening")
+	p.scene_shown("family_high_rickshaw")
+	eq(p.family_scene_due(), "", "once")
+	p.add_family("rickshaw", -7)
+	eq(p.family_scene_due(), "family_low_rickshaw", "1: Sumi is upset")
+	const Story = preload("res://scripts/rules/story.gd")
+	var st := Story.new()
+	for who in ["rickshaw", "tea", "bus"]:
+		for kind in ["high", "low"]:
+			check(not st.scene("family_%s_%s" % [kind, who]).is_empty(), "a scene for %s %s" % [who, kind])
+	for id in ["bed", "fan", "desk", "tv", "house"]:
+		check(not st.scene("home_" + id).is_empty(), "a scene for the " + id)
+
+
+func test_a_chapter_changes_the_next_days() -> void:
+	var p := _fresh()
+	p.finish_chapter("rahim_9", {"after": {"days": 2, "target": 200, "note": "flood_home", "who": "rickshaw"}})
+	eq(int(p.story_effect("rickshaw").get("target", 0)), 200, "more to earn")
+	eq(p.story_effect("tea"), {}, "only for Rahim Chacha")
+	p.apply_tea_day({"earned": 100, "served": 5, "happy": 5, "lost": 0, "stars": 4.0})
+	eq(int(p.story_effect("rickshaw").get("left", 0)), 2, "a tea day does not count")
+	p.apply_day({"earned": 700, "trips": 8, "stars": 4.0, "fines": 0})
+	eq(int(p.story_effect("rickshaw").get("left", 0)), 1, "one day done")
+	p.apply_day({"earned": 700, "trips": 8, "stars": 4.0, "fines": 0})
+	eq(p.story_effect("rickshaw"), {}, "over")
+	const Story = preload("res://scripts/rules/story.gd")
+	const Strings = preload("res://scripts/ui/strings.gd")
+	var s := Strings.new()
+	for c in Story.new().chapters:
+		var afters := [c.get("after", {})]
+		for o in c.get("choice", {}).get("options", []):
+			afters.append(o.get("effects", {}).get("after", {}))
+		for a in afters:
+			if not a.is_empty():
+				check(s.t("after_" + str(a.note)) != "after_" + str(a.note), "words for %s" % a.note)

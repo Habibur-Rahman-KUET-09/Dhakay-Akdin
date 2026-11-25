@@ -15,6 +15,7 @@ signal offer_refuse
 signal again_pressed
 signal tea_pressed
 signal pump_pressed
+signal hood_down_pressed
 
 var s: Strings
 var map: RoadMap
@@ -52,6 +53,7 @@ var _energy_fill: StyleBoxFlat
 var _energy_text: Label
 var _energy_shown := -1
 var _tea_button: Button
+var _hood_button: Button
 var _pump_button: Button
 
 
@@ -164,6 +166,17 @@ func _ready() -> void:
 	_pump_button.pressed.connect(func(): pump_pressed.emit())
 	_pump_button.visible = false
 	root.add_child(_pump_button)
+	# After the rain, with the hood still up: fold it down.
+	_hood_button = Look.button(s.t("hoodDownButton"), Look.PARROT_DARK, 18)
+	_hood_button.name = "HoodDown"
+	_hood_button.set_anchors_preset(Control.PRESET_CENTER)
+	_hood_button.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_hood_button.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_hood_button.offset_top = 240
+	_hood_button.offset_bottom = 240
+	_hood_button.pressed.connect(func(): hood_down_pressed.emit())
+	_hood_button.visible = false
+	root.add_child(_hood_button)
 
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
@@ -296,8 +309,17 @@ func show_tea(shown: bool, price := 0) -> void:
 	_tea_button.visible = shown
 
 
+func show_hood_down(shown: bool) -> void:
+	if _hood_button.visible != shown:
+		_hood_button.visible = shown
+
+
 func show_pump(shown: bool) -> void:
 	_pump_button.visible = shown
+
+
+func hood_rect() -> Rect2:
+	return _hood_button.get_global_rect().grow(8) if _hood_button.visible else Rect2()
 
 
 func pump_rect() -> Rect2:

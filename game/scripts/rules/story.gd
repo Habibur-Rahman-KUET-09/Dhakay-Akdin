@@ -8,6 +8,8 @@ const PATH := "res://content/story.json"
 
 var cast: Dictionary
 var chapters: Array
+## Short family scenes (not chapters): for things bought for the home.
+var scenes: Array = []
 var school_goal := 3000
 
 
@@ -15,11 +17,20 @@ func _init(path := PATH) -> void:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
 	cast = parsed.cast
 	chapters = parsed.chapters
+	scenes = parsed.get("scenes", [])
 	school_goal = int(Balance.new().n("rickshaw.school_fee_goal"))
 
 
 func chapter(id: String) -> Dictionary:
 	for c in chapters:
+		if c.id == id:
+			return c
+	return {}
+
+
+## A family scene ("home_bed"…), or {}.
+func scene(id: String) -> Dictionary:
+	for c in scenes:
 		if c.id == id:
 			return c
 	return {}

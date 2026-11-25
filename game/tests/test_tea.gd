@@ -249,3 +249,40 @@ func test_the_regulars_usual_is_never_said() -> void:
 	t.memory = true
 	t._arrive("rahim")
 	check(t.order_hidden(t.customers[0]), "Monir Mama knows what Rahim Chacha takes")
+
+
+func test_ramadan_iftar_at_the_stall() -> void:
+	var b := Balance.new()
+	var t := TeaDay.new(b, 3, [], "2027-02-20")
+	check(t.ramadan, "Ramadan in February 2027")
+	t.clock = t.day_seconds * (17.5 - b.n("tea_stall.start_hour")) / (b.n("tea_stall.end_hour") - b.n("tea_stall.start_hour"))
+	check(t.iftar_time(), "half past five: iftar time")
+	var plain := TeaDay.new(b, 3, [], "2027-04-20")
+	check(not plain.ramadan and not plain.iftar_time(), "not in April")
+
+
+func test_a_hidden_order_can_change() -> void:
+	var b := Balance.new()
+	var t := TeaDay.new(b, 3)
+	t.memory = true
+	t.level = 5
+	t.customers = [{"id": 1, "seat": 0, "kind": "normal", "items": ["milk_tea"], "ordered": ["milk_tea"], "patience": 30.0, "left": 30.0,
+		"bill": t.price("milk_tea"), "npc": "", "hide_at": 0.0}]
+	var changed := false
+	for i in 40:
+		t.customers[0].erase("changed")
+		var events := []
+		t._change_orders(events)
+		if events.has(TeaDay.Event.CHANGED):
+			changed = true
+			break
+	check(changed, "sometimes they change their mind")
+	eq(t.customers[0].items, ["liquor_tea"], "milk tea to black tea")
+	eq(t.customers[0].bill, t.price("liquor_tea"), "and the bill with it")
+	t.level = 1
+	t.customers[0].erase("changed")
+	var none := []
+	for i in 40:
+		t._change_orders(none)
+		t.customers[0].erase("changed")
+	check(none.is_empty(), "not before level 3")

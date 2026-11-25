@@ -301,3 +301,18 @@ func test_the_needy_go_to_the_front_seats_first() -> void:
 	eq(t.problems(), ["elder"], "a young man in a front seat while someone ill stands")
 	t.fix("elder")
 	eq(young.seat, BusDay.SEATS, "he stands")
+
+
+func test_a_needy_rider_left_standing_gets_off() -> void:
+	var t := _bus()
+	t.riders.clear()
+	t.stop_i = 0
+	var sick := _person(t, 1, "needy", false, BusDay.SEATS)
+	var seated := _person(t, 2, "needy", false, BusDay.ELDER_SEATS[0])
+	t.rating = 4.0
+	var events := []
+	t._arrive(events)
+	check(events.has(BusDay.Event.NEEDY_LEFT), "left standing since the last stop: off")
+	check(not t.riders.has(sick) and t.riders.has(seated), "only the one standing")
+	eq(t.needy_left, 1, "counted")
+	check(t.rating < 4.0, "the bus thinks less of Babu")

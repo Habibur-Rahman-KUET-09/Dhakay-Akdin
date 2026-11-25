@@ -99,6 +99,7 @@ var _call_rng := RandomNumberGenerator.new()
 var _friend_energy := 0.0
 var _relay_energy := 0.0
 var _call_result := {}
+var _story_effect := {}
 var _way := {"turn": -1, "tiles": -1}
 var _way_key := []
 var _said_way := []
@@ -134,13 +135,18 @@ func _ready() -> void:
 	shift = Day.new(map, b, -1, progress.date(), Day.trip_for_level(progress.level()))
 	shift.interactive = Activity.wanted()
 	shift.follow_route = Driving.easy()
+	shift.easy = Driving.easy()
 	shift.level = progress.level()
+	# A chapter's mark on the next days: a rented old rickshaw, shorter
+	# days with Rokeya ill, more to earn for the flooded village.
+	_story_effect = progress.story_effect("rickshaw")
+	shift.day_seconds *= float(_story_effect.get("day_share", 1.0))
 	_call_rng.randomize()
 	var call_share := HomeCall.plan(_call_rng, progress.level())
 	if call_share >= 0.0:
 		_call_at = call_share * shift.day_seconds
-	_target_money = int(b.n("rickshaw.daily_target"))
-	shift.base_speed *= progress.speed_factor()
+	_target_money = int(b.n("rickshaw.daily_target")) + int(_story_effect.get("target", 0))
+	shift.base_speed *= progress.speed_factor() * float(_story_effect.get("speed", 1.0))
 	shift.energy_factor = progress.energy_factor()
 	# Resting better at home (a bed, a fan): more energy to start with.
 	shift.energy_max += progress.home_energy()
@@ -175,7 +181,12 @@ func _ready() -> void:
 	await _step("traffic")
 	traffic = Traffic.new()
 	add_child(traffic)
-	traffic.setup(map, map.home, Traffic.counts_for(map.id))
+	var counts := Traffic.counts_for(map.id)
+	# Easy driving: fewer vehicles on the roads, so fewer jams.
+	if shift.easy:
+		for k in counts:
+			counts[k] = int(counts[k] * b.n("rickshaw.easy_traffic"))
+	traffic.setup(map, map.home, counts)
 	traffic.focus = shift.driver
 	traffic.signal_cycle = shift.signal_cycle
 	_person_mesh = Models.person()
@@ -231,6 +242,7 @@ func _ready() -> void:
 	hud.offer_refuse.connect(_on_refuse)
 	hud.tea_pressed.connect(_on_tea)
 	hud.pump_pressed.connect(_on_pump)
+	hud.hood_down_pressed.connect(_on_hood_down)
 	add_child(hud)
 	_police = _police_man()
 	add_child(_police)
@@ -270,7 +282,9 @@ func _ready() -> void:
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
-	if not shift.festival.is_empty():
+	if not _story_effect.is_empty():
+		_say(strings.t("after_" + str(_story_effect.note), {"n": int(_story_effect.left)}), Look.MAGENTA, 6.0)
+	elif not shift.festival.is_empty():
 		_say(str(shift.festival.greeting.get(strings.lang, shift.festival.greeting.en)), Look.MAGENTA, 6.0)
 	elif shift.foggy:
 		_say(strings.t("fogMorning"), Look.SKY, 4.0)
@@ -509,7 +523,11 @@ func _process(dt: float) -> void:
 	_handle(events)
 	if not is_processing():
 		return
-	if _call_at >= 0.0 and shift.clock >= _call_at and _activity == null:
+	hud.show_hood_down(shift.interactive and shift.hood_up and not shift.raining)
+	# A call from home comes when he is standing still (a signal, a jam),
+	# or after half a minute's wait for that.
+	if _call_at >= 0.0 and shift.clock >= _call_at and _activity == null \
+			and (shift.speed_now < 0.05 or shift.clock >= _call_at + 30.0):
 		_call_at = -1.0
 		_ring_home()
 	if events.has(Driver.Event.WRONG_WAY) and not events.has(Day.POLICE):
@@ -1003,6 +1021,12 @@ func _sms_checked(_score: float, act) -> void:
 	_say(strings.t("phone_" + result, {"fare": fare}), colour, 3.0)
 
 
+func _on_hood_down() -> void:
+	shift.lower_hood()
+	hud.show_hood_down(false)
+	_say(strings.t("hoodDown"), Look.PARROT, 2.0)
+
+
 ## Rain on the passenger: up with the hood, and the plastic over them.
 func _raise_hood() -> void:
 	if _activity != null:
@@ -1170,6 +1194,7 @@ func _end_day() -> void:
 		"sub": strings.t("avgRating", {"stars": _stars(snappedf(shift.average_stars(), 0.1))}),
 		"money": shift.money,
 		"lines": lines,
+		"share": strings.t("share_rickshaw_rain" if shift.rain_at >= 0.0 else "share_rickshaw", {"n": shift.trips, "money": shift.money}) if shift.trips > 0 else "",
 		"kept_label": strings.t("gainKeptLabel"),
 		"extras": [strings.t("targetMet" if met else "targetMissed", {"target": _target_money})],
 		"good": met,
@@ -1193,7 +1218,7 @@ func _input(event: InputEvent) -> void:
 		var finger: int = event.index
 		if event.pressed:
 			if hud.offer_rect().has_point(event.position) or hud.tea_rect().has_point(event.position) \
-					or hud.pump_rect().has_point(event.position):
+					or hud.pump_rect().has_point(event.position) or hud.hood_rect().has_point(event.position):
 				pass
 			elif hud.bell_rect().has_point(event.position):
 				_ring()

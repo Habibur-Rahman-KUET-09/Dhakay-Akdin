@@ -88,7 +88,10 @@ func test_choices_do_only_what_the_game_knows() -> void:
 		eq(c.choice.options.size(), 2, "%s: two ways" % c.id)
 		for o in c.choice.options:
 			for k in o.effects:
-				check(k in ["taka", "npc", "family"], "%s: knows the effect %s" % [c.id, k])
+				check(k in ["taka", "npc", "family", "after"], "%s: knows the effect %s" % [c.id, k])
+			if o.effects.has("after"):
+				for a in o.effects.after:
+					check(a in ["days", "speed", "day_share", "target", "arrivals", "note"], "%s: knows the after %s" % [c.id, a])
 			if o.effects.has("npc"):
 				check(ids.has(o.effects.npc[0]), "%s: %s is a neighbour" % [c.id, o.effects.npc[0]])
 			if o.effects.has("family"):

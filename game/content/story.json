@@ -1,5 +1,5 @@
 {
- "note": "Story chapters (§৬.২): ten for each character and a side story each (n 11), unlocked by days played, money earned, upgrades bought or the school fee. Choices may give or take money (taka), move how a neighbour feels (npc) or a family's feeling (family). Pictures are drawn from the scene name until real art arrives.",
+ "note": "Story chapters (§৬.২): ten for each character and a side story each (n 11), unlocked by days played, money earned, upgrades bought or the school fee. Choices may give or take money (taka), move how a neighbour feels (npc) or a family's feeling (family). Pictures are drawn from the scene name until real art arrives. scenes: short family scenes, not chapters: for things bought for the home (home_<item>, after buying and from the shop), and once when a family's feeling reaches 8 or falls to 2 (family_high_<who>, family_low_<who>, on the mohalla page). after: what a chapter (or a choice's effects) changes in the next days of play: days, and speed (the rickshaw's), day_share (a shorter day), target (more to earn), arrivals (customers at the stall); note names the words shown.",
  "cast": {
   "rahim": {
    "bn": "রহিম চাচা",
@@ -543,7 +543,12 @@
        "family": [
         "rickshaw",
         1
-       ]
+       ],
+       "after": {
+        "days": 3,
+        "speed": 0.85,
+        "note": "rented_rickshaw"
+       }
       },
       "lines": [
        {
@@ -694,6 +699,11 @@
       ]
      }
     ]
+   },
+   "after": {
+    "days": 3,
+    "day_share": 0.8,
+    "note": "rokeya_ill"
    }
   },
   {
@@ -784,6 +794,11 @@
       ]
      }
     ]
+   },
+   "after": {
+    "days": 7,
+    "target": 200,
+    "note": "flood_home"
    }
   },
   {
@@ -1228,6 +1243,11 @@
       ]
      }
     ]
+   },
+   "after": {
+    "days": 1,
+    "arrivals": 0.6,
+    "note": "evicted"
    }
   },
   {
@@ -1370,7 +1390,12 @@
       }
      ]
     }
-   ]
+   ],
+   "after": {
+    "days": 1,
+    "arrivals": 2.0,
+    "note": "match_night"
+   }
   },
   {
    "id": "monir_9",
@@ -2258,6 +2283,349 @@
      }
     ]
    }
+  }
+ ],
+ "scenes": [
+  {
+   "id": "home_bed",
+   "who": "rickshaw",
+   "n": 0,
+   "title": {
+    "bn": "নতুন চৌকি",
+    "en": "A new bed"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "rokeya",
+       "bn": "এত দিন মেঝেতে মাদুর পেতে ঘুমিয়েছি। আজ নতুন চৌকি!",
+       "en": "All this time we slept on a mat on the floor. Today, a new bed!"
+      },
+      {
+       "by": "sumi",
+       "bn": "আব্বা, আমি জানালার পাশে শোব!",
+       "en": "Abba, I'll sleep by the window!"
+      },
+      {
+       "by": "rahim",
+       "bn": "শোও মা। ভালো ঘুম হলে কাল আমিও জোরে প্যাডেল মারতে পারব।",
+       "en": "Sleep well, dear. With a good night's rest I'll pedal harder tomorrow too."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "home_fan",
+   "who": "rickshaw",
+   "n": 0,
+   "title": {
+    "bn": "ঘরে ফ্যান",
+    "en": "A fan at home"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, ফ্যানের বাতাসে আমার খাতার পাতা উড়ে যাচ্ছে!",
+       "en": "Abba, the fan is blowing the pages of my notebook away!"
+      },
+      {
+       "by": "rokeya",
+       "bn": "গরমে আর হাতপাখা ঘোরাতে হবে না।",
+       "en": "No more waving a hand fan in the heat."
+      },
+      {
+       "by": "rahim",
+       "bn": "আরামে ঘুমাও সবাই। গরমের রাতে আমিও এখন একটু জিরোতে পারব।",
+       "en": "Sleep easy, all of you. Now I can rest a little on hot nights too."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "home_desk",
+   "who": "rickshaw",
+   "n": 0,
+   "title": {
+    "bn": "সুমির পড়ার টেবিল",
+    "en": "Sumi's study desk"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আমার নিজের টেবিল! এখানে বসেই বৃত্তি পরীক্ষার পড়া পড়ব।",
+       "en": "My very own desk! I'll study for the scholarship exam right here."
+      },
+      {
+       "by": "rokeya",
+       "bn": "বই-খাতা আর মেঝেতে ছড়িয়ে থাকবে না।",
+       "en": "No more books and notebooks all over the floor."
+      },
+      {
+       "by": "rahim",
+       "bn": "মন দিয়ে পড়ো মা। তোমার আব্বা পারেনি, তুমি পারবে।",
+       "en": "Study hard, dear. Your Abba couldn't, but you will."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "home_tv",
+   "who": "rickshaw",
+   "n": 0,
+   "title": {
+    "bn": "সন্ধ্যার টিভি",
+    "en": "TV in the evening"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, খবরে মিরপুরের রাস্তা দেখাচ্ছে!",
+       "en": "Abba, the news is showing the roads of Mirpur!"
+      },
+      {
+       "by": "rahim",
+       "bn": "ওই মোড়েই তো আজ যাত্রী নামিয়েছি!",
+       "en": "That's the very corner where I dropped a passenger today!"
+      },
+      {
+       "by": "rokeya",
+       "bn": "পড়া শেষ করে তবে কার্টুন, সুমি।",
+       "en": "Cartoons only after your homework, Sumi."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "home_house",
+   "who": "rickshaw",
+   "n": 0,
+   "title": {
+    "bn": "পাকা ঘরে ওঠা",
+    "en": "Into a brick house"
+   },
+   "panels": [
+    {
+     "scene": "home_dawn",
+     "lines": [
+      {
+       "by": "rokeya",
+       "bn": "টিনের চাল দিয়ে আর বৃষ্টির পানি পড়বে না।",
+       "en": "No more rain dripping through a tin roof."
+      },
+      {
+       "by": "sumi",
+       "bn": "আব্বা, এখন আমার নিজের একটা কোণ আছে!",
+       "en": "Abba, I have a corner of my own now!"
+      },
+      {
+       "by": "rahim",
+       "bn": "গ্রাম থেকে এসে প্রথম রাত ফুটপাতে কাটিয়েছিলাম। আজ পাকা ঘরে উঠলাম।",
+       "en": "My first night in the city, I slept on the pavement. Today we moved into a brick house."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_high_rickshaw",
+   "who": "rickshaw",
+   "n": 0,
+   "title": {
+    "bn": "বাসায় খুশির সন্ধ্যা",
+    "en": "A happy evening at home"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা, আজ তুমি তাড়াতাড়ি এসেছ! চলো, আমার আঁকা ছবিগুলো দেখাই।",
+       "en": "Abba, you're home early today! Come, let me show you my drawings."
+      },
+      {
+       "by": "rokeya",
+       "bn": "তুমি এখন বাসার খবর রাখো, মেয়েটা সেটা টের পায়।",
+       "en": "You keep up with home now, and she can tell."
+      },
+      {
+       "by": "rahim",
+       "bn": "তোমরাই তো আমার সবচেয়ে বড় আয়।",
+       "en": "You two are the best thing I earn."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_low_rickshaw",
+   "who": "rickshaw",
+   "n": 0,
+   "title": {
+    "bn": "সুমির অভিমান",
+    "en": "Sumi is upset"
+   },
+   "panels": [
+    {
+     "scene": "home_night",
+     "lines": [
+      {
+       "by": "sumi",
+       "bn": "আব্বা তো ফোনই ধরে না। আমি আব্বার সাথে কথা বলব না।",
+       "en": "Abba never answers the phone. I'm not talking to Abba."
+      },
+      {
+       "by": "rokeya",
+       "bn": "মেয়েটা অভিমান করেছে। ওকে একটু সময় দিও।",
+       "en": "She's hurt. Give her a little time."
+      },
+      {
+       "by": "rahim",
+       "bn": "ঠিক বলেছ। কাল থেকে ফোন এলে ধরব, কথা দিলাম।",
+       "en": "You're right. From tomorrow I'll answer when they call, I promise."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_high_tea",
+   "who": "tea",
+   "n": 0,
+   "title": {
+    "bn": "গ্রাম থেকে বোনের ফোন",
+    "en": "A call from his sister"
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "sister",
+       "bn": "ভাই, এখন প্রতি সপ্তাহে তোর ফোন আসে। মা খুব খুশি।",
+       "en": "Brother, your call comes every week now. Ma is so happy."
+      },
+      {
+       "by": "monir",
+       "bn": "মায়ের দোয়াতেই তো দোকানটা চলছে রে।",
+       "en": "It's Ma's prayers that keep the stall going."
+      },
+      {
+       "by": "sister",
+       "bn": "ঈদে বাড়ি আসবি তো? মা তোর জন্য পিঠা বানাবে।",
+       "en": "Will you come home for Eid? Ma will make pitha for you."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_low_tea",
+   "who": "tea",
+   "n": 0,
+   "title": {
+    "bn": "বোনের অভিযোগ",
+    "en": "His sister's complaint"
+   },
+   "panels": [
+    {
+     "scene": "tea_stall",
+     "lines": [
+      {
+       "by": "sister",
+       "bn": "ভাই, মায়ের ওষুধের কথা কতবার বললাম। তোর তো সময়ই হয় না।",
+       "en": "Brother, how many times have I told you about Ma's medicine? You never have time."
+      },
+      {
+       "by": "monir",
+       "bn": "দোকানের ভিড়ে মাথা ঠিক থাকে না রে, বোন।",
+       "en": "With the crowd at the stall I can't think straight, sister."
+      },
+      {
+       "by": "sister",
+       "bn": "মা কিছু বলে না, কিন্তু চুপ করে বসে থাকে।",
+       "en": "Ma says nothing, but she just sits there quietly."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_high_bus",
+   "who": "bus",
+   "n": 0,
+   "title": {
+    "bn": "মায়ের খুশি",
+    "en": "His mother is glad"
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "babu_ma",
+       "bn": "বাবা, তোর পাঠানো টাকায় ঘরের চালে নতুন টিন দিয়েছি।",
+       "en": "Son, with the money you sent I put new tin on the roof."
+      },
+      {
+       "by": "babu",
+       "bn": "মা, শীতের আগে তোমার জন্য একটা কম্বলও পাঠাব।",
+       "en": "Ma, I'll send you a blanket too before the winter."
+      },
+      {
+       "by": "babu_ma",
+       "bn": "তুই ভালো থাকলেই আমার সব হয়।",
+       "en": "As long as you're well, I have everything."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family_low_bus",
+   "who": "bus",
+   "n": 0,
+   "title": {
+    "bn": "মা অপেক্ষা করেন",
+    "en": "His mother waits"
+   },
+   "panels": [
+    {
+     "scene": "street_morning",
+     "lines": [
+      {
+       "by": "babu_ma",
+       "bn": "বাবা, অনেক দিন তোর গলা শুনি না। শহরে গিয়ে কি মাকে ভুলে গেলি?",
+       "en": "Son, I haven't heard your voice in so long. Have you forgotten your Ma in the city?"
+      },
+      {
+       "by": "babu",
+       "bn": "না মা, কাজের চাপে... এখন থেকে রোজ একবার ফোন দেব।",
+       "en": "No, Ma, it's the work... From now on I'll call once a day."
+      },
+      {
+       "by": "babu_ma",
+       "bn": "দিও বাবা। মায়ের মন তো, অপেক্ষা করে থাকে।",
+       "en": "Do, son. A mother's heart keeps waiting."
+      }
+     ]
+    }
+   ]
   }
  ]
 }

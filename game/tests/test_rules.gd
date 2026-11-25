@@ -682,3 +682,56 @@ func test_eid_ramadan_and_the_morning_news() -> void:
 	check(not c.news("2026-10-05").is_empty(), "always something to say")
 	var d := Day.new(_mirpur(), Balance.new(), 3, "2027-02-20")
 	check(d.ramadan, "the day knows it is Ramadan")
+
+
+func test_the_hood_stays_up_after_the_rain_until_folded() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 3)
+	d.interactive = true
+	d.rain_at = 0.0
+	d.rain_seconds = 5.0
+	d.update(0.1)
+	check(d.raining, "raining")
+	d.raise_hood(1.0)
+	d.update(6.0)
+	check(not d.raining and d.hood_up, "the rain is over, the hood still up")
+	d.update(0.1)
+	near(d.speed_factor, Balance.new().n("rickshaw.hood_drag"), "and it slows him")
+	d.lower_hood()
+	d.update(0.1)
+	near(d.speed_factor, 1.0, "folded: full speed")
+
+
+func test_easy_driving_lower_fares_and_fines() -> void:
+	var b := Balance.new()
+	var hard := Day.new(_mirpur(), b, 7)
+	var easy := Day.new(_mirpur(), b, 7)
+	easy.easy = true
+	easy.waiting.clear()
+	easy._top_up()
+	var fair_hard := 0
+	var fair_easy := 0
+	for w in hard.waiting:
+		fair_hard += int(w.fair)
+	for w in easy.waiting:
+		fair_easy += int(w.fair)
+	check(fair_easy < fair_hard, "fares a little lower (%d < %d)" % [fair_easy, fair_hard])
+	near(easy._fine_share(), 0.5, "fines halved")
+	near(hard._fine_share(), 1.0, "not when driving normally")
+
+
+func test_the_paper_knows_tomorrows_rain() -> void:
+	const Calendar = preload("res://scripts/rules/calendar.gd")
+	var c := Calendar.new()
+	var b := Balance.new()
+	var usual := b.n("rickshaw.rain_chance_per_day")
+	var said := 0
+	var day := "2026-07-01"
+	for i in 30:
+		var tomorrow := Calendar.next_day(day)
+		var keys: Array = c.news(day, usual).map(func(n): return n.key)
+		var d := Day.new(_mirpur(), b, -1, tomorrow)
+		eq(keys.has("news_rain_tomorrow"), d.rain_at >= 0.0, "%s: the paper is right about %s" % [day, tomorrow])
+		if keys.has("news_rain_tomorrow"):
+			said += 1
+		day = tomorrow
+	check(said > 0, "some rain in July")

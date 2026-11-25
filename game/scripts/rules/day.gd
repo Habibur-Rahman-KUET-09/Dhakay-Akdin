@@ -95,6 +95,9 @@ var _last_ring := -10.0
 var _hand_rng := RandomNumberGenerator.new()
 ## The hood: up in the rain (a little slower, but the passenger stays
 ## dry); asked for once per rider and shower.
+## Easy driving (a setting): fares a little lower, fines halved (and the
+## police keep him half as long); the scene also thins the traffic.
+var easy := false
 var hood_up := false
 var _hood_asked := false
 ## A ride paid by phone, waiting for the SMS to be checked: {fare, sms,
@@ -164,6 +167,10 @@ func _init(road_map: RoadMap, b: Balance, seed_value := -1, date := "", trip := 
 	rain_seconds = b.n("rickshaw.rain_seconds")
 	if seed_value >= 0:
 		weather.seed = seed_value + 7
+	elif date != "":
+		# The same weather for everyone on a date, so Rafiq Chacha's paper
+		# can say today whether it rains tomorrow (Calendar.rains_on).
+		weather.seed = Calendar.weather_seed(date)
 	else:
 		weather.randomize()
 	var chance := b.n("rickshaw.rain_chance_per_day")
@@ -204,7 +211,8 @@ func update(dt: float) -> Array:
 	speed_factor = balance.n("rickshaw.tired_speed") if energy < balance.n("rickshaw.tired_below") else 1.0
 	if flat:
 		speed_factor *= balance.n("rickshaw.flat_speed")
-	if hood_up and raining:
+	# The hood catches the wind: slower while it is up, rain or not.
+	if hood_up:
 		speed_factor *= balance.n("rickshaw.hood_drag")
 	# The bell rung: people step aside for a moment.
 	if clear_left > 0.0:
@@ -251,9 +259,10 @@ func _weather(events: Array) -> void:
 	if now != raining:
 		raining = now
 		events.append(RAIN_START if now else RAIN_END)
-		# Without the hands, the hood goes up by itself; it comes down when
-		# the rain stops.
-		hood_up = now and not interactive
+		# Without the hands, the hood goes up by itself and comes down when
+		# the rain stops. With them, it stays up until he lowers it.
+		if not interactive:
+			hood_up = now
 		_hood_asked = false
 
 
@@ -274,6 +283,11 @@ func raise_hood(score: float) -> void:
 		riding["dry"] = true
 	elif score < 0.4:
 		riding.flooded += 1
+
+
+## The hood folded down again (after the rain): full speed back.
+func lower_hood() -> void:
+	hood_up = false
 
 
 ## Is p under water? Flooded tiles always; in rain, the tiles next to them
@@ -298,14 +312,18 @@ func on_flood() -> bool:
 func _police(events: Array) -> void:
 	if _police_rest > 0.0:
 		return
-	var fine := int(balance.n("rickshaw.wrong_way_fine"))
+	var fine := int(balance.n("rickshaw.wrong_way_fine") * _fine_share())
 	money -= fine
 	fines += fine
 	police_fines += fine
-	held = balance.n("rickshaw.wrong_way_stop_s")
+	held = balance.n("rickshaw.wrong_way_stop_s") * _fine_share()
 	_police_rest = held + 15.0
 	speed_now = 0.0
 	events.append(POLICE)
+
+
+func _fine_share() -> float:
+	return balance.n("rickshaw.easy_fine") if easy else 1.0
 
 
 ## Stopped next to a tea stall, not bargaining, and not full of energy.
@@ -383,7 +401,7 @@ func _entered(events: Array) -> void:
 		events.append(WORN_OUT)
 	# Into a junction against the red light: a fine.
 	if red_at(driver.cell, driver.heading):
-		var fine := int(balance.n("rickshaw.red_light_fine"))
+		var fine := int(balance.n("rickshaw.red_light_fine") * _fine_share())
 		money -= fine
 		fines += fine
 		events.append(FINED)
@@ -645,6 +663,8 @@ func _top_up() -> void:
 		if ramadan and who == "normal" and hour() >= 15.0 and _hand_rng.randf() < 0.5:
 			who = "hurry"
 		var fair_fare := fares.fair(tiles)
+		if easy:
+			fair_fare = fares.round_fare(fair_fare * balance.n("rickshaw.easy_fare"))
 		_next_id += 1
 		var offered := fares.offer(who, fair_fare, rng)
 		var w := {

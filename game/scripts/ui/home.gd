@@ -65,6 +65,11 @@ var _settings_open := false
 var _friends_news: Array = []
 var _friends_note: Label
 var _friends_busy := false
+## Reading aloud: on (kept from the setting), and a finger held down
+## (where, since when) to read what is under it.
+var _read_aloud := false
+var _hold_at := -1.0
+var _hold_pos := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -75,6 +80,7 @@ func _ready() -> void:
 		Graphics.save_level("low")
 		_lowered = true
 	progress = Progress.new(b)
+	_read_aloud = ReadAloud.wanted()
 	cloud = Cloud.new()
 	add_child(cloud)
 	music = Music.new()
@@ -97,8 +103,10 @@ func _backup() -> void:
 
 
 func _build() -> void:
+	# A story being read stays (a copy online finishing behind it used to
+	# rebuild the page and take the story away mid-way).
 	for c in get_children():
-		if c != cloud and c != music:
+		if c != cloud and c != music and not (c is StoryPlayer and not c.is_queued_for_deletion()):
 			c.queue_free()
 	if _tab == "":
 		_tab = progress.featured()
@@ -116,6 +124,11 @@ func _build() -> void:
 		_start_sheet(_sheet)
 	if _settings_open:
 		_settings()
+	for c in get_children():
+		if c is StoryPlayer:
+			move_child(c, -1)
+	if _page == "hub" and _sheet == "" and not _settings_open:
+		_family_scene.call_deferred()
 
 
 ## From the title page into the mohalla.
@@ -816,9 +829,13 @@ func _news_card() -> Control:
 	var top := HBoxContainer.new()
 	top.add_theme_constant_override("separation", 10)
 	top.add_child(Look.icon("book", 36, Look.OUTLINE))
-	top.add_child(Look.label(s.t("newsTitle"), 18, true))
+	var title := Look.label(s.t("newsTitle"), 18, true)
+	# Room to grow, or the label wraps a letter to a line.
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(title)
 	col.add_child(top)
-	for item in Calendar.new().news(progress.date()):
+	for item in Calendar.new().news(progress.date(), b.n("rickshaw.rain_chance_per_day")):
 		var values := {}
 		for k in item.values:
 			var v = item.values[k]
@@ -840,6 +857,9 @@ func _today_chips(who: String) -> Control:
 			line += " · " + s.t("festivalTip", {"n": int(fest.tip)})
 		flow.add_child(_wrap_pill("flag", line, Color("FDE7F0"), Look.MAGENTA))
 	flow.add_child(_wrap_pill(_weather_icon(), s.t("chip_" + _season()), Color("D6ECF7"), Look.SKY_DARK))
+	var after := progress.story_effect(who)
+	if not after.is_empty():
+		flow.add_child(_wrap_pill("book", s.t("after_" + str(after.note), {"n": int(after.left)}), Color("F3E5F5"), Look.MAGENTA))
 	if who == progress.featured() and not progress.daily().featured:
 		flow.add_child(_wrap_pill("coin", s.t("chipDouble", {"name": s.t(_name_key(who))}), Color("FFE9A8"), Color.WHITE))
 	return flow
@@ -1153,6 +1173,11 @@ func _home_shop(page: VBoxContainer) -> void:
 		var parts := _goods_card(str(h.get("icon", "home")), Color("FFF1D6"), s.t("home_" + h.id), s.t("homeHelp_" + h.id))
 		if progress.has_home(h.id):
 			_owned_pill(parts[1], s.t("owned"))
+			if not story.scene("home_" + h.id).is_empty():
+				var again := Look.chunky(s.t("homeSceneAgain"), Color.WHITE, Look.OUTLINE, 14, 3, 14)
+				again.name = "HomeScene_" + h.id
+				again.pressed.connect(_play_home_scene.bind(h.id))
+				parts[1].add_child(again)
 		else:
 			_price_button(parts[1], int(h.price), _buy_home.bind(h.id), "Home_" + h.id)
 		grid.add_child(parts[0])
@@ -1170,6 +1195,34 @@ func _buy_home(id: String) -> void:
 	if progress.buy_home(id):
 		progress.save()
 		_build()
+		_play_home_scene(id)
+
+
+## A family's scene, once, when their feeling is high or low (and no
+## story is open already).
+func _family_scene() -> void:
+	for c in get_children():
+		if c is StoryPlayer and not c.is_queued_for_deletion():
+			return
+	var id := progress.family_scene_due()
+	if id == "" or story.scene(id).is_empty():
+		return
+	progress.scene_shown(id)
+	progress.save()
+	var player := StoryPlayer.new()
+	player.setup(story, story.scene(id), s)
+	add_child(player)
+
+
+## The family's little scene for a thing bought for the home.
+func _play_home_scene(id: String) -> void:
+	var c := story.scene("home_" + id)
+	if c.is_empty():
+		return
+	var player := StoryPlayer.new()
+	player.setup(story, c, s)
+	player.finished.connect(func(_id, _effects): _build())
+	add_child(player)
 
 
 func _buy_phone() -> void:
@@ -1409,6 +1462,14 @@ func _people_page(page: VBoxContainer) -> void:
 		text.add_child(Look.label(p[s.lang], 16, true))
 		text.add_child(Look.label(p.role[s.lang], 13, false, Look.MUTED))
 		text.add_child(Look.label(mood, 13, true, Look.PARROT_DARK if met and rel > 0 else (Color("B3261E") if met and rel < 0 else Look.MUTED)))
+		# The whole card opens their page.
+		var open := Button.new()
+		open.name = "Neighbour_" + str(p.id)
+		open.flat = true
+		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+			open.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+		open.pressed.connect(_neighbour_page.bind(str(p.id)))
+		panel.add_child(open)
 		grid.add_child(panel)
 	if not progress.data.log.is_empty():
 		page.add_child(_caption(s.t("lately")))
@@ -1469,6 +1530,7 @@ func _friends_page(page: VBoxContainer) -> void:
 	var f := Friends.of(progress.data)
 	var back := Look.chunky(s.t("friendsBack"), Color.WHITE, Look.OUTLINE, 15, 3, 14)
 	back.name = "FriendsBack"
+	back.autowrap_mode = TextServer.AUTOWRAP_OFF
 	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	back.pressed.connect(show_page.bind("hub"))
 	page.add_child(back)
@@ -1477,6 +1539,7 @@ func _friends_page(page: VBoxContainer) -> void:
 		page.add_child(Look.label(s.t("friendsOff"), 15, false, Look.MUTED))
 		return
 	_friends_note = Look.label("", 14, true, Look.VERMILION)
+	_friends_note.visible = false
 	for news in _friends_news:
 		var news_card := _card(Look.YELLOW, 16)
 		news_card.add_child(Look.label(str(news), 15, true))
@@ -1699,6 +1762,7 @@ func _say_friends(text: String, bad := true) -> void:
 	if is_instance_valid(_friends_note):
 		_friends_note.add_theme_color_override("font_color", Look.VERMILION if bad else Look.PARROT_DARK)
 		_friends_note.text = text
+		_friends_note.visible = text != ""
 
 
 func _friends_err(e: String) -> String:
@@ -1887,6 +1951,111 @@ func _refresh_friends() -> void:
 		_build()
 
 
+## A neighbour's page in the notebook: who they are, how they feel about
+## you, how much of their story has opened, and what happened lately.
+func _neighbour_page(id: String) -> void:
+	var p: Dictionary = {}
+	for x in neighbours.people:
+		if x.id == id:
+			p = x
+	if p.is_empty():
+		return
+	var rows := []
+	rows.append(Look.label(p.role[s.lang], 16, true, Look.MUTED))
+	var met: bool = progress.data.npcs.has(id)
+	var rel := progress.relation(id)
+	var feel := s.t("notMet") if not met else s.t("neighbourFeel", {"n": ("+" if rel > 0 else "") + str(rel)})
+	rows.append(Look.label(feel, 16, true, Look.PARROT_DARK if met and rel > 0 else (Color("B3261E") if met and rel < 0 else Look.OUTLINE)))
+	rows.append(Look.label(s.t("neighbourHelp"), 14, false, Look.MUTED))
+	# Their story: chapters they appear in.
+	var theirs := []
+	for c in story.chapters:
+		var in_it := false
+		for panel in c.panels:
+			for line in panel.lines:
+				if line.by == id:
+					in_it = true
+		if in_it:
+			theirs.append(c)
+	if not theirs.is_empty():
+		var read := theirs.filter(func(c): return progress.seen(c.id))
+		rows.append(_caption(s.t("neighbourStory", {"n": read.size(), "all": theirs.size()})))
+		for c in theirs:
+			var seen_it := progress.seen(c.id)
+			var line_text: String = s.t(_name_key(c.who)) + " · " + (str(c.title[s.lang]) if seen_it else s.t("chapterLocked", {"n": int(c.n)}))
+			rows.append(Look.label("• " + line_text, 15, seen_it, Look.OUTLINE if seen_it else Look.MUTED))
+	var lately := (progress.data.log as Array).filter(func(e): return e.id == id)
+	if not lately.is_empty():
+		rows.append(_caption(s.t("lately")))
+		for e in lately.slice(0, 5):
+			var change := int(e.delta)
+			rows.append(Look.label(s.t("logLine", {"name": p[s.lang], "what": s.t("log_" + str(e.what)), "n": ("+" if change > 0 else "") + str(change)}), 14))
+	_overlay(p[s.lang], rows)
+
+
+# --- Reading aloud what is held -------------------------------------------------
+
+
+## With reading aloud on, a finger held still on a card or a button for a
+## moment reads its words out (and the button is not pressed by it).
+func _input(event: InputEvent) -> void:
+	if not _read_aloud:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_hold_at = Time.get_ticks_msec() / 1000.0
+			_hold_pos = event.position
+		else:
+			if _hold_at == -2.0:
+				# This hold was read out: the lift does not press anything.
+				get_viewport().set_input_as_handled()
+			_hold_at = -1.0
+	elif event is InputEventMouseMotion and _hold_at >= 0.0 and event.position.distance_to(_hold_pos) > 24.0:
+		_hold_at = -1.0
+
+
+func _process(_dt: float) -> void:
+	if _hold_at >= 0.0 and Time.get_ticks_msec() / 1000.0 - _hold_at > 0.6:
+		_hold_at = -2.0
+		ReadAloud.say(_words_at(_hold_pos), s.lang)
+
+
+## The words of the smallest card or button under a point.
+func _words_at(pos: Vector2) -> String:
+	var best: Control = null
+	var best_area := INF
+	var stack: Array = [self]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for c in n.get_children():
+			stack.append(c)
+		if not (n is Control) or not (n as Control).is_visible_in_tree():
+			continue
+		var ctl := n as Control
+		if not (ctl is PanelContainer or ctl is Button or ctl is Label) or not ctl.get_global_rect().has_point(pos):
+			continue
+		var area := ctl.size.x * ctl.size.y
+		if area < best_area and _words_in(ctl) != "":
+			best = ctl
+			best_area = area
+	return _words_in(best) if best != null else ""
+
+
+func _words_in(ctl: Control) -> String:
+	var words := []
+	if ctl is Label:
+		return (ctl as Label).text.strip_edges()
+	if ctl is Button and (ctl as Button).text != "":
+		words.append((ctl as Button).text)
+	for l in ctl.find_children("*", "Label", true, false):
+		if (l as Label).is_visible_in_tree() and (l as Label).text.strip_edges() != "":
+			words.append((l as Label).text)
+	for btn in ctl.find_children("*", "Button", true, false):
+		if (btn as Button).is_visible_in_tree() and (btn as Button).text != "":
+			words.append((btn as Button).text)
+	return "। ".join(PackedStringArray(words))
+
+
 # --- Small parts ----------------------------------------------------------------
 
 
@@ -2052,6 +2221,7 @@ func _set_hands(value: bool) -> void:
 
 func _set_read_aloud(value: bool) -> void:
 	ReadAloud.save_wanted(value)
+	_read_aloud = value
 	if value:
 		ReadAloud.say(s.t("readAloudOn"), s.lang)
 	_build()
@@ -2279,6 +2449,12 @@ func _play_chapter(id: String, then: String) -> void:
 
 
 func _chapter_done(id: String, effects: Dictionary) -> void:
+	# What the chapter changes in the next days (a choice's own first).
+	var c := story.chapter(id)
+	if not effects.has("after") and c.has("after"):
+		effects["after"] = (c.after as Dictionary).duplicate()
+	if effects.has("after"):
+		effects.after["who"] = str(c.get("who", ""))
 	progress.finish_chapter(id, effects)
 	progress.save()
 	if _then_scene != "":

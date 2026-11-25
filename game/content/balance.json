@@ -18,6 +18,7 @@
   "ads": {"double_per_day": 3, "retry_per_day": 2, "tara_per_day": 3,
           "interstitial_every_n_days": 3, "interstitial_per_day": 3, "no_interstitial_first_days": 3},
   "rickshaw": {
+    "easy_fare": 0.9, "easy_fine": 0.5, "easy_traffic": 0.6,
     "start_hour": 7, "end_hour": 21, "day_seconds": 360, "school_fee_goal": 3000, "daily_target": 600,
     "speed_tiles_per_s": 1.5, "accel_tiles_per_s2": 0.6, "coast_decel": 0.3, "brake_decel": 1.5,
     "fare_base": 20, "fare_per_tile": 1.5, "fare_round_to": 5,
@@ -43,6 +44,7 @@
     }
   },
   "bus": {
+    "phone_pay_chance": 0.12, "needy_left_star_penalty": 0.3,
     "trips_per_day": 2, "seats": 24, "ladies_seats": 4, "elder_seats": 2, "standing": 10,
     "crowded_above": 30, "seconds_between_stops": [12, 15],
     "fare_min": 10, "fare_per_stop": 5, "fare_max": 35,
@@ -61,6 +63,7 @@
     }
   },
   "tea_stall": {
+    "phone_pay_chance": 0.12, "ramadan_day_arrivals": 2.5, "iftar_price": 40, "change_chance": 0.15,
     "start_hour": 6, "end_hour": 23, "day_seconds": 300, "rush_hours": [[7, 9], [17, 20]],
     "arrival_every_s": 6, "rush_arrival_every_s": 3,
     "patience_s": {"normal": 12, "office": 8, "elder": 16},

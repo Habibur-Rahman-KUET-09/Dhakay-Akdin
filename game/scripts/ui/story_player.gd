@@ -128,7 +128,8 @@ func _lines() -> Array:
 
 
 func _show() -> void:
-	_title.text = s.t("storyChapter", {"n": int(chapter.n), "title": chapter.title[s.lang]})
+	# A family scene has no chapter number: just its name.
+	_title.text = s.t("storyChapter", {"n": int(chapter.n), "title": chapter.title[s.lang]}) if int(chapter.get("n", 0)) > 0 else str(chapter.title[s.lang])
 	var line: Dictionary = _lines()[_line_i]
 	_speaker.text = story.speaker(line.by, s.lang)
 	_speaker_box.add_theme_stylebox_override("panel", Look.card(story.colour(line.by), 10, 0))

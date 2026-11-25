@@ -32,6 +32,7 @@ const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
 const Weather = preload("res://scripts/world/weather.gd")
 const CallAct = preload("res://scripts/ui/activities/call.gd")
+const Sms = preload("res://scripts/ui/activities/sms.gd")
 const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const HomeCall = preload("res://scripts/rules/home_call.gd")
 
@@ -76,6 +77,7 @@ var _activity: Activity
 ## A call from home today: when (on the day's clock; -1 when none, or
 ## once it has rung), and how it went, for the day's end.
 var _call_at := -1.0
+var _story_effect := {}
 var _call_rng := RandomNumberGenerator.new()
 var _call_result := {}
 var _status: Label
@@ -104,6 +106,10 @@ func _ready() -> void:
 	day = TeaDay.new(b, -1, progress.data.tea.upgrades, progress.date())
 	day.interactive = Activity.wanted()
 	day.memory = day.interactive
+	day.level = progress.level()
+	# A chapter's mark on the day: the stall moved on, or the cricket final.
+	_story_effect = progress.story_effect("tea")
+	day.arrival_factor = float(_story_effect.get("arrivals", 1.0))
 	_call_rng.randomize()
 	var call_share := HomeCall.plan(_call_rng, progress.level())
 	if call_share >= 0.0:
@@ -155,7 +161,9 @@ func _ready() -> void:
 	await _step("done")
 	loading.queue_free()
 	set_process(true)
-	if not day.festival.is_empty():
+	if not _story_effect.is_empty():
+		_say(strings.t("after_" + str(_story_effect.note), {"n": int(_story_effect.left)}), Look.MAGENTA, 6.0)
+	elif not day.festival.is_empty():
 		_say(str(day.festival.greeting.get(strings.lang, day.festival.greeting.en)), Look.MAGENTA, 6.0)
 	elif day.hot:
 		_say(strings.t("teaHotFridge" if day.has("fridge") else "teaHot"), Look.VERMILION, 4.0)
@@ -521,7 +529,10 @@ func _process(dt: float) -> void:
 	_handle(events)
 	if not is_processing():
 		return
-	if _call_at >= 0.0 and day.clock >= _call_at and _activity == null:
+	# A call from home comes when the stall is quiet (one waiting at most),
+	# or after half a minute's wait for that.
+	if _call_at >= 0.0 and day.clock >= _call_at and _activity == null \
+			and (day.customers.size() <= 1 or day.clock >= _call_at + 30.0):
 		_call_at = -1.0
 		_ring_home()
 	if _notice_left > 0.0:
@@ -534,6 +545,12 @@ func _process(dt: float) -> void:
 
 
 func _handle(events: Array) -> void:
+	if events.has(TeaDay.Event.PHONE_PAY):
+		_check_sms.call_deferred()
+	if events.has(TeaDay.Event.CHANGED):
+		var ch: Dictionary = day.last_change
+		var who := strings.t("kind_" + str(ch.kind)) if str(ch.npc) == "" else neighbours.name_of(str(ch.npc), strings.lang)
+		_say(strings.t("orderChanged", {"who": who, "item": strings.t("item_" + str(ch.to))}), Look.MAGENTA, 3.5)
 	if events.has(TeaDay.Event.ARRIVED):
 		var ordered := false
 		for c in day.customers:
@@ -867,8 +884,32 @@ func _light() -> void:
 	_env.fog_density = lerpf(0.014, 0.03, _rain_k)
 
 
+## Paid by phone: check the SMS on Monir Mama's phone.
+func _check_sms() -> void:
+	if day.phone_pay.is_empty():
+		return
+	if _activity != null:
+		_sms_checked(1.0, null)
+		return
+	var act := Sms.new()
+	act.sms = day.phone_pay.sms
+	act.fare = int(day.phone_pay.fare)
+	act.has_phone = progress.has_phone()
+	_open(act, "act_sms", _sms_checked.bind(act))
+
+
+func _sms_checked(_score: float, act) -> void:
+	var fare := int(day.phone_pay.get("fare", 0))
+	var result := day.settle_phone(act != null and act.said_fake)
+	print("[tea] phone pay: ", result)
+	var colour: Color = {"fine": Look.PARROT, "caught": Look.PARROT, "fooled": Look.VERMILION, "wrong": Look.VERMILION}.get(result, Look.SKY)
+	_say(strings.t("phone_" + result, {"fare": fare}), colour, 3.0)
+
+
 func _end_day() -> void:
 	set_process(false)
+	# An SMS not yet checked when the day ends: taken as it is.
+	day.settle_phone(false)
 	_rain_sound.stop()
 	_drops.emitting = false
 	var stats := {"happy": day.happy, "none_lost": 1 if day.lost == 0 and day.served >= 10 else 0, "milk_tea": int(day.sold_items.get("milk_tea", 0))}
@@ -886,6 +927,8 @@ func _end_day() -> void:
 		lines.append(strings.t("teaLost", {"n": day.lost}))
 	if day.tips > 0:
 		lines.append(strings.t("teaTips", {"n": day.tips}))
+	if day.iftar_sold > 0:
+		lines.append(strings.t("iftarLine", {"n": day.iftar_sold, "money": day.iftar_sold * int(b.n("tea_stall.iftar_price"))}))
 	if not _call_result.is_empty():
 		lines.append(strings.t("familyLine", {"n": _call_result.family}))
 	if int(got.get("samity_payout", 0)) > 0:
@@ -903,6 +946,7 @@ func _end_day() -> void:
 		"sub": strings.t("teaRating", {"stars": "%.1f" % day.stars()}),
 		"money": day.money,
 		"lines": lines,
+		"share": strings.t("share_tea", {"n": day.served, "money": day.money}) if day.served > 0 else "",
 	})
 	end.home_pressed.connect(_go_home)
 	end.again_pressed.connect(_again)

@@ -30,6 +30,7 @@ const Neighbours = preload("res://scripts/rules/neighbours.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
 const DayEnd = preload("res://scripts/ui/day_end.gd")
 const CallAct = preload("res://scripts/ui/activities/call.gd")
+const Sms = preload("res://scripts/ui/activities/sms.gd")
 const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const HomeCall = preload("res://scripts/rules/home_call.gd")
 
@@ -120,6 +121,7 @@ func _ready() -> void:
 	progress = Progress.new(b)
 	bus = BusDay.new(b, -1, progress.data.bus.upgrades)
 	bus.interactive = Activity.wanted()
+	bus.level = progress.level()
 	_call_rng.randomize()
 	var call_share := HomeCall.plan(_call_rng, progress.level())
 	if call_share >= 0.0:
@@ -667,7 +669,9 @@ func _process(dt: float) -> void:
 	_handle(events)
 	if not is_processing():
 		return
-	if _call_at >= 0.0 and bus.clock >= _call_at and _activity == null:
+	# A call from home comes at a stop, or after half a minute's wait for one.
+	if _call_at >= 0.0 and bus.clock >= _call_at and _activity == null \
+			and (bus.at_stop or bus.clock >= _call_at + 30.0):
 		_call_at = -1.0
 		_ring_home()
 	# The street slides by; slower into a stop, still while stopped.
@@ -711,6 +715,8 @@ func _handle(events: Array) -> void:
 		if on > 0:
 			_voice.say("bus_board")
 		_sync_people()
+	if events.has(BusDay.Event.NEEDY_LEFT):
+		_say(strings.t("needyLeft"), Look.VERMILION, 3.5)
 	if events.has(BusDay.Event.SLIPPED):
 		_say(strings.t("slipped", {"n": events.count(BusDay.Event.SLIPPED)}), Look.VERMILION, 3.0)
 	if events.has(BusDay.Event.OWED_SHORT):
@@ -933,6 +939,32 @@ func _open_fare(id: int) -> void:
 		bus.ask(id)
 		_student_row.visible = false
 		_change_box.visible = true
+		# Now and then: "I'll send it by phone".
+		if bus.offer_phone():
+			_fare_box.visible = false
+			_check_sms()
+			return
+	_refresh()
+
+
+## Paid by phone: check the SMS on Babu's phone.
+func _check_sms() -> void:
+	if _activity != null:
+		_sms_checked(1.0, null)
+		return
+	var act := Sms.new()
+	act.sms = bus.phone_pay.sms
+	act.fare = int(bus.phone_pay.fare)
+	act.has_phone = progress.has_phone()
+	_open(act, "act_sms", _sms_checked.bind(act))
+
+
+func _sms_checked(_score: float, act) -> void:
+	var fare := int(bus.phone_pay.get("fare", 0))
+	var result := bus.settle_phone(act != null and act.said_fake)
+	print("[bus] phone pay: ", result)
+	var colour: Color = {"fine": Look.PARROT, "caught": Look.PARROT, "fooled": Look.VERMILION, "wrong": Look.VERMILION}.get(result, Look.SKY)
+	_say(strings.t("phone_" + result, {"fare": fare}), colour, 3.0)
 	_refresh()
 
 
@@ -1069,6 +1101,8 @@ func _end_trip() -> void:
 	set_process(false)
 	_call_box.visible = false
 	_fare_box.visible = false
+	# An SMS not yet checked when the day ends: taken as it is.
+	bus.settle_phone(false)
 	var earned := bus.earned()
 	var stats := {"no_slip": 1 if bus.slipped == 0 and bus.boarded >= 20 else 0, "on_time": bus.bonus / int(b.n("bus.on_time_bonus")), "riders": bus.boarded}
 	var got := progress.apply_bus_day({"earned": earned, "riders": bus.boarded, "stars": bus.rating, "stats": stats, "npcs": bus.npc_log})
@@ -1081,6 +1115,8 @@ func _end_trip() -> void:
 		lines.append(strings.t("onTime", {"n": bus.bonus}))
 	if bus.slipped > 0:
 		lines.append(strings.t("busSlipped", {"n": bus.slipped}))
+	if bus.needy_left > 0:
+		lines.append(strings.t("busNeedyLeft", {"n": bus.needy_left}))
 	if bus.arguments > 0:
 		lines.append(strings.t("busArguments", {"n": bus.arguments}))
 	if bus.overpaid > 0:
@@ -1106,6 +1142,7 @@ func _end_trip() -> void:
 		"sub": strings.t("busRatingLine", {"stars": "%.1f" % bus.rating}),
 		"money": earned,
 		"lines": lines,
+		"share": strings.t("share_bus", {"n": bus.boarded, "money": earned}) if bus.boarded > 0 else "",
 	})
 	end.home_pressed.connect(_go_home)
 	end.again_pressed.connect(_again)
