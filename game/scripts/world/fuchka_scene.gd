@@ -473,15 +473,16 @@ func _handle(events: Array) -> void:
 			if c.kind == "sumi" and not c.has("greeted"):
 				c["greeted"] = true
 				_say(strings.t("fuchkaSumi"), Look.MAGENTA, 3.5)
-		_voice.say("tea_order")
+		_voice.say("fuchka_order")
 	if events.has(FuchkaDay.Event.SERVED):
 		var ls: Dictionary = day.last_served
 		_ding.play()
 		_say(strings.t("fuchkaVerdict_" + str(ls.verdict), {"tip": int(ls.tip)}),
 			Look.PARROT if ls.verdict == "exact" else (Look.SKY if ls.verdict == "close" else Look.VERMILION), 2.5)
-		_voice.say("tea_happy" if ls.verdict != "wrong" else "tea_angry")
+		_voice.say("fuchka_happy" if ls.verdict != "wrong" else "fuchka_wrong")
 	if events.has(FuchkaDay.Event.LEFT):
 		_say(strings.t("customerLeft"), Look.VERMILION, 2.5)
+		_voice.say("fuchka_left")
 	if events.has(FuchkaDay.Event.NOT_READY):
 		_say(strings.t("fuchkaNotReady"), Look.VERMILION, 2.0)
 	if events.has(FuchkaDay.Event.RAIN_START):
