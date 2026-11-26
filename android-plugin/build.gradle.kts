@@ -23,6 +23,7 @@ dependencies {
     compileOnly("org.godotengine:godot:4.5.1.stable")
     // The same libraries are added to the game by the export plugin
     // (game/addons/google_sign_in/export_plugin.gd); keep the versions alike.
+    implementation("androidx.core:core:1.13.1")
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")

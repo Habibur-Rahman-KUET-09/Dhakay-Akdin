@@ -94,8 +94,8 @@
   },
   "fuchka": {
     "start_hour": 13, "end_hour": 21, "day_seconds": 300, "school_out_hour": 13.5,
-    "rush_hours": [[13.5, 14.5], [18, 20]], "arrival_every_s": 7, "rush_arrival_every_s": 3.5,
-    "patience_s": {"child": 16, "student": 13, "office": 11, "family": 18},
+    "rush_hours": [[13.5, 14.5], [18, 20]], "arrival_every_s": 11, "rush_arrival_every_s": 6.5,
+    "patience_s": {"child": 28, "student": 24, "office": 20, "family": 30},
     "price": {"fuchka": 40, "doi_fuchka": 60}, "tip_exact": 10, "happy_tip_share": 0.15, "doi_share": 0.35,
     "rain_chance_per_day": 0.25, "rain_seconds": 60, "rain_arrivals": 0.5, "winter_arrivals": 1.4,
     "upgrades": {"stool": {"cost": 800, "patience_bonus_s": 4}, "umbrella": {"cost": 1500}, "doi": {"cost": 2500}}
@@ -103,8 +103,8 @@
   "league": {"min_players": 1, "win_tara": 5},
   "delivery": {
     "start_hour": 16, "end_hour": 22, "day_seconds": 300, "speed": 1.15, "energy": 0.8, "daily_target": 500,
-    "max_orders": 3, "offer_every_s": 9, "offer_s": 12, "cook_s": 8, "hot_s": 70, "rain_cooling": 1.4,
-    "base_pay": 30, "pay_per_tile": 3, "min_tiles": 6, "max_tiles": 16, "tip_hot": 15, "rain_tip": 10, "gate_chance": 0.3,
+    "max_orders": 3, "offer_every_s": 12, "offer_s": 25, "cook_s": 5, "hot_s": 120, "rain_cooling": 1.3,
+    "base_pay": 40, "pay_per_tile": 3, "min_tiles": 5, "max_tiles": 12, "tip_hot": 15, "rain_tip": 10, "gate_chance": 0.15,
     "upgrades": {"gear_cycle": {"cost": 1200, "speed": 1.15}, "hot_bag": {"cost": 900, "cooling": 0.6}, "raincoat": {"cost": 700, "tip": 10}}
   },
   "boat": {

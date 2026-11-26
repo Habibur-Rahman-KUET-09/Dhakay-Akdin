@@ -1,5 +1,7 @@
 package com.pranerdhaka.googlesignin
 
+import android.content.Intent
+import androidx.core.content.FileProvider
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -14,6 +16,7 @@ import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.SignalInfo
 import org.godotengine.godot.plugin.UsedByGodot
+import java.io.File
 
 /**
  * "Sign in with Google" for the game: Android's own account picker
@@ -29,6 +32,7 @@ class GoogleSignInPlugin(godot: Godot) : GodotPlugin(godot) {
     override fun getPluginSignals() = setOf(
         SignalInfo("signed_in", String::class.java),
         SignalInfo("sign_in_failed", String::class.java),
+        SignalInfo("share_failed", String::class.java),
     )
 
     /** Shows the account picker. webClientId: the Firebase project's web client. */
@@ -64,4 +68,37 @@ class GoogleSignInPlugin(godot: Godot) : GodotPlugin(godot) {
             }
         }
     }
+
+    /**
+     * The phone's share sheet with a picture the game drew (a file in its
+     * own files folder, under share/) and a line of text: WhatsApp,
+     * Facebook, Messenger, saving it, whatever the phone offers.
+     */
+    @UsedByGodot
+    fun shareImage(path: String, text: String) {
+        val activity = activity
+        if (activity == null) {
+            emitSignal("share_failed", "NO_ACTIVITY")
+            return
+        }
+        activity.runOnUiThread {
+            try {
+                val uri = FileProvider.getUriForFile(activity, activity.packageName + ".pranerdhaka.share", File(path))
+                val send = Intent(Intent.ACTION_SEND).apply {
+                    type = "image/png"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    putExtra(Intent.EXTRA_TEXT, text)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                val chooser = Intent.createChooser(send, null)
+                chooser.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                activity.startActivity(chooser)
+            } catch (e: Exception) {
+                emitSignal("share_failed", e.javaClass.simpleName)
+            }
+        }
+    }
 }
+
+/** Its own class, so its entry cannot clash with another FileProvider's. */
+class ShareFileProvider : FileProvider()

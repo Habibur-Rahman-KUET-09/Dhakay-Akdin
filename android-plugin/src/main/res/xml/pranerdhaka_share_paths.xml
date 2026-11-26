@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The game writes the day's picture to user://share/, which is files/share/. -->
+<paths>
+    <files-path name="share" path="share/" />
+</paths>

@@ -41,7 +41,7 @@ func test_an_order_offered_taken_or_gone() -> void:
 	check(tiles >= int(b.n("delivery.min_tiles")) and tiles <= int(b.n("delivery.max_tiles")), "a fair ride: %d" % tiles)
 	check(int(o.pay) > 0 and int(o.pay) % 5 == 0, "paid in fives")
 	var events := []
-	for i in 40:
+	for i in 120:
 		events.append_array(d.update(0.5, Vector2i(-1, -1)))
 		if events.has(Delivery.OFFER_GONE):
 			break
@@ -84,7 +84,7 @@ func test_food_goes_cold() -> void:
 	d.arrive(o.kitchen.at)
 	check(o.picked, "picked")
 	var events := []
-	for i in 200:
+	for i in 600:
 		events.append_array(d.update(0.5, Vector2i(-1, -1)))
 	check(events.has(Delivery.COLD), "cold after a while")
 	d.gates = []

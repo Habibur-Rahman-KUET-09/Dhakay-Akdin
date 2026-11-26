@@ -90,12 +90,21 @@ func average_stars() -> float:
 ## Where people live: an ordinary road a fair way from the kitchen.
 func _home_for(from: Vector2i) -> Vector2i:
 	var roads := map.roads().filter(func(p): return map.kind_at(p) == RoadMap.Kind.ROAD)
-	for attempt in 40:
+	var low := int(b.n("delivery.min_tiles"))
+	var high := int(b.n("delivery.max_tiles"))
+	# Failing a fit, the nearest to the middle of the range seen.
+	var best: Vector2i = roads[0]
+	var best_off := 1 << 30
+	for attempt in 150:
 		var p: Vector2i = roads[rng.randi() % roads.size()]
 		var d := map.distance(from, p)
-		if d >= int(b.n("delivery.min_tiles")) and d <= int(b.n("delivery.max_tiles")):
+		if d >= low and d <= high:
 			return p
-	return roads[0]
+		var off := absi(d - (low + high) / 2)
+		if off < best_off:
+			best_off = off
+			best = p
+	return best
 
 
 func _make_offer() -> Dictionary:

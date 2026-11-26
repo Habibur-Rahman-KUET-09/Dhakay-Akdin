@@ -1,5 +1,6 @@
-## Puts the Google sign-in Android library (built by CI from
-## android-plugin/ into bin/) and what it needs into the Android export.
+## Puts the Android library (Google sign-in, and the share sheet for the
+## day's picture; built by CI from android-plugin/ into bin/) and what it
+## needs into the Android export.
 ## Needs the Gradle build (export_presets.cfg).
 @tool
 extends EditorPlugin
@@ -29,6 +30,7 @@ class AndroidExport extends EditorExportPlugin:
 
 	func _get_android_dependencies(platform: EditorExportPlatform, debug: bool) -> PackedStringArray:
 		return PackedStringArray([
+			"androidx.core:core:1.13.1",
 			"androidx.credentials:credentials:1.3.0",
 			"androidx.credentials:credentials-play-services-auth:1.3.0",
 			"com.google.android.libraries.identity.googleid:googleid:1.1.1",

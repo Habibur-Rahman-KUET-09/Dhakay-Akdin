@@ -4914,5 +4914,29 @@
  "livePlaceMine": {
   "bn": "আপনি {n} নম্বরে",
   "en": "You came number {n}"
+ },
+ "orderAuto": {
+  "bn": "নতুন অর্ডার নেওয়া হলো: {kitchen} থেকে {food}, {pay} টাকা। তীর ধরে রান্নাঘরে যান।",
+  "en": "New order taken: {food} from {kitchen}, Tk {pay}. Follow the arrow to the kitchen."
+ },
+ "sharePhotoTitle": {
+  "bn": "আজকের দিনের ছবি",
+  "en": "Today in a picture"
+ },
+ "sharePhoto": {
+  "bn": "ছবিটা শেয়ার করুন",
+  "en": "Share the picture"
+ },
+ "sharePhotoMoney": {
+  "bn": "আজ {n} টাকা",
+  "en": "Tk {n} today"
+ },
+ "sharePhotoDay": {
+  "bn": "দিন {day} · মহল্লা লেভেল {level}",
+  "en": "Day {day} · Mohalla level {level}"
+ },
+ "sharePhotoFoot": {
+  "bn": "আপনিও খেলুন: {url}",
+  "en": "Play it too: {url}"
  }
 }

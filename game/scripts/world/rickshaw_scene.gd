@@ -1247,6 +1247,15 @@ func _stop_text() -> String:
 func _delivery_events(events: Array) -> void:
 	if events.has(Delivery.OFFER):
 		var o: Dictionary = _delivery.offer
+		# With nothing to carry, the order is his at once, as a passenger
+		# gets in: only a second or third one at a time is a choice.
+		if _delivery.active.is_empty():
+			_bell.play()
+			Activity.buzz(40)
+			_say(strings.t("orderAuto", {"food": str(o.kitchen.food.get(strings.lang, o.kitchen.food.en)),
+				"kitchen": str(o.kitchen.name.get(strings.lang, o.kitchen.name.en)), "pay": int(o.pay)}), Look.PARROT, 4.0)
+			_take_order(true)
+			return
 		hud.show_offer(strings.t("orderTitle", {"food": str(o.kitchen.food.get(strings.lang, o.kitchen.food.en)), "pay": int(o.pay)}),
 			strings.t("orderSub", {"kitchen": str(o.kitchen.name.get(strings.lang, o.kitchen.name.en)), "flat": str(o.flat), "tiles": int(o.tiles)}), "")
 		Activity.buzz(40)

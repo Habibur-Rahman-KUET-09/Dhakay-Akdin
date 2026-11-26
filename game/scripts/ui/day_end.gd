@@ -2,8 +2,9 @@
 ## the money (with how the day went), where the money went (savings, the
 ## school fee, the mohalla fund), the XP towards the next level and what a
 ## new level opens, the day's extras (challenge, run of days, a record),
-## a card to share the day (WhatsApp, Facebook), and two ways on: back to
-## the mohalla, or straight into the next day.
+## a card to share the day (a picture of it drawn for the phone's share
+## sheet, or a line for WhatsApp or Facebook), and two ways on: back to the
+## mohalla, or straight into the next day.
 extends Control
 
 const Look = preload("res://scripts/ui/look.gd")
@@ -17,6 +18,15 @@ signal home_pressed
 signal again_pressed
 
 const NIGHT := Color("2B2238")
+## Each character's face and colour, for the day's picture.
+const FACES := {"rickshaw": ["rahim", "C2185B"], "tea": ["monir", "2E9E6B"], "bus": ["babu", "2D8BD6"],
+	"fuchka": ["julekha", "E2432A"], "delivery": ["ratul", "F26B1D"], "hawker": ["kashem", "A0722F"], "boat": ["haripada", "1F6E8C"]}
+const NAMES := {"rickshaw": "rickshawName", "tea": "teaName", "bus": "busName", "fuchka": "fuchkaName",
+	"delivery": "deliveryName", "hawker": "hawkerName", "boat": "boatName"}
+## The day's picture: 1080 by 1350 (4:5, as phones show photos), saved
+## here for the share sheet.
+const PHOTO_SIZE := Vector2i(1080, 1350)
+const PHOTO_PATH := "user://share/day.png"
 
 var s: Strings
 var b: Balance
@@ -27,6 +37,9 @@ var got: Dictionary
 ## good (whether the day reached its target), kept_label, share (the
 ## day in a line, to share with friends; none, no card).
 var info: Dictionary
+var _photo: Image
+var _photo_view: TextureRect
+var _photo_button: Button
 
 
 func setup(strings: Strings, balance: Balance, save: Progress, gained: Dictionary, day_info: Dictionary) -> void:
@@ -185,7 +198,9 @@ func _money_card() -> Control:
 const GAME_URL := "https://pranerdhaka.web.app"
 
 
-## The day in a rickshaw-art frame, and buttons to send it to friends.
+## The day in a rickshaw-art frame: its picture (drawn once the page is
+## up), a button to send the picture, and the line for WhatsApp or
+## Facebook.
 func _share_card() -> Control:
 	var frame := PanelContainer.new()
 	var outer := Look.card(Look.MAGENTA, 22, 4)
@@ -205,11 +220,25 @@ func _share_card() -> Control:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 10)
 	inner.add_child(col)
-	var title := Look.title(s.t("appTitle"), 26, Look.MAGENTA, false)
+	var title := Look.title(s.t("sharePhotoTitle"), 26, Look.MAGENTA, false)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(title)
-	var line := Look.label(str(info.share), 18, true)
+	_photo_view = TextureRect.new()
+	_photo_view.name = "SharePhoto"
+	_photo_view.custom_minimum_size = Vector2(0, 330)
+	_photo_view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_photo_view.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_photo_view.visible = false
+	col.add_child(_photo_view)
+	_photo_button = Look.chunky(s.t("sharePhoto"), Look.MAGENTA, Color.WHITE, 18, 4, 14)
+	_photo_button.name = "Share_photo"
+	_photo_button.custom_minimum_size = Vector2(0, 56)
+	_photo_button.visible = false
+	_photo_button.pressed.connect(_share_photo)
+	col.add_child(_photo_button)
+	var line := Look.label(str(info.share), 16, true)
 	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(line)
 	var grid := GridContainer.new()
 	grid.columns = 2
@@ -222,7 +251,162 @@ func _share_card() -> Control:
 		go.pressed.connect(_share.bind(way))
 		grid.add_child(go)
 	col.add_child(grid)
+	_draw_photo.call_deferred()
 	return frame
+
+
+# --- The day's picture ---------------------------------------------------------
+
+
+## Whose day it was: the latest day in the save.
+func _who() -> String:
+	var h: Array = progress.data.get("history", [])
+	return str(h[0].get("who", "rickshaw")) if not h.is_empty() else "rickshaw"
+
+
+## Draws the picture off screen (a viewport of its own), keeps it as a
+## file for the share sheet, and shows it on the card.
+func _draw_photo() -> void:
+	var view := SubViewport.new()
+	view.size = PHOTO_SIZE
+	view.transparent_bg = false
+	view.render_target_update_mode = SubViewport.UPDATE_ONCE
+	view.add_child(_photo_layout())
+	add_child(view)
+	await RenderingServer.frame_post_draw
+	await RenderingServer.frame_post_draw
+	var img := view.get_texture().get_image() if is_inside_tree() else null
+	view.queue_free()
+	if img == null or img.is_empty():
+		return
+	_photo = img
+	DirAccess.make_dir_recursive_absolute(PHOTO_PATH.get_base_dir())
+	img.save_png(PHOTO_PATH)
+	_photo_view.texture = ImageTexture.create_from_image(img)
+	_photo_view.visible = true
+	_photo_button.visible = true
+	print("[day end] picture drawn")
+
+
+## The picture: the character's face in their colour in a rickshaw-art
+## frame, the day's money and stars, the day in a line, and where to play.
+func _photo_layout() -> Control:
+	var who := _who()
+	var face: Array = FACES.get(who, FACES.rickshaw)
+	var colour := Color(str(face[1]))
+	var root := Control.new()
+	root.size = Vector2(PHOTO_SIZE)
+	var bg := ColorRect.new()
+	bg.color = NIGHT
+	bg.size = Vector2(PHOTO_SIZE)
+	root.add_child(bg)
+	var bunting := TextureRect.new()
+	bunting.texture = Look.icon_texture("bunting", 1080)
+	bunting.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bunting.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+	bunting.position = Vector2(0, 0)
+	bunting.size = Vector2(1080, 150)
+	root.add_child(bunting)
+	var frame := PanelContainer.new()
+	var outer := Look.card(Look.MAGENTA, 48, 10)
+	for side in ["left", "right", "top", "bottom"]:
+		outer.set("content_margin_" + side, 22)
+	frame.add_theme_stylebox_override("panel", outer)
+	frame.position = Vector2(60, 140)
+	frame.size = Vector2(960, 1050)
+	root.add_child(frame)
+	var inner := PanelContainer.new()
+	var st := Look.card(Look.CREAM, 36, 8)
+	for side in ["left", "right", "top", "bottom"]:
+		st.set("content_margin_" + side, 36)
+	inner.add_theme_stylebox_override("panel", st)
+	frame.add_child(inner)
+	var col := VBoxContainer.new()
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 10)
+	inner.add_child(col)
+	var title := Look.title(s.t("appTitle"), 80, Look.MAGENTA)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(title)
+	var disc_box := CenterContainer.new()
+	col.add_child(disc_box)
+	var disc := Panel.new()
+	disc.custom_minimum_size = Vector2(250, 250)
+	var ring := StyleBoxFlat.new()
+	ring.bg_color = colour
+	ring.set_corner_radius_all(125)
+	ring.border_color = Look.OUTLINE
+	ring.set_border_width_all(8)
+	disc.add_theme_stylebox_override("panel", ring)
+	disc_box.add_child(disc)
+	var pic := TextureRect.new()
+	pic.texture = Look.icon_texture(str(face[0]), 256)
+	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	pic.position = Vector2(20, 20)
+	pic.size = Vector2(210, 210)
+	disc.add_child(pic)
+	var name_label := Look.title(s.t(str(NAMES.get(who, "rickshawName"))), 64, colour.darkened(0.25), false)
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(name_label)
+	var money := Look.title(s.t("sharePhotoMoney", {"n": int(info.get("money", 0))}), 88, Look.PARROT_DARK)
+	money.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(money)
+	var stars_row := HBoxContainer.new()
+	stars_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	stars_row.add_theme_constant_override("separation", 10)
+	var n := int(round(float(info.get("stars", 0.0))))
+	for i in 5:
+		var star := TextureRect.new()
+		star.texture = Look.icon_texture("star" if i < n else "star_off", 96)
+		star.custom_minimum_size = Vector2(84, 84)
+		star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		star.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		stars_row.add_child(star)
+	col.add_child(stars_row)
+	var line := Look.label(str(info.get("share", "")), 36, true)
+	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.custom_minimum_size = Vector2(820, 0)
+	col.add_child(line)
+	var day := Look.label(s.t("sharePhotoDay", {"day": int(progress.data.get("day", 0)), "level": progress.level()}), 34, true, Look.MUTED)
+	day.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(day)
+	var foot := PanelContainer.new()
+	var band := StyleBoxFlat.new()
+	band.bg_color = Look.MAGENTA
+	foot.add_theme_stylebox_override("panel", band)
+	foot.position = Vector2(0, 1230)
+	foot.size = Vector2(1080, 120)
+	var url := Look.label(s.t("sharePhotoFoot", {"url": GAME_URL.replace("https://", "")}), 44, true, Color.WHITE)
+	url.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	url.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	foot.add_child(url)
+	root.add_child(foot)
+	return root
+
+
+## The picture to the phone's share sheet (Android, through the game's
+## plugin; in a browser, the browser's own sharing or a download); the
+## line for WhatsApp where neither can.
+func _share_photo() -> void:
+	var text := "%s\n%s %s" % [str(info.share), s.t("sharePlay"), GAME_URL]
+	if _photo == null:
+		_share("whatsapp")
+		return
+	if Engine.has_singleton("GoogleSignIn"):
+		Engine.get_singleton("GoogleSignIn").shareImage(ProjectSettings.globalize_path(PHOTO_PATH), text)
+		return
+	if OS.has_feature("web"):
+		var b64 := Marshalls.raw_to_base64(_photo.save_png_to_buffer())
+		var js := ("(function(){try{var b=atob(%s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);"
+			+ "var f=new File([a],'pranerdhaka.png',{type:'image/png'});"
+			+ "if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],text:%s});return true}"
+			+ "var u=URL.createObjectURL(f),l=document.createElement('a');l.href=u;l.download='pranerdhaka.png';"
+			+ "document.body.appendChild(l);l.click();l.remove();return true}catch(e){return false}})()") % [JSON.stringify(b64), JSON.stringify(text)]
+		if bool(JavaScriptBridge.eval(js, true)):
+			return
+	_share("whatsapp")
 
 
 ## Opens WhatsApp (or Facebook) with the day's line and the game's link;
