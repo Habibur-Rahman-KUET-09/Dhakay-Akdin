@@ -584,7 +584,9 @@ func _process(dt: float) -> void:
 	_alive_left -= dt
 	if _alive_left <= 0.0:
 		_alive_left = 10.0
-		print("[alive] %d ms, %d fps" % [Time.get_ticks_msec(), Engine.get_frames_per_second()])
+		# With the river's state, so a report of a stall shows where it was.
+		print("[alive] %d ms, %d fps, clock %.0f, %s, rain %s, launches %d%s" % [Time.get_ticks_msec(), Engine.get_frames_per_second(),
+			river.clock, "docked" if river.docked else "crossing", river.raining, river.launches.size(), ", call open" if _activity != null else ""])
 	_t += dt
 	var pace := 0.35 if _activity != null and _activity.slow else 1.0
 	var was_raining := river.raining
@@ -753,4 +755,4 @@ func _end_day() -> void:
 
 func _again() -> void:
 	CrashWatch.start("boat")
-	get_tree().reload_current_scene()
+	get_tree().reload_current_scene.call_deferred()

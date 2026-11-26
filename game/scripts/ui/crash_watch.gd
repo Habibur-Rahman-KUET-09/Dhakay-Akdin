@@ -41,4 +41,10 @@ static func last_crash() -> String:
 		OS.get_model_name(), OS.get_name(), RenderingServer.get_video_adapter_name(),
 		ProjectSettings.get_setting("application/config/version", "dev"),
 	]
-	return "Crash during: %s\n%s\n%s" % [what, info, text]
+	# The game was sent to the background and Android closed it there
+	# later: not a crash, though the report is still worth having.
+	var kind := "Crash during"
+	var tail := text.strip_edges().split("\n")
+	if not tail.is_empty() and str(tail[tail.size() - 1]).contains("[app] paused"):
+		kind = "Closed in the background during"
+	return "%s: %s\n%s\n%s" % [kind, what, info, text]

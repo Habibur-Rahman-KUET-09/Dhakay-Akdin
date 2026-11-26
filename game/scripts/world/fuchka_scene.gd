@@ -707,10 +707,10 @@ func _end_day() -> void:
 	end.home_pressed.connect(_go_home)
 	end.again_pressed.connect(func():
 		CrashWatch.start("fuchka")
-		get_tree().reload_current_scene())
+		get_tree().reload_current_scene.call_deferred())
 	_layer.add_child(end)
 
 
 func _go_home() -> void:
 	CrashWatch.stop()
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	get_tree().change_scene_to_file.call_deferred("res://scenes/main.tscn")

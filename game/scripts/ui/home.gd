@@ -2937,4 +2937,4 @@ func _start(who: String, scene: String) -> void:
 
 func _go(scene: String) -> void:
 	CrashWatch.start(scene.get_file().get_basename())
-	get_tree().change_scene_to_file(scene)
+	get_tree().change_scene_to_file.call_deferred(scene)

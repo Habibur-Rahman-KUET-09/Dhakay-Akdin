@@ -373,11 +373,14 @@ func _refresh() -> void:
 func _fill_buyers() -> void:
 	var want := hk.buyers().slice(0, SHOWN_BUYERS) if hk.on_bus else []
 	var ids := want.map(func(r): return int(r.id))
-	var have := _buyer_col.get_children().map(func(k): return int(k.get_meta("id", -1)))
+	var live := _buyer_col.get_children().filter(func(k): return not k.is_queued_for_deletion())
+	var have := live.map(func(k): return int(k.get_meta("id", -1)))
 	if ids == have:
 		return
-	for k in _buyer_col.get_children():
-		_buyer_col.remove_child(k)
+	# Hidden now and freed after this frame: the button being pressed may
+	# still be handling its press.
+	for k in live:
+		k.visible = false
 		k.queue_free()
 	for r in want:
 		var n := int(r.wants)
@@ -614,4 +617,4 @@ func _end_day() -> void:
 
 func _again() -> void:
 	CrashWatch.start("hawker")
-	get_tree().reload_current_scene()
+	get_tree().reload_current_scene.call_deferred()

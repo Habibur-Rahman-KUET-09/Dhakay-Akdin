@@ -1204,12 +1204,12 @@ func _end_trip() -> void:
 
 func _again() -> void:
 	CrashWatch.start("bus")
-	get_tree().reload_current_scene()
+	get_tree().reload_current_scene.call_deferred()
 
 
 func _go_home() -> void:
 	CrashWatch.stop()
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	get_tree().change_scene_to_file.call_deferred("res://scenes/main.tscn")
 
 
 ## Leaving the app, or Android pausing it, goes in the log: the crash

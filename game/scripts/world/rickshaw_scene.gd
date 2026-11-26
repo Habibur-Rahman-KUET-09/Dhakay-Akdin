@@ -515,7 +515,7 @@ func _step(what: String) -> void:
 
 func _go_home() -> void:
 	CrashWatch.stop()
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	get_tree().change_scene_to_file.call_deferred("res://scenes/main.tscn")
 
 
 func _environment() -> void:
@@ -1945,7 +1945,7 @@ func _end_day() -> void:
 
 func _play_again() -> void:
 	CrashWatch.start("rickshaw")
-	get_tree().reload_current_scene()
+	get_tree().reload_current_scene.call_deferred()
 
 
 ## Touches are read finger by finger: a finger on the pedal or brake holds
