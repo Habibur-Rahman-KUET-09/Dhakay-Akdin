@@ -263,6 +263,14 @@ func _show_who() -> void:
 		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_who_box.add_child(row)
+	if not story.is_empty() and roles.has(Online.BOT):
+		var parts := PackedStringArray()
+		for who in roles[Online.BOT]:
+			parts.append(s.t({"rahim": "rickshawName", "monir": "teaName", "babu": "busName"}[who]))
+		var bot := Look.label(s.t("onBotPlays", {"who": ", ".join(parts)}), 16, true, Look.OUTLINE)
+		bot.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		bot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_who_box.add_child(bot)
 	var kind_line := s.t("onRaceKind") if str(_room.get("kind", "")) == "race" else s.t("onStoryKind", {"title": str(story.get("title", {}).get(s.lang, story.get("title", {}).get("en", "")))})
 	_status.text = kind_line + "\n" + s.t("onCount", {"n": here.size(), "max": int(b.n("online.max_players"))})
 	if _host and _start != null:

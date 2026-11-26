@@ -127,7 +127,7 @@
     "fare": 1.5, "hurry_share": 0.35, "energy": 1.25, "dark_share": 0.3, "pothole_chance": 0.06, "lamp_potholes": 0.5,
     "guards": 3, "guard_hold_s": 4, "guard_tip": 15, "family_worry": 1
   },
-  "online": {"poll_s": 1.5, "max_players": 3, "wait_s": 90, "finish_tara": 1, "win_tara": 3, "paid_per_day": 3},
+  "online": {"poll_s": 1.5, "max_players": 3, "wait_s": 90, "beat_s": 3, "gone_s": 20, "finish_tara": 1, "win_tara": 3, "paid_per_day": 3},
   "race": {"finish_tara": 2, "beat_tara": 3, "low_tiles": 14, "high_tiles": 26},
   "together": {"good": 0.7, "ok": 0.4, "tara": [5, 10, 15], "help_pushes": 0.6},
   "leaderboard": {"top": 20, "prizes": {"day": [5, 3, 2], "week": [15, 10, 5], "month": [40, 25, 15]}},

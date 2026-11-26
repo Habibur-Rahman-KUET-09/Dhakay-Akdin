@@ -16,6 +16,9 @@ const KINDS := ["story", "race"]
 ## A together story's cast id to its place in the cast (who plays them).
 const SEAT_OF := {"rahim": 0, "monir": 1, "babu": 2}
 const CAST_IDS := ["rahim", "monir", "babu"]
+## Who plays a character nobody in the room plays, or one whose player
+## has gone: the game itself.
+const BOT := "bot"
 
 ## Set by the lobby just before the story or the race opens: {code, kind,
 ## host, players (uids, host first), me (my uid), names {uid: name},
@@ -48,12 +51,52 @@ static func is_host(r: Dictionary) -> bool:
 	return str(r.get("host", "")) == str(r.get("me", "-"))
 
 
-## Who plays a story character: with three players one each (the host is
-## Rahim Chacha); with two the host also plays Babu; alone, all.
+## Who plays a story character: one each in the room's order (the host is
+## Rahim Chacha, the next Monir Mama, the third Babu); a seat with nobody
+## in it is the bot's. Alone, all of them.
 static func owner_of(players: Array, who: String) -> String:
 	if players.is_empty():
 		return ""
-	return str(players[int(SEAT_OF.get(who, 0)) % players.size()])
+	if players.size() == 1:
+		return str(players[0])
+	var seat := int(SEAT_OF.get(who, 0))
+	return str(players[seat]) if seat < players.size() else BOT
+
+
+## A turn the bot plays (or plays for someone who has gone): a fair score,
+## the same on every phone (it comes from the room's code and the step),
+## so every phone still reaches the same ending.
+static func bot_score(code: String, step: int) -> float:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s/%d" % [code, step])
+	return snappedf(rng.randf_range(0.55, 0.9), 0.01)
+
+
+## A turn some phone gave to the bot (its player had gone): the score it
+## wrote, or -1. Every phone then takes that, even the player coming back.
+static func bot_mark(moves: Dictionary, i: int) -> float:
+	for uid in moves:
+		var m = moves[uid]
+		if typeof(m) == TYPE_DICTIONARY and m.has("g%d" % i):
+			return float(m["g%d" % i])
+	return -1.0
+
+
+## Whether a player has gone: their phone stopped writing its heartbeat
+## (`key`: a count that goes up every few seconds, or the race clock).
+## `seen` is {uid: [last value, seconds since it changed]}, kept by the
+## caller; `moves` the latest read. Updates `seen` and returns whether
+## `uid` has been silent `limit` seconds.
+static func gone(seen: Dictionary, moves: Dictionary, uid: String, dt: float, limit: float, key := "beat") -> bool:
+	var m = moves.get(uid, null)
+	var beat := str(m.get(key, "")) if typeof(m) == TYPE_DICTIONARY else ""
+	var had: Array = seen.get(uid, [beat, 0.0])
+	if beat != str(had[0]):
+		had = [beat, 0.0]
+	else:
+		had = [beat, float(had[1]) + dt]
+	seen[uid] = had
+	return float(had[1]) >= limit
 
 
 ## The characters each player plays: {uid: [cast ids]}.
@@ -64,6 +107,8 @@ static func roles(players: Array) -> Dictionary:
 	for who in CAST_IDS:
 		var o := owner_of(players, who)
 		if o != "":
+			if not out.has(o):
+				out[o] = []
 			out[o].append(who)
 	return out
 

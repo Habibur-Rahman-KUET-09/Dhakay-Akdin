@@ -48,6 +48,9 @@ var online := {}
 var cloud: Cloud
 var _mine := {}
 var _waiting := -1
+var _beat := 0.0
+## {uid: [last heartbeat, seconds unchanged]}: who has gone (Online.gone).
+var _seen := {}
 
 
 func _ready() -> void:
@@ -69,10 +72,23 @@ func _ready() -> void:
 		Online.room = {}
 		cloud = Cloud.new()
 		add_child(cloud)
-		_mine = {"name": str(online.names.get(online.me, ""))}
+		_mine = {"name": str(online.names.get(online.me, "")), "beat": 0}
+		_send_mine()
 		_begin((online.players as Array).size())
 		return
 	_ask_players()
+
+
+## Online: a heartbeat every few seconds, so the others can tell when this
+## phone has gone (closed, or put away) and let the bot play its turns.
+func _process(dt: float) -> void:
+	if online.is_empty() or step_i >= (story.steps as Array).size():
+		return
+	_beat += dt
+	if _beat >= b.n("online.beat_s"):
+		_beat = 0.0
+		_mine.beat = int(_mine.get("beat", 0)) + 1
+		_send_mine()
 
 
 func _title() -> String:
@@ -162,14 +178,31 @@ func _next_step() -> void:
 	var who := s.t(_name_key(str(step.who)))
 	if not online.is_empty():
 		var owner := Online.owner_of(online.players, str(step.who))
-		if owner == str(online.me):
-			_card(s.t("onYourTurn", {"name": who}), [s.t("onYourTurnLine")], [[s.t("tgReady"), Look.YELLOW, _play_step]])
+		if owner == Online.BOT:
+			# Nobody in the room plays this one: the bot does, at once.
+			_their_score(step_i, Online.bot_score(str(online.code), step_i), s.t("onBot"))
+		elif owner == str(online.me):
+			_card(s.t("onYourTurn", {"name": who}), [s.t("onYourTurnLine")], [[s.t("tgReady"), Look.YELLOW, _my_turn]])
 		else:
 			_wait_for(step_i, owner, who)
 		return
 	if players > 1:
 		# Pass the phone: whose turn it is.
 		_card(s.t("tgTurn", {"name": who}), [s.t("tgPass", {"name": who})], [[s.t("tgReady"), Look.YELLOW, _play_step]])
+	else:
+		_play_step()
+
+
+## My turn online: unless, while this phone was away, the others gave it
+## to the bot (then that score stands, the same on every phone).
+func _my_turn() -> void:
+	var i := step_i
+	var m := await cloud.moves(str(online.code))
+	if i != step_i:
+		return
+	var bot := Online.bot_mark(m, i) if not m.has("_error") else -1.0
+	if bot >= 0.0:
+		_their_score(i, bot, s.t("onBot"))
 	else:
 		_play_step()
 
@@ -285,7 +318,9 @@ func _results(rank: int) -> void:
 
 
 ## Someone else's turn: wait (asking every second or two) for their score,
-## then show how it went. After a long wait, offer to play it here.
+## then show how it went. If their phone has gone quiet, the bot plays it
+## (and says so to the others, so every phone takes the same score); after
+## a long wait anyway, offer to play it here.
 func _wait_for(i: int, owner: String, who: String) -> void:
 	_waiting = i
 	var name := str(online.names.get(owner, ""))
@@ -300,10 +335,24 @@ func _wait_for(i: int, owner: String, who: String) -> void:
 		var m := await cloud.moves(str(online.code))
 		if _waiting != i:
 			return
-		var score := Online.score_of(m, owner, i) if not m.has("_error") else -1.0
-		if score >= 0.0:
+		if m.has("_error"):
+			continue
+		# A turn another phone gave to the bot stands, even if its player
+		# came back and played it late: every phone the same.
+		var bot := Online.bot_mark(m, i)
+		var score := Online.score_of(m, owner, i)
+		if score >= 0.0 and bot < 0.0:
 			_waiting = -1
 			_their_score(i, score, name)
+			return
+		if bot < 0.0 and Online.gone(_seen, m, owner, b.n("online.poll_s"), b.n("online.gone_s")):
+			bot = Online.bot_score(str(online.code), i)
+			_mine["g%d" % i] = bot
+			_send_mine()
+		if bot >= 0.0:
+			_waiting = -1
+			print("[online] %s has gone: the bot plays step %d" % [name, i])
+			_their_score(i, bot, s.t("onGoneBot", {"name": name}))
 			return
 		if waited >= b.n("online.wait_s") and not offered:
 			offered = true

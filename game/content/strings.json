@@ -4879,6 +4879,18 @@
   "bn": "খেললেন {name}",
   "en": "Played by {name}"
  },
+ "onBot": {
+  "bn": "বট",
+  "en": "the bot"
+ },
+ "onBotPlays": {
+  "bn": "বট খেলবে: {who}",
+  "en": "The bot plays: {who}"
+ },
+ "onGoneBot": {
+  "bn": "বট ({name} চলে গেছেন)",
+  "en": "the bot ({name} has gone)"
+ },
  "onTogetherDone": {
   "bn": "সবার ফোনে একই শেষ।",
   "en": "Everyone's phone has the same ending."
@@ -4906,6 +4918,10 @@
  "liveStill": {
   "bn": "{name}: এখনো চালাচ্ছেন",
   "en": "{name}: still riding"
+ },
+ "liveGone": {
+  "bn": "{name}: চলে গেছেন",
+  "en": "{name}: has gone"
  },
  "liveWon": {
   "bn": "আপনি প্রথম!",

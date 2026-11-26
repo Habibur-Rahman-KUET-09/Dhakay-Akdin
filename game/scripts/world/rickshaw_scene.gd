@@ -1596,18 +1596,28 @@ func _end_live_race() -> void:
 	var code := str(_live.code)
 	var rows := []
 	var waited := 0.0
+	# A racer whose clock has stopped (closed the game, or put it away) is
+	# not waited for.
+	var seen := {}
+	var gone := {}
 	while true:
 		await _live_cloud.move_put(code, {"name": str(_live.names.get(_live.me, "")), "path": Race.encode(_path), "done": true, "time": snappedf(_race_clock, 0.1)})
 		var m := await _live_cloud.moves(code)
 		if not m.has("_error"):
 			rows = Online.standings(_live.players, m)
+			for r in rows:
+				if not r.done and r.uid != str(_live.me) and Online.gone(seen, m, r.uid, float(progress.b.n("online.poll_s")), float(progress.b.n("online.gone_s")), "t"):
+					gone[r.uid] = true
 			var text := PackedStringArray()
 			for i in rows.size():
 				var r: Dictionary = rows[i]
 				var who: String = r.name + (" " + strings.t("onYou") if r.uid == str(_live.me) else "")
-				text.append(strings.t("livePlace", {"n": i + 1, "name": who, "s": "%.1f" % float(r.time)}) if r.done else strings.t("liveStill", {"name": who}))
+				if r.done:
+					text.append(strings.t("livePlace", {"n": i + 1, "name": who, "s": "%.1f" % float(r.time)}))
+				else:
+					text.append(strings.t("liveGone" if gone.has(r.uid) else "liveStill", {"name": who}))
 			table.text = "\n".join(text)
-			if rows.all(func(r): return r.done):
+			if rows.all(func(r): return r.done or gone.has(r.uid)):
 				break
 		waited += float(progress.b.n("online.poll_s"))
 		if waited >= float(progress.b.n("online.wait_s")):
