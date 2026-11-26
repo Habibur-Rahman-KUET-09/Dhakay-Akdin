@@ -57,6 +57,9 @@ func _ready() -> void:
 	_standing = Models.bus_standing()
 	_sitter_mesh = Models.bench_sitter()
 	_stander_mesh = Models.person()
+	for k in Models.PEOPLE:
+		_sitter_meshes.append(Models.bench_sitter(k))
+		_stander_meshes.append(Models.person(k))
 	# The bus he waits for, seen from the pavement as it pulls in.
 	_outside_bus = MeshInstance3D.new()
 	_outside_bus.mesh = Models.bus()
@@ -211,7 +214,7 @@ func _sync_people() -> void:
 		if not _people.has(id):
 			var person := MeshInstance3D.new()
 			person.material_override = _paint_for(r)
-			person.mesh = _sitter_mesh if seated else _stander_mesh
+			person.mesh = (_sitter_meshes if seated else _stander_meshes)[int(id) % Models.PEOPLE]
 			add_child(person)
 			_people[id] = person
 			person.position = Vector3(p.x, 0.0 if seated else 0.02, p.y + (0.05 if seated else 0.0))

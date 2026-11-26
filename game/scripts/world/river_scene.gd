@@ -77,6 +77,8 @@ func _ready() -> void:
 	_launch_paint = Models.traffic_material(PackedColorArray([Color("1C4E9B"), Color("C62828")]), false)
 	_launch_paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
 	_sitter_mesh = Models.bench_sitter()
+	for k in Models.PEOPLE:
+		_sitter_meshes.append(Models.bench_sitter(k))
 	camera = Camera3D.new()
 	camera.fov = 65
 	camera.near = 0.1
@@ -315,7 +317,7 @@ func _sync_riders() -> void:
 			seat += 1
 		taken[seat] = true
 		var mi := MeshInstance3D.new()
-		mi.mesh = _sitter_mesh
+		mi.mesh = _sitter_meshes[int(id) % Models.PEOPLE]
 		var paint := Models.traffic_material(PackedColorArray([_palette[id * 5 % 8], _palette[8 + id * 3 % 8]]), false)
 		paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
 		mi.material_override = paint

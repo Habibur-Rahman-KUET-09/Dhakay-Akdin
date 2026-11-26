@@ -65,6 +65,9 @@ var _seats: Array[Vector2] = []
 var _standing: Array[Vector2] = []
 var _sitter_mesh: ArrayMesh
 var _stander_mesh: ArrayMesh
+## Every kind of person, seated and standing (Models.PEOPLE of each).
+var _sitter_meshes: Array = []
+var _stander_meshes: Array = []
 # The screen.
 var _layer: CanvasLayer
 var _root: Control
@@ -162,12 +165,24 @@ func _ready() -> void:
 		board.font = Look.font(Look.BOLD)
 		board.font_size = 40
 		board.outline_size = 8
-		board.modulate = Color.WHITE
-		board.outline_modulate = Color("1C4E9B")
-		board.pixel_size = 0.0035
+		board.modulate = Color("FFE27A")
+		board.outline_modulate = Color("0E2A5C")
+		board.pixel_size = 0.0028
 		board.alpha_cut = Label3D.ALPHA_CUT_DISCARD
 		board.position = sign_at[0]
 		add_child(board)
+		# A painted plate behind the words, so the bright window behind does
+		# not wash them out.
+		var plate := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(0.98, 0.19, 0.02)
+		plate.mesh = box
+		var paint := StandardMaterial3D.new()
+		paint.albedo_color = Color("1C4E9B")
+		paint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		plate.material_override = paint
+		plate.position = sign_at[0] - Vector3(0, 0, 0.02)
+		add_child(plate)
 	# A bought sign over the windscreen.
 	var sticker := progress.worn("bus", "sticker")
 	if not sticker.is_empty():
@@ -193,6 +208,9 @@ func _ready() -> void:
 	add_child(_checker)
 	_sitter_mesh = Models.bench_sitter()
 	_stander_mesh = Models.person()
+	for k in Models.PEOPLE:
+		_sitter_meshes.append(Models.bench_sitter(k))
+		_stander_meshes.append(Models.person(k))
 	await _step("street")
 	_build_street()
 	camera = Camera3D.new()
@@ -432,7 +450,7 @@ func _sync_people() -> void:
 			_people[r.id] = person
 		_spot_of[r.id] = spot
 		var seated := spot >= 0 and spot < _seats.size()
-		person.mesh = _sitter_mesh if seated else _stander_mesh
+		person.mesh = (_sitter_meshes if seated else _stander_meshes)[int(r.id) % Models.PEOPLE]
 		person.visible = spot != -1
 		if spot == -2:
 			# At the door, front left, looking out.

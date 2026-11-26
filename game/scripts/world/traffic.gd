@@ -69,7 +69,7 @@ func setup(road_map: RoadMap, avoid: Vector2i, counts := {"rickshaw": 20, "ricks
 	# Rickshaws come in every style of decoration: one multimesh each.
 	var meshes := {
 		"rickshaw": [], "rickshaw_full": [],
-		"cng": [Models.cng()], "bus": [Models.bus()], "person": [Models.person()],
+		"cng": [Models.cng()], "bus": [Models.bus()], "person": [Models.person(0), Models.person(1), Models.person(2)],
 	}
 	for style in Models.STYLES:
 		meshes.rickshaw.append(Models.rickshaw(false, true, style))

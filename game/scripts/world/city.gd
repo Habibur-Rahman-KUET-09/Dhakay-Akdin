@@ -517,7 +517,10 @@ static func _poles_and_wires(map: RoadMap) -> Node3D:
 				continue
 			for d in 4:
 				if map.kind_at(RoadMap.step(p, d)) == RoadMap.Kind.BLOCK:
-					poles[p] = centre(p) + Vector3(RoadMap.DX[d], 0, RoadMap.DY[d]) * (T / 2 + PAVEMENT * 0.5)
+					# Near the tile's edge, between two shopfronts, not in front
+					# of the middle of one (where its signboard is).
+					var along := Vector3(RoadMap.DY[d], 0, -RoadMap.DX[d])
+					poles[p] = centre(p) + Vector3(RoadMap.DX[d], 0, RoadMap.DY[d]) * (T / 2 + PAVEMENT * 0.5) + along * (T * 0.42)
 					break
 	var pole_at: Array[Transform3D] = []
 	var wire_at: Array[Transform3D] = []

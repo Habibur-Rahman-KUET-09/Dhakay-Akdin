@@ -258,7 +258,7 @@ func _build_cart(map: RoadMap, tile: Vector2i) -> void:
 	_cart.add_child(board)
 	# Julekha Khala behind the cart: a green and magenta sari.
 	var khala := MeshInstance3D.new()
-	khala.mesh = Models.person()
+	khala.mesh = Models.person(1)
 	var sari := Models.traffic_material(PackedColorArray([Color("1C7C54"), Color("C2185B")]), false)
 	sari.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
 	khala.material_override = sari
@@ -268,7 +268,7 @@ func _build_cart(map: RoadMap, tile: Vector2i) -> void:
 	var mesh := Models.person()
 	for i in STAND_X.size():
 		var p := MeshInstance3D.new()
-		p.mesh = mesh
+		p.mesh = mesh if i % Models.PEOPLE == 0 else Models.person(i % Models.PEOPLE)
 		p.position = Vector3(STAND_X[i], 0, STAND_Z)
 		# Facing the cart (+Z here; the model looks along -Z).
 		p.rotation.y = PI

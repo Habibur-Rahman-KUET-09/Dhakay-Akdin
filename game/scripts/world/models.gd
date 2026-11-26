@@ -65,12 +65,12 @@ class Builder:
 		m.rings = 1
 		add(m, _xf(pos, rot), c, code, limb)
 
-	func ball(radius: float, pos: Vector3, c: Color, scale := Vector3.ONE, code := 1.0, limb := Vector2.ZERO) -> void:
+	func ball(radius: float, pos: Vector3, c: Color, scale := Vector3.ONE, code := 1.0, limb := Vector2.ZERO, sides := 10) -> void:
 		var m := SphereMesh.new()
 		m.radius = radius
 		m.height = radius * 2
-		m.radial_segments = 10
-		m.rings = 6
+		m.radial_segments = sides
+		m.rings = maxi(3, sides * 3 / 5)
 		add(m, Transform3D(Basis.from_scale(scale), pos), c, code, limb)
 
 	## A ring (tyre, rim) whose axle runs along X.
@@ -130,46 +130,121 @@ static func material() -> StandardMaterial3D:
 
 
 ## A person standing at the origin, ready to walk: shirt PAINT_A, trousers
-## PAINT_B, legs and arms marked to swing.
-static func person() -> ArrayMesh:
+## PAINT_B, legs and arms marked to swing. Three kinds (style): a young man
+## in shirt and trousers, a woman in salwar kameez with an orna, an older
+## man in a lungi and a prayer cap.
+static func person(style := 0) -> ArrayMesh:
 	var b := Builder.new()
-	_body(b, Vector3.ZERO, false, true)
+	_body(b, Vector3.ZERO, false, true, false, style)
 	return b.commit()
 
 
+## How many kinds of people there are.
+const PEOPLE := 3
+const BEARD := Color("8C8C88")
+const CAP := Color("F2F0EA")
+const LIPS := Color("5A2E22")
+
+
 ## Adds a body to b. Seated: thighs forward, for riders and passengers.
-## swing: mark the legs (and arms) to swing in the shader.
-static func _body(b: Builder, at: Vector3, seated: bool, swing: bool, arms_forward := false) -> void:
+## swing: mark the legs (and arms) to swing in the shader. Rounded, not
+## boxy: an oval chest, round shoulders, hands, shoes and a face.
+static func _body(b: Builder, at: Vector3, seated: bool, swing: bool, arms_forward := false, style := 0) -> void:
 	var hip := at.y + (0.92 if not seated else 0.0)
+	var woman := style == 1
+	var lungi := style == 2
 	var lx := 0.1
+	var skin := SKIN if style != 2 else SKIN.darkened(0.08)
 	for side in [-1, 1]:
 		var limb := Vector2(side, hip) if swing else Vector2.ZERO
+		var x: float = at.x + side * lx
 		if seated:
-			b.cyl(0.08, 0.45, Vector3(at.x + side * lx, hip, at.z - 0.22), STEEL.lerp(Color.WHITE, 0.1), Vector3(90, 0, 0), 8, PAINT_B)
-			b.cyl(0.07, 0.5, Vector3(at.x + side * lx, hip - 0.25, at.z - 0.45), SKIN, Vector3.ZERO, 8, KEEP, limb)
-			b.box(Vector3(0.1, 0.06, 0.22), Vector3(at.x + side * lx, hip - 0.5, at.z - 0.5), RUBBER, Vector3.ZERO, KEEP, limb)
+			b.cyl(0.085, 0.45, Vector3(x, hip, at.z - 0.22), Color.WHITE, Vector3(90, 0, 0), 10, PAINT_B, Vector2.ZERO, 0.075)
+			b.ball(0.08, Vector3(x, hip, at.z - 0.44), Color.WHITE, Vector3.ONE, PAINT_B, Vector2.ZERO, 8)
+			var shin := skin if lungi else Color.WHITE
+			var shin_code := KEEP if lungi else PAINT_B
+			b.cyl(0.07, 0.48, Vector3(x, hip - 0.25, at.z - 0.45), shin, Vector3.ZERO, 10, shin_code, limb, 0.06)
+			b.ball(0.06, Vector3(x, hip - 0.5, at.z - 0.52), RUBBER, Vector3(0.9, 0.55, 1.7), KEEP, limb, 8)
 		else:
-			b.cyl(0.085, 0.5, Vector3(at.x + side * lx, hip - 0.25, at.z), Color.WHITE, Vector3.ZERO, 8, PAINT_B, limb)
-			b.cyl(0.07, 0.42, Vector3(at.x + side * lx, hip - 0.68, at.z), SKIN, Vector3.ZERO, 8, KEEP, limb)
-			b.box(Vector3(0.1, 0.06, 0.24), Vector3(at.x + side * lx, 0.03, at.z - 0.05), RUBBER, Vector3.ZERO, KEEP, limb)
-	# Hips, torso, shoulders.
-	b.cyl(0.17, 0.2, Vector3(at.x, hip + 0.02, at.z), Color.WHITE, Vector3.ZERO, 10, PAINT_B)
-	b.cyl(0.19, 0.55, Vector3(at.x, hip + 0.32, at.z), Color.WHITE, Vector3.ZERO, 10, PAINT_A, Vector2.ZERO, 0.21)
-	b.box(Vector3(0.48, 0.1, 0.22), Vector3(at.x, hip + 0.58, at.z), Color.WHITE, Vector3.ZERO, PAINT_A)
+			# Thigh and knee, shin, ankle, shoe.
+			b.cyl(0.085, 0.47, Vector3(x, hip - 0.24, at.z), Color.WHITE, Vector3.ZERO, 10, PAINT_B, limb, 0.09)
+			b.ball(0.075, Vector3(x, hip - 0.48, at.z), Color.WHITE if not lungi else skin, Vector3.ONE, PAINT_B if not lungi else KEEP, limb, 8)
+			var shin := skin if lungi else Color.WHITE
+			var shin_code := KEEP if lungi else PAINT_B
+			b.cyl(0.065, 0.4, Vector3(x, hip - 0.68, at.z), shin, Vector3.ZERO, 10, shin_code, limb, 0.072)
+			b.ball(0.06, Vector3(x, 0.05, at.z - 0.05), RUBBER, Vector3(0.9, 0.6, 1.7), KEEP, limb, 8)
+	# Hips; for the lungi and the kameez, the cloth hanging round the legs.
+	b.ball(0.17, Vector3(at.x, hip + 0.02, at.z), Color.WHITE, Vector3(1.1, 0.6, 0.85), PAINT_B, Vector2.ZERO, 12)
+	if lungi:
+		if seated:
+			b.box(Vector3(0.4, 0.14, 0.48), Vector3(at.x, hip + 0.02, at.z - 0.2), Color.WHITE, Vector3.ZERO, PAINT_B)
+		else:
+			b.cyl(0.2, 0.62, Vector3(at.x, hip - 0.31, at.z), Color.WHITE, Vector3.ZERO, 14, PAINT_B, Vector2.ZERO, 0.19)
+	if woman:
+		if seated:
+			# The kameez falls over the thighs.
+			for side in [-1, 1]:
+				b.cyl(0.093, 0.32, Vector3(at.x + side * lx, hip + 0.005, at.z - 0.16), Color.WHITE, Vector3(90, 0, 0), 10, PAINT_A)
+		else:
+			b.cyl(0.215, 0.5, Vector3(at.x, hip - 0.2, at.z), Color.WHITE, Vector3.ZERO, 14, PAINT_A, Vector2.ZERO, 0.18)
+	# An oval chest, narrower front to back, and round shoulders.
+	b.ball(0.2, Vector3(at.x, hip + 0.32, at.z), Color.WHITE, Vector3(1.0 if not woman else 0.92, 1.45, 0.7), PAINT_A, Vector2.ZERO, 14)
+	var shoulder_w := 0.2 if not woman else 0.17
+	b.cyl(0.075, shoulder_w * 2.0, Vector3(at.x, hip + 0.56, at.z), Color.WHITE, Vector3(0, 0, 90), 10, PAINT_A)
+	for side in [-1, 1]:
+		b.ball(0.077, Vector3(at.x + side * shoulder_w, hip + 0.56, at.z), Color.WHITE, Vector3.ONE, PAINT_A, Vector2.ZERO, 8)
+	if woman:
+		# The orna: over one shoulder and across the chest.
+		b.box(Vector3(0.09, 0.62, 0.03), Vector3(at.x, hip + 0.36, at.z - 0.15), Color.WHITE, Vector3(-8, 0, 32), PAINT_B)
+		b.box(Vector3(0.1, 0.5, 0.03), Vector3(at.x + 0.12, hip + 0.4, at.z + 0.15), Color.WHITE, Vector3(8, 0, -10), PAINT_B)
 	# Arms: hanging (swing as they walk) or reaching forward (handlebar).
 	for side in [-1, 1]:
-		var shoulder := Vector3(at.x + side * 0.25, hip + 0.56, at.z)
+		var shoulder := Vector3(at.x + side * (shoulder_w + 0.04), hip + 0.55, at.z)
 		if arms_forward:
-			b.cyl(0.055, 0.6, shoulder + Vector3(0, -0.12, -0.28), Color.WHITE, Vector3(-65, 0, 0), 8, PAINT_A)
-			b.ball(0.05, shoulder + Vector3(0, -0.25, -0.55), SKIN)
+			b.cyl(0.055, 0.32, shoulder + Vector3(0, -0.07, -0.13), Color.WHITE, Vector3(-65, 0, 0), 8, PAINT_A)
+			b.cyl(0.045, 0.32, shoulder + Vector3(0, -0.18, -0.41), skin, Vector3(-65, 0, 0), 8)
+			b.ball(0.05, shoulder + Vector3(0, -0.25, -0.57), skin, Vector3(0.8, 0.8, 1.1), KEEP, Vector2.ZERO, 8)
 		else:
 			var limb := Vector2(side * 0.5, hip + 0.56) if swing else Vector2.ZERO
-			b.cyl(0.055, 0.3, shoulder + Vector3(0, -0.15, 0), Color.WHITE, Vector3.ZERO, 8, PAINT_A, limb)
-			b.cyl(0.045, 0.3, shoulder + Vector3(0, -0.44, 0), SKIN, Vector3.ZERO, 8, KEEP, limb)
-	# Neck, head, hair.
-	b.cyl(0.05, 0.1, Vector3(at.x, hip + 0.68, at.z), SKIN)
-	b.ball(0.115, Vector3(at.x, hip + 0.82, at.z), SKIN, Vector3(1, 1.12, 1))
-	b.ball(0.118, Vector3(at.x, hip + 0.87, at.z + 0.015), HAIR, Vector3(1.02, 0.75, 1.02))
+			b.cyl(0.058, 0.3, shoulder + Vector3(0, -0.15, 0), Color.WHITE, Vector3.ZERO, 10, PAINT_A, limb, 0.06)
+			b.ball(0.046, shoulder + Vector3(0, -0.3, 0), skin, Vector3.ONE, KEEP, limb, 6)
+			b.cyl(0.042, 0.28, shoulder + Vector3(0, -0.44, 0), skin, Vector3.ZERO, 8, KEEP, limb, 0.046)
+			b.ball(0.048, shoulder + Vector3(0, -0.62, -0.01), skin, Vector3(0.75, 1.15, 0.6), KEEP, limb, 8)
+	# Neck and collar.
+	b.cyl(0.05, 0.12, Vector3(at.x, hip + 0.68, at.z), skin, Vector3.ZERO, 8)
+	b.cyl(0.072, 0.05, Vector3(at.x, hip + 0.63, at.z), Color.WHITE, Vector3.ZERO, 10, PAINT_A, Vector2.ZERO, 0.06)
+	_head(b, Vector3(at.x, hip + 0.82, at.z), style, skin)
+
+
+## A head facing -Z at `c`: face, ears, eyes, brows, nose, mouth and the
+## kind's hair (short; long and tied back; a cap and a grey beard).
+static func _head(b: Builder, c: Vector3, style: int, skin: Color) -> void:
+	b.ball(0.115, c, skin, Vector3(0.95, 1.12, 1.0), KEEP, Vector2.ZERO, 12)
+	# The jaw and chin, a little narrower.
+	b.ball(0.085, c + Vector3(0, -0.06, -0.025), skin, Vector3(1.0, 0.8, 1.0), KEEP, Vector2.ZERO, 8)
+	for side in [-1, 1]:
+		b.ball(0.03, c + Vector3(side * 0.108, -0.005, 0.005), skin, Vector3(0.5, 1.0, 0.8), KEEP, Vector2.ZERO, 6)
+		b.ball(0.013, c + Vector3(side * 0.037, 0.018, -0.096), Color("EDE6DA"), Vector3(1.25, 0.75, 0.45), KEEP, Vector2.ZERO, 6)
+		b.ball(0.0075, c + Vector3(side * 0.037, 0.018, -0.1), Color("1A1210"), Vector3(1, 1, 0.6), KEEP, Vector2.ZERO, 6)
+		var brow := HAIR if style != 2 else BEARD
+		b.box(Vector3(0.04, 0.009, 0.012), c + Vector3(side * 0.04, 0.05, -0.105), brow, Vector3(0, 0, -side * 6))
+	b.ball(0.015, c + Vector3(0, -0.012, -0.108), skin.darkened(0.06), Vector3(0.9, 1.3, 0.9), KEEP, Vector2.ZERO, 6)
+	b.box(Vector3(0.038, 0.008, 0.01), c + Vector3(0, -0.052, -0.1), LIPS)
+	match style:
+		1:
+			# Long hair, parted, tied in a bun at the back.
+			b.ball(0.12, c + Vector3(0, 0.03, 0.012), HAIR, Vector3(1.0, 0.85, 1.04), KEEP, Vector2.ZERO, 12)
+			b.ball(0.11, c + Vector3(0, -0.04, 0.05), HAIR, Vector3(1.0, 1.0, 0.75), KEEP, Vector2.ZERO, 10)
+			b.ball(0.055, c + Vector3(0, -0.02, 0.13), HAIR, Vector3.ONE, KEEP, Vector2.ZERO, 8)
+		2:
+			# A white prayer cap and a short grey beard.
+			b.cyl(0.108, 0.07, c + Vector3(0, 0.085, 0.005), CAP, Vector3.ZERO, 12, KEEP, Vector2.ZERO, 0.1)
+			b.ball(0.09, c + Vector3(0, -0.07, -0.04), BEARD, Vector3(1.05, 0.75, 0.8), KEEP, Vector2.ZERO, 8)
+			b.box(Vector3(0.06, 0.012, 0.014), c + Vector3(0, -0.035, -0.11), BEARD)
+		_:
+			# Short hair, a little fuller on top.
+			b.ball(0.12, c + Vector3(0, 0.045, 0.012), HAIR, Vector3(1.0, 0.72, 1.04), KEEP, Vector2.ZERO, 12)
+			b.ball(0.112, c + Vector3(0, 0.0, 0.035), HAIR, Vector3(1.0, 0.9, 0.85), KEEP, Vector2.ZERO, 10)
 
 
 # --- Rickshaw ------------------------------------------------------------
@@ -439,7 +514,7 @@ static func _rickshaw(b: Builder, rider: bool, passenger: bool, wheels: bool, st
 	if rider:
 		_body(b, Vector3(0, 1.08, -0.42), true, true, true)
 	if passenger:
-		_body(b, Vector3(0, 1.04, 0.66), true, false)
+		_body(b, Vector3(0, 1.04, 0.66), true, false, false, style % PEOPLE)
 
 
 ## A whole rickshaw in one mesh, for traffic (or parked, without a rider).
@@ -451,9 +526,9 @@ static func rickshaw(passenger := false, rider := true, style := 0) -> ArrayMesh
 
 ## A passenger sitting on the rickshaw seat (shirt PAINT_A, trousers
 ## PAINT_B), to show on Rahim Chacha's rickshaw during a trip.
-static func seated_passenger() -> ArrayMesh:
+static func seated_passenger(style := 0) -> ArrayMesh:
 	var b := Builder.new()
-	_body(b, Vector3(0, 1.04, 0.66), true, false)
+	_body(b, Vector3(0, 1.04, 0.66), true, false, false, style)
 	return b.commit()
 
 
@@ -747,9 +822,9 @@ static func fuchka_cart(body := Color("1C7C54"), trim := Color("F6B800")) -> Arr
 	return b.commit()
 
 
-static func bench_sitter() -> ArrayMesh:
+static func bench_sitter(style := 0) -> ArrayMesh:
 	var b := Builder.new()
-	_body(b, Vector3(0, 0.5, 0), true, false)
+	_body(b, Vector3(0, 0.5, 0), true, false, false, style)
 	return b.commit()
 
 

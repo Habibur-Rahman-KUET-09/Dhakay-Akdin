@@ -343,7 +343,7 @@ func _build_stall(map: RoadMap, tile: Vector2i) -> void:
 	var sitter_mesh := Models.bench_sitter()
 	for i in SEAT_X.size():
 		var sitter := MeshInstance3D.new()
-		sitter.mesh = sitter_mesh
+		sitter.mesh = Models.bench_sitter(i % Models.PEOPLE) if i % Models.PEOPLE != 0 else sitter_mesh
 		# Facing the counter (+Z here; the model looks along -Z).
 		sitter.position = Vector3(SEAT_X[i], 0, BENCH_Z + 0.05)
 		sitter.rotation.y = PI

@@ -1822,6 +1822,7 @@ func _on_refuse() -> void:
 
 func _boarded() -> void:
 	hud.hide_offer()
+	_rider_seat.mesh = Models.seated_passenger(randi() % Models.PEOPLE)
 	_rider_seat.visible = true
 	_say(strings.t("boarded", {"place": RoadMap.place_name(shift.riding.place, strings.lang), "fare": shift.riding.fare}), Look.SKY, 2.5)
 	_place_marker()
