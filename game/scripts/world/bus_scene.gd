@@ -14,6 +14,8 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const Tips = preload("res://scripts/ui/tips.gd")
+const Chatter = preload("res://scripts/ui/chatter.gd")
 const Music = preload("res://scripts/ui/music.gd")
 const Activity = preload("res://scripts/ui/activity.gd")
 const Hands = preload("res://scripts/rules/activities.gd")
@@ -91,6 +93,7 @@ var _ding: AudioStreamPlayer
 var _coin: AudioStreamPlayer
 ## Babu calling the stops, passengers, the checker.
 var _voice: Voice
+var _chat_left := Chatter.gap()
 ## The hand activity open, if any; the slap pad on the bus's side and the
 ## times of the last slaps; the notes in his hand to sort.
 var _activity: Activity
@@ -227,6 +230,7 @@ func _loading_screen() -> CanvasLayer:
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
 	text.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(text)
+	layer.add_child(Tips.card(strings))
 	add_child(layer)
 	return layer
 
@@ -254,9 +258,10 @@ func _environment() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.fog_enabled = true
 	env.fog_light_color = Color("D8D5C8")
-	env.fog_density = 0.012
-	env.adjustment_saturation = 1.15
-	env.adjustment_contrast = 1.06
+	env.fog_density = 0.006
+	env.adjustment_enabled = true
+	env.adjustment_saturation = 1.25
+	env.adjustment_contrast = 1.1
 	env.glow_intensity = 0.45
 	env.glow_hdr_threshold = 0.95
 	_env = env
@@ -676,6 +681,7 @@ func _process(dt: float) -> void:
 	var pace := 0.35 if _activity != null and _activity.slow else 1.0
 	var events := bus.update(dt * pace)
 	_handle(events)
+	_chat_tick(dt)
 	if not is_processing():
 		return
 	# A call from home comes at a stop, or after half a minute's wait for one.
@@ -1224,3 +1230,18 @@ func _notification(what: int) -> void:
 			print("[app] closing ", Time.get_ticks_msec(), " ms")
 		NOTIFICATION_WM_GO_BACK_REQUEST:
 			print("[app] back button ", Time.get_ticks_msec(), " ms")
+
+
+## Passing talk now and then, when nothing else is on the notice line.
+func _chat_tick(dt: float) -> void:
+	_chat_left -= dt
+	if _chat_left > 0.0:
+		return
+	_chat_left = Chatter.gap()
+	if _notice_left > 0.0 or bus.over or _activity != null:
+		return
+	var line := Chatter.pick("bus_chat", strings.lang)
+	if line.is_empty():
+		return
+	_voice.play(str(line.id))
+	_say(str(line.text), Look.SKY_DARK, 4.0)

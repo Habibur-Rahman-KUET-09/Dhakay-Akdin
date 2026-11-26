@@ -30,6 +30,7 @@ const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
 const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 const League = preload("res://scripts/rules/league.gd")
+const Ranked = preload("res://scripts/rules/ranked.gd")
 const Race = preload("res://scripts/rules/race.gd")
 const Together = preload("res://scripts/rules/together.gd")
 
@@ -84,6 +85,8 @@ var _lb_state := ""
 ## This week's area league as fetched: {area: {count, sum}}; "" / loading / ok.
 var _league_now := {}
 var _league_state := ""
+## Last week's tournament prize, paid when the home opened in a new week.
+var _rank_paid := {}
 ## Reading aloud: on (kept from the setting), and a finger held down
 ## (where, since when) to read what is under it.
 var _read_aloud := false
@@ -99,6 +102,9 @@ func _ready() -> void:
 		Graphics.save_level("low")
 		_lowered = true
 	progress = Progress.new(b)
+	_rank_paid = Ranked.claim(progress.data, b, progress.date())
+	if not _rank_paid.is_empty():
+		progress.save()
 	_read_aloud = ReadAloud.wanted()
 	cloud = Cloud.new()
 	add_child(cloud)
@@ -450,6 +456,7 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 	var challenge := _challenge_card()
 	if challenge != null:
 		inner.add_child(challenge)
+	inner.add_child(_ranked_card())
 	inner.add_child(_together_card())
 	if cloud.enabled():
 		inner.add_child(_online_card())
@@ -1171,7 +1178,18 @@ func _shop_page(page: VBoxContainer) -> void:
 	page.add_child(_caption(s.t("looksTitle")))
 	var looks := _two_columns()
 	page.add_child(looks)
+	var slot := ""
 	for l in Goods.looks(_shop_who):
+		# Rahim Chacha's back painting and slogan: their own part, after a
+		# heading that says what they are.
+		if _shop_who == "rickshaw" and str(l.slot) in ["plate", "slogan"] and str(l.slot) != slot:
+			if slot not in ["plate", "slogan"]:
+				page.add_child(_caption(s.t("rickshawArtTitle")))
+				page.add_child(Look.label(s.t("rickshawArtHelp"), 14, false, Look.MUTED))
+			page.add_child(Look.label(s.t("lookSlot_" + str(l.slot)), 16, true, Look.OUTLINE))
+			looks = _two_columns()
+			page.add_child(looks)
+		slot = str(l.slot)
 		looks.add_child(_look_card(l, _shop_who))
 	# Bought with stars (won in the leaderboards, challenges, the story).
 	page.add_child(_caption(s.t("starShopTitle", {"n": int(progress.data.tara)})))
@@ -1261,6 +1279,20 @@ func _look_card(l: Dictionary, who: String) -> Control:
 			break
 	var parts := _goods_card(str(l.get("icon", "bag")), tile, s.t("look_" + l.id), s.t("lookHelp_" + l.slot))
 	var col: VBoxContainer = parts[1]
+	# A painting shows itself; a slogan as it is written on the rickshaw.
+	if l.has("picture"):
+		var pic := TextureRect.new()
+		pic.texture = Look.icon_texture(str(l.picture), 200)
+		pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		pic.custom_minimum_size = Vector2(0, 80)
+		col.add_child(pic)
+	elif str(l.slot) == "slogan":
+		var words := Look.label(str(s.both("look_" + l.id).get("bn", "")), 20, true, Look.YELLOW)
+		words.add_theme_color_override("font_outline_color", Color("7B1FA2"))
+		words.add_theme_constant_override("outline_size", 8)
+		words.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		col.add_child(words)
 	if not progress.owns_look(l.id) and bool(l.get("prize", false)):
 		col.add_child(Look.label(s.t("lookPrize"), 13, true, Look.MAGENTA))
 	elif not progress.owns_look(l.id):
@@ -2219,6 +2251,58 @@ func _together_page(page: VBoxContainer) -> void:
 
 
 ## On the mohalla page: the leaderboards, and the way in.
+## The weekly tournament: this week's rank and points, how far to the
+## next rank, the days left and the prize; last week's prize when it was
+## just paid; and the area league, a tap away.
+func _ranked_card() -> Control:
+	var panel := _card(Color("2B1B4D"), 20)
+	panel.name = "RankedCard"
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 6)
+	panel.add_child(col)
+	var points := Ranked.points(progress.data, progress.date())
+	var i := Ranked.rank_of(b, points)
+	var rank := s.t("rank_" + Ranked.rank_id(b, i))
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 10)
+	top.add_child(_icon_tile("star", Look.YELLOW, Look.OUTLINE))
+	var titles := VBoxContainer.new()
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	titles.add_theme_constant_override("separation", 0)
+	titles.add_child(Look.label(s.t("rankedTitle"), 18, true, Look.YELLOW))
+	titles.add_child(Look.label(s.t("rankedNow", {"rank": rank, "n": points}), 15, true, Color.WHITE))
+	top.add_child(titles)
+	col.add_child(top)
+	var left := Ranked.to_next(b, points)
+	if left > 0:
+		var next_at := points + left
+		var from := int(Ranked.ranks(b)[i].points)
+		col.add_child(Look.bar(points - from, next_at - from, Look.YELLOW, 14))
+		col.add_child(Look.label(s.t("rankedNext", {"rank": s.t("rank_" + Ranked.rank_id(b, i + 1)), "n": left}), 14, false, Color("E9DDFB")))
+	else:
+		col.add_child(Look.label(s.t("rankedTop"), 14, true, Look.YELLOW))
+	var prize := int(Ranked.ranks(b)[i].tara)
+	var when := s.t("rankedDays", {"n": Ranked.days_left(progress.date())})
+	if prize > 0:
+		when += " · " + s.t("rankedPrize", {"n": prize})
+	var when_label := Look.label(when, 13, false, Color("C9B8EE"))
+	when_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(when_label)
+	if not _rank_paid.is_empty():
+		var paid := Look.label(s.t("rankedPaid", {"rank": s.t("rank_" + Ranked.rank_id(b, int(_rank_paid.rank))), "n": int(_rank_paid.tara)}), 15, true, Look.PARROT)
+		paid.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(paid)
+	var how := Look.label(s.t("rankedHow"), 12, false, Color("C9B8EE"))
+	how.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(how)
+	if cloud.enabled():
+		var league := Look.chunky(s.t("rankedLeague"), Look.MAGENTA, Color.WHITE, 15, 4, 14)
+		league.name = "RankedLeague"
+		league.pressed.connect(show_page.bind("board"))
+		col.add_child(league)
+	return panel
+
+
 func _leader_card() -> Control:
 	if not cloud.enabled():
 		return null

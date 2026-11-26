@@ -113,6 +113,7 @@ func _loading_screen() -> CanvasLayer:
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
 	text.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(text)
+	layer.add_child(Tips.card(strings))
 	add_child(layer)
 	return layer
 
@@ -523,7 +524,7 @@ func _refresh() -> void:
 	else:
 		_next_stop.text = strings.t("boatCrossing", {"ghat": _stop_name(1 - river.side), "m": int(river.left_share() * river.width)})
 	var h := int(river.hour())
-	var clock := "%d:%02d" % [((h - 1) % 12) + 1, int((river.hour() - h) * 60.0)]
+	var clock := strings.num("%d:%02d" % [((h - 1) % 12) + 1, int((river.hour() - h) * 60.0)])
 	_status.text = "%s\n%s\n%s" % [clock, strings.t("taka", {"n": river.earned()}), strings.t("boatTrips", {"n": river.crossings})]
 	_dock_box.visible = river.docked and not river.over
 	_oar_row.visible = not river.docked and not river.over

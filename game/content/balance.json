@@ -100,6 +100,9 @@
     "rain_chance_per_day": 0.25, "rain_seconds": 60, "rain_arrivals": 0.5, "winter_arrivals": 1.4,
     "upgrades": {"stool": {"cost": 800, "patience_bonus_s": 4}, "umbrella": {"cost": 1500}, "doi": {"cost": 2500}}
   },
+  "ranked": {"note": "The weekly tournament (rules/ranked.gd): a day's XP is its points; the week's points give the rank; a new week pays last week's rank its stars.",
+    "ranks": [{"id": "notun", "points": 0, "tara": 0}, {"id": "paka", "points": 300, "tara": 3}, {"id": "ostad", "points": 700, "tara": 6},
+      {"id": "raja", "points": 1200, "tara": 10}, {"id": "kingbodonti", "points": 2000, "tara": 15}]},
   "league": {"min_players": 1, "win_tara": 5},
   "delivery": {
     "start_hour": 16, "end_hour": 22, "day_seconds": 300, "speed": 1.15, "energy": 0.8, "daily_target": 500,

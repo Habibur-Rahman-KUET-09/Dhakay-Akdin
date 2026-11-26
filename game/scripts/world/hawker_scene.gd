@@ -109,6 +109,7 @@ func _loading_screen() -> CanvasLayer:
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
 	text.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(text)
+	layer.add_child(Tips.card(strings))
 	add_child(layer)
 	return layer
 
@@ -356,7 +357,7 @@ func _refresh() -> void:
 	else:
 		_next_stop.text = strings.t("hkWaiting", {"stop": _stop_name(hk.stop_i)})
 	var h := int(hk.hour())
-	var clock := "%d:%02d" % [((h - 1) % 12) + 1, int((hk.hour() - h) * 60.0)]
+	var clock := strings.num("%d:%02d" % [((h - 1) % 12) + 1, int((hk.hour() - h) * 60.0)])
 	var lines := PackedStringArray([clock, strings.t("taka", {"n": hk.earned()}), strings.t("hkBasket", {"n": hk.stock})])
 	if hk.on_bus:
 		lines.append(strings.t("hkStops", {"n": hk.ridden, "free": hk.free_stops}))

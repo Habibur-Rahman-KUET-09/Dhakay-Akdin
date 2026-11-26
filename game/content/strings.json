@@ -2180,7 +2180,7 @@
   "en": "just now"
  },
  "sms_old": {
-  "bn": "গতকাল সন্ধ্যা 7:40",
+  "bn": "গতকাল সন্ধ্যা ৭:৪০",
   "en": "yesterday 7:40 pm"
  },
  "sms_ok": {
@@ -2328,15 +2328,15 @@
   "en": "Busy now, I'll call later"
  },
  "familyUp": {
-  "bn": "পরিবারের মন ভালো হলো ({n}/10)",
+  "bn": "পরিবারের মন ভালো হলো ({n}/১০)",
   "en": "The family is pleased ({n}/10)"
  },
  "familyDown": {
-  "bn": "পরিবারের মন খারাপ হলো ({n}/10)",
+  "bn": "পরিবারের মন খারাপ হলো ({n}/১০)",
   "en": "The family is let down ({n}/10)"
  },
  "familyLine": {
-  "bn": "পরিবারের মন: {n}/10",
+  "bn": "পরিবারের মন: {n}/১০",
   "en": "Family: {n}/10"
  },
  "shopHome": {
@@ -2424,7 +2424,7 @@
   "en": "Praner Dhaka"
  },
  "homeShopHelp": {
-  "bn": "রহিম চাচার মিরপুরের বাসা। প্রতিটা জিনিসে পরিবার খুশি হয় (এখন পরিবারের মন {n}/10)।",
+  "bn": "রহিম চাচার মিরপুরের বাসা। প্রতিটা জিনিসে পরিবার খুশি হয় (এখন পরিবারের মন {n}/১০)।",
   "en": "Rahim Chacha's home in Mirpur. Everything bought makes the family glad (family now {n}/10)."
  },
  "home_bed": {
@@ -2448,11 +2448,11 @@
   "en": "A brick house"
  },
  "homeHelp_bed": {
-  "bn": "ভালো ঘুম: দিনের শুরুতে শক্তি +10",
+  "bn": "ভালো ঘুম: দিনের শুরুতে শক্তি +১০",
   "en": "Better sleep: +10 energy at the start of a day"
  },
  "homeHelp_fan": {
-  "bn": "গরমে আরাম: দিনের শুরুতে শক্তি +10",
+  "bn": "গরমে আরাম: দিনের শুরুতে শক্তি +১০",
   "en": "Cool nights: +10 energy at the start of a day"
  },
  "homeHelp_desk": {
@@ -4954,5 +4954,233 @@
  "sharePhotoFoot": {
   "bn": "আপনিও খেলুন: {url}",
   "en": "Play it too: {url}"
+ },
+ "look_plate_tiger": {
+  "bn": "বাঘ মামা",
+  "en": "Tiger"
+ },
+ "look_plate_shapla": {
+  "bn": "শাপলা",
+  "en": "Water lilies"
+ },
+ "look_plate_peacock": {
+  "bn": "ময়ূর",
+  "en": "Peacock"
+ },
+ "look_plate_boat": {
+  "bn": "নদীর নৌকা",
+  "en": "Boat on the river"
+ },
+ "look_plate_village": {
+  "bn": "গ্রামের বাড়ি",
+  "en": "Village home"
+ },
+ "look_plate_parrots": {
+  "bn": "টিয়া পাখি",
+  "en": "Parrots"
+ },
+ "look_slogan_mayer_doa": {
+  "bn": "মায়ের দোয়া",
+  "en": "Mother's blessing"
+ },
+ "look_slogan_babar_doa": {
+  "bn": "বাবার দোয়া",
+  "en": "Father's blessing"
+ },
+ "look_slogan_sabdhane": {
+  "bn": "সাবধানে চলুন",
+  "en": "Drive safely"
+ },
+ "look_slogan_chap_nai": {
+  "bn": "চাপ নিয়েন না",
+  "en": "No stress"
+ },
+ "look_slogan_jam_bondhu": {
+  "bn": "জ্যাম আমার বন্ধু",
+  "en": "The jam is my friend"
+ },
+ "look_slogan_dhakar_raja": {
+  "bn": "ঢাকার রাজা",
+  "en": "King of Dhaka"
+ },
+ "lookHelp_plate": {
+  "bn": "রিকশার পেছনে আঁকা ছবি, রাস্তায় সবাই দেখবে।",
+  "en": "A painting on the back of the rickshaw, for the whole street to see."
+ },
+ "lookHelp_slogan": {
+  "bn": "ছবির নিচে লেখা, রিকশাওয়ালাদের মতো।",
+  "en": "A line written under the painting, as on every rickshaw."
+ },
+ "lookSlot_paint": {
+  "bn": "রং",
+  "en": "Paint"
+ },
+ "lookSlot_art": {
+  "bn": "হুডের নকশা",
+  "en": "Hood pattern"
+ },
+ "lookSlot_plate": {
+  "bn": "পেছনের ছবি",
+  "en": "Back painting"
+ },
+ "lookSlot_slogan": {
+  "bn": "পেছনের লেখা",
+  "en": "Back slogan"
+ },
+ "rickshawArtTitle": {
+  "bn": "রিকশা সাজাও",
+  "en": "Decorate the rickshaw"
+ },
+ "rickshawArtHelp": {
+  "bn": "তারা দিয়ে কেনা ছবি আর লেখা, দিনের খেলায় রিকশার পেছনে দেখা যায়।",
+  "en": "Paintings and slogans bought with stars show on the back of the rickshaw while you ride."
+ },
+ "rank_notun": {
+  "bn": "নতুন",
+  "en": "Rookie"
+ },
+ "rank_paka": {
+  "bn": "পাকা খেলোয়াড়",
+  "en": "Pro"
+ },
+ "rank_ostad": {
+  "bn": "ওস্তাদ",
+  "en": "Master"
+ },
+ "rank_raja": {
+  "bn": "রাজা",
+  "en": "King"
+ },
+ "rank_kingbodonti": {
+  "bn": "কিংবদন্তি",
+  "en": "Legend"
+ },
+ "rankedTitle": {
+  "bn": "সাপ্তাহিক টুর্নামেন্ট",
+  "en": "Weekly tournament"
+ },
+ "rankedNow": {
+  "bn": "আপনার র‍্যাংক: {rank} · {n} পয়েন্ট",
+  "en": "Your rank: {rank} · {n} points"
+ },
+ "rankedNext": {
+  "bn": "{rank} হতে আর {n} পয়েন্ট",
+  "en": "{n} points to {rank}"
+ },
+ "rankedTop": {
+  "bn": "সবার উপরের র‍্যাংক! এবার ধরে রাখুন।",
+  "en": "The top rank! Now hold on to it."
+ },
+ "rankedDays": {
+  "bn": "সপ্তাহ শেষ হতে আর {n} দিন",
+  "en": "{n} days left this week"
+ },
+ "rankedPrize": {
+  "bn": "সপ্তাহ শেষে এই র‍্যাংকের পুরস্কার: {n} তারা",
+  "en": "Prize for this rank at the week's end: {n} stars"
+ },
+ "rankedHow": {
+  "bn": "যেকোনো চরিত্রে খেলা প্রতিটা দিনের XP এখানে পয়েন্ট। প্রতি সপ্তাহে আবার শুরু।",
+  "en": "Every day's XP, with any character, counts as points. It starts again each week."
+ },
+ "rankedPaid": {
+  "bn": "গত সপ্তাহে আপনি ছিলেন {rank}: পুরস্কার {n} তারা!",
+  "en": "Last week you were {rank}: {n} stars won!"
+ },
+ "rankedLeague": {
+  "bn": "এলাকার লিগ: মিরপুর বনাম পুরান ঢাকা",
+  "en": "Area league: Mirpur vs Old Dhaka"
+ },
+ "dayRankPoints": {
+  "bn": "টুর্নামেন্ট: +{n} পয়েন্ট",
+  "en": "Tournament: +{n} points"
+ },
+ "rankUp": {
+  "bn": "র‍্যাংক উঠল: {rank}!",
+  "en": "Ranked up: {rank}!"
+ },
+ "teaGuideNext": {
+  "bn": "পরের ধাপ: \"{step}\" চাপুন",
+  "en": "Next: press \"{step}\""
+ },
+ "teaGuideGive": {
+  "bn": "চা তৈরি! এবার \"{give}\" চাপুন",
+  "en": "Tea's ready! Now press \"{give}\""
+ },
+ "teaGuideDiscard": {
+  "bn": "এটা অর্ডারের সাথে মিলছে না। \"{discard}\" চেপে আবার শুরু করুন",
+  "en": "That doesn't match the order. Press \"{discard}\" and start again"
+ },
+ "teaGuideDone": {
+  "bn": "দারুণ! এখন থেকে নিজে নিজেই পারবেন।",
+  "en": "Great! You can do it on your own now."
+ },
+ "tipTitle": {
+  "bn": "টিপস",
+  "en": "Tip"
+ },
+ "tip_0": {
+  "bn": "মোড়ের আগেই সোয়াইপ করুন, দেরি করলে রিকশা সোজা চলে যাবে।",
+  "en": "Swipe before the junction; leave it late and the rickshaw goes straight on."
+ },
+ "tip_1": {
+  "bn": "লাল বাতিতে থামুন, নইলে পুলিশ মামা জরিমানা ধরবে।",
+  "en": "Stop at red lights, or the police will fine you."
+ },
+ "tip_2": {
+  "bn": "ভাড়া বেশি চাইলে কেউ কেউ রাজি হয় না। দরদামে মাঝামাঝি থাকুন।",
+  "en": "Ask too much and some won't agree. Keep your price in the middle."
+ },
+ "tip_3": {
+  "bn": "শক্তি কমলে চায়ের দোকানে থামুন। এক কাপ চা, ফুল চার্জ!",
+  "en": "Low on energy? Stop at a tea stall. One cup, full charge!"
+ },
+ "tip_4": {
+  "bn": "প্রতিদিন খেললে টানা খেলার তারা পাবেন, সাত দিনে স্পেশাল হুড।",
+  "en": "Play every day for streak stars; on the seventh day, a special hood."
+ },
+ "tip_5": {
+  "bn": "তারা জমিয়ে রিকশার পেছনে বাঘ, ময়ূর বা নৌকার ছবি আঁকান।",
+  "en": "Save stars to paint a tiger, a peacock or a boat on the back of the rickshaw."
+ },
+ "tip_6": {
+  "bn": "সাপ্তাহিক টুর্নামেন্টে যেকোনো চরিত্রের খেলা গোনে। কিংবদন্তি হতে পারবেন?",
+  "en": "Every character's days count in the weekly tournament. Can you reach Legend?"
+ },
+ "tip_7": {
+  "bn": "বৃষ্টি এলে হুড তুলুন, যাত্রী খুশি হলে বকশিশও বেশি।",
+  "en": "Raise the hood in the rain; happy passengers tip more."
+ },
+ "tip_8": {
+  "bn": "আজকের চরিত্রে প্রথম দিনে আয় দ্বিগুণ।",
+  "en": "Today's character earns double on their first day."
+ },
+ "tip_9": {
+  "bn": "বন্ধুদের সাথে অনলাইনে একই গল্প খেলুন; কেউ না এলে বট খেলে দেবে।",
+  "en": "Play a story online with friends; if someone's missing, the bot plays for them."
+ },
+ "tip_10": {
+  "bn": "আয়ের দশ ভাগ মহল্লার তহবিলে যায়, তাতেই মহল্লা বদলায়।",
+  "en": "A tenth of what you earn goes to the mohalla fund, and that changes the mohalla."
+ },
+ "tip_11": {
+  "bn": "একমুখী রাস্তায় উল্টো ঢুকবেন না, পুলিশ মামা সব দেখে।",
+  "en": "Don't go the wrong way down a one-way street. The police see everything."
+ },
+ "tip_12": {
+  "bn": "সেটিংসে 'সহজ চালানো' চালু করলে মোড়ে রিকশা নিজেই পথ ধরে।",
+  "en": "Turn on 'Easy driving' in settings and the rickshaw finds the way at junctions."
+ },
+ "tip_13": {
+  "bn": "দিনশেষে ছবি বানিয়ে বন্ধুদের পাঠান, দেখুক আজ কত কামালেন!",
+  "en": "Make a picture at the end of the day and send it to friends. Show them what you earned!"
+ },
+ "tip_14": {
+  "bn": "গলির ভেতর দিয়ে গেলে মাঝে মাঝে জ্যাম এড়ানো যায়।",
+  "en": "A side lane can sometimes get you round a jam."
+ },
+ "tip_15": {
+  "bn": "ফুচকায় আগে ফুচকা ফাটান, তারপর আলু, টক আর ঝাল মাপে দিন।",
+  "en": "Fuchka: crack it first, then potato, tamarind and chilli to taste."
  }
 }

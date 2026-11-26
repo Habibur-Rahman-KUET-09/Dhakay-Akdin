@@ -1,63 +1,400 @@
 {
- "about": "What the savings (and the stars) can be spent on besides upgrades. boosts: bought with stars (tara) for the character's next day: a good meal (more energy), a loudspeaker at the stall (more customers), a pack of small notes in the change bag. looks: paint and decorations for each one's rickshaw, stall or bus (bought once, then worn or taken off; one per slot; a prize one is not sold, it is won among friends; a tara one is bought with stars). home: things for Rahim Chacha's home in Mirpur, each makes the family glad (family) and some let him rest better (energy: more at the start of a day). phone: a phone of his own, which helps check payment SMS and talk to home. samity: the savings club, a small deposit at the end of every day, paid back with a bonus after `rounds` deposits.",
+ "about": "What the savings (and the stars) can be spent on besides upgrades. boosts: bought with stars (tara) for the character's next day: a good meal (more energy), a loudspeaker at the stall (more customers), a pack of small notes in the change bag. looks: paint and decorations for each one's rickshaw, stall or bus (bought once, then worn or taken off; one per slot; a prize one is not sold, it is won among friends; a tara one is bought with stars). home: things for Rahim Chacha's home in Mirpur, each makes the family glad (family) and some let him rest better (energy: more at the start of a day). phone: a phone of his own, which helps check payment SMS and talk to home. samity: the savings club, a small deposit at the end of every day, paid back with a bonus after `rounds` deposits. Rahim Chacha's rickshaw also takes a painting on the back (plate: a picture from textures/ui) and a line written under it (slogan), as rickshaw painters do; both are bought with stars.",
  "looks": {
   "rickshaw": [
-   {"id": "paint_parrot", "slot": "paint", "price": 300, "hood": "2E9E6B", "body": "C2185B", "icon": "flag"},
-   {"id": "paint_sky", "slot": "paint", "price": 300, "hood": "2D8BD6", "body": "F6B800", "icon": "flag"},
-   {"id": "paint_vermilion", "slot": "paint", "price": 400, "hood": "E2432A", "body": "1C3E7B", "icon": "flag"},
-   {"id": "paint_friends", "slot": "paint", "price": 0, "prize": true, "hood": "F2B705", "body": "7B1FA2", "icon": "flag"},
-   {"id": "art_rings", "slot": "art", "price": 500, "style": 1, "icon": "bunting"},
-   {"id": "art_peacock", "slot": "art", "price": 800, "style": 2, "icon": "bunting"},
-   {"id": "paint_night", "slot": "paint", "tara": 40, "hood": "283593", "body": "F6B800", "icon": "star"}
+   {
+    "id": "paint_parrot",
+    "slot": "paint",
+    "price": 300,
+    "hood": "2E9E6B",
+    "body": "C2185B",
+    "icon": "flag"
+   },
+   {
+    "id": "paint_sky",
+    "slot": "paint",
+    "price": 300,
+    "hood": "2D8BD6",
+    "body": "F6B800",
+    "icon": "flag"
+   },
+   {
+    "id": "paint_vermilion",
+    "slot": "paint",
+    "price": 400,
+    "hood": "E2432A",
+    "body": "1C3E7B",
+    "icon": "flag"
+   },
+   {
+    "id": "paint_friends",
+    "slot": "paint",
+    "price": 0,
+    "prize": true,
+    "hood": "F2B705",
+    "body": "7B1FA2",
+    "icon": "flag"
+   },
+   {
+    "id": "art_rings",
+    "slot": "art",
+    "price": 500,
+    "style": 1,
+    "icon": "bunting"
+   },
+   {
+    "id": "art_peacock",
+    "slot": "art",
+    "price": 800,
+    "style": 2,
+    "icon": "bunting"
+   },
+   {
+    "id": "paint_night",
+    "slot": "paint",
+    "tara": 40,
+    "hood": "283593",
+    "body": "F6B800",
+    "icon": "star"
+   },
+   {
+    "id": "plate_tiger",
+    "slot": "plate",
+    "tara": 20,
+    "picture": "plate_tiger",
+    "icon": "star"
+   },
+   {
+    "id": "plate_shapla",
+    "slot": "plate",
+    "tara": 20,
+    "picture": "plate_shapla",
+    "icon": "star"
+   },
+   {
+    "id": "plate_peacock",
+    "slot": "plate",
+    "tara": 25,
+    "picture": "plate_peacock",
+    "icon": "star"
+   },
+   {
+    "id": "plate_boat",
+    "slot": "plate",
+    "tara": 25,
+    "picture": "plate_boat",
+    "icon": "star"
+   },
+   {
+    "id": "plate_village",
+    "slot": "plate",
+    "tara": 30,
+    "picture": "plate_village",
+    "icon": "star"
+   },
+   {
+    "id": "plate_parrots",
+    "slot": "plate",
+    "tara": 30,
+    "picture": "plate_parrots",
+    "icon": "star"
+   },
+   {
+    "id": "slogan_mayer_doa",
+    "slot": "slogan",
+    "tara": 8,
+    "icon": "star"
+   },
+   {
+    "id": "slogan_babar_doa",
+    "slot": "slogan",
+    "tara": 8,
+    "icon": "star"
+   },
+   {
+    "id": "slogan_sabdhane",
+    "slot": "slogan",
+    "tara": 8,
+    "icon": "star"
+   },
+   {
+    "id": "slogan_chap_nai",
+    "slot": "slogan",
+    "tara": 8,
+    "icon": "star"
+   },
+   {
+    "id": "slogan_jam_bondhu",
+    "slot": "slogan",
+    "tara": 8,
+    "icon": "star"
+   },
+   {
+    "id": "slogan_dhakar_raja",
+    "slot": "slogan",
+    "tara": 8,
+    "icon": "star"
+   }
   ],
   "tea": [
-   {"id": "sign_red", "slot": "sign", "price": 250, "fill": "E2432A", "outline": "FFFFFF", "icon": "shop"},
-   {"id": "sign_green", "slot": "sign", "price": 250, "fill": "2E9E6B", "outline": "FFFFFF", "icon": "shop"},
-   {"id": "sign_blue", "slot": "sign", "price": 350, "fill": "2D8BD6", "outline": "F6B800", "icon": "shop"},
-   {"id": "sign_star", "slot": "sign", "tara": 30, "fill": "6A1B9A", "outline": "F6B800", "icon": "star"}
+   {
+    "id": "sign_red",
+    "slot": "sign",
+    "price": 250,
+    "fill": "E2432A",
+    "outline": "FFFFFF",
+    "icon": "shop"
+   },
+   {
+    "id": "sign_green",
+    "slot": "sign",
+    "price": 250,
+    "fill": "2E9E6B",
+    "outline": "FFFFFF",
+    "icon": "shop"
+   },
+   {
+    "id": "sign_blue",
+    "slot": "sign",
+    "price": 350,
+    "fill": "2D8BD6",
+    "outline": "F6B800",
+    "icon": "shop"
+   },
+   {
+    "id": "sign_star",
+    "slot": "sign",
+    "tara": 30,
+    "fill": "6A1B9A",
+    "outline": "F6B800",
+    "icon": "star"
+   }
   ],
   "bus": [
-   {"id": "sticker_ma", "slot": "sticker", "price": 200, "colour": "E2432A", "icon": "band"},
-   {"id": "sticker_dhaka", "slot": "sticker", "price": 300, "colour": "2E9E6B", "icon": "band"},
-   {"id": "sticker_star", "slot": "sticker", "tara": 30, "colour": "6A1B9A", "icon": "star"}
+   {
+    "id": "sticker_ma",
+    "slot": "sticker",
+    "price": 200,
+    "colour": "E2432A",
+    "icon": "band"
+   },
+   {
+    "id": "sticker_dhaka",
+    "slot": "sticker",
+    "price": 300,
+    "colour": "2E9E6B",
+    "icon": "band"
+   },
+   {
+    "id": "sticker_star",
+    "slot": "sticker",
+    "tara": 30,
+    "colour": "6A1B9A",
+    "icon": "star"
+   }
   ],
   "fuchka": [
-   {"id": "cart_blue", "slot": "cart", "price": 300, "body": "1E6FB0", "trim": "F6B800", "icon": "flag"},
-   {"id": "cart_red", "slot": "cart", "price": 400, "body": "B3261E", "trim": "FFFFFF", "icon": "flag"},
-   {"id": "cart_star", "slot": "cart", "tara": 35, "body": "6A1B9A", "trim": "F6B800", "icon": "star"}
+   {
+    "id": "cart_blue",
+    "slot": "cart",
+    "price": 300,
+    "body": "1E6FB0",
+    "trim": "F6B800",
+    "icon": "flag"
+   },
+   {
+    "id": "cart_red",
+    "slot": "cart",
+    "price": 400,
+    "body": "B3261E",
+    "trim": "FFFFFF",
+    "icon": "flag"
+   },
+   {
+    "id": "cart_star",
+    "slot": "cart",
+    "tara": 35,
+    "body": "6A1B9A",
+    "trim": "F6B800",
+    "icon": "star"
+   }
   ],
   "delivery": [
-   {"id": "cycle_green", "slot": "cycle", "price": 300, "box": "2E9E6B", "frame": "1D1A1A", "icon": "flag"},
-   {"id": "cycle_red", "slot": "cycle", "price": 400, "box": "B3261E", "frame": "F6B800", "icon": "flag"},
-   {"id": "cycle_star", "slot": "cycle", "tara": 35, "box": "6A1B9A", "frame": "F6B800", "icon": "star"}
+   {
+    "id": "cycle_green",
+    "slot": "cycle",
+    "price": 300,
+    "box": "2E9E6B",
+    "frame": "1D1A1A",
+    "icon": "flag"
+   },
+   {
+    "id": "cycle_red",
+    "slot": "cycle",
+    "price": 400,
+    "box": "B3261E",
+    "frame": "F6B800",
+    "icon": "flag"
+   },
+   {
+    "id": "cycle_star",
+    "slot": "cycle",
+    "tara": 35,
+    "box": "6A1B9A",
+    "frame": "F6B800",
+    "icon": "star"
+   }
   ],
   "hawker": [
-   {"id": "basket_green", "slot": "basket", "price": 300, "basket": "2E7D4F", "cloth": "F6B800", "icon": "bag"},
-   {"id": "basket_red", "slot": "basket", "price": 400, "basket": "B3261E", "cloth": "F4F1E8", "icon": "bag"},
-   {"id": "basket_star", "slot": "basket", "tara": 35, "basket": "6A1B9A", "cloth": "F6B800", "icon": "star"}
+   {
+    "id": "basket_green",
+    "slot": "basket",
+    "price": 300,
+    "basket": "2E7D4F",
+    "cloth": "F6B800",
+    "icon": "bag"
+   },
+   {
+    "id": "basket_red",
+    "slot": "basket",
+    "price": 400,
+    "basket": "B3261E",
+    "cloth": "F4F1E8",
+    "icon": "bag"
+   },
+   {
+    "id": "basket_star",
+    "slot": "basket",
+    "tara": 35,
+    "basket": "6A1B9A",
+    "cloth": "F6B800",
+    "icon": "star"
+   }
   ],
   "boat": [
-   {"id": "boat_blue", "slot": "boat", "price": 400, "body": "1E6FB0", "trim": "F4F1E8", "icon": "flag"},
-   {"id": "boat_red", "slot": "boat", "price": 500, "body": "B3261E", "trim": "F6B800", "icon": "flag"},
-   {"id": "boat_star", "slot": "boat", "tara": 35, "body": "6A1B9A", "trim": "F6B800", "icon": "star"}
+   {
+    "id": "boat_blue",
+    "slot": "boat",
+    "price": 400,
+    "body": "1E6FB0",
+    "trim": "F4F1E8",
+    "icon": "flag"
+   },
+   {
+    "id": "boat_red",
+    "slot": "boat",
+    "price": 500,
+    "body": "B3261E",
+    "trim": "F6B800",
+    "icon": "flag"
+   },
+   {
+    "id": "boat_star",
+    "slot": "boat",
+    "tara": 35,
+    "body": "6A1B9A",
+    "trim": "F6B800",
+    "icon": "star"
+   }
   ]
  },
  "home": [
-  {"id": "bed", "price": 500, "family": 1, "energy": 10, "icon": "home"},
-  {"id": "fan", "price": 1200, "family": 1, "energy": 10, "icon": "sun"},
-  {"id": "desk", "price": 1500, "family": 2, "icon": "book"},
-  {"id": "tv", "price": 4000, "family": 2, "icon": "bulb"},
-  {"id": "house", "price": 10000, "family": 3, "icon": "town"}
+  {
+   "id": "bed",
+   "price": 500,
+   "family": 1,
+   "energy": 10,
+   "icon": "home"
+  },
+  {
+   "id": "fan",
+   "price": 1200,
+   "family": 1,
+   "energy": 10,
+   "icon": "sun"
+  },
+  {
+   "id": "desk",
+   "price": 1500,
+   "family": 2,
+   "icon": "book"
+  },
+  {
+   "id": "tv",
+   "price": 4000,
+   "family": 2,
+   "icon": "bulb"
+  },
+  {
+   "id": "house",
+   "price": 10000,
+   "family": 3,
+   "icon": "town"
+  }
  ],
  "boosts": [
-  {"id": "meal", "who": "rickshaw", "tara": 8, "energy": 30, "icon": "bolt"},
-  {"id": "mike", "who": "tea", "tara": 8, "arrivals": 1.3, "icon": "voice"},
-  {"id": "change_pack", "who": "bus", "tara": 8, "notes": {"10": 5, "20": 4, "50": 2}, "icon": "purse"},
-  {"id": "price_board", "who": "fuchka", "tara": 8, "arrivals": 1.3, "icon": "flag"},
-  {"id": "fast_app", "who": "delivery", "tara": 8, "arrivals": 1.3, "icon": "bolt"},
-  {"id": "fresh_roast", "who": "hawker", "tara": 8, "arrivals": 1.3, "icon": "flame"},
-  {"id": "early_ghat", "who": "boat", "tara": 8, "arrivals": 1.3, "icon": "sun"}
+  {
+   "id": "meal",
+   "who": "rickshaw",
+   "tara": 8,
+   "energy": 30,
+   "icon": "bolt"
+  },
+  {
+   "id": "mike",
+   "who": "tea",
+   "tara": 8,
+   "arrivals": 1.3,
+   "icon": "voice"
+  },
+  {
+   "id": "change_pack",
+   "who": "bus",
+   "tara": 8,
+   "notes": {
+    "10": 5,
+    "20": 4,
+    "50": 2
+   },
+   "icon": "purse"
+  },
+  {
+   "id": "price_board",
+   "who": "fuchka",
+   "tara": 8,
+   "arrivals": 1.3,
+   "icon": "flag"
+  },
+  {
+   "id": "fast_app",
+   "who": "delivery",
+   "tara": 8,
+   "arrivals": 1.3,
+   "icon": "bolt"
+  },
+  {
+   "id": "fresh_roast",
+   "who": "hawker",
+   "tara": 8,
+   "arrivals": 1.3,
+   "icon": "flame"
+  },
+  {
+   "id": "early_ghat",
+   "who": "boat",
+   "tara": 8,
+   "arrivals": 1.3,
+   "icon": "sun"
+  }
  ],
- "phone": {"price": 2500, "icon": "voice"},
- "samity": {"daily": 30, "rounds": 10, "bonus": 30, "icon": "ledger"}
+ "phone": {
+  "price": 2500,
+  "icon": "voice"
+ },
+ "samity": {
+  "daily": 30,
+  "rounds": 10,
+  "bonus": 30,
+  "icon": "ledger"
+ }
 }

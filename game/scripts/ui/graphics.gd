@@ -41,7 +41,9 @@ static func save_level(value: String) -> void:
 static func plain(viewport: Viewport, env: Environment, sun: DirectionalLight3D) -> void:
 	viewport.msaa_3d = Viewport.MSAA_DISABLED
 	env.glow_enabled = false
-	env.adjustment_enabled = false
+	# Colour and contrast stay on (cheap, part of the tonemap pass): without
+	# them the scenes look washed out.
+	env.adjustment_enabled = true
 	sun.shadow_enabled = false
 
 
@@ -50,6 +52,6 @@ static func apply(viewport: Viewport, env: Environment, sun: DirectionalLight3D)
 	var high := level() == "high"
 	viewport.msaa_3d = Viewport.MSAA_4X if high else Viewport.MSAA_DISABLED
 	env.glow_enabled = high
-	env.adjustment_enabled = high
+	env.adjustment_enabled = true
 	sun.shadow_enabled = high
 	print("[graphics] ", level(), " on ", RenderingServer.get_video_adapter_name())

@@ -721,6 +721,194 @@
     "by": "woman",
     "bn": "বাচ্চারা আর দাঁড়াইতে পারতেছে না, চললাম।"
    }
+  ],
+  "ride_chat": [
+   {
+    "by": "student",
+    "bn": "মামা, জ্যাম দেখে মনে হইতেছে বাসায় না, সোজা ঈদে পৌঁছামু।",
+    "en": "Mama, with this jam I'll reach Eid before I reach home."
+   },
+   {
+    "by": "man",
+    "bn": "অফিসে বলছি পাঁচ মিনিটে আসতেছি। বিশ মিনিট আগে বলছি।",
+    "en": "I told the office I'm five minutes away. Twenty minutes ago."
+   },
+   {
+    "by": "woman",
+    "bn": "মামা, গর্তগুলা একটু দেখে, ফোনের চার্জ আর আমার কোমর দুইটাই কম।",
+    "en": "Mind the potholes, Mama: my phone and my back are both low on charge."
+   },
+   {
+    "by": "student",
+    "bn": "মামা, কালকে পরীক্ষা, আজকে মাত্র বই খুলছি। দোয়া রাইখেন।",
+    "en": "Exam tomorrow, Mama, and I only just opened the book. Pray for me."
+   },
+   {
+    "by": "man2",
+    "bn": "এই শহরে রিকশাই আসল রাইড শেয়ার, অ্যাপ লাগে না।",
+    "en": "In this city the rickshaw is the real ride-share. No app needed."
+   },
+   {
+    "by": "oldman",
+    "bn": "আমাদের সময় এই রাস্তায় ধানক্ষেত ছিল, বুঝলা?",
+    "en": "In my day this road was a paddy field, you know?"
+   },
+   {
+    "by": "woman2",
+    "bn": "মামা, ডানের দোকানটায় নাকি সেই বিরিয়ানি, একদিন খাইতে হবে।",
+    "en": "They say that shop on the right does great biryani. Must try it one day."
+   },
+   {
+    "by": "student",
+    "bn": "মামা, আপনি তো পুরা ফর্মুলা ওয়ান!",
+    "en": "Mama, you're basically Formula One!"
+   },
+   {
+    "by": "man",
+    "bn": "মোবাইলে নেট নাই, রিকশাই এখন আমার একমাত্র বিনোদন।",
+    "en": "No signal on my phone; this rickshaw is my only entertainment now."
+   },
+   {
+    "by": "woman",
+    "bn": "মামা, বৃষ্টি না আসলেই বাঁচি, ছাতা আনি নাই।",
+    "en": "Hope it doesn't rain, Mama. I forgot my umbrella."
+   },
+   {
+    "by": "man2",
+    "bn": "ভাই, খেলার স্কোর কত জানেন? আজকে জিততেই হবে!",
+    "en": "Know the cricket score? We have to win today!"
+   },
+   {
+    "by": "oldwoman",
+    "bn": "বাবা, একটু আস্তে, পুরান হাড্ডি, ঝাঁকি সহ্য হয় না।",
+    "en": "Easy, son. Old bones don't like bumps."
+   }
+  ],
+  "tea_chat": [
+   {
+    "by": "man",
+    "bn": "মামা, আপনার চা খাইলে মাথা ফ্রেশ, বসের কথাও মনে থাকে না।",
+    "en": "Your tea clears my head, Mama. I even forget the boss."
+   },
+   {
+    "by": "student",
+    "bn": "ভাই, ক্লাস বাঙ্ক মারি নাই, এইটা স্টাডি ব্রেক।",
+    "en": "I'm not bunking class, bro. This is a study break."
+   },
+   {
+    "by": "man2",
+    "bn": "দেশের সব খবর তিন জায়গায়: চায়ের কাপ, পত্রিকা আর মামার দোকান।",
+    "en": "All the news there is: a cup of tea, the paper and Mama's stall."
+   },
+   {
+    "by": "oldman",
+    "bn": "চা ঠান্ডা হইলে আলাপ জমে না, আরেক কাপ দাও।",
+    "en": "Cold tea kills the chat. Another cup."
+   },
+   {
+    "by": "student",
+    "bn": "মামা, টিউশনির টাকা পাইলেই সব বাকি শোধ, প্রমিস।",
+    "en": "Mama, I'll clear my tab the day my tuition money comes. Promise."
+   },
+   {
+    "by": "woman",
+    "bn": "এই গরমেও চা? হ্যাঁ, চা ছাড়া তো দিন শুরুই হয় না।",
+    "en": "Tea in this heat? Yes. The day doesn't start without it."
+   },
+   {
+    "by": "man",
+    "bn": "কালকে খেলায় জিতলে সবাইরে আমি চা খাওয়ামু!",
+    "en": "If we win tomorrow's match, tea's on me for everyone!"
+   },
+   {
+    "by": "man2",
+    "bn": "মামা, আপনার বিস্কুট আর আমার ডায়েট, দুইটা একসাথে চলে না।",
+    "en": "Mama, your biscuits and my diet don't get along."
+   },
+   {
+    "by": "student",
+    "bn": "ওয়াইফাই নাই, কিন্তু চা আছে। চলবে।",
+    "en": "No Wi-Fi, but there's tea. That'll do."
+   },
+   {
+    "by": "oldman",
+    "bn": "মনির, তোমার চা খাইতে খাইতে আমার চুল পাকছে।",
+    "en": "Monir, my hair went grey drinking your tea."
+   }
+  ],
+  "bus_chat": [
+   {
+    "by": "man",
+    "bn": "ভাই, একটু চাপেন, আমার এক পা এখনো বাইরে।",
+    "en": "Squeeze in a bit, brother. One of my feet's still outside."
+   },
+   {
+    "by": "student",
+    "bn": "লোকাল বাসে উঠলে জিম লাগে না, পুরা ওয়ার্কআউট।",
+    "en": "Who needs a gym? A local bus is a full workout."
+   },
+   {
+    "by": "woman",
+    "bn": "ভাই, মহিলা সিটটা একটু ছাড়েন।",
+    "en": "Brother, please give up the ladies' seat."
+   },
+   {
+    "by": "man2",
+    "bn": "ওস্তাদ, আস্তে টানেন, বাসটা তো বিমান না!",
+    "en": "Easy, Ustad. This bus isn't a plane!"
+   },
+   {
+    "by": "oldman",
+    "bn": "এই বাসের বয়স মনে হয় আমার চেয়েও বেশি।",
+    "en": "This bus looks older than me."
+   },
+   {
+    "by": "student",
+    "bn": "মতিঝিল আর কতক্ষণ? ক্লাস তো শুরু হইয়া যাইতেছে!",
+    "en": "How long to Motijheel? Class is starting!"
+   },
+   {
+    "by": "man",
+    "bn": "জানালার পাশে বসলাম, এখন খালি ধুলা খাইতেছি।",
+    "en": "Got the window seat, and now I'm just eating dust."
+   },
+   {
+    "by": "woman2",
+    "bn": "আস্তে ব্রেক করেন, সবাই তো একজনের উপর একজন পড়তেছি!",
+    "en": "Brake gently, we're all falling on each other!"
+   }
+  ],
+  "fuchka_chat": [
+   {
+    "by": "student",
+    "bn": "খালা, আজকে আমার ডায়েটের চিট ডে।",
+    "en": "Khala, today's my diet cheat day."
+   },
+   {
+    "by": "child",
+    "bn": "আম্মু বলছে একটা, কিন্তু খালার ফুচকা কি একটায় হয়?",
+    "en": "Mum said just one, but who stops at one of Khala's fuchkas?"
+   },
+   {
+    "by": "woman",
+    "bn": "খালা, আগে ছবি তুলে পোস্ট দেই, তারপর খাই।",
+    "en": "Khala, let me post a photo first, then eat."
+   },
+   {
+    "by": "man2",
+    "bn": "ঝাল বেশি হইলে কাঁদি, কিন্তু খাওয়া ছাড়ি না।",
+    "en": "Too hot and I cry, but I never stop eating."
+   },
+   {
+    "by": "student",
+    "bn": "খালা, আপনার টকটা পুরা ভাইরাল হওয়ার মতো।",
+    "en": "Khala, this tamarind water deserves to go viral."
+   },
+   {
+    "by": "woman2",
+    "bn": "বান্ধবীরা সবাই আসতেছে, খালা, বিশ প্লেট রেডি রাখেন!",
+    "en": "My friends are all coming, Khala. Get twenty plates ready!"
+   }
   ]
  },
  "fixes": {

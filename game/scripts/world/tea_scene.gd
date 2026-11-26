@@ -14,6 +14,8 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const Tips = preload("res://scripts/ui/tips.gd")
+const Chatter = preload("res://scripts/ui/chatter.gd")
 const Music = preload("res://scripts/ui/music.gd")
 const Activity = preload("res://scripts/ui/activity.gd")
 const Pour = preload("res://scripts/ui/activities/pour.gd")
@@ -91,6 +93,13 @@ var _call_result := {}
 var _status: Label
 var _tray: Label
 var _give: Button
+var _drop: Button
+## The first-day guide (the first few orders of the first tea day): the
+## button to press next lights up, the others dim.
+var _guide := false
+var _guide_label: Label
+var _guide_box: PanelContainer
+var _step_buttons := {}
 var _kettle_button: Button
 var _notice: Label
 var _notice_box: PanelContainer
@@ -99,6 +108,7 @@ var _ding: AudioStreamPlayer
 ## The glass set down, and the customers and Monir Mama talking.
 var _cup: AudioStreamPlayer
 var _voice: Voice
+var _chat_left := Chatter.gap()
 ## Rain: how hard (0–1, eased), the drops and their sound.
 var _rain_k := 0.0
 var _drops: CPUParticles3D
@@ -205,6 +215,7 @@ func _loading_screen() -> CanvasLayer:
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
 	text.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(text)
+	layer.add_child(Tips.card(strings))
 	add_child(layer)
 	return layer
 
@@ -244,10 +255,10 @@ func _environment() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.fog_enabled = true
 	env.fog_light_color = Color("D8D5C8")
-	env.fog_density = 0.014
+	env.fog_density = 0.006
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.15
-	env.adjustment_contrast = 1.06
+	env.adjustment_saturation = 1.25
+	env.adjustment_contrast = 1.1
 	env.glow_enabled = true
 	env.glow_intensity = 0.45
 	env.glow_hdr_threshold = 0.95
@@ -514,7 +525,17 @@ func _build_hud() -> void:
 	var drop := Look.button(strings.t("discard"), Look.VERMILION, 14)
 	drop.pressed.connect(_on_discard)
 	hand_row.add_child(drop)
+	_drop = drop
 	bottom.add_child(hand)
+	_guide = int(progress.data.tea.get("days", 0)) == 0
+	_guide_box = PanelContainer.new()
+	_guide_box.add_theme_stylebox_override("panel", Look.card(Color("FFF1F6"), 12, 2))
+	_guide_label = Look.label("", 16, true, Look.MAGENTA)
+	_guide_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_guide_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_guide_box.add_child(_guide_label)
+	_guide_box.visible = false
+	bottom.add_child(_guide_box)
 	var grid := GridContainer.new()
 	# Three across; four once the fridge makes ten, so it stays three rows.
 	grid.columns = 4 if day.steps().size() > 9 else 3
@@ -526,6 +547,7 @@ func _build_hud() -> void:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.pressed.connect(_on_step.bind(step))
 		grid.add_child(button)
+		_step_buttons[step] = button
 		if step == "kettle":
 			_kettle_button = button
 	bottom.add_child(grid)
@@ -554,6 +576,7 @@ func _process(dt: float) -> void:
 	var pace := 0.35 if _activity != null and _activity.slow else 1.0
 	var events := day.update(dt * pace)
 	_handle(events)
+	_chat_tick(dt)
 	if not is_processing():
 		return
 	if _activity == null and not _queued.is_empty():
@@ -833,6 +856,7 @@ func _refresh() -> void:
 			steps.append(strings.t("step_" + st))
 		_tray.text = strings.t("tray", {"steps": " + ".join(steps)})
 	_give.disabled = day.made() == ""
+	_show_guide()
 	if day.has_second:
 		_kettle_button.text = strings.t("kettleTwo", {"a": _kettle_state(day.kettle, day.refill_left), "b": _kettle_state(day.kettle2, day.refill2_left)})
 	elif day.refill_left > 0.0:
@@ -919,7 +943,7 @@ func _light() -> void:
 		_sky.sky_top_color = _sky.sky_top_color.lerp(Color("6E7882"), _rain_k * 0.8)
 		_sky.sky_horizon_color = _sky.sky_horizon_color.lerp(Color("9DA4AA"), _rain_k * 0.8)
 		_env.fog_light_color = _env.fog_light_color.lerp(Color("8F979E"), _rain_k * 0.8)
-	_env.fog_density = lerpf(0.014, 0.03, _rain_k)
+	_env.fog_density = lerpf(0.006, 0.025, _rain_k)
 
 
 ## Washing up: the dirty cups, six at a time.
@@ -1094,3 +1118,44 @@ func _notification(what: int) -> void:
 			print("[app] closing ", Time.get_ticks_msec(), " ms")
 		NOTIFICATION_WM_GO_BACK_REQUEST:
 			print("[app] back button ", Time.get_ticks_msec(), " ms")
+
+
+## Passing talk now and then, when nothing else is on the notice line.
+func _chat_tick(dt: float) -> void:
+	_chat_left -= dt
+	if _chat_left > 0.0:
+		return
+	_chat_left = Chatter.gap()
+	if _notice_left > 0.0 or day.customers.is_empty() or _activity != null:
+		return
+	var line := Chatter.pick("tea_chat", strings.lang)
+	if line.is_empty():
+		return
+	_voice.play(str(line.id))
+	_say(str(line.text), Look.SKY_DARK, 4.0)
+
+
+## The first-day guide: light up what to press next, dim the rest; it goes
+## once three orders have been served.
+func _show_guide() -> void:
+	if _guide and day.served >= 3:
+		_guide = false
+		_say(strings.t("teaGuideDone"), Look.PARROT_DARK, 3.5)
+	var next := day.guide_step() if _guide else ""
+	_guide_box.visible = next != ""
+	var lit: Array = [_give, _drop]
+	lit.append_array(_step_buttons.values())
+	for button in lit:
+		(button as Control).modulate = Color.WHITE
+	if next == "":
+		return
+	var target: Control = _give if next == "give" else (_drop if next == "discard" else _step_buttons.get(next))
+	for button in lit:
+		if button != target:
+			(button as Control).modulate = Color(1, 1, 1, 0.35)
+	if next == "give":
+		_guide_label.text = strings.t("teaGuideGive", {"give": strings.t("give")})
+	elif next == "discard":
+		_guide_label.text = strings.t("teaGuideDiscard", {"discard": strings.t("discard")})
+	else:
+		_guide_label.text = strings.t("teaGuideNext", {"step": strings.t("step_" + next)})

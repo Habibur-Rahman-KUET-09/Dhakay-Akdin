@@ -9,6 +9,7 @@ const Balance = preload("res://scripts/rules/balance.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const RoadMap = preload("res://scripts/rules/road_map.gd")
 const Day = preload("res://scripts/rules/day.gd")
+const Ranked = preload("res://scripts/rules/ranked.gd")
 
 ## A Tuesday; its week began on Saturday the 21st.
 const DAY := "2026-11-24"
@@ -196,3 +197,37 @@ func test_racing_the_rickshaw() -> void:
 	day._entered(events)
 	eq(events, [Day.RACE_DONE], "the finish")
 	check(day.over, "over")
+
+
+# --- The weekly tournament (ranked.gd) -------------------------------------------
+
+
+func test_rank_ladder() -> void:
+	var b := Balance.new()
+	eq(Ranked.rank_id(b, Ranked.rank_of(b, 0)), "notun", "no points: new")
+	eq(Ranked.rank_id(b, Ranked.rank_of(b, 300)), "paka", "300: pro")
+	eq(Ranked.rank_id(b, Ranked.rank_of(b, 5000)), "kingbodonti", "lots: legend")
+	eq(Ranked.to_next(b, 250), 50, "50 to go")
+	eq(Ranked.to_next(b, 5000), -1, "nothing above the top")
+
+
+func test_days_climb_and_a_new_week_pays_once() -> void:
+	var b := Balance.new()
+	var data := {"tara": 0}
+	var r := Ranked.note(data, b, 130, "2026-11-23")
+	eq(r.points, 130, "a day's XP")
+	check(not r.up, "still new")
+	r = Ranked.note(data, b, 190, "2026-11-25")
+	check(r.up, "up to pro")
+	eq(Ranked.claim(data, b, "2026-11-26"), {}, "nothing to pay in the same week")
+	# Saturday 28 November: a new week.
+	eq(Ranked.points(data, "2026-11-28"), 0, "a new week starts from nothing")
+	var paid := Ranked.claim(data, b, "2026-11-28")
+	eq(int(paid.tara), 3, "last week's pro prize")
+	eq(int(data.tara), 3, "the stars added")
+	eq(Ranked.claim(data, b, "2026-11-29"), {}, "paid once")
+
+
+func test_week_days_left() -> void:
+	eq(Ranked.days_left("2026-11-28"), 7, "Saturday: the whole week")
+	eq(Ranked.days_left("2026-12-04"), 1, "Friday: the last day")

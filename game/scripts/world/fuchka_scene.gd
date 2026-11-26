@@ -14,6 +14,8 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const Tips = preload("res://scripts/ui/tips.gd")
+const Chatter = preload("res://scripts/ui/chatter.gd")
 const Music = preload("res://scripts/ui/music.gd")
 const Activity = preload("res://scripts/ui/activity.gd")
 const Crack = preload("res://scripts/ui/activities/crack.gd")
@@ -72,6 +74,7 @@ var _notice_box: PanelContainer
 var _notice_left := 0.0
 var _ding: AudioStreamPlayer
 var _voice: Voice
+var _chat_left := Chatter.gap()
 var _rain_k := 0.0
 var _drops: CPUParticles3D
 var _rain_sound: AudioStreamPlayer
@@ -158,6 +161,7 @@ func _loading_screen() -> CanvasLayer:
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
 	text.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(text)
+	layer.add_child(Tips.card(strings))
 	add_child(layer)
 	return layer
 
@@ -202,10 +206,10 @@ func _environment() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.fog_enabled = true
 	env.fog_light_color = Color("D8D5C8")
-	env.fog_density = 0.014
+	env.fog_density = 0.006
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.15
-	env.adjustment_contrast = 1.06
+	env.adjustment_saturation = 1.25
+	env.adjustment_contrast = 1.1
 	env.glow_enabled = true
 	env.glow_intensity = 0.45
 	env.glow_hdr_threshold = 0.95
@@ -451,6 +455,7 @@ func _process(dt: float) -> void:
 		print("[alive] %d ms, %d fps, nodes %d" % [Time.get_ticks_msec(), Engine.get_frames_per_second(), Performance.get_monitor(Performance.OBJECT_NODE_COUNT)])
 	var pace := 0.35 if _activity != null and _activity.slow else 1.0
 	_handle(day.update(dt * pace))
+	_chat_tick(dt)
 	if not is_processing():
 		return
 	# A call from home when the cart is quiet, or after half a minute.
@@ -668,7 +673,7 @@ func _light() -> void:
 		_sun.light_energy *= lerpf(1.0, 0.3, _rain_k)
 		_sky.sky_top_color = _sky.sky_top_color.lerp(Color("6E7882"), _rain_k * 0.8)
 		_env.fog_light_color = _env.fog_light_color.lerp(Color("8F979E"), _rain_k * 0.8)
-	_env.fog_density = lerpf(0.014, 0.03, _rain_k)
+	_env.fog_density = lerpf(0.006, 0.025, _rain_k)
 
 
 func _end_day() -> void:
@@ -715,3 +720,18 @@ func _end_day() -> void:
 func _go_home() -> void:
 	CrashWatch.stop()
 	get_tree().change_scene_to_file.call_deferred("res://scenes/main.tscn")
+
+
+## Passing talk now and then, when nothing else is on the notice line.
+func _chat_tick(dt: float) -> void:
+	_chat_left -= dt
+	if _chat_left > 0.0:
+		return
+	_chat_left = Chatter.gap()
+	if _notice_left > 0.0 or day.customers.is_empty() or _activity != null:
+		return
+	var line := Chatter.pick("fuchka_chat", strings.lang)
+	if line.is_empty():
+		return
+	_voice.play(str(line.id))
+	_say(str(line.text), Look.SKY_DARK, 4.0)

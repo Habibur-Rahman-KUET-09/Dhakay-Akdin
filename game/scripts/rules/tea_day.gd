@@ -427,6 +427,25 @@ func next_for(item: String) -> Dictionary:
 	return who
 
 
+## The first-day guide: what to press next for the order waited on
+## longest. A step ("cup", "kettle", …), "give" when it is made, "discard"
+## when the tray has gone wrong, or "" with nobody waiting.
+func guide_step() -> String:
+	var first: Dictionary = {}
+	for c in customers:
+		if not (c.items as Array).is_empty() and (first.is_empty() or c.left < first.left):
+			first = c
+	if first.is_empty():
+		return ""
+	for it in first.items:
+		var want := steps_of(it)
+		if want == tray:
+			return "give"
+		if want.size() > tray.size() and want.slice(0, tray.size()) == tray:
+			return str(want[tray.size()])
+	return "discard" if not tray.is_empty() else str(steps_of(first.items[0])[0])
+
+
 ## The spoons of sugar the next milk tea should have.
 func sugar_wanted() -> int:
 	return int(next_for("milk_tea").get("sugar", 2))

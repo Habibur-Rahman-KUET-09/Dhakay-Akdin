@@ -15,4 +15,8 @@ static func lines(got: Dictionary, s: Strings) -> Array:
 		out.append(s.t("streakStars", {"n": int(got.streak), "stars": int(got.streak_stars)}))
 	if got.get("streak_gift", "") != "":
 		out.append(s.t("streakGift"))
+	if int(got.get("rank_points", 0)) > 0:
+		out.append(s.t("dayRankPoints", {"n": int(got.rank_points)}))
+	if got.get("rank_up", false):
+		out.append(s.t("rankUp", {"rank": s.t("rank_" + str(got.get("rank_id", "")))}))
 	return out

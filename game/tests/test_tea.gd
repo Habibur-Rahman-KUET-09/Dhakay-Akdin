@@ -286,3 +286,18 @@ func test_a_hidden_order_can_change() -> void:
 		t._change_orders(none)
 		t.customers[0].erase("changed")
 	check(none.is_empty(), "not before level 3")
+
+
+func test_first_day_guide_points_to_the_next_step() -> void:
+	var day := TeaDay.new(Balance.new(), 3)
+	day.customers = [{"items": ["milk_tea"], "left": 20.0}, {"items": ["banana"], "left": 30.0}]
+	eq(day.guide_step(), "cup", "the longest wait first: a cup")
+	day.tray = ["cup", "kettle"]
+	eq(day.guide_step(), "milk", "then milk")
+	day.tray = ["cup", "kettle", "milk", "sugar"]
+	eq(day.guide_step(), "give", "made: hand it over")
+	day.tray = ["cup", "banana"]
+	eq(day.guide_step(), "discard", "gone wrong: throw it away")
+	day.customers = []
+	day.tray = []
+	eq(day.guide_step(), "", "nobody waiting")

@@ -13,6 +13,8 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const Tips = preload("res://scripts/ui/tips.gd")
+const Chatter = preload("res://scripts/ui/chatter.gd")
 const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
@@ -147,6 +149,7 @@ var _live_busy := false
 var _queued: Array[Callable] = []
 ## Passengers, the policeman and Rahim Chacha talking.
 var _voice: Voice
+var _chat_left := Chatter.gap()
 ## Rain: how hard (0–1, eased), the drops, the sound, the water that
 ## spreads on the roads.
 var _rain_k := 0.0
@@ -297,6 +300,8 @@ func _ready() -> void:
 	var plain := Models.material()
 	for w in rickshaw.get_meta("wheels"):
 		(w as MeshInstance3D).material_override = plain
+	if mode != "delivery":
+		_back_art(rickshaw)
 	# A passenger on the seat, shown during a trip.
 	_rider_seat = MeshInstance3D.new()
 	_rider_seat.mesh = Models.seated_passenger()
@@ -502,6 +507,7 @@ func _loading_screen() -> CanvasLayer:
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
 	text.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(text)
+	layer.add_child(Tips.card(strings))
 	add_child(layer)
 	return layer
 
@@ -537,12 +543,12 @@ func _environment() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.fog_enabled = true
 	env.fog_light_color = Color("D8D5C8")
-	env.fog_density = 0.011
+	env.fog_density = 0.008
 	# A little more colour and contrast than the camera sees, and a soft
 	# glow round the brightest things (signals, the sky, lamps at night).
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.15
-	env.adjustment_contrast = 1.06
+	env.adjustment_saturation = 1.25
+	env.adjustment_contrast = 1.1
 	env.glow_enabled = true
 	env.glow_intensity = 0.45
 	env.glow_strength = 0.9
@@ -653,6 +659,7 @@ func _process(dt: float) -> void:
 		_notice_left -= dt
 		if _notice_left <= 0.0 or (_notice_left > 1e6 and shift.driver.moving):
 			_notice = ""
+	_chat_tick(dt)
 	_follow(dt)
 	_honk(dt)
 	_weather(dt)
@@ -1883,11 +1890,11 @@ func _day_light() -> void:
 		_sky.sky_top_color = _sky.sky_top_color.lerp(Color("6E7882"), r * 0.8)
 		_sky.sky_horizon_color = _sky.sky_horizon_color.lerp(Color("9DA4AA"), r * 0.8)
 		_env.fog_light_color = _env.fog_light_color.lerp(Color("8F979E"), r * 0.8)
-	_env.fog_density = lerpf(0.011, 0.028, _rain_k)
+	_env.fog_density = lerpf(0.008, 0.026, _rain_k)
 	# A winter morning's fog: white, thick at dawn, gone by mid-morning.
 	var fog := shift.fog()
 	if fog > 0.0:
-		_env.fog_density = maxf(_env.fog_density, lerpf(0.011, 0.05, fog))
+		_env.fog_density = maxf(_env.fog_density, lerpf(0.008, 0.05, fog))
 		_env.fog_light_color = _env.fog_light_color.lerp(Color("E8E8E4"), fog)
 		_sky.sky_horizon_color = _sky.sky_horizon_color.lerp(Color("EDEDEA"), fog)
 		_sun.light_energy *= lerpf(1.0, 0.6, fog)
@@ -2063,3 +2070,63 @@ func _notification(what: int) -> void:
 			print("[app] closing ", Time.get_ticks_msec(), " ms")
 		NOTIFICATION_WM_GO_BACK_REQUEST:
 			print("[app] back button ", Time.get_ticks_msec(), " ms")
+
+
+## A passenger's passing talk now and then on a ride, when nothing else is
+## on the notice line.
+func _chat_tick(dt: float) -> void:
+	_chat_left -= dt
+	if _chat_left > 0.0:
+		return
+	_chat_left = Chatter.gap()
+	if _notice != "" or shift.riding.is_empty() or _activity != null or mode == "delivery":
+		return
+	var line := Chatter.pick("ride_chat", strings.lang)
+	if line.is_empty():
+		return
+	_voice.play(str(line.id))
+	_say(str(line.text), Look.SKY_DARK, 4.0)
+
+
+## Bought decorations on the back of Rahim Chacha's rickshaw, where the
+## camera sees them all day: a painting, and a line written under it
+## (always in Bangla, as rickshaw painters write it).
+func _back_art(on: Node3D) -> void:
+	var plate := progress.worn("rickshaw", "plate")
+	if not plate.is_empty():
+		var tex := load("res://textures/ui/%s.png" % str(plate.get("picture", ""))) as Texture2D
+		if tex != null:
+			var quad := QuadMesh.new()
+			quad.size = Vector2(0.98, 0.4)
+			var mat := StandardMaterial3D.new()
+			mat.albedo_texture = tex
+			mat.roughness = 0.55
+			mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			var art := MeshInstance3D.new()
+			art.name = "BackPlate"
+			art.mesh = quad
+			art.material_override = mat
+			art.position = Vector3(0, 0.74, 0.96)
+			on.add_child(art)
+	var slogan := progress.worn("rickshaw", "slogan")
+	if not slogan.is_empty():
+		var board := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(0.92, 0.12, 0.025)
+		board.mesh = box
+		var paint := StandardMaterial3D.new()
+		paint.albedo_color = Color("1C3E7B")
+		board.material_override = paint
+		board.position = Vector3(0, 0.47, 0.95)
+		on.add_child(board)
+		var words := Label3D.new()
+		words.name = "BackSlogan"
+		words.text = str(strings.both("look_" + str(slogan.id)).get("bn", ""))
+		words.font = Look.font(Look.BOLD)
+		words.font_size = 64
+		words.pixel_size = 0.0016
+		words.outline_size = 12
+		words.modulate = Look.YELLOW
+		words.outline_modulate = Color("7B1FA2")
+		words.position = Vector3(0, 0.47, 0.965)
+		on.add_child(words)

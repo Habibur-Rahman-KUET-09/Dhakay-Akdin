@@ -13,6 +13,7 @@ const Goods = preload("res://scripts/rules/goods.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
 const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 const League = preload("res://scripts/rules/league.gd")
+const Ranked = preload("res://scripts/rules/ranked.gd")
 
 const SCHEMA := 1
 const DEFAULT_PATH := "user://save.json"
@@ -741,6 +742,12 @@ func _day_done(who: String, result: Dictionary, out: Dictionary) -> void:
 	# This week's earnings and today's relay leg, for friends to see.
 	Friends.note_day(data, who, int(out.get("earned", 0)), float(result.get("stars", 0.0)), date())
 	Leaderboard.note(data, who, int(out.get("earned", 0)), date())
+	# The weekly tournament: the day's XP as points.
+	var rk := Ranked.note(data, b, int(out.get("xp", 0)), date())
+	out.rank_points = int(rk.gained)
+	out.rank = int(rk.rank)
+	out.rank_up = bool(rk.up)
+	out.rank_id = Ranked.rank_id(b, int(rk.rank))
 	out.relay_done = Friends.claim_relay(data, b, date())
 
 

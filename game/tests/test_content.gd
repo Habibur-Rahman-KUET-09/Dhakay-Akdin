@@ -32,5 +32,18 @@ func test_strings_in_both_languages() -> void:
 		s.lang = lang
 		check(s.t("appTitle") != "appTitle", "%s title" % lang)
 	s.lang = "bn"
-	eq(s.t("rickshawToPlace", {"place": "চিড়িয়াখানা", "tiles": 12}), "চিড়িয়াখানা · আর 12 ব্লক", "placeholders")
+	eq(s.t("rickshawToPlace", {"place": "চিড়িয়াখানা", "tiles": 12}), "চিড়িয়াখানা · আর ১২ ব্লক", "placeholders, numbers in Bangla digits")
+	eq(s.t("onPlayedBy", {"name": "Rakib99"}), "খেললেন Rakib99", "a chosen name stays as it is")
+	s.lang = "en"
+	eq(s.t("rickshawToPlace", {"place": "Zoo", "tiles": 12}).contains("12"), true, "English digits in English")
 	eq(s.t("noSuchKey"), "noSuchKey", "missing key shows itself")
+
+
+func test_rickshaw_paintings_and_tips_exist() -> void:
+	var Goods = load("res://scripts/rules/goods.gd")
+	var s := Strings.new()
+	for l in Goods.looks("rickshaw"):
+		if l.has("picture"):
+			check(ResourceLoader.exists("res://textures/ui/%s.png" % l.picture), "painting %s" % l.picture)
+		check(s.has("look_" + str(l.id)), "name of %s" % l.id)
+	check(load("res://scripts/ui/tips.gd").count(s) >= 10, "loading tips")
