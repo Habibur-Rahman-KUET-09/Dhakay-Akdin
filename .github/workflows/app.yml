@@ -1,9 +1,8 @@
 name: app
 
+# The old Flutter app, no longer worked on: built only when asked (Run
+# workflow), to save Actions minutes.
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:

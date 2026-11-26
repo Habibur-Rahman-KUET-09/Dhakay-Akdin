@@ -5,7 +5,10 @@ name: game
 on:
   push:
     branches: [main]
+    # Notes and docs alone build nothing (saves Actions minutes).
+    paths-ignore: ["docs/**", "**.md"]
   pull_request:
+    paths-ignore: ["docs/**", "**.md"]
   workflow_dispatch:
 
 permissions:
