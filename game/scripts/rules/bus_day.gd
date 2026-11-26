@@ -468,7 +468,7 @@ func _board_at(i: int, n: int) -> int:
 		var r := {
 			"id": _next_id, "from": i, "to": to, "fare": f, "kind": kind,
 			"woman": rng.randf() < 0.35, "evader": rng.randf() < b.n("bus.evader_chance") and npc == "",
-			"note": _note_for(f if kind != "student" else int(f * b.n("bus.student_share"))),
+			"note": _note_for(f if kind != "student" else half_fare(f)),
 			"paid": false, "owed": 0, "seat": -1, "npc": npc,
 		}
 		if interactive:
@@ -697,6 +697,12 @@ func _note_for(amount: int) -> int:
 	return 500
 
 
+## A student's half fare, rounded up to the next 5 taka so the change can
+## be made from the bag's notes (half of 25 is 15, not 12).
+func half_fare(fare: int) -> int:
+	return int(ceil(fare * b.n("bus.student_share") / 5.0)) * 5
+
+
 ## Starts taking someone's fare. A student offers half: `full` says
 ## whether Babu asks for the whole fare (they pay it, but grudgingly).
 func ask(id: int, full := true) -> Dictionary:
@@ -710,7 +716,7 @@ func ask(id: int, full := true) -> Dictionary:
 				if full:
 					rating -= 0.2
 				else:
-					asking_fare = int(r.fare * b.n("bus.student_share"))
+					asking_fare = half_fare(int(r.fare))
 					rating += 0.2
 				rating = clampf(rating, 1.0, 5.0)
 				if r.get("npc", "") != "":

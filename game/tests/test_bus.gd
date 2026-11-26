@@ -84,6 +84,15 @@ func test_change_is_found_when_greedy_would_miss_it() -> void:
 	check(not got.has(50), "not the 50")
 
 
+func test_half_fares_come_in_fives() -> void:
+	var t := _bus()
+	eq(t.half_fare(20), 10, "half of 20")
+	eq(t.half_fare(25), 15, "half of 25 rounded up to 15")
+	eq(t.half_fare(35), 20, "half of 35 rounded up to 20")
+	eq(t.half_fare(10), 5, "half of 10")
+	eq(t.half_fare(15), 10, "half of 15 rounded up to 10")
+
+
 func test_students_offer_half() -> void:
 	var t := _bus()
 	var id := _rider(t, 20, 10, "student")

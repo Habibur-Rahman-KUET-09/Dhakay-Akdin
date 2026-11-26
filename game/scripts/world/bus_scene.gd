@@ -1101,7 +1101,7 @@ func _refresh() -> void:
 			if r.get("npc", "") != "":
 				_fare_title.text = neighbours.name_of(r.npc, strings.lang) + " · " + _fare_title.text
 			if r.kind == "student" and _student_row.visible:
-				_fare_sub.text = strings.t("studentAsks", {"half": int(r.fare * b.n("bus.student_share"))})
+				_fare_sub.text = strings.t("studentAsks", {"half": bus.half_fare(int(r.fare))})
 			else:
 				_fare_sub.text = strings.t("paidWith", {"note": int(r.note)})
 			var given := 0
