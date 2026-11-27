@@ -224,8 +224,9 @@ static func _head(b: Builder, c: Vector3, style: int, skin: Color) -> void:
 	b.ball(0.085, c + Vector3(0, -0.06, -0.025), skin, Vector3(1.0, 0.8, 1.0), KEEP, Vector2.ZERO, 8)
 	for side in [-1, 1]:
 		b.ball(0.03, c + Vector3(side * 0.108, -0.005, 0.005), skin, Vector3(0.5, 1.0, 0.8), KEEP, Vector2.ZERO, 6)
-		b.ball(0.013, c + Vector3(side * 0.037, 0.018, -0.096), Color("EDE6DA"), Vector3(1.25, 0.75, 0.45), KEEP, Vector2.ZERO, 6)
-		b.ball(0.0075, c + Vector3(side * 0.037, 0.018, -0.1), Color("1A1210"), Vector3(1, 1, 0.6), KEEP, Vector2.ZERO, 6)
+		# Eyes big enough to read from the street: white, then dark.
+		b.ball(0.02, c + Vector3(side * 0.04, 0.016, -0.097), Color("F4EFE6"), Vector3(1.1, 1.0, 0.45), KEEP, Vector2.ZERO, 8)
+		b.ball(0.012, c + Vector3(side * 0.04, 0.014, -0.103), Color("1A1210"), Vector3(1, 1.1, 0.6), KEEP, Vector2.ZERO, 6)
 		var brow := HAIR if style != 2 else BEARD
 		b.box(Vector3(0.04, 0.009, 0.012), c + Vector3(side * 0.04, 0.05, -0.105), brow, Vector3(0, 0, -side * 6))
 	b.ball(0.015, c + Vector3(0, -0.012, -0.108), skin.darkened(0.06), Vector3(0.9, 1.3, 0.9), KEEP, Vector2.ZERO, 6)

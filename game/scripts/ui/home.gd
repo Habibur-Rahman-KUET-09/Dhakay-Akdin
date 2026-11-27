@@ -110,6 +110,7 @@ var _salami := {}
 ## The story open over the home page (an index in _stories()), or -1.
 var _story_at := -1
 var _swipe_from := Vector2.ZERO
+var _show: Node
 ## Reading aloud: on (kept from the setting), and a finger held down
 ## (where, since when) to read what is under it.
 var _read_aloud := false
@@ -817,7 +818,28 @@ func _stage() -> Control:
 		flags.offset_bottom = 50
 		flags.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stage.add_child(flags)
+	# A soft spotlight behind them.
+	var spot := TextureRect.new()
+	var glow_tex := GradientTexture2D.new()
+	glow_tex.fill = GradientTexture2D.FILL_RADIAL
+	glow_tex.fill_from = Vector2(0.5, 0.5)
+	glow_tex.fill_to = Vector2(0.5, 0.0)
+	var ramp := Gradient.new()
+	ramp.colors = PackedColorArray([Color(1.0, 0.97, 0.85, 0.75 if not night else 0.35), Color(1.0, 0.97, 0.85, 0.0)])
+	glow_tex.gradient = ramp
+	glow_tex.width = 256
+	glow_tex.height = 256
+	spot.texture = glow_tex
+	spot.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	spot.set_anchors_preset(Control.PRESET_FULL_RECT)
+	spot.offset_left = 40
+	spot.offset_right = -40
+	spot.offset_top = 20
+	spot.offset_bottom = -120
+	spot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(spot)
 	var show := Showcase.new().setup(who, progress, open, night)
+	_show = show
 	show.set_anchors_preset(Control.PRESET_FULL_RECT)
 	show.offset_bottom = -150
 	stage.add_child(show)
@@ -941,7 +963,12 @@ func _stage_input(e: InputEvent) -> void:
 			if absf(d.x) > 60 and absf(d.x) > absf(d.y):
 				_pick_step(-1 if d.x > 0 else 1)
 			elif d.length() < 20:
-				open_sheet(_tab)
+				# A tap on them: they jump, wave and say their line.
+				if _show != null and is_instance_valid(_show) and progress.open_characters().has(_tab):
+					Juice.tap()
+					_show.poke()
+				else:
+					open_sheet(_tab)
 
 
 ## Something newly opened (a day's play opens one more thing): shown once,
