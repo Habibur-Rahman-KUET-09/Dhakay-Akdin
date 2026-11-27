@@ -291,45 +291,52 @@ def shirt(body, spec):
 
 def gamchha(body, spec):
     """A red-and-white checked strip over one shoulder near the neck: down
-    the chest in front, over the shoulder, down the back."""
+    the chest in front, over the shoulder, down the back. Laid on the
+    body's own surface, measured at each height (front and back of the
+    torso there), never on the arms or the head."""
     side = spec.get("side", -1)
     h = body.height
     width = spec.get("width", 0.12)
-    x = side * h * spec.get("x", 0.055)
-    centre_y = sum(c.y for c in body.co) / len(body.co)
+    x0 = side * h * spec.get("x", 0.06)
+    off = spec.get("off", 0.015)
+    torso = [i for i in range(len(body.co)) if not body.is_arm(i) and not body.is_leg(i)
+             and body.top_group[i] not in ("head", "neck_01", "scalp", "ears", "lips")]
+
+    def surface(x, z, front):
+        pts = [body.co[i] for i in torso if abs(body.co[i].x - x) < 0.025 and abs(body.co[i].z - z) < 0.025]
+        if not pts:
+            return None
+        return min(p.y for p in pts) - off if front else max(p.y for p in pts) + off
+
+    def shoulder_top(x):
+        pts = [body.co[i] for i in torso if abs(body.co[i].x - x) < 0.025 and body.co[i].z > body.floor + h * 0.7]
+        if not pts:
+            return None
+        top = max(pts, key=lambda p: p.z)
+        return top.z + off, sum(p.y for p in pts if p.z > top.z - 0.03) / max(1, len([p for p in pts if p.z > top.z - 0.03]))
+
+    heights = [0.58, 0.63, 0.68, 0.73, 0.77]
     rows = []
-
-    def onto(origin, direction):
-        hit, normal, _i, _d = body.tree.ray_cast(origin, direction)
-        return (hit, normal) if hit is not None else (None, None)
-
-    # Front, from the chest up to the shoulder; over the top; down the back.
-    front = [0.58, 0.64, 0.70, 0.76, 0.80]
-    back = list(reversed(front))
-    points = []
-    for f in front:
-        points.append(("front", f))
-    points.append(("top", 0.0))
-    for f in back:
-        points.append(("back", f))
-    for kind, f in points:
-        row = []
-        for edge in (-0.5, 0.5):
-            px = x + side * edge * width
-            if kind == "front":
-                hit, n = onto(Vector((px, centre_y - 1.0, body.floor + h * f)), Vector((0, 1, 0)))
-            elif kind == "back":
-                hit, n = onto(Vector((px, centre_y + 1.0, body.floor + h * f)), Vector((0, -1, 0)))
-            else:
-                hit, n = onto(Vector((px, centre_y, body.floor + h + 0.5)), Vector((0, 0, -1)))
-                # Past the head: the shoulder is below the neck.
-                if hit is not None and hit.z > body.floor + h * 0.86:
-                    hit, n = onto(Vector((px * 1.6, centre_y, body.floor + h * 0.95)), Vector((0, 0, -1)))
-            if hit is None:
-                continue
-            row.append(hit + n * 0.018)
-        if len(row) == 2:
-            rows.append(row)
+    for front, hs in ((True, heights), (None, [0]), (False, list(reversed(heights)))):
+        for f in hs:
+            row = []
+            for edge in (-0.5, 0.5):
+                x = x0 + side * edge * width
+                if front is None:
+                    top = shoulder_top(x)
+                    if top is None:
+                        row = []
+                        break
+                    row.append(Vector((x, top[1], top[0])))
+                    continue
+                z = body.floor + h * f
+                y = surface(x, z, front)
+                if y is None:
+                    row = []
+                    break
+                row.append(Vector((x, y, z)))
+            if len(row) == 2:
+                rows.append(row)
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new()
     vrows = [[bm.verts.new(p) for p in row] for row in rows]
@@ -338,7 +345,6 @@ def gamchha(body, spec):
         for loop, (uu, vv) in zip(f.loops, [(0, k), (1, k), (1, k + 1), (0, k + 1)]):
             loop[uv].uv = (uu, vv / max(1, len(vrows) - 1) * 4.0)
     bm.normal_update()
-    # Both faces seen (a strip of cloth).
     img = checked_image("gamchha_check", 128, [hex_colour("C62828"), hex_colour("F2EFE6"), hex_colour("C62828"), hex_colour("2E7D32")], 8, 3)
     mat = cloth_material("gamchha", img, 0.92)
     mat.use_backface_culling = False
