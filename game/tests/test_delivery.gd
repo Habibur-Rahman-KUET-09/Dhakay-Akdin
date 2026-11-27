@@ -173,6 +173,8 @@ func test_ratul_opens_at_level_seven_and_saves_his_evenings() -> void:
 	p.data.mohalla.level = 7
 	check(p.open_characters().has("delivery"), "open at level 7")
 	var taka := int(p.data.taka)
+	# Not today's character's double money, whatever the date.
+	p.daily().featured = true
 	var out := p.apply_delivery_day({"earned": 400, "orders": 9, "stars": 4.6, "stats": {"orders": 9, "hot": 6, "earned": 400}})
 	eq(int(out.earned), 400, "the evening's money")
 	eq(int(p.data.delivery.orders), 9, "orders counted")

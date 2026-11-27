@@ -601,6 +601,45 @@ func test_easy_driving_takes_the_way_at_a_junction() -> void:
 	check(not got.has(Driver.Event.WAITING), "never stopped to wait")
 
 
+func test_easy_driving_goes_on_after_a_drop_off_at_a_junction() -> void:
+	var s := Shift.new(small(), 2.0, 0.5, 3, 1)
+	s.driver = Driver.new(s.map, 2.0, p(4, 3), RoadMap.N)
+	# The drop-off is the T-junction itself: straight on is a wall.
+	s.destination = p(4, 1)
+	s.follow_route = true
+	s.pedal = true
+	s.accel = 100.0
+	for i in 100:
+		s.update(0.05)
+		if s.delivered > 0:
+			break
+	eq(s.delivered, 1, "dropped off at the junction")
+	var at := s.driver.cell
+	for i in 60:
+		s.update(0.05)
+	check(s.driver.cell != at or s.delivered > 1, "drove on to the next place, not stuck waiting")
+
+
+func test_easy_driving_turns_at_a_crossing_it_could_go_straight_through() -> void:
+	var m: RoadMap = RoadMap.parse("cross", PackedStringArray(["#######", "#H....#", "#.#.#.#", "#.....#", "#######"]))
+	var s := Shift.new(m, 2.0, 0.5, 3, 1)
+	s.driver = Driver.new(m, 2.0, p(1, 3), RoadMap.E)
+	# Up the middle street: a left turn at (3, 3), where straight on is open.
+	s.destination = p(3, 1)
+	s.follow_route = true
+	s.pedal = true
+	s.accel = 100.0
+	var went_past := false
+	for i in 120:
+		s.update(0.05)
+		if s.driver.cell == p(4, 3):
+			went_past = true
+		if s.delivered > 0:
+			break
+	check(not went_past, "did not go straight on past the turn")
+	eq(s.delivered, 1, "got there")
+
+
 func test_following_the_hints_delivers_a_passenger() -> void:
 	var d := Day.new(_mirpur(), Balance.new(), 5)
 	var w: Dictionary = d.waiting[0]

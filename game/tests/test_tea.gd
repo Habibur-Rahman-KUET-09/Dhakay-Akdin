@@ -298,6 +298,10 @@ func test_first_day_guide_points_to_the_next_step() -> void:
 	eq(day.guide_step(), "give", "made: hand it over")
 	day.tray = ["cup", "banana"]
 	eq(day.guide_step(), "discard", "gone wrong: throw it away")
-	day.customers = []
 	day.tray = []
+	day.interactive = true
+	day.cups_clean = 0
+	eq(day.guide_step(), "wash", "no clean cup: wash first")
+	day.interactive = false
+	day.customers = []
 	eq(day.guide_step(), "", "nobody waiting")

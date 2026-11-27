@@ -442,8 +442,13 @@ func guide_step() -> String:
 		if want == tray:
 			return "give"
 		if want.size() > tray.size() and want.slice(0, tray.size()) == tray:
-			return str(want[tray.size()])
-	return "discard" if not tray.is_empty() else str(steps_of(first.items[0])[0])
+			return _or_wash(str(want[tray.size()]))
+	return "discard" if not tray.is_empty() else _or_wash(str(steps_of(first.items[0])[0]))
+
+
+## A cup is wanted but none is clean: wash some first.
+func _or_wash(step: String) -> String:
+	return "wash" if step == "cup" and interactive and cups_clean <= 0 else step
 
 
 ## The spoons of sugar the next milk tea should have.

@@ -1143,13 +1143,13 @@ func _show_guide() -> void:
 		_say(strings.t("teaGuideDone"), Look.PARROT_DARK, 3.5)
 	var next := day.guide_step() if _guide else ""
 	_guide_box.visible = next != ""
-	var lit: Array = [_give, _drop]
+	var lit: Array = [_give, _drop, _wash]
 	lit.append_array(_step_buttons.values())
 	for button in lit:
 		(button as Control).modulate = Color.WHITE
 	if next == "":
 		return
-	var target: Control = _give if next == "give" else (_drop if next == "discard" else _step_buttons.get(next))
+	var target: Control = {"give": _give, "discard": _drop, "wash": _wash}.get(next, _step_buttons.get(next))
 	for button in lit:
 		if button != target:
 			(button as Control).modulate = Color(1, 1, 1, 0.35)
@@ -1157,5 +1157,7 @@ func _show_guide() -> void:
 		_guide_label.text = strings.t("teaGuideGive", {"give": strings.t("give")})
 	elif next == "discard":
 		_guide_label.text = strings.t("teaGuideDiscard", {"discard": strings.t("discard")})
+	elif next == "wash":
+		_guide_label.text = strings.t("teaGuideWash")
 	else:
 		_guide_label.text = strings.t("teaGuideNext", {"step": strings.t("step_" + next)})

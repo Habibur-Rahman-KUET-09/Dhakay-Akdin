@@ -26,6 +26,9 @@ var cruise := false
 ## Easy driving: at a junction where it would stop and wait, it takes the
 ## way to the destination by itself.
 var follow_route := false
+## Stopped at a junction, waiting for a way to be chosen.
+var waiting_turn := false
+var _auto_turn := false
 var accel := 0.45
 var coast := 0.3
 var braking := 1.5
@@ -81,17 +84,44 @@ func update(dt: float) -> Array:
 	speed_now = minf(speed_now, top * room)
 	driver.speed = speed_now
 	var events := driver.update(dt)
-	if follow_route and events.has(Driver.Event.WAITING):
+	if events.has(Driver.Event.WAITING):
+		waiting_turn = true
+	# Arrived first (a drop-off picks the next destination), then the way on
+	# from there: a drop-off right at a junction used to leave easy driving
+	# looking for the way to where it already was, waiting for good.
+	if events.has(Driver.Event.ENTERED):
+		_entered(events)
+	if follow_route and waiting_turn and not driver.moving:
 		var way := next_turn()
 		if way.turn >= 0 and way.tiles == 0:
 			events.erase(Driver.Event.WAITING)
 			events.append_array(swipe(way.turn))
+	if driver.moving:
+		waiting_turn = false
+	if follow_route:
+		_steer(events)
 	# Stopped at a junction or a dead end: the rickshaw stands still.
 	if not driver.moving:
 		speed_now = 0.0
-	if events.has(Driver.Event.ENTERED):
-		_entered(events)
 	return events
+
+
+## Easy driving on the move: the turn the way needs at the next junction is
+## asked for in good time (once a tile), so the rickshaw does not go
+## straight on through a crossing it should turn at. A turn the player
+## swiped is left alone; one of ours that was not taken is dropped.
+func _steer(events: Array) -> void:
+	if not events.has(Driver.Event.ENTERED) or not driver.moving:
+		return
+	if _auto_turn and driver.queued >= 0:
+		driver.queued = -1
+	_auto_turn = false
+	if driver.queued >= 0 or driver.progress <= 0.0:
+		return
+	var way := next_turn()
+	if way.tiles == 1 and (way.turn == Driver.RIGHT or way.turn == Driver.LEFT):
+		driver.queued = way.turn
+		_auto_turn = true
 
 
 ## A new tile was entered. Here: reaching the destination picks another
