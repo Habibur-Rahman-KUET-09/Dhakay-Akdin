@@ -260,6 +260,18 @@ def shirt(body, spec):
             continue
         keep.add(v.index)
     bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.index not in keep], context="VERTS")
+    # Straight edges where the cloth was cut (no saw teeth): the hem down to
+    # the hem line, the neck up to the neck line, the sleeves out to their end.
+    for e in bm.edges:
+        if not e.is_boundary:
+            continue
+        for v in e.verts:
+            if v.co.z < bottom + 0.05:
+                v.co.z = bottom
+            elif v.co.z > neck - 0.06:
+                v.co.z = neck - 0.01 * (abs(v.co.x) < 0.03)
+            elif abs(v.co.x) > end_x - 0.05:
+                v.co.x = math.copysign(end_x, v.co.x)
     bm.normal_update()
     # Loose: out from the skin, more at the belly and back, and the hem hangs.
     for v in bm.verts:
@@ -278,39 +290,61 @@ def shirt(body, spec):
 
 
 def gamchha(body, spec):
-    """A red-and-white checked strip over one shoulder: down the chest in
-    front, over the top of the shoulder, down the back."""
+    """A red-and-white checked strip over one shoulder near the neck: down
+    the chest in front, over the shoulder, down the back."""
     side = spec.get("side", -1)
     h = body.height
-    path = [(0.10, -1.0, 0.60), (0.11, -1.0, 0.70), (0.12, -0.6, 0.79), (0.13, 0.0, 0.82),
-            (0.12, 0.6, 0.79), (0.11, 1.0, 0.70), (0.10, 1.0, 0.60)]
-    width = spec.get("width", 0.13)
-    bm = bmesh.new()
-    uv = bm.loops.layers.uv.new()
-    rows = []
+    width = spec.get("width", 0.12)
+    x = side * h * spec.get("x", 0.055)
     centre_y = sum(c.y for c in body.co) / len(body.co)
-    for k, (fx, fy, fz) in enumerate(path):
-        x = side * h * fx
-        z = body.floor + h * fz
+    rows = []
+
+    def onto(origin, direction):
+        hit, normal, _i, _d = body.tree.ray_cast(origin, direction)
+        return (hit, normal) if hit is not None else (None, None)
+
+    # Front, from the chest up to the shoulder; over the top; down the back.
+    front = [0.58, 0.64, 0.70, 0.76, 0.80]
+    back = list(reversed(front))
+    points = []
+    for f in front:
+        points.append(("front", f))
+    points.append(("top", 0.0))
+    for f in back:
+        points.append(("back", f))
+    for kind, f in points:
         row = []
         for edge in (-0.5, 0.5):
-            p = Vector((x + side * edge * width * 0.6, centre_y + fy * 0.3, z))
-            # Onto the skin from outside, then a little off it.
-            hit, normal, _i, _d = body.tree.find_nearest(p)
+            px = x + side * edge * width
+            if kind == "front":
+                hit, n = onto(Vector((px, centre_y - 1.0, body.floor + h * f)), Vector((0, 1, 0)))
+            elif kind == "back":
+                hit, n = onto(Vector((px, centre_y + 1.0, body.floor + h * f)), Vector((0, -1, 0)))
+            else:
+                hit, n = onto(Vector((px, centre_y, body.floor + h + 0.5)), Vector((0, 0, -1)))
+                # Past the head: the shoulder is below the neck.
+                if hit is not None and hit.z > body.floor + h * 0.86:
+                    hit, n = onto(Vector((px * 1.6, centre_y, body.floor + h * 0.95)), Vector((0, 0, -1)))
             if hit is None:
-                hit, normal = p, Vector((0, fy, 0))
-            row.append(bm.verts.new(hit + normal * 0.02))
-        rows.append(row)
-    for k in range(len(rows) - 1):
-        f = bm.faces.new((rows[k][0], rows[k][1], rows[k + 1][1], rows[k + 1][0]))
+                continue
+            row.append(hit + n * 0.018)
+        if len(row) == 2:
+            rows.append(row)
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new()
+    vrows = [[bm.verts.new(p) for p in row] for row in rows]
+    for k in range(len(vrows) - 1):
+        f = bm.faces.new((vrows[k][0], vrows[k][1], vrows[k + 1][1], vrows[k + 1][0]))
         for loop, (uu, vv) in zip(f.loops, [(0, k), (1, k), (1, k + 1), (0, k + 1)]):
-            loop[uv].uv = (uu, vv / (len(rows) - 1) * 4.0)
+            loop[uv].uv = (uu, vv / max(1, len(vrows) - 1) * 4.0)
     bm.normal_update()
-    sol = bmesh.ops.extrude_face_region(bm, geom=list(bm.faces))
-    for v in [e for e in sol["geom"] if isinstance(e, bmesh.types.BMVert)]:
-        v.co += v.normal * -0.004
+    # Both faces seen (a strip of cloth).
     img = checked_image("gamchha_check", 128, [hex_colour("C62828"), hex_colour("F2EFE6"), hex_colour("C62828"), hex_colour("2E7D32")], 8, 3)
-    obj = new_object("gamchha", bm, cloth_material("gamchha", img, 0.92))
+    mat = cloth_material("gamchha", img, 0.92)
+    mat.use_backface_culling = False
+    obj = new_object("gamchha", bm, mat)
+    sol = obj.modifiers.new("thick", "SOLIDIFY")
+    sol.thickness = 0.006
     bind(obj, body.obj)
     return obj
 

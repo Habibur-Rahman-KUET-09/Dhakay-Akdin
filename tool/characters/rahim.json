@@ -33,10 +33,10 @@
   ],
   "eyes": [
     [
-      "low-poly"
+      "high-poly"
     ],
     [
-      "high-poly"
+      "low-poly"
     ]
   ],
   "eyebrows": [
@@ -59,10 +59,10 @@
   "tongue": [],
   "hair": [
     [
-      "short04"
+      "short02"
     ],
     [
-      "short02"
+      "short04"
     ]
   ],
   "clothes": [],
@@ -100,7 +100,7 @@
       "repeat": 3.0
     },
     "shirt": {
-      "colour": "C9783A",
+      "colour": "B8733F",
       "bottom": 0.55,
       "neck": 0.835,
       "sleeve": 0.45,
@@ -108,10 +108,16 @@
     },
     "gamchha": {
       "side": -1,
-      "width": 0.13
+      "width": 0.12,
+      "x": 0.06
     },
     "sandals": {
       "colour": "2B4C7E"
     }
-  }
+  },
+  "skin_tone": [
+    0.62,
+    0.47,
+    0.36
+  ]
 }

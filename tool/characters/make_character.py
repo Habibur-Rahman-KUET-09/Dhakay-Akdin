@@ -45,6 +45,14 @@ def pick(sub, wishes):
     return None
 
 
+def shrink(img):
+    """No bigger than the phone needs (before any work on its pixels)."""
+    limit = SPEC.get("max_texture", 1024)
+    if img.size[0] > limit or img.size[1] > limit:
+        f = limit / max(img.size[0], img.size[1])
+        img.scale(max(1, int(img.size[0] * f)), max(1, int(img.size[1] * f)))
+
+
 def tint_images(obj, colour, keep):
     """Recolours an asset's textures toward `colour` (hair dark, a little of
     its own light kept, so it stays hair and not paint)."""
@@ -55,6 +63,7 @@ def tint_images(obj, colour, keep):
         for n in m.node_tree.nodes:
             if n.type == "TEX_IMAGE" and n.image and n.image.size[0] > 0:
                 img = n.image
+                shrink(img)
                 px = list(img.pixels)
                 for i in range(0, len(px), 4):
                     lum = 0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2]
@@ -93,6 +102,34 @@ for part, kind in [("eyes", "Eyes"), ("eyebrows", "Eyebrows"), ("eyelashes", "Ey
             added[part] = HumanService.add_mhclo_asset(f, human, asset_type=kind, subdiv_levels=0, material_type="GAMEENGINE")
         except Exception as e:
             report["errors"].append("%s: %r" % (part, e))
+def tone_images(obj, factor):
+    """Darkens or warms a skin's own textures (multiplies them), keeping
+    every pore and shade."""
+    done = set()
+    for slot in obj.material_slots:
+        m = slot.material
+        if not m or not m.use_nodes:
+            continue
+        for n in m.node_tree.nodes:
+            if n.type == "TEX_IMAGE" and n.image and n.image.name not in done and n.image.size[0] > 0:
+                lname = n.image.name.lower()
+                if "normal" in lname or "nrm" in lname or "rough" in lname:
+                    continue
+                done.add(n.image.name)
+                img = n.image
+                shrink(img)
+                px = list(img.pixels)
+                for i in range(0, len(px), 4):
+                    for k in range(3):
+                        px[i + k] = px[i + k] * factor[k]
+                img.pixels[:] = px
+                img.update()
+    return sorted(done)
+
+
+if SPEC.get("skin_tone"):
+    report["toned"] = tone_images(human, SPEC["skin_tone"])
+
 if SPEC.get("outfit"):
     made = clothes.dress(human, SPEC["outfit"], report)
     report["picked"]["outfit"] = sorted(made)
