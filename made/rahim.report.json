@@ -1,13 +1,19 @@
 {
  "name": "rahim",
  "picked": {
-  "skin": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/skins/middleage_african_female/middleage_african_female.mhmat",
-  "eyes": null,
+  "skin": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/skins/middleage_asian_male/middleage_asian_male.mhmat",
+  "eyes": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyes/low-poly/low-poly.mhclo",
   "eyebrows": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyebrows/eyebrow001/eyebrow001.mhclo",
   "eyelashes": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyelashes/eyelashes01/eyelashes01.mhclo",
-  "teeth": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/teeth/teeth_base/teeth_base.mhclo",
-  "tongue": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/tongue/tongue01/tongue01.mhclo",
-  "hair": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/hair/short02/short02.mhclo"
+  "teeth": null,
+  "tongue": null,
+  "hair": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/hair/short04/short04.mhclo",
+  "outfit": [
+   "gamchha",
+   "lungi",
+   "sandals",
+   "shirt"
+  ]
  },
  "assets": {
   "skins": [
@@ -114,19 +120,94 @@
    "proxy741/proxy741.proxy"
   ]
  },
- "errors": [
-  "rig: OSError('Could not find the rig file: /home/runner/.config/blender/4.2/extensions/user_default/mpfb/data/rigs/standard/rig.standard.game_engine.json')"
- ],
+ "errors": [],
+ "body": {
+  "height": 1.632,
+  "groups": [
+   "ball_l",
+   "ball_r",
+   "calf_l",
+   "calf_r",
+   "clavicle_l",
+   "clavicle_r",
+   "ears",
+   "fingernails",
+   "foot_l",
+   "foot_r",
+   "hand_l",
+   "hand_r",
+   "head",
+   "index_01_l",
+   "index_01_r",
+   "index_02_l",
+   "index_02_r",
+   "index_03_l",
+   "index_03_r",
+   "lips",
+   "lowerarm_l",
+   "lowerarm_r",
+   "middle_01_l",
+   "middle_01_r",
+   "middle_02_l",
+   "middle_02_r",
+   "middle_03_l",
+   "middle_03_r",
+   "neck_01",
+   "nipple",
+   "nippletip",
+   "pelvis",
+   "pinky_01_l",
+   "pinky_01_r",
+   "pinky_02_l",
+   "pinky_02_r",
+   "pinky_03_l",
+   "pinky_03_r",
+   "ring_01_l",
+   "ring_01_r",
+   "ring_02_l",
+   "ring_02_r",
+   "ring_03_l",
+   "ring_03_r",
+   "scalp",
+   "spine_01",
+   "spine_02",
+   "spine_03",
+   "thigh_l",
+   "thigh_r",
+   "thumb_01_l",
+   "thumb_01_r",
+   "thumb_02_l",
+   "thumb_02_r",
+   "thumb_03_l",
+   "thumb_03_r",
+   "toenails",
+   "upperarm_l",
+   "upperarm_r"
+  ]
+ },
  "meshes": {
+  "gamchha": 26,
+  "lungi": 640,
   "rahim": 18486,
   "rahim.eyebrow001": 96,
   "rahim.eyelashes01": 184,
-  "rahim.short02": 1672,
-  "rahim.teeth_base": 3560,
-  "rahim.tongue01": 224
+  "rahim.low-poly": 86,
+  "rahim.short04": 525,
+  "sandals": 24,
+  "shirt": 1578
  },
  "materials": {
   "Dots Stroke": [],
+  "gamchha": [
+   "BSDF_PRINCIPLED",
+   "OUTPUT_MATERIAL",
+   "TEX_IMAGE"
+  ],
+  "lungi": [
+   "BSDF_PRINCIPLED",
+   "OUTPUT_MATERIAL",
+   "TEX_IMAGE"
+  ],
   "Material": [
    "OUTPUT_MATERIAL",
    "BSDF_PRINCIPLED"
@@ -149,24 +230,28 @@
    "TEX_IMAGE",
    "TEX_IMAGE"
   ],
-  "rahim.short02": [
+  "rahim.low-poly": [
    "OUTPUT_MATERIAL",
    "BSDF_PRINCIPLED",
    "TEX_IMAGE",
    "TEX_IMAGE"
   ],
-  "rahim.teeth_base": [
+  "rahim.short04": [
    "OUTPUT_MATERIAL",
    "BSDF_PRINCIPLED",
    "TEX_IMAGE",
    "TEX_IMAGE"
   ],
-  "rahim.tongue01": [
-   "OUTPUT_MATERIAL",
+  "sandals": [
    "BSDF_PRINCIPLED",
-   "TEX_IMAGE",
+   "OUTPUT_MATERIAL",
+   "TEX_IMAGE"
+  ],
+  "shirt": [
+   "BSDF_PRINCIPLED",
+   "OUTPUT_MATERIAL",
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 11280124
+ "glb_bytes": 3399216
 }
