@@ -2,12 +2,12 @@
  "name": "rahim",
  "picked": {
   "skin": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/skins/middleage_asian_male/middleage_asian_male.mhmat",
-  "eyes": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyes/low-poly/low-poly.mhclo",
+  "eyes": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyes/high-poly/high-poly.mhclo",
   "eyebrows": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyebrows/eyebrow001/eyebrow001.mhclo",
   "eyelashes": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyelashes/eyelashes01/eyelashes01.mhclo",
   "teeth": null,
   "tongue": null,
-  "hair": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/hair/short04/short04.mhclo",
+  "hair": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/hair/short02/short02.mhclo",
   "outfit": [
    "gamchha",
    "lungi",
@@ -121,6 +121,9 @@
   ]
  },
  "errors": [],
+ "toned": [
+  "middleage_lightskinned_male_diffuse2.png"
+ ],
  "body": {
   "height": 1.632,
   "groups": [
@@ -186,13 +189,13 @@
   ]
  },
  "meshes": {
-  "gamchha": 26,
+  "gamchha": 4,
   "lungi": 640,
   "rahim": 18486,
   "rahim.eyebrow001": 96,
   "rahim.eyelashes01": 184,
-  "rahim.low-poly": 86,
-  "rahim.short04": 525,
+  "rahim.high-poly": 1020,
+  "rahim.short02": 1672,
   "sandals": 24,
   "shirt": 1578
  },
@@ -230,13 +233,13 @@
    "TEX_IMAGE",
    "TEX_IMAGE"
   ],
-  "rahim.low-poly": [
+  "rahim.high-poly": [
    "OUTPUT_MATERIAL",
    "BSDF_PRINCIPLED",
    "TEX_IMAGE",
    "TEX_IMAGE"
   ],
-  "rahim.short04": [
+  "rahim.short02": [
    "OUTPUT_MATERIAL",
    "BSDF_PRINCIPLED",
    "TEX_IMAGE",
@@ -253,5 +256,5 @@
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 3399216
+ "glb_bytes": 3084512
 }
