@@ -7,6 +7,12 @@ extends RefCounted
 const COLOURS := [Color("F6B800"), Color("C2185B"), Color("2E9E6B"), Color("1E6FB0"), Color("E2432A")]
 
 
+## A light buzz for a tap that is not on a button (a swipe, a face).
+static func tap() -> void:
+	if OS.has_feature("mobile") and load("res://scripts/ui/prefs.gd").taps():
+		Input.vibrate_handheld(8)
+
+
 ## kind: "ting" (small) or "sparkle" (big). `parent` is where the confetti
 ## goes (a CanvasLayer or Control); `at` its middle on screen.
 static func celebrate(parent: Node, kind := "ting", at := Vector2(-1, -1)) -> void:

@@ -229,6 +229,32 @@ def ting():
     return out
 
 
+def tap():
+    """A soft wooden tick for a button press."""
+    out = []
+    for i in range(int(RATE * 0.05)):
+        t = i / RATE
+        v = (math.sin(2 * math.pi * 1250 * t) + 0.4 * math.sin(2 * math.pi * 2500 * t)) * math.exp(-t * 110)
+        out.append(v * 0.35)
+    return out
+
+
+def tear():
+    """Paper torn open: a dry rush of noise, then a little chime."""
+    rnd = random.Random(5)
+    out = []
+    n = int(RATE * 0.55)
+    for i in range(n):
+        t = i / RATE
+        env = min(1.0, t * 40) * math.exp(-t * 7)
+        v = (rnd.random() * 2 - 1) * env * 0.45
+        if t > 0.25:
+            u = t - 0.25
+            v += (math.sin(2 * math.pi * 1568 * u) + 0.5 * math.sin(2 * math.pi * 2093 * u)) * math.exp(-u * 9) * 0.3
+        out.append(v)
+    return out
+
+
 def sparkle():
     """Rising chimes for five stars."""
     out = [0.0] * int(RATE * 0.9)
@@ -327,6 +353,8 @@ if __name__ == '__main__':
     write('coin.wav', coin())
     write('ting.wav', ting())
     write('sparkle.wav', sparkle())
+    write('tap.wav', tap())
+    write('tear.wav', tear())
     for name, spec in TUNES.items():
         write_music(name, tune(spec))
     write_pcm('reel_music.pcm', tune(TUNES['tune_theme']), 12.5)

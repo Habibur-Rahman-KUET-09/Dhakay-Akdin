@@ -39,10 +39,15 @@ const Share = preload("res://scripts/ui/share.gd")
 const Juice = preload("res://scripts/ui/juice.gd")
 const Race = preload("res://scripts/rules/race.gd")
 const Together = preload("res://scripts/rules/together.gd")
+const Showcase = preload("res://scripts/ui/showcase.gd")
+const Unlocks = preload("res://scripts/rules/unlocks.gd")
+const Prefs = preload("res://scripts/ui/prefs.gd")
 
+## The home page by night: a deep blue behind the cards.
+const NIGHT_BG := Color("1E2433")
 const WHO := ["rickshaw", "tea", "bus", "fuchka", "delivery", "hawker", "boat"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
-const PAGE_ICONS := {"hub": "home", "shop": "bag", "fund": "town", "story": "book", "people": "people"}
+const PAGE_ICONS := {"hub": "home", "shop": "bag", "fund": "town", "story": "book", "people": "people", "board": "flag"}
 const UPGRADE_ICONS := {
 	"new_rickshaw": "rickshaw", "battery_rickshaw": "bolt", "bench": "bench", "second_kettle": "kettle",
 	"awning": "awning", "fridge": "fridge", "notebook": "ledger", "change_bag": "purse", "loud_voice": "voice",
@@ -98,6 +103,9 @@ var _school_rows: Array = []
 var _rank_paid := {}
 ## Eid salami given when the home opened on an Eid day.
 var _salami := {}
+## The story open over the home page (an index in _stories()), or -1.
+var _story_at := -1
+var _swipe_from := Vector2.ZERO
 ## Reading aloud: on (kept from the setting), and a finger held down
 ## (where, since when) to read what is under it.
 var _read_aloud := false
@@ -152,7 +160,7 @@ func _build() -> void:
 	if _shop_who == "":
 		_shop_who = _tab if progress.open_characters().has(_tab) else "rickshaw"
 	var bg := ColorRect.new()
-	bg.color = Look.CREAM
+	bg.color = NIGHT_BG if _page == "hub" and Prefs.night() else Look.CREAM
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	if _page == "title":
@@ -163,11 +171,17 @@ func _build() -> void:
 		_start_sheet(_sheet)
 	if _settings_open:
 		_settings()
+	if _story_at >= 0:
+		_story_view()
 	for c in get_children():
 		if c is StoryPlayer:
 			move_child(c, -1)
-	if _page == "hub" and _sheet == "" and not _settings_open:
+	if _page == "hub" and _sheet == "" and not _settings_open and _story_at < 0:
 		_family_scene.call_deferred()
+		var fresh := Unlocks.newly_open(progress.data)
+		if not fresh.is_empty():
+			progress.save()
+			_unlock_pop(fresh)
 
 
 ## From the title page into the mohalla.
@@ -414,7 +428,10 @@ func _nav() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 0)
 	panel.add_child(row)
-	for page in PAGES:
+	var pages := PAGES.duplicate()
+	if Unlocks.is_open(progress.data, "board") and cloud.enabled():
+		pages.insert(1, "board")
+	for page in pages:
 		var on: bool = page == _page
 		var ink: Color = Look.YELLOW if on else Look.CREAM
 		var button := Button.new()
@@ -457,46 +474,485 @@ func _page_title(text: String, extra := "") -> Control:
 
 
 func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
-	# The street runs edge to edge.
+	# One screen: stories along the top, today's character big in the
+	# middle, the way into the day under it (no long list to scroll).
 	margin.add_theme_constant_override("margin_left", 0)
 	margin.add_theme_constant_override("margin_right", 0)
-	page.add_child(_street())
-	var inner := VBoxContainer.new()
-	inner.add_theme_constant_override("separation", 12)
+	page.add_theme_constant_override("separation", 6)
+	if _crash != "":
+		page.add_child(_padded(_crash_card()))
+	page.add_child(_stories_row())
+	page.add_child(_stage())
+	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 11, false, Color("8A8178"))
+	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	page.add_child(version)
+
+
+func _padded(c: Control) -> Control:
 	var pad := MarginContainer.new()
 	for side in ["left", "right"]:
 		pad.add_theme_constant_override("margin_" + side, 14)
-	pad.add_child(inner)
-	page.add_child(pad)
-	if _crash != "":
-		inner.add_child(_crash_card())
+	pad.add_child(c)
+	return pad
+
+
+# --- Stories (the round buttons along the top) -----------------------------------
+
+
+## What the round buttons hold, in order: each an id, an icon, a name, a
+## token (seen when it last matched) and the cards it shows (or a page to
+## go to).
+func _stories() -> Array:
+	var list: Array = []
+	var date := progress.date()
 	var waiting := story.waiting(progress.data)
 	if not waiting.is_empty():
-		inner.add_child(_chapter_card(waiting[0]))
-	var challenge := _challenge_card()
-	if challenge != null:
-		inner.add_child(challenge)
+		var c: Dictionary = waiting[0]
+		list.append({"id": "chapter", "icon": "book", "label": s.t("stChapter"), "token": str(c.id), "make": func() -> Array: return [_chapter_card(c)]})
 	if not _salami.is_empty():
-		inner.add_child(_salami_card())
-	inner.add_child(_pass_card())
-	inner.add_child(_ranked_card())
-	inner.add_child(_traffic_card())
-	inner.add_child(_album_card())
-	inner.add_child(_stickers_card())
-	inner.add_child(_together_card())
-	if cloud.enabled():
-		inner.add_child(_online_card())
-	var friends := _friends_card()
-	if friends != null:
-		inner.add_child(friends)
-	var leaders := _leader_card()
-	if leaders != null:
-		inner.add_child(leaders)
-	inner.add_child(_news_card())
-	inner.add_child(_season_card())
-	var version := Look.label("%s · %s" % [s.t("testBuild"), ProjectSettings.get_setting("application/config/version", "dev")], 12, false, Color("8A8178"))
-	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	inner.add_child(version)
+		list.append({"id": "salami", "icon": "purse", "label": s.t("stSalami"), "token": date, "make": func() -> Array: return [_salami_card()]})
+	var friends_open := Unlocks.is_open(progress.data, "friends")
+	if progress.challenge().size() > 0 or friends_open:
+		list.append({"id": "challenge", "icon": "target", "label": s.t("stChallenge"), "token": date, "make": func() -> Array:
+			var cards: Array = []
+			var c := _challenge_card()
+			if c != null:
+				cards.append(c)
+			if friends_open:
+				cards.append(_traffic_card())
+				cards.append(_ranked_card())
+			return cards})
+	if Unlocks.is_open(progress.data, "pass"):
+		var due := Season.waiting(progress.data, date)
+		list.append({"id": "pass", "icon": "star", "label": s.t("stPass"), "token": "%s %d %d" % [Season.id_of(date), Season.open_tiers(progress.data, date), due],
+			"badge": due, "make": func() -> Array: return [_pass_card()]})
+	if Unlocks.is_open(progress.data, "cards"):
+		list.append({"id": "cards", "icon": "plate_tiger", "label": s.t("stCards"), "token": str(Cards.of(progress.data).size()), "make": func() -> Array: return [_album_card()]})
+	if friends_open:
+		list.append({"id": "friends", "icon": "people", "label": s.t("stFriends"), "token": date, "make": func() -> Array:
+			var cards: Array = [_together_card()]
+			if cloud.enabled():
+				cards.append(_online_card())
+			var f := _friends_card()
+			if f != null:
+				cards.append(f)
+			cards.append(_stickers_card())
+			return cards})
+	if Unlocks.is_open(progress.data, "board") and cloud.enabled():
+		list.append({"id": "board", "icon": "flag", "label": s.t("stBoard"), "token": date, "go": "board"})
+	list.append({"id": "news", "icon": _weather_icon(), "label": s.t("stNews"), "token": date, "make": func() -> Array: return [_season_card(), _news_card()]})
+	return list
+
+
+func _story_fresh(item: Dictionary) -> bool:
+	var seen: Dictionary = progress.data.get("seen_stories", {})
+	return str(seen.get(item.id, "")) != str(item.token) or int(item.get("badge", 0)) > 0
+
+
+func _story_seen(item: Dictionary) -> void:
+	if not progress.data.has("seen_stories"):
+		progress.data["seen_stories"] = {}
+	if str(progress.data.seen_stories.get(item.id, "")) != str(item.token):
+		progress.data.seen_stories[item.id] = str(item.token)
+		progress.save()
+
+
+func _stories_row() -> Control:
+	var scroll := ScrollContainer.new()
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll.custom_minimum_size = Vector2(0, 98)
+	scroll.scroll_deadzone = 12
+	var pad := MarginContainer.new()
+	for side in ["left", "right"]:
+		pad.add_theme_constant_override("margin_" + side, 10)
+	pad.add_theme_constant_override("margin_top", 8)
+	scroll.add_child(pad)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	pad.add_child(row)
+	var items := _stories()
+	for i in items.size():
+		row.add_child(_story_dot(items[i], i))
+	return scroll
+
+
+func _story_dot(item: Dictionary, i: int) -> Control:
+	var fresh := _story_fresh(item)
+	var col := VBoxContainer.new()
+	col.custom_minimum_size = Vector2(70, 0)
+	col.add_theme_constant_override("separation", 3)
+	var holder := CenterContainer.new()
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	col.add_child(holder)
+	var ring := Panel.new()
+	ring.custom_minimum_size = Vector2(62, 62)
+	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	# New: a magenta disc ringed in yellow; seen: sand, quiet.
+	style.bg_color = Look.MAGENTA if fresh else Look.SAND
+	style.border_color = Look.YELLOW if fresh else Color("C9C0B2")
+	style.set_border_width_all(4 if fresh else 2)
+	style.set_corner_radius_all(31)
+	style.anti_aliasing = true
+	ring.add_theme_stylebox_override("panel", style)
+	holder.add_child(ring)
+	var painted := str(item.icon).begins_with("plate_")
+	var ic := Look.icon(str(item.icon), 34, Color.WHITE if fresh or painted else Look.OUTLINE)
+	ic.set_anchors_preset(Control.PRESET_CENTER)
+	ic.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	ic.grow_vertical = Control.GROW_DIRECTION_BOTH
+	ic.offset_left = -17
+	ic.offset_right = 17
+	ic.offset_top = -17
+	ic.offset_bottom = 17
+	ring.add_child(ic)
+	if int(item.get("badge", 0)) > 0:
+		var badge := Look.pill("", str(int(item.badge)), Look.VERMILION, Color.WHITE, 11)
+		badge.position = Vector2(40, -4)
+		ring.add_child(badge)
+	var ink := Look.CREAM if Prefs.night() else Look.OUTLINE
+	var name := Look.label(str(item.label), 12, fresh, ink if fresh else (Color("A9B1C6") if Prefs.night() else Look.MUTED))
+	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name.autowrap_mode = TextServer.AUTOWRAP_OFF
+	col.add_child(name)
+	var tap := Button.new()
+	tap.name = "Story_" + str(item.id)
+	tap.flat = true
+	tap.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for state in ["normal", "hover", "pressed", "focus"]:
+		tap.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+	tap.pressed.connect(_open_story.bind(i))
+	col.add_child(tap)
+	return col
+
+
+func _open_story(i: int) -> void:
+	var items := _stories()
+	if i < 0 or i >= items.size():
+		return
+	Juice.tap()
+	var item: Dictionary = items[i]
+	if item.has("go"):
+		_story_seen(item)
+		show_page(str(item.go))
+		return
+	_story_at = i
+	_build()
+
+
+func _close_story() -> void:
+	_story_at = -1
+	_build()
+
+
+## Over everything: one story's cards, bars for where it is among them, the
+## way to the one before or after (or a swipe), and out.
+func _story_view() -> void:
+	var items := _stories().filter(func(x): return not x.has("go"))
+	var all := _stories()
+	if _story_at < 0 or _story_at >= all.size() or all[_story_at].has("go"):
+		_story_at = -1
+		return
+	var item: Dictionary = all[_story_at]
+	var at := items.find(item)
+	_story_seen(item)
+	var shade := ColorRect.new()
+	shade.color = Color(0.08, 0.09, 0.11, 0.94)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(shade)
+	var room := Look.safe_insets(get_viewport())
+	var col := VBoxContainer.new()
+	col.set_anchors_preset(Control.PRESET_FULL_RECT)
+	col.offset_left = 14
+	col.offset_right = -14
+	col.offset_top = room.x
+	col.offset_bottom = -room.y
+	col.add_theme_constant_override("separation", 10)
+	shade.add_child(col)
+	var bars := HBoxContainer.new()
+	bars.add_theme_constant_override("separation", 4)
+	for k in items.size():
+		var bar := ColorRect.new()
+		bar.color = Look.YELLOW if k <= at else Color(1, 1, 1, 0.25)
+		bar.custom_minimum_size = Vector2(0, 4)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bars.add_child(bar)
+	col.add_child(bars)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 10)
+	head.add_child(Look.icon(str(item.icon), 30, Color.WHITE))
+	var title := Look.label(str(item.label), 22, true, Color.WHITE)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	var close := Look.chunky(s.t("close"), Color.WHITE, Look.OUTLINE, 15, 3, 14)
+	close.name = "StoryClose"
+	close.autowrap_mode = TextServer.AUTOWRAP_OFF
+	close.pressed.connect(_close_story)
+	head.add_child(close)
+	col.add_child(head)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll.scroll_deadzone = 12
+	col.add_child(scroll)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation", 12)
+	scroll.add_child(box)
+	for c in (item.make as Callable).call():
+		if c != null:
+			box.add_child(c)
+	_let_scroll(box)
+	var nav := HBoxContainer.new()
+	nav.add_theme_constant_override("separation", 10)
+	var prev := Look.chunky(s.t("storyPrev"), Color.WHITE, Look.OUTLINE, 17, 4, 16)
+	prev.name = "StoryPrev"
+	prev.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	prev.disabled = at <= 0
+	prev.pressed.connect(_story_step.bind(-1))
+	nav.add_child(prev)
+	var last := at >= items.size() - 1
+	var next := Look.chunky(s.t("close") if last else s.t("storyNext"), Look.YELLOW, Look.OUTLINE, 17, 4, 16)
+	next.name = "StoryNext"
+	next.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	next.pressed.connect(_close_story if last else _story_step.bind(1))
+	nav.add_child(next)
+	col.add_child(nav)
+	shade.gui_input.connect(_story_swipe)
+
+
+func _story_step(d: int) -> void:
+	var all := _stories()
+	var k := _story_at + d
+	while k >= 0 and k < all.size() and all[k].has("go"):
+		k += d
+	if k < 0 or k >= all.size():
+		_close_story()
+		return
+	Juice.tap()
+	_story_at = k
+	_build()
+
+
+func _story_swipe(e: InputEvent) -> void:
+	if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
+		if e.pressed:
+			_swipe_from = e.position
+		else:
+			var d: Vector2 = e.position - _swipe_from
+			if d.y > 140 and absf(d.x) < d.y:
+				_close_story()
+			elif absf(d.x) > 70 and absf(d.x) > absf(d.y):
+				_story_step(-1 if d.x > 0 else 1)
+
+
+# --- Today's character, big -------------------------------------------------------
+
+
+## The middle of the home page: the character picked, in 3D with their
+## things, their name and a line of theirs; swipe (or the arrows, or a face
+## below) for another; a tap gets them ready for the day.
+func _stage() -> Control:
+	var who := _tab
+	var open := progress.open_characters().has(who)
+	var stage := Control.new()
+	stage.name = "Stage"
+	var room := Look.safe_insets(get_viewport())
+	var h := get_viewport_rect().size.y - 72.0 - 98.0 - 102.0 - 76.0 - room.x - room.y - 30.0
+	stage.custom_minimum_size = Vector2(0, clampf(h, 380.0, 640.0))
+	stage.clip_contents = true
+	var art := TextureRect.new()
+	art.texture = Look.icon_texture("mohalla", 540)
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	art.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var night := Prefs.night()
+	art.modulate = Color(0.4, 0.45, 0.65, 0.55) if night else Color(1, 1, 1, 0.4)
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(art)
+	var glow := ColorRect.new()
+	glow.color = _colour_of(who).lerp(NIGHT_BG, 0.75) if night else _colour_of(who).lerp(Look.CREAM, 0.72)
+	glow.color.a = 0.55
+	glow.set_anchors_preset(Control.PRESET_FULL_RECT)
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(glow)
+	if not Calendar.new().festival(progress.date()).is_empty():
+		var flags := TextureRect.new()
+		flags.texture = Look.icon_texture("bunting", 540)
+		flags.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		flags.stretch_mode = TextureRect.STRETCH_SCALE
+		flags.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		flags.offset_bottom = 50
+		flags.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stage.add_child(flags)
+	var show := Showcase.new().setup(who, progress, open, night)
+	show.set_anchors_preset(Control.PRESET_FULL_RECT)
+	show.offset_bottom = -150
+	stage.add_child(show)
+	# A tap gets them ready; a swipe goes to the next.
+	var touch := Control.new()
+	touch.name = "StageTouch"
+	touch.set_anchors_preset(Control.PRESET_FULL_RECT)
+	touch.mouse_filter = Control.MOUSE_FILTER_STOP
+	touch.gui_input.connect(_stage_input)
+	stage.add_child(touch)
+	# Where and when, and what opens next.
+	var top := VBoxContainer.new()
+	top.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	top.offset_left = 10
+	top.offset_right = -10
+	top.offset_top = 8
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_theme_constant_override("separation", 6)
+	stage.add_child(top)
+	var where_row := HBoxContainer.new()
+	where_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	where_row.add_child(Look.pill(_weather_icon(), _where_line(), Look.OUTLINE, Look.CREAM, 14, Look.CREAM))
+	top.add_child(where_row)
+	var coming := Unlocks.next(progress.data)
+	if not coming.is_empty():
+		var soon_row := HBoxContainer.new()
+		soon_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		soon_row.add_child(Look.pill("lock", s.t("unlockSoon", {"n": int(coming.days), "what": s.t("feat_" + str(coming.feature))}), Color.WHITE, Look.OUTLINE, 13, Look.OUTLINE))
+		top.add_child(soon_row)
+	if open and who == progress.featured() and not progress.daily().featured:
+		var ribbon_row := HBoxContainer.new()
+		ribbon_row.alignment = BoxContainer.ALIGNMENT_END
+		ribbon_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var ribbon := Look.pill("", s.t("tabDouble"), Look.YELLOW, Look.OUTLINE, 15)
+		ribbon.rotation_degrees = -4
+		ribbon_row.add_child(ribbon)
+		top.add_child(ribbon_row)
+	# The arrows at the sides.
+	for d in [-1, 1]:
+		var arrow := Look.chunky("‹" if d < 0 else "›", Color.WHITE, Look.OUTLINE, 30, 3, 26)
+		arrow.name = "StagePrev" if d < 0 else "StageNext"
+		arrow.custom_minimum_size = Vector2(52, 52)
+		arrow.set_anchors_preset(Control.PRESET_CENTER_LEFT if d < 0 else Control.PRESET_CENTER_RIGHT)
+		arrow.position = Vector2(8 if d < 0 else -60, -76)
+		arrow.pressed.connect(_pick_step.bind(d))
+		stage.add_child(arrow)
+	# The name plate and a line of theirs, then all the faces.
+	var bottom := VBoxContainer.new()
+	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	bottom.offset_left = 12
+	bottom.offset_right = -12
+	bottom.offset_bottom = -6
+	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bottom.add_theme_constant_override("separation", 8)
+	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(bottom)
+	var plate := _card(Color.WHITE, 18)
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var plate_col := VBoxContainer.new()
+	plate_col.add_theme_constant_override("separation", 0)
+	plate_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.add_child(plate_col)
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 8)
+	name_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var name := Look.label(s.t(_name_key(who)), 22, true, _deep_of(who) if open else Look.MUTED)
+	name.autowrap_mode = TextServer.AUTOWRAP_OFF
+	name_row.add_child(name)
+	var role := Look.label("· " + s.t(_role_key(who)), 14, false, Look.MUTED)
+	role.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	role.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	role.clip_text = true
+	name_row.add_child(role)
+	plate_col.add_child(name_row)
+	var line_text := s.t("catch_" + who) if open else s.t("lockedPlate", {"name": s.t(_name_key(who)), "level": int(b.n("unlocks." + _unlock_of(who)))})
+	var line := Look.label(line_text, 15, open, Look.OUTLINE)
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	plate_col.add_child(line)
+	bottom.add_child(plate)
+	var faces := HBoxContainer.new()
+	faces.alignment = BoxContainer.ALIGNMENT_CENTER
+	faces.add_theme_constant_override("separation", 6)
+	bottom.add_child(faces)
+	for w in WHO:
+		var picked: bool = w == who
+		var holder := CenterContainer.new()
+		holder.custom_minimum_size = Vector2(52, 52)
+		holder.add_child(_face(w, 50 if picked else 40, picked, progress.open_characters().has(w)))
+		var tap := Button.new()
+		tap.name = "Pick_" + w
+		tap.flat = true
+		tap.set_anchors_preset(Control.PRESET_FULL_RECT)
+		for state in ["normal", "hover", "pressed", "focus"]:
+			tap.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+		tap.pressed.connect(_pick.bind(w))
+		holder.add_child(tap)
+		faces.add_child(holder)
+	return stage
+
+
+func _pick(who: String) -> void:
+	if who == _tab:
+		open_sheet(who)
+		return
+	Juice.tap()
+	_tab = who
+	_build()
+
+
+func _pick_step(d: int) -> void:
+	var i := WHO.find(_tab)
+	_pick(WHO[(i + d + WHO.size()) % WHO.size()])
+
+
+func _stage_input(e: InputEvent) -> void:
+	if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
+		if e.pressed:
+			_swipe_from = e.position
+		else:
+			var d: Vector2 = e.position - _swipe_from
+			if absf(d.x) > 60 and absf(d.x) > absf(d.y):
+				_pick_step(-1 if d.x > 0 else 1)
+			elif d.length() < 20:
+				open_sheet(_tab)
+
+
+## Something newly opened (a day's play opens one more thing): shown once,
+## big, with confetti.
+func _unlock_pop(features: Array) -> void:
+	var shade := ColorRect.new()
+	shade.color = Color(0.08, 0.09, 0.11, 0.7)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(shade)
+	var centre := CenterContainer.new()
+	centre.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.add_child(centre)
+	var panel := _card(Look.CREAM, 24)
+	panel.custom_minimum_size = Vector2(440, 0)
+	centre.add_child(panel)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	panel.add_child(col)
+	var title := Look.title(s.t("unlockTitle"), 34, Look.MAGENTA, false)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(title)
+	for f in features:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		row.add_child(_icon_tile({"cards": "plate_tiger", "pass": "star", "friends": "people", "board": "flag"}.get(f, "star"), Look.YELLOW, Look.OUTLINE, 44))
+		var text := VBoxContainer.new()
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		text.add_theme_constant_override("separation", 0)
+		text.add_child(Look.label(s.t("feat_" + str(f)), 19, true))
+		var help := Look.label(s.t("unlock_" + str(f)), 14, false, Look.MUTED)
+		help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.add_child(help)
+		row.add_child(text)
+		col.add_child(row)
+	var ok := Look.chunky(s.t("unlockOk"), Look.YELLOW, Look.OUTLINE, 20, 5, 18)
+	ok.name = "UnlockOk"
+	ok.pressed.connect(shade.queue_free)
+	col.add_child(ok)
+	Juice.celebrate(shade, "sparkle")
 
 
 ## The street, drawn, with the three characters standing on it: tap one
@@ -2354,13 +2810,8 @@ func _leader_card() -> Control:
 
 
 func _board_page(page: VBoxContainer) -> void:
-	var back := Look.chunky(s.t("friendsBack"), Color.WHITE, Look.OUTLINE, 15, 3, 14)
-	back.name = "BoardBack"
-	back.autowrap_mode = TextServer.AUTOWRAP_OFF
-	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	back.pressed.connect(show_page.bind("hub"))
-	page.add_child(back)
 	page.add_child(_page_title(s.t("lbTitle")))
+	page.add_child(_ranked_card())
 	if not cloud.enabled():
 		page.add_child(Look.label(s.t("friendsOff"), 15, false, Look.MUTED))
 		return
@@ -2746,6 +3197,12 @@ func _settings() -> void:
 	rows.append(Look.label(s.t("easyDrivingHelp"), 13, false, Look.MUTED))
 	rows.append(_choice_row(s.t("readAloud"), [s.t("musicOn"), s.t("musicOff")], 0 if ReadAloud.wanted() else 1, func(i): _set_read_aloud(i == 0), "ReadAloud_", ["on", "off"]))
 	rows.append(Look.label(s.t("readAloudHelp"), 13, false, Look.MUTED))
+	rows.append(_choice_row(s.t("setTaps"), [s.t("musicOn"), s.t("musicOff")], 0 if Prefs.taps() else 1, func(i): _set_pref("taps", i == 0), "Taps_", ["on", "off"]))
+	rows.append(_choice_row(s.t("setHand"), [s.t("handRight"), s.t("handLeft")], 1 if Prefs.left_hand() else 0, func(i): _set_pref("left_hand", i == 1), "Hand_", ["right", "left"]))
+	rows.append(_choice_row(s.t("setText"), [s.t("textNormal"), s.t("textBig"), s.t("textBigger")], Prefs.SCALES.find(Prefs.text_scale()), func(i): _set_pref("text_scale", Prefs.SCALES[i]), "Text_", ["1", "2", "3"]))
+	rows.append(_choice_row(s.t("setBanglish"), [s.t("musicOn"), s.t("musicOff")], 0 if Prefs.banglish() else 1, func(i): _set_pref("banglish", i == 0), "Banglish_", ["on", "off"]))
+	rows.append(Look.label(s.t("setBanglishHelp"), 13, false, Look.MUTED))
+	rows.append(_choice_row(s.t("setTheme"), [s.t("themeAuto"), s.t("themeDay"), s.t("themeNight")], Prefs.THEMES.find(Prefs.theme()), func(i): _set_pref("theme", Prefs.THEMES[i]), "Theme_", Prefs.THEMES))
 	rows.append(_cloud_card())
 	# Who recorded the street sounds (their licences ask to be named).
 	var credits := Sfx.credits()
@@ -2784,6 +3241,23 @@ func _close_settings() -> void:
 
 func _set_hands(value: bool) -> void:
 	Activity.save_wanted(value)
+	_build()
+
+
+## One of the player's own ways (prefs.gd), then the page again.
+func _set_pref(key: String, value) -> void:
+	match key:
+		"taps":
+			Prefs.save_taps(value)
+		"left_hand":
+			Prefs.save_left_hand(value)
+		"text_scale":
+			Prefs.save_text_scale(value)
+		"banglish":
+			Prefs.save_banglish(value)
+			s.banglish = value
+		"theme":
+			Prefs.save_theme(value)
 	_build()
 
 

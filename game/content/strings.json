@@ -5490,5 +5490,220 @@
  "instHelp": {
   "bn": "আপনার সাপ্তাহিক টুর্নামেন্টের পয়েন্ট আপনার প্রতিষ্ঠানের নামে যোগ হয়। কোন প্রতিষ্ঠান এগিয়ে, দেখুন!",
   "en": "Your weekly tournament points count for your place of study. See who's ahead!"
+ },
+ "stChapter": {
+  "bn": "গল্প",
+  "en": "Story",
+  "bx": "Golpo"
+ },
+ "stSalami": {
+  "bn": "সালামি",
+  "en": "Salami",
+  "bx": "Salami"
+ },
+ "stChallenge": {
+  "bn": "চ্যালেঞ্জ",
+  "en": "Challenge",
+  "bx": "Challenge"
+ },
+ "stPass": {
+  "bn": "পাস",
+  "en": "Pass",
+  "bx": "Pass"
+ },
+ "stCards": {
+  "bn": "কার্ড",
+  "en": "Cards",
+  "bx": "Cards"
+ },
+ "stFriends": {
+  "bn": "বন্ধু",
+  "en": "Friends",
+  "bx": "Dostora"
+ },
+ "stBoard": {
+  "bn": "তালিকা",
+  "en": "Ranks",
+  "bx": "Rank"
+ },
+ "stNews": {
+  "bn": "খবর",
+  "en": "News",
+  "bx": "Khobor"
+ },
+ "storyPrev": {
+  "bn": "আগেরটা",
+  "en": "Back",
+  "bx": "Ager ta"
+ },
+ "storyNext": {
+  "bn": "পরেরটা",
+  "en": "Next",
+  "bx": "Next"
+ },
+ "catch_rickshaw": {
+  "bn": "\"আজ জ্যাম কম, চলেন মামা!\"",
+  "en": "\"Light traffic today. Hop on!\"",
+  "bx": "\"Aj jam kom, chalen mama!\""
+ },
+ "catch_tea": {
+  "bn": "\"এক কাপ চা, দুধ চিনি বেশি?\"",
+  "en": "\"One cup of tea, extra milk and sugar?\"",
+  "bx": "\"Ek cup cha, dudh chini beshi?\""
+ },
+ "catch_bus": {
+  "bn": "\"মতিঝিল! মতিঝিল! খালি গাড়ি!\"",
+  "en": "\"Motijheel! Motijheel! Empty bus!\"",
+  "bx": "\"Motijheel! Motijheel! Khali gari!\""
+ },
+ "catch_fuchka": {
+  "bn": "\"ঝাল কম না বেশি, আম্মু?\"",
+  "en": "\"Less chilli or more, dear?\"",
+  "bx": "\"Jhal kom na beshi, ammu?\""
+ },
+ "catch_delivery": {
+  "bn": "\"অর্ডার রেডি, ১০ মিনিটে হাজির!\"",
+  "en": "\"Order's ready, there in 10 minutes!\"",
+  "bx": "\"Order ready, 10 min e hajir!\""
+ },
+ "catch_hawker": {
+  "bn": "\"বাদাম! গরম গরম বাদাম!\"",
+  "en": "\"Peanuts! Hot peanuts!\"",
+  "bx": "\"Badam! Gorom gorom badam!\""
+ },
+ "catch_boat": {
+  "bn": "\"ওপারে যাবেন? উঠেন, ছাড়লাম!\"",
+  "en": "\"Going across? Get in, we're off!\"",
+  "bx": "\"Opare jaben? Uthen, charlam!\""
+ },
+ "unlockTitle": {
+  "bn": "নতুন খুলেছে!",
+  "en": "Just opened!",
+  "bx": "Notun unlock!"
+ },
+ "unlockOk": {
+  "bn": "দারুণ!",
+  "en": "Nice!",
+  "bx": "Joss!"
+ },
+ "unlockSoon": {
+  "bn": "আর {n} দিন খেললে: {what}",
+  "en": "{n} more days: {what}",
+  "bx": "Ar {n} din khelle: {what}"
+ },
+ "feat_cards": {
+  "bn": "কার্ড অ্যালবাম",
+  "en": "Card album",
+  "bx": "Card album"
+ },
+ "feat_pass": {
+  "bn": "সিজন পাস",
+  "en": "Season pass",
+  "bx": "Season pass"
+ },
+ "feat_friends": {
+  "bn": "বন্ধু আর চ্যালেঞ্জ",
+  "en": "Friends and challenges",
+  "bx": "Dost ar challenge"
+ },
+ "feat_board": {
+  "bn": "লিগ আর তালিকা",
+  "en": "Leagues and ranks",
+  "bx": "League ar rank"
+ },
+ "unlock_cards": {
+  "bn": "প্রতিদিন শেষে একটা কার্ড, সেট পূর্ণ করলে তারা।",
+  "en": "A card at the end of each day; full sets pay stars.",
+  "bx": "Protidin sheshe ekta card, set full korle tara."
+ },
+ "unlock_pass": {
+  "bn": "খেলে খেলে ধাপ খোলো, প্রতিটায় পুরস্কার। একদম ফ্রি।",
+  "en": "Play to open tiers, a prize on each. Free.",
+  "bx": "Khele khele tier kholo, protita te prize. Free!"
+ },
+ "unlock_friends": {
+  "bn": "বন্ধুর সাথে খেলো, স্টিকার পাঠাও, ট্রাফিক চ্যালেঞ্জে হারাও।",
+  "en": "Play with friends, send stickers, beat them in the traffic challenge.",
+  "bx": "Dost er sathe khelo, sticker pathao, traffic challenge e harao."
+ },
+ "unlock_board": {
+  "bn": "সাপ্তাহিক লিগ, স্কুল লিগ আর লিডারবোর্ড।",
+  "en": "The weekly league, the school league and the leaderboards.",
+  "bx": "Weekly league, school league ar leaderboard."
+ },
+ "nav_board": {
+  "bn": "তালিকা",
+  "en": "Ranks",
+  "bx": "Rank"
+ },
+ "setTaps": {
+  "bn": "চাপলে শব্দ আর কম্পন",
+  "en": "Tick and buzz on taps",
+  "bx": "Tap e sound ar buzz"
+ },
+ "setHand": {
+  "bn": "খেলার বোতাম কোন হাতে",
+  "en": "Game buttons for",
+  "bx": "Button kon hate"
+ },
+ "handRight": {
+  "bn": "ডান হাত",
+  "en": "Right hand",
+  "bx": "Dan hat"
+ },
+ "handLeft": {
+  "bn": "বাঁ হাত",
+  "en": "Left hand",
+  "bx": "Ba hat"
+ },
+ "setText": {
+  "bn": "লেখার আকার",
+  "en": "Text size",
+  "bx": "Lekha size"
+ },
+ "textNormal": {
+  "bn": "স্বাভাবিক",
+  "en": "Normal",
+  "bx": "Normal"
+ },
+ "textBig": {
+  "bn": "বড়",
+  "en": "Big",
+  "bx": "Boro"
+ },
+ "textBigger": {
+  "bn": "আরও বড়",
+  "en": "Bigger",
+  "bx": "Aro boro"
+ },
+ "setBanglish": {
+  "bn": "বাংলিশ মোড",
+  "en": "Banglish mode",
+  "bx": "Banglish mode"
+ },
+ "setBanglishHelp": {
+  "bn": "মেনুর অনেক লেখা হবে ইংরেজি অক্ষরে, ছোট আর মজার।",
+  "en": "Many menu words in English letters, short and casual (Bangla only).",
+  "bx": "Menu r lekha English letter e, choto ar moja."
+ },
+ "setTheme": {
+  "bn": "হোমের চেহারা",
+  "en": "Home look",
+  "bx": "Home er look"
+ },
+ "themeAuto": {
+  "bn": "সময় মতো",
+  "en": "By the clock",
+  "bx": "Auto"
+ },
+ "themeDay": {
+  "bn": "দিন",
+  "en": "Day",
+  "bx": "Din"
+ },
+ "themeNight": {
+  "bn": "রাত",
+  "en": "Night",
+  "bx": "Raat"
  }
 }

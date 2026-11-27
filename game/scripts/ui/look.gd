@@ -1,6 +1,8 @@
 ## Colours and fonts: rickshaw art (docs/DETAILED_DESIGN.md §১০).
 extends RefCounted
 
+const Prefs = preload("res://scripts/ui/prefs.gd")
+
 const MAGENTA := Color("C2185B")
 const PARROT := Color("2E9E6B")
 const YELLOW := Color("F6B800")
@@ -18,10 +20,42 @@ static func font(path := REGULAR) -> Font:
 	return load(path)
 
 
+## A text size made bigger when the player chose bigger text.
+static func px(size: int) -> int:
+	return int(round(size * Prefs.text_scale()))
+
+
+## A button that answers a press: it squeezes a little, ticks and buzzes
+## (unless the player turned that off).
+static func feel(b: BaseButton) -> void:
+	b.button_down.connect(func():
+		if not is_instance_valid(b):
+			return
+		b.pivot_offset = b.size / 2.0
+		b.scale = Vector2(0.95, 0.95)
+		press_feedback(b))
+	b.button_up.connect(func():
+		if is_instance_valid(b):
+			b.scale = Vector2.ONE)
+
+
+static func press_feedback(node: Node) -> void:
+	if not Prefs.taps() or node == null or not node.is_inside_tree():
+		return
+	if OS.has_feature("mobile"):
+		Input.vibrate_handheld(10)
+	var p := AudioStreamPlayer.new()
+	p.stream = load("res://sounds/tap.wav")
+	p.volume_db = -12.0
+	node.add_child(p)
+	p.play()
+	p.finished.connect(p.queue_free)
+
+
 static func label(text: String, size := 18, bold := false, colour := OUTLINE) -> Label:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", px(size))
 	l.add_theme_color_override("font_color", colour)
 	if bold:
 		l.add_theme_font_override("font", font(BOLD))
@@ -47,13 +81,14 @@ static func button(text: String, fill := MAGENTA, size := 18) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.add_theme_font_override("font", font(BOLD))
-	b.add_theme_font_size_override("font_size", size)
+	b.add_theme_font_size_override("font_size", px(size))
 	b.add_theme_color_override("font_color", Color.WHITE)
 	b.add_theme_color_override("font_hover_color", Color.WHITE)
 	b.add_theme_color_override("font_pressed_color", Color.WHITE)
 	for state in ["normal", "hover", "pressed", "focus"]:
 		var s := card(fill.darkened(0.1) if state == "pressed" else fill, 12, 3)
 		b.add_theme_stylebox_override(state, s)
+	feel(b)
 	return b
 
 
@@ -111,7 +146,7 @@ static func title(text: String, size := 40, colour := MAGENTA, outlined := true)
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", font(DISPLAY))
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", px(size))
 	l.add_theme_color_override("font_color", colour)
 	if outlined:
 		l.add_theme_color_override("font_outline_color", OUTLINE)
@@ -146,7 +181,7 @@ static func chunky(text: String, fill := YELLOW, ink := OUTLINE, size := 22, dep
 	var b := Button.new()
 	b.text = text
 	b.add_theme_font_override("font", font(BOLD))
-	b.add_theme_font_size_override("font_size", size)
+	b.add_theme_font_size_override("font_size", px(size))
 	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
 		b.add_theme_color_override(state, ink)
 	b.add_theme_color_override("font_disabled_color", MUTED)
@@ -167,6 +202,7 @@ static func chunky(text: String, fill := YELLOW, ink := OUTLINE, size := 22, dep
 	b.add_theme_stylebox_override("hover_pressed", down)
 	b.add_theme_stylebox_override("disabled", off)
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	feel(b)
 	return b
 
 

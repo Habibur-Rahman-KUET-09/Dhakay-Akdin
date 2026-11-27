@@ -6,11 +6,15 @@ const PATH := "res://content/strings.json"
 const SETTINGS := "user://settings.cfg"
 
 var lang := "bn"
+## Banglish: short, casual words where a line has them ("bx"), in English
+## letters, with plain digits.
+var banglish := false
 var _all: Dictionary
 
 
 func _init() -> void:
 	_all = JSON.parse_string(FileAccess.get_file_as_string(PATH))
+	banglish = load("res://scripts/ui/prefs.gd").banglish()
 
 
 func has(key: String) -> bool:
@@ -31,7 +35,10 @@ const BN_DIGITS := "০১২৩৪৫৬৭৮৯"
 func t(key: String, values: Dictionary = {}) -> String:
 	if not _all.has(key):
 		return key
-	var s: String = _all[key].get(lang, _all[key].get("en", key))
+	var entry: Dictionary = _all[key]
+	var s: String = entry.get(lang, entry.get("en", key))
+	if banglish and lang == "bn" and entry.has("bx"):
+		s = entry.bx
 	for k in values:
 		var v := str(values[k])
 		s = s.replace("{%s}" % k, v if AS_IS.has(k) else num(v))
@@ -41,7 +48,7 @@ func t(key: String, values: Dictionary = {}) -> String:
 ## Numbers in Bangla digits when the game is in Bangla (12:05 → ১২:০৫).
 func num(text) -> String:
 	var v := str(text)
-	return bangla_digits(v) if lang == "bn" else v
+	return bangla_digits(v) if lang == "bn" and not banglish else v
 
 
 static func bangla_digits(text: String) -> String:
