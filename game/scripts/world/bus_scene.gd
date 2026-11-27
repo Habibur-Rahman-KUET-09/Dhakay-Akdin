@@ -595,6 +595,7 @@ func _build_hud() -> void:
 	_next_button.custom_minimum_size = Vector2(0, 56)
 	_next_button.pressed.connect(_on_next_fare)
 	take.add_child(_next_button)
+	Look.handed(take)
 	bottom.add_child(take)
 	# By hand: the notes in his fist to sort, and the bus's side to slap.
 	var hands := HBoxContainer.new()
@@ -610,6 +611,7 @@ func _build_hud() -> void:
 	_slap_button.pressed.connect(_on_slap)
 	hands.add_child(_slap_button)
 	hands.visible = bus.interactive
+	Look.handed(hands)
 	bottom.add_child(hands)
 	_refresh()
 

@@ -85,15 +85,18 @@
  },
  "back": {
   "bn": "ফিরুন",
-  "en": "Back"
+  "en": "Back",
+  "bx": "Back"
  },
  "pedal": {
   "bn": "প্যাডেল",
-  "en": "Pedal"
+  "en": "Pedal",
+  "bx": "Pedal"
  },
  "brake": {
   "bn": "ব্রেক",
-  "en": "Brake"
+  "en": "Brake",
+  "bx": "Brake"
  },
  "kmh": {
   "bn": "{n} কিমি/ঘণ্টা",
@@ -101,7 +104,8 @@
  },
  "bell": {
   "bn": "টুংটাং",
-  "en": "Ring"
+  "en": "Ring",
+  "bx": "Tring!"
  },
  "crashTitle": {
   "bn": "আগেরবার গেম হঠাৎ বন্ধ হয়ে গিয়েছিল",
@@ -153,11 +157,13 @@
  },
  "counter": {
   "bn": "{fare} টাকা চান",
-  "en": "Ask Tk {fare}"
+  "en": "Ask Tk {fare}",
+  "bx": "{fare} taka chao"
  },
  "refuse": {
   "bn": "মানা",
-  "en": "No"
+  "en": "No",
+  "bx": "Na"
  },
  "counterNo": {
   "bn": "যাত্রী রাজি হলেন না, চলে গেলেন",
@@ -205,7 +211,8 @@
  },
  "dayOver": {
   "bn": "দিন শেষ",
-  "en": "Day over"
+  "en": "Day over",
+  "bx": "Din shesh"
  },
  "earned": {
   "bn": "আজকের আয়: {money} টাকা",
@@ -237,11 +244,13 @@
  },
  "toMohalla": {
   "bn": "মহল্লায় ফিরুন",
-  "en": "Back to the mohalla"
+  "en": "Back to the mohalla",
+  "bx": "Mohollay fero"
  },
  "taka": {
   "bn": "{n} টাকা",
-  "en": "Tk {n}"
+  "en": "Tk {n}",
+  "bx": "{n} taka"
  },
  "dayNumber": {
   "bn": "দিন {n}",
@@ -257,7 +266,8 @@
  },
  "startDay": {
   "bn": "দিন {n} শুরু",
-  "en": "Start day {n}"
+  "en": "Start day {n}",
+  "bx": "Din {n} shuru"
  },
  "lastDay": {
   "bn": "আগের দিন: {money} টাকা · {trips} ট্রিপ · রেটিং {stars}/৫",
@@ -357,7 +367,8 @@
  },
  "nextDay": {
   "bn": "পরের দিন",
-  "en": "Next day"
+  "en": "Next day",
+  "bx": "Porer din"
  },
  "energy": {
   "bn": "এনার্জি {n}",
@@ -365,7 +376,8 @@
  },
  "teaButton": {
   "bn": "চা খান · {n} টাকা",
-  "en": "Have tea · Tk {n}"
+  "en": "Have tea · Tk {n}",
+  "bx": "Cha khao · {n} taka"
  },
  "teaDrunk": {
   "bn": "আহ, গরম চা! এনার্জি +{n}",
@@ -781,7 +793,8 @@
  },
  "nextFare": {
   "bn": "ভাড়া নিন",
-  "en": "Take a fare"
+  "en": "Take a fare",
+  "bx": "Bhara koi, mama?"
  },
  "fareTitle": {
   "bn": "{stop} পর্যন্ত · ভাড়া {fare} টাকা",
@@ -925,7 +938,8 @@
  },
  "catchDoor": {
   "bn": "ধরুন! ভাড়া না দিয়ে নামছে",
-  "en": "Catch them! Not paid"
+  "en": "Catch them! Not paid",
+  "bx": "Dhoro! Bhara na diye namche"
  },
  "caught": {
   "bn": "ধরলেন! ভাড়া আদায় হলো",
@@ -1061,7 +1075,8 @@
  },
  "newChapter": {
   "bn": "নতুন অধ্যায় এসেছে!",
-  "en": "A new chapter!"
+  "en": "A new chapter!",
+  "bx": "Notun chapter!"
  },
  "storyChapter": {
   "bn": "অধ্যায় {n}: {title}",
@@ -1069,7 +1084,8 @@
  },
  "readChapter": {
   "bn": "পড়ুন",
-  "en": "Read"
+  "en": "Read",
+  "bx": "Poro"
  },
  "storyBook": {
   "bn": "গল্প ({n}/{all})",
@@ -1365,7 +1381,8 @@
  },
  "settings": {
   "bn": "সেটিংস",
-  "en": "Settings"
+  "en": "Settings",
+  "bx": "Settings"
  },
  "whoToday": {
   "bn": "আজ কে কাজে নামবে?",
@@ -1413,7 +1430,8 @@
  },
  "tabDouble": {
   "bn": "আজ দ্বিগুণ",
-  "en": "Double today"
+  "en": "Double today",
+  "bx": "Aj double!"
  },
  "tabLocked": {
   "bn": "লেভেল {level}-এ",
@@ -1589,7 +1607,8 @@
  },
  "pumpButton": {
   "bn": "পাম্প দিন",
-  "en": "Pump the tyre"
+  "en": "Pump the tyre",
+  "bx": "Pump dao"
  },
  "stopPump": {
   "bn": "থামুন",
@@ -1721,7 +1740,8 @@
  },
  "slapPad": {
   "bn": "বাসের গায়ে চাপড়",
-  "en": "Slap the bus"
+  "en": "Slap the bus",
+  "bx": "Thap dao!"
  },
  "slapCall": {
   "bn": "এক চাপড়: স্টপ ডাকুন",
@@ -1765,23 +1785,28 @@
  },
  "nav_hub": {
   "bn": "মহল্লা",
-  "en": "Mohalla"
+  "en": "Mohalla",
+  "bx": "Mohalla"
  },
  "nav_shop": {
   "bn": "দোকান",
-  "en": "Shop"
+  "en": "Shop",
+  "bx": "Shop"
  },
  "nav_fund": {
   "bn": "তহবিল",
-  "en": "Fund"
+  "en": "Fund",
+  "bx": "Fund"
  },
  "nav_story": {
   "bn": "গল্প",
-  "en": "Story"
+  "en": "Story",
+  "bx": "Golpo"
  },
  "nav_people": {
   "bn": "প্রতিবেশী",
-  "en": "Neighbours"
+  "en": "Neighbours",
+  "bx": "Neighbours"
  },
  "lockedPlate": {
   "bn": "{name} · লেভেল {level}",
@@ -1789,11 +1814,13 @@
  },
  "todayChallenge": {
   "bn": "আজকের চ্যালেঞ্জ ({name}) · +৩ তারা",
-  "en": "Today's challenge ({name}) · +3 stars"
+  "en": "Today's challenge ({name}) · +3 stars",
+  "bx": "Ajker challenge ({name}) · +3 tara"
  },
  "playDay": {
   "bn": "দিন {n} খেলুন",
-  "en": "Play day {n}"
+  "en": "Play day {n}",
+  "bx": "Din {n} — Let's go!"
  },
  "dayN": {
   "bn": "দিন {n}",
@@ -1893,7 +1920,8 @@
  },
  "owned": {
   "bn": "কেনা আছে",
-  "en": "Owned"
+  "en": "Owned",
+  "bx": "Kena ache"
  },
  "needMore": {
   "bn": "আরও {n} টাকা লাগবে",
@@ -2573,7 +2601,8 @@
  },
  "friendsBack": {
   "bn": "মহল্লায় ফিরুন",
-  "en": "Back to the mohalla"
+  "en": "Back to the mohalla",
+  "bx": "Mohollay fero"
  },
  "friendsOff": {
   "bn": "এই build-এ অনলাইন ব্যবস্থা বন্ধ, তাই বন্ধুদের সাথে খেলা যাবে না।",
@@ -2893,7 +2922,8 @@
  },
  "hoodDownButton": {
   "bn": "হুড নামান",
-  "en": "Fold the hood"
+  "en": "Fold the hood",
+  "bx": "Hood namao"
  },
  "hoodDown": {
   "bn": "হুড নামানো হলো, রিকশা আবার জোরে চলবে",
@@ -2965,7 +2995,8 @@
  },
  "lbTitle": {
   "bn": "লিডারবোর্ড",
-  "en": "Leaderboards"
+  "en": "Leaderboards",
+  "bx": "Leaderboard"
  },
  "lbCardLine": {
   "bn": "আজ, এই সপ্তাহ, এই মাস আর সব সময়ের সেরা আয়; শীর্ষ ৩ জন তারা পান",
@@ -4609,7 +4640,8 @@
  },
  "boatPatience": {
   "bn": "যাত্রীদের ধৈর্য",
-  "en": "Passengers' patience"
+  "en": "Passengers' patience",
+  "bx": "Jatrider patience"
  },
  "boatGo": {
   "bn": "নৌকা ছাড়ুন ({n} জন)",
@@ -4625,11 +4657,13 @@
  },
  "oarLeft": {
   "bn": "বাম বৈঠা",
-  "en": "Left oar"
+  "en": "Left oar",
+  "bx": "Bam boitha"
  },
  "oarRight": {
   "bn": "ডান বৈঠা",
-  "en": "Right oar"
+  "en": "Right oar",
+  "bx": "Dan boitha"
  },
  "stroke_good": {
   "bn": "ছপ! ভালো টান।",
@@ -4941,7 +4975,8 @@
  },
  "sharePhoto": {
   "bn": "ছবিটা শেয়ার করুন",
-  "en": "Share the picture"
+  "en": "Share the picture",
+  "bx": "Pic share koro"
  },
  "sharePhotoMoney": {
   "bn": "আজ {n} টাকা",
@@ -5289,7 +5324,8 @@
  },
  "salamiTitle": {
   "bn": "ঈদ মোবারক! সালামি এসেছে",
-  "en": "Eid Mubarak! Salami's here"
+  "en": "Eid Mubarak! Salami's here",
+  "bx": "Eid Mubarak! Salami esheche"
  },
  "salamiLine": {
   "bn": "পরিবার থেকে ঈদের সালামি: {taka} টাকা আর {tara} তারা।",
@@ -5297,7 +5333,8 @@
  },
  "seasonTitle": {
   "bn": "সিজন পাস (ফ্রি)",
-  "en": "Season pass (free)"
+  "en": "Season pass (free)",
+  "bx": "Season pass (free)"
  },
  "seasonTier": {
   "bn": "ধাপ {n}/{all}",
@@ -5345,7 +5382,8 @@
  },
  "reelMake": {
   "bn": "১২ সেকেন্ডের রিল বানান (ভিডিও)",
-  "en": "Make a 12-second reel (video)"
+  "en": "Make a 12-second reel (video)",
+  "bx": "12 sec er reel banao"
  },
  "reelMaking": {
   "bn": "রিল আঁকা হচ্ছে… {n}%",
@@ -5377,7 +5415,8 @@
  },
  "stickersTitle": {
   "bn": "স্টিকার",
-  "en": "Stickers"
+  "en": "Stickers",
+  "bx": "Stickers"
  },
  "stickersLine": {
   "bn": "চরিত্রদের মজার স্টিকার, মেসেঞ্জার আর হোয়াটসঅ্যাপে পাঠান",
@@ -5429,7 +5468,8 @@
  },
  "photoButton": {
   "bn": "ছবি",
-  "en": "Photo"
+  "en": "Photo",
+  "bx": "Pic"
  },
  "photoFrame": {
   "bn": "ফ্রেম বদলান",
@@ -5780,5 +5820,65 @@
   "bn": "দেখো",
   "en": "See it all",
   "bx": "Dekho"
+ },
+ "stMe": {
+  "bn": "আমি",
+  "en": "Me",
+  "bx": "Ami"
+ },
+ "idTitle": {
+  "bn": "ঢাকাবাসী কার্ড",
+  "en": "Dhakabashi card",
+  "bx": "Dhakabashi card"
+ },
+ "idNoName": {
+  "bn": "নামহীন ঢাকাবাসী",
+  "en": "A Dhakabashi",
+  "bx": "Namhin Dhakabashi"
+ },
+ "idFavourite": {
+  "bn": "প্রিয় চরিত্র: {name}",
+  "en": "Favourite: {name}",
+  "bx": "Fav: {name}"
+ },
+ "idLevel": {
+  "bn": "লেভেল",
+  "en": "Level",
+  "bx": "Level"
+ },
+ "idDays": {
+  "bn": "দিন খেলেছি",
+  "en": "Days played",
+  "bx": "Din khelechi"
+ },
+ "idStreak": {
+  "bn": "সেরা টানা দিন",
+  "en": "Best run",
+  "bx": "Best streak"
+ },
+ "idCards": {
+  "bn": "কার্ড",
+  "en": "Cards",
+  "bx": "Cards"
+ },
+ "idShare": {
+  "bn": "কার্ড শেয়ার করো",
+  "en": "Share the card",
+  "bx": "Card share koro"
+ },
+ "idShareLine": {
+  "bn": "আমার ঢাকাবাসী কার্ড! তুমিও খেলো প্রাণের ঢাকা:",
+  "en": "My Dhakabashi card! Play Praner Dhaka too:",
+  "bx": "Amar Dhakabashi card! Tumio khelo Praner Dhaka:"
+ },
+ "quickOff": {
+  "bn": "১ মিনিটের দিন খেলবে? (চাপো)",
+  "en": "Play a 1-minute day? (tap)",
+  "bx": "1 min er din khelba? (tap)"
+ },
+ "quickOn": {
+  "bn": "১ মিনিটের দিন: চালু (কার্ড নেই)",
+  "en": "1-minute day: on (no card)",
+  "bx": "1 min er din: ON (card nai)"
  }
 }

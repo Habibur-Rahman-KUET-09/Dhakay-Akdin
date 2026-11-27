@@ -224,6 +224,7 @@ func _ready() -> void:
 	pedal_button = _round_button(s.t("pedal"), PEDAL_SIZE, Look.PARROT)
 	pedal_button.size_flags_vertical = Control.SIZE_SHRINK_END
 	controls.add_child(pedal_button)
+	Look.handed(controls)
 	bottom.add_child(controls)
 	var credit := Look.label(map.credit, 11)
 	credit.add_theme_color_override("font_color", Look.OUTLINE.lerp(Color.WHITE, 0.2))

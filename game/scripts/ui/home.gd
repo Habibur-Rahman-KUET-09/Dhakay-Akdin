@@ -42,9 +42,13 @@ const Together = preload("res://scripts/rules/together.gd")
 const Showcase = preload("res://scripts/ui/showcase.gd")
 const Unlocks = preload("res://scripts/rules/unlocks.gd")
 const Prefs = preload("res://scripts/ui/prefs.gd")
+const IdCard = preload("res://scripts/ui/id_card.gd")
 
 ## The home page by night: a deep blue behind the cards.
 const NIGHT_BG := Color("1E2433")
+## Each festival's colour on the home page.
+const FEST_TINTS := {"eid_fitr": Color("2E9E6B"), "eid_adha": Color("2E9E6B"), "boishakh": Color("E2432A"),
+	"falgun": Color("F6B800"), "ekushe": Color("546E7A"), "shadhinota": Color("1F7A50"), "bijoy": Color("1F7A50")}
 const WHO := ["rickshaw", "tea", "bus", "fuchka", "delivery", "hawker", "boat"]
 const PAGES := ["hub", "shop", "fund", "story", "people"]
 const PAGE_ICONS := {"hub": "home", "shop": "bag", "fund": "town", "story": "book", "people": "people", "board": "flag"}
@@ -505,6 +509,16 @@ func _padded(c: Control) -> Control:
 func _stories() -> Array:
 	var list: Array = []
 	var date := progress.date()
+	# The player's own card first: theirs to show off.
+	list.append({"id": "me", "icon": str(IdCard.FACES.get(IdCard.favourite(progress.data), IdCard.FACES.rickshaw)[0]), "painted": true,
+		"label": s.t("stMe"), "token": "1", "make": func() -> Array:
+			var centre := CenterContainer.new()
+			centre.add_child(IdCard.view(progress, s))
+			var share := Look.chunky(s.t("idShare"), Look.YELLOW, Look.OUTLINE, 19, 5, 18)
+			share.name = "IdShare"
+			share.custom_minimum_size = Vector2(0, 60)
+			share.pressed.connect(_share_id)
+			return [centre, share]})
 	var waiting := story.waiting(progress.data)
 	if not waiting.is_empty():
 		var c: Dictionary = waiting[0]
@@ -597,7 +611,7 @@ func _story_dot(item: Dictionary, i: int) -> Control:
 	style.anti_aliasing = true
 	ring.add_theme_stylebox_override("panel", style)
 	holder.add_child(ring)
-	var painted := str(item.icon).begins_with("plate_")
+	var painted := str(item.icon).begins_with("plate_") or bool(item.get("painted", false))
 	var ic := Look.icon(str(item.icon), 34, Color.WHITE if fresh or painted else Look.OUTLINE)
 	ic.set_anchors_preset(Control.PRESET_CENTER)
 	ic.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -625,6 +639,13 @@ func _story_dot(item: Dictionary, i: int) -> Control:
 	tap.pressed.connect(_open_story.bind(i))
 	col.add_child(tap)
 	return col
+
+
+func _share_id() -> void:
+	var img: Image = await IdCard.picture(self, progress, s)
+	var line := "%s %s" % [s.t("idShareLine"), "https://pranerdhaka.web.app"]
+	if not Share.image(img, "dhakabashi", line):
+		_open_whatsapp_text(line)
 
 
 func _open_story(i: int) -> void:
@@ -776,6 +797,14 @@ func _stage() -> Control:
 	var glow := ColorRect.new()
 	glow.color = _colour_of(who).lerp(NIGHT_BG, 0.75) if night else _colour_of(who).lerp(Look.CREAM, 0.72)
 	glow.color.a = 0.55
+	# A festival paints the home in its colours; the monsoon in grey-blue.
+	var fest := Calendar.new().festival(progress.date())
+	var tint: Color = FEST_TINTS.get(str(fest.get("id", "")), Color(0, 0, 0, 0))
+	if fest.is_empty() and _season() == "monsoon":
+		tint = Color("6F8FAF")
+	if tint.a > 0.0:
+		glow.color = tint.lerp(NIGHT_BG if night else Look.CREAM, 0.55)
+		glow.color.a = 0.6
 	glow.set_anchors_preset(Control.PRESET_FULL_RECT)
 	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(glow)
@@ -1334,6 +1363,22 @@ func _start_sheet(who: String) -> void:
 	body.add_child(_tip_card(who))
 	_let_scroll(body)
 
+	# A quick day (a minute) for a bus ride or a break: the characters
+	# whose day runs on a clock.
+	var timed := ["rickshaw", "tea", "fuchka", "delivery", "hawker", "boat"].has(who)
+	if not timed and progress.quick():
+		progress.set_quick(false)
+	if timed:
+		var on := progress.quick()
+		var quick := Look.chunky(s.t("quickOn") if on else s.t("quickOff"), Look.PARROT if on else Color.WHITE, Color.WHITE if on else Look.OUTLINE, 16, 4, 16)
+		quick.name = "QuickDay"
+		quick.icon = Look.icon_texture("bolt", 22)
+		quick.add_theme_constant_override("icon_max_width", 22)
+		quick.pressed.connect(func():
+			progress.set_quick(not progress.quick())
+			progress.save()
+			_build())
+		col.add_child(quick)
 	var start := Look.chunky(s.t("start_" + who), Look.YELLOW, Look.OUTLINE, 26, 8, 22)
 	start.name = {"rickshaw": "Drive", "tea": "OpenStall", "bus": "Board", "fuchka": "OpenCart", "delivery": "StartDeliveries", "hawker": "StartSelling", "boat": "StartRowing"}[who]
 	start.icon = Look.icon_texture("play", 24)

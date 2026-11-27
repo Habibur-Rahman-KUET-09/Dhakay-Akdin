@@ -1,4 +1,5 @@
 {
+  "quick_day": {"seconds": 60},
   "version": 1,
   "note": "Starting numbers from docs/DETAILED_DESIGN.md. Tuned after playtests; later overridable from Remote Config.",
   "day_seconds": 360, "school_fee_goal": 3000,

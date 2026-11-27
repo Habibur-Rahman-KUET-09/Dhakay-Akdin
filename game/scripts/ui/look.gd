@@ -39,6 +39,17 @@ static func feel(b: BaseButton) -> void:
 			b.scale = Vector2.ONE)
 
 
+## A row of the game's buttons turned round for the left hand (when the
+## player chose it): what the right thumb had, the left one gets.
+static func handed(row: BoxContainer) -> void:
+	if not Prefs.left_hand():
+		return
+	var kids := row.get_children()
+	kids.reverse()
+	for i in kids.size():
+		row.move_child(kids[i], i)
+
+
 static func press_feedback(node: Node) -> void:
 	if not Prefs.taps() or node == null or not node.is_inside_tree():
 		return

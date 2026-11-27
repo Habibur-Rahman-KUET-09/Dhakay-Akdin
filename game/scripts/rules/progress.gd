@@ -51,6 +51,7 @@ func _init(balance: Balance, save_path := DEFAULT_PATH) -> void:
 	path = save_path
 	data = fresh()
 	load_save()
+	Balance.quick = quick()
 
 
 static func fresh() -> Dictionary:
@@ -324,11 +325,22 @@ func claim_salami() -> Dictionary:
 ## Rahim Chacha's day's target: lower in the first levels, so a new player
 ## can meet it (balance "rickshaw.target_by_level": [from level, taka]).
 func rickshaw_target() -> int:
-	var target := int(b.n("rickshaw.daily_target"))
+	var target := int(b.plain("rickshaw.daily_target"))
 	for step in b.at("rickshaw.target_by_level"):
 		if level() >= int(step[0]):
 			target = int(step[1])
-	return target
+	return int(round(target * b.quick_share("rickshaw")))
+
+
+## The next day is a quick one (a minute): chosen before it, over after it.
+## Money and XP come as played; a quick day draws no card.
+func quick() -> bool:
+	return bool(data.get("quick_next", false))
+
+
+func set_quick(on: bool) -> void:
+	data["quick_next"] = on
+	Balance.quick = on
 
 
 func level() -> int:
@@ -779,7 +791,9 @@ func _day_done(who: String, result: Dictionary, out: Dictionary) -> void:
 	var card_rng := RandomNumberGenerator.new()
 	card_rng.randomize()
 	var fest := Calendar.new().festival(date())
-	out.card = Cards.draw(data, b, who, str(fest.get("id", "")), card_rng)
+	out.card = {} if quick() else Cards.draw(data, b, who, str(fest.get("id", "")), card_rng)
+	out.quick = quick()
+	set_quick(false)
 	out.relay_done = Friends.claim_relay(data, b, date())
 
 

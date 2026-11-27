@@ -53,3 +53,16 @@ func test_banglish_words_and_plain_digits() -> void:
 	eq(s.t("stPass"), "Pass", "Banglish")
 	s.lang = "en"
 	eq(s.t("stFriends"), "Friends", "English stays English")
+
+
+func test_a_quick_day_is_a_minute_with_a_smaller_target() -> void:
+	var Balance = load("res://scripts/rules/balance.gd")
+	var b = Balance.new()
+	var was: bool = Balance.quick
+	Balance.quick = false
+	eq(b.n("tea_stall.day_seconds"), b.plain("tea_stall.day_seconds"), "a usual day")
+	Balance.quick = true
+	eq(b.n("tea_stall.day_seconds"), 60.0, "a quick day: a minute")
+	eq(b.n("hawker.daily_target"), roundf(b.plain("hawker.daily_target") * 60.0 / b.plain("hawker.day_seconds")), "the target shrinks with it")
+	eq(b.quick_share("bus"), 1.0, "the bus runs on trips, not a clock")
+	Balance.quick = was
