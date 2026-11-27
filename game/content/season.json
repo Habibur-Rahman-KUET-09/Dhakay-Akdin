@@ -1,0 +1,88 @@
+{
+ "about": "The free season pass (rules/season.gd): a season is a calendar month; every day's XP is points; every `per_tier` points opens a tier, whose prize is claimed by hand: stars, a new card for the album, a photo frame, or a look (given, not sold). A new month starts again.",
+ "per_tier": 100,
+ "tiers": [
+  {
+   "tara": 3
+  },
+  {
+   "card": "new"
+  },
+  {
+   "frame": "frame_raja"
+  },
+  {
+   "tara": 5
+  },
+  {
+   "look": [
+    "rickshaw",
+    "outfit_check"
+   ]
+  },
+  {
+   "card": "new"
+  },
+  {
+   "tara": 5
+  },
+  {
+   "frame": "frame_jam"
+  },
+  {
+   "look": [
+    "tea",
+    "outfit_blue"
+   ]
+  },
+  {
+   "look": [
+    "rickshaw",
+    "plate_peacock"
+   ]
+  },
+  {
+   "tara": 8
+  },
+  {
+   "frame": "frame_eid"
+  },
+  {
+   "card": "new"
+  },
+  {
+   "look": [
+    "fuchka",
+    "sari_blue"
+   ]
+  },
+  {
+   "look": [
+    "rickshaw",
+    "slogan_dhakar_raja"
+   ]
+  },
+  {
+   "tara": 10
+  },
+  {
+   "card": "new"
+  },
+  {
+   "look": [
+    "rickshaw",
+    "plate_village"
+   ]
+  },
+  {
+   "tara": 10
+  },
+  {
+   "look": [
+    "fuchka",
+    "sari_jamdani"
+   ],
+   "tara": 20
+  }
+ ]
+}

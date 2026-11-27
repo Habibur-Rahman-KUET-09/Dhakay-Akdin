@@ -15,6 +15,7 @@ const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 const League = preload("res://scripts/rules/league.gd")
 const Ranked = preload("res://scripts/rules/ranked.gd")
 const Cards = preload("res://scripts/rules/cards.gd")
+const Season = preload("res://scripts/rules/season.gd")
 const Calendar = preload("res://scripts/rules/calendar.gd")
 
 const SCHEMA := 1
@@ -772,6 +773,8 @@ func _day_done(who: String, result: Dictionary, out: Dictionary) -> void:
 	out.rank = int(rk.rank)
 	out.rank_up = bool(rk.up)
 	out.rank_id = Ranked.rank_id(b, int(rk.rank))
+	# The season pass: the day's XP as points.
+	out.season = Season.note(data, int(out.get("xp", 0)), date())
 	# A card for the album: from the character's set, a festival's on its day.
 	var card_rng := RandomNumberGenerator.new()
 	card_rng.randomize()

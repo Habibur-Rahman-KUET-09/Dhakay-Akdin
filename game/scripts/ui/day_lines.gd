@@ -18,6 +18,9 @@ static func lines(got: Dictionary, s: Strings) -> Array:
 		out.append(s.t("streakGift"))
 	if int(got.get("rank_points", 0)) > 0:
 		out.append(s.t("dayRankPoints", {"n": int(got.rank_points)}))
+	var season: Dictionary = got.get("season", {})
+	if int(season.get("new_tiers", 0)) > 0:
+		out.append(s.t("seasonNewTier", {"n": int(season.tier)}))
 	var card: Dictionary = got.get("card", {})
 	if not card.is_empty():
 		var name := str(Cards.card(str(card.id)).get("name", {}).get(s.lang, ""))

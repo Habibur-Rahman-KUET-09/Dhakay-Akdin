@@ -5294,5 +5294,53 @@
  "salamiLine": {
   "bn": "পরিবার থেকে ঈদের সালামি: {taka} টাকা আর {tara} তারা।",
   "en": "Eid salami from the family: Tk {taka} and {tara} stars."
+ },
+ "seasonTitle": {
+  "bn": "সিজন পাস (ফ্রি)",
+  "en": "Season pass (free)"
+ },
+ "seasonTier": {
+  "bn": "ধাপ {n}/{all}",
+  "en": "Tier {n} of {all}"
+ },
+ "seasonWaiting": {
+  "bn": "{n}টা পুরস্কার নেওয়ার অপেক্ষায়!",
+  "en": "{n} prizes waiting to be claimed!"
+ },
+ "seasonHow": {
+  "bn": "এই মাসের পাস: যেকোনো চরিত্রে খেলা দিনের XP পয়েন্ট, প্রতি {n} পয়েন্টে একটা ধাপ খোলে। পুরস্কার নিজে চেপে নিন। নতুন মাসে নতুন পাস।",
+  "en": "This month's pass: every day's XP, any character, is points; every {n} points opens a tier. Claim each prize yourself. A new pass every month."
+ },
+ "seasonClaim": {
+  "bn": "নিন",
+  "en": "Claim"
+ },
+ "seasonFrame": {
+  "bn": "ছবির ফ্রেম: {name}",
+  "en": "Photo frame: {name}"
+ },
+ "seasonCard": {
+  "bn": "নতুন কার্ড",
+  "en": "A new card"
+ },
+ "seasonStars": {
+  "bn": "{n} তারা",
+  "en": "{n} stars"
+ },
+ "seasonNewTier": {
+  "bn": "সিজন পাসের ধাপ {n} খুলেছে! পুরস্কার নিন।",
+  "en": "Season pass tier {n} is open! Claim the prize."
+ },
+ "frame_raja": {
+  "bn": "ঢাকার রাজা",
+  "en": "King of Dhaka"
+ },
+ "frame_jam": {
+  "bn": "জ্যাম আমার বন্ধু",
+  "en": "The jam is my friend"
+ },
+ "frame_eid": {
+  "bn": "ঈদ মোবারক",
+  "en": "Eid Mubarak"
  }
 }

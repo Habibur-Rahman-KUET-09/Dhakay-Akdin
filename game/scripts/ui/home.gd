@@ -32,6 +32,7 @@ const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 const League = preload("res://scripts/rules/league.gd")
 const Ranked = preload("res://scripts/rules/ranked.gd")
 const Cards = preload("res://scripts/rules/cards.gd")
+const Season = preload("res://scripts/rules/season.gd")
 const Juice = preload("res://scripts/ui/juice.gd")
 const Race = preload("res://scripts/rules/race.gd")
 const Together = preload("res://scripts/rules/together.gd")
@@ -308,6 +309,8 @@ func _app_page() -> void:
 			_together_page(page)
 		"cards":
 			_cards_page(page)
+		"season":
+			_season_page(page)
 		_:
 			_hub_page(page, margin)
 	_let_scroll(margin)
@@ -467,6 +470,7 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 		inner.add_child(challenge)
 	if not _salami.is_empty():
 		inner.add_child(_salami_card())
+	inner.add_child(_pass_card())
 	inner.add_child(_ranked_card())
 	inner.add_child(_album_card())
 	inner.add_child(_together_card())
@@ -3129,3 +3133,102 @@ func _salami_card() -> Control:
 	text.add_child(line)
 	panel.ready.connect(func(): Juice.celebrate(self, "sparkle"))
 	return panel
+
+
+# --- The free season pass --------------------------------------------------------
+
+
+## On the mohalla page: this month's pass, the tier reached, prizes waiting.
+func _pass_card() -> Control:
+	var panel := _card(Color("1C3E7B"), 20)
+	panel.name = "SeasonCard"
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 6)
+	panel.add_child(col)
+	var date := progress.date()
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 10)
+	top.add_child(_icon_tile("star", Look.YELLOW, Look.OUTLINE))
+	var titles := VBoxContainer.new()
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	titles.add_theme_constant_override("separation", 0)
+	titles.add_child(Look.label(s.t("seasonTitle"), 18, true, Look.YELLOW))
+	titles.add_child(Look.label(s.t("seasonTier", {"n": Season.open_tiers(progress.data, date), "all": Season.tiers().size()}), 15, true, Color.WHITE))
+	top.add_child(titles)
+	var go := Look.chunky(s.t("friendsOpen"), Look.YELLOW, Look.OUTLINE, 16, 4, 14)
+	go.name = "SeasonOpen"
+	go.autowrap_mode = TextServer.AUTOWRAP_OFF
+	go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	go.pressed.connect(show_page.bind("season"))
+	top.add_child(go)
+	col.add_child(top)
+	var into := Season.points(progress.data, date) % Season.per_tier()
+	if Season.open_tiers(progress.data, date) < Season.tiers().size():
+		col.add_child(Look.bar(into, Season.per_tier(), Look.YELLOW, 14))
+	var waiting := Season.waiting(progress.data, date)
+	if waiting > 0:
+		col.add_child(Look.label(s.t("seasonWaiting", {"n": waiting}), 14, true, Look.PARROT))
+	return panel
+
+
+## The pass: every tier's prize, claimed, to claim, or still locked.
+func _season_page(page: VBoxContainer) -> void:
+	var back := Look.chunky(s.t("friendsBack"), Color.WHITE, Look.OUTLINE, 15, 3, 14)
+	back.name = "SeasonBack"
+	back.autowrap_mode = TextServer.AUTOWRAP_OFF
+	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	back.pressed.connect(show_page.bind("hub"))
+	page.add_child(back)
+	page.add_child(_caption(s.t("seasonTitle")))
+	var how := Look.label(s.t("seasonHow", {"n": Season.per_tier()}), 14, false, Look.MUTED)
+	how.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(how)
+	var date := progress.date()
+	var open := Season.open_tiers(progress.data, date)
+	for t in range(1, Season.tiers().size() + 1):
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var panel := _card(Color.WHITE if t <= open else Color("ECE6DA"), 14)
+		panel.add_child(row)
+		var num := Look.label(s.num(str(t)), 20, true, Look.SKY_DARK if t <= open else Look.MUTED)
+		num.custom_minimum_size = Vector2(36, 0)
+		row.add_child(num)
+		var what := Look.label(_prize_text(Season.tiers()[t - 1]), 15, true, Look.OUTLINE if t <= open else Look.MUTED)
+		what.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		what.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row.add_child(what)
+		if Season.claimed(progress.data, date, t):
+			row.add_child(Look.icon("check", 28, Look.PARROT))
+		elif t <= open:
+			var take := Look.chunky(s.t("seasonClaim"), Look.PARROT, Color.WHITE, 15, 3, 12)
+			take.name = "SeasonClaim_%d" % t
+			take.autowrap_mode = TextServer.AUTOWRAP_OFF
+			take.pressed.connect(_claim_tier.bind(t))
+			row.add_child(take)
+		else:
+			row.add_child(Look.icon("lock", 24, Look.MUTED))
+		page.add_child(panel)
+
+
+func _prize_text(prize: Dictionary) -> String:
+	var parts := PackedStringArray()
+	if prize.has("look"):
+		parts.append(s.t("look_" + str(prize.look[1])))
+	if prize.has("frame"):
+		parts.append(s.t("seasonFrame", {"name": s.t(str(prize.frame))}))
+	if prize.has("card"):
+		parts.append(s.t("seasonCard"))
+	if prize.has("tara"):
+		parts.append(s.t("seasonStars", {"n": int(prize.tara)}))
+	return " + ".join(parts)
+
+
+func _claim_tier(t: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var got := Season.claim(progress.data, b, progress.date(), t, rng)
+	if got.is_empty():
+		return
+	progress.save()
+	Juice.celebrate(self, "sparkle")
+	_build()
