@@ -1,0 +1,42 @@
+name: asset probe
+
+# By hand only: which sources of free (CC0) 3D people, clothes, animations,
+# textures and sounds the build machine can reach, and whether Blender
+# installs. Nothing is kept.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Sources
+        run: |
+          for url in \
+            https://github.com/makehumancommunity/mpfb2/releases \
+            https://api.github.com/repos/makehumancommunity/mpfb2/releases/latest \
+            https://static.makehumancommunity.org/ \
+            https://download.tuxfamily.org/makehuman/ \
+            https://quaternius.com/ \
+            https://api.github.com/repos/Quaternius/ \
+            https://kenney.nl/assets \
+            https://api.polyhaven.com/assets?t=models \
+            https://ambientcg.com/api/v2/full_json?limit=1 \
+            https://freesound.org/ \
+            https://download.blender.org/release/ \
+            https://opengameart.org/ ; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 20 "$url" || echo "fail")
+            echo "$code  $url"
+          done
+      - name: MPFB release assets
+        run: |
+          curl -s https://api.github.com/repos/makehumancommunity/mpfb2/releases/latest | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('tag_name')); [print(a['name'], a['size']) for a in d.get('assets',[])]" || true
+      - name: Blender
+        run: |
+          sudo apt-get update -qq
+          apt-cache policy blender | head -5
+          sudo apt-get install -y -qq blender > /dev/null 2>&1 && blender --version | head -1 || echo "apt blender failed"
