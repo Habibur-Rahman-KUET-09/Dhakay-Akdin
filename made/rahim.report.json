@@ -189,7 +189,7 @@
   ]
  },
  "meshes": {
-  "gamchha": 4,
+  "gamchha": 8,
   "lungi": 640,
   "rahim": 18486,
   "rahim.eyebrow001": 96,
@@ -256,5 +256,5 @@
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 3084512
+ "glb_bytes": 3085536
 }
