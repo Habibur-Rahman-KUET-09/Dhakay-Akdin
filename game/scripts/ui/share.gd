@@ -10,10 +10,11 @@ static func plugin() -> Object:
 	return Engine.get_singleton("GoogleSignIn") if Engine.has_singleton("GoogleSignIn") else null
 
 
-## Whether this build can make a video (the Android app).
+## Whether this build can make a video (the Android app, whose plugin has
+## makeVideo). has_method() cannot see a Java plugin's methods (it was
+## always false on the phone, so the reel button never showed).
 static func can_video() -> bool:
-	var p := plugin()
-	return p != null and p.has_method("makeVideo")
+	return plugin() != null and OS.get_name() == "Android"
 
 
 ## Saves `img` under share/ and opens the share sheet with it. True if it
@@ -41,7 +42,7 @@ static func image(img: Image, name: String, text: String) -> bool:
 ## The share sheet with a video already under share/.
 static func video(path: String, text: String) -> bool:
 	var p := plugin()
-	if p == null or not p.has_method("shareVideo"):
+	if not can_video():
 		return false
 	p.shareVideo(ProjectSettings.globalize_path(path), text)
 	return true

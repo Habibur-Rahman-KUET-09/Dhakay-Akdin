@@ -52,7 +52,7 @@ func make() -> void:
 		music.close()
 	status.emit(s.t("reelEncoding"))
 	var p := Share.plugin()
-	if p == null or not p.has_method("makeVideo"):
+	if not Share.can_video():
 		finished.emit.call_deferred("")
 		return
 	p.connect("video_ready", _ready_video, CONNECT_ONE_SHOT)
