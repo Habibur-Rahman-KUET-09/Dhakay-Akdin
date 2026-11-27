@@ -1,0 +1,95 @@
+{
+ "about": "The school league (rules/school.gd): each player picks where they study (or 'school', or 'somewhere else'); their weekly tournament points count for it, and the board shows each one's total and players.",
+ "schools": [
+  {
+   "id": "buet",
+   "bn": "বুয়েট",
+   "en": "BUET"
+  },
+  {
+   "id": "du",
+   "bn": "ঢাকা বিশ্ববিদ্যালয়",
+   "en": "Dhaka University"
+  },
+  {
+   "id": "kuet",
+   "bn": "কুয়েট",
+   "en": "KUET"
+  },
+  {
+   "id": "ruet",
+   "bn": "রুয়েট",
+   "en": "RUET"
+  },
+  {
+   "id": "cuet",
+   "bn": "চুয়েট",
+   "en": "CUET"
+  },
+  {
+   "id": "sust",
+   "bn": "শাবিপ্রবি",
+   "en": "SUST"
+  },
+  {
+   "id": "ju",
+   "bn": "জাহাঙ্গীরনগর",
+   "en": "Jahangirnagar"
+  },
+  {
+   "id": "ru",
+   "bn": "রাজশাহী বিশ্ববিদ্যালয়",
+   "en": "Rajshahi University"
+  },
+  {
+   "id": "cu",
+   "bn": "চট্টগ্রাম বিশ্ববিদ্যালয়",
+   "en": "Chittagong University"
+  },
+  {
+   "id": "nsu",
+   "bn": "নর্থ সাউথ",
+   "en": "North South"
+  },
+  {
+   "id": "brac",
+   "bn": "ব্র্যাক",
+   "en": "BRAC"
+  },
+  {
+   "id": "aiub",
+   "bn": "এআইইউবি",
+   "en": "AIUB"
+  },
+  {
+   "id": "ewu",
+   "bn": "ইস্ট ওয়েস্ট",
+   "en": "East West"
+  },
+  {
+   "id": "iut",
+   "bn": "আইইউটি",
+   "en": "IUT"
+  },
+  {
+   "id": "dhaka_college",
+   "bn": "ঢাকা কলেজ",
+   "en": "Dhaka College"
+  },
+  {
+   "id": "notre_dame",
+   "bn": "নটর ডেম",
+   "en": "Notre Dame"
+  },
+  {
+   "id": "school",
+   "bn": "স্কুল",
+   "en": "School"
+  },
+  {
+   "id": "other",
+   "bn": "অন্য কোথাও",
+   "en": "Somewhere else"
+  }
+ ]
+}

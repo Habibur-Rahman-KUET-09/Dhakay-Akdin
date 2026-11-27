@@ -5450,5 +5450,45 @@
  "frame_dhaka": {
   "bn": "প্রাণের ঢাকা",
   "en": "Praner Dhaka"
+ },
+ "trafficTitle": {
+  "bn": "ঢাকা ট্রাফিক চ্যালেঞ্জ",
+  "en": "Dhaka traffic challenge"
+ },
+ "trafficAbout": {
+  "bn": "আজকের এক মিনিটের পথ, সবার জন্য একই। বন্ধুদের চেয়ে কম সময়ে পৌঁছাতে পারবেন?",
+  "en": "Today's one-minute ride, the same for everyone. Can you beat your friends' times?"
+ },
+ "trafficNobody": {
+  "bn": "আজ এখনো কেউ চালায়নি। প্রথম হোন!",
+  "en": "No one has ridden it today. Be the first!"
+ },
+ "trafficRow": {
+  "bn": "{n}. {name}: {s} সেকেন্ড",
+  "en": "{n}. {name}: {s} s"
+ },
+ "trafficGo": {
+  "bn": "চ্যালেঞ্জ দিন",
+  "en": "Take the challenge"
+ },
+ "instTitle": {
+  "bn": "প্রতিষ্ঠানের লিগ",
+  "en": "School league"
+ },
+ "instNone": {
+  "bn": "কোথায় পড়েন? বেছে নিন",
+  "en": "Where do you study? Pick one"
+ },
+ "instEmpty": {
+  "bn": "এই সপ্তাহে এখনো কোনো পয়েন্ট নেই",
+  "en": "No points this week yet"
+ },
+ "instRow": {
+  "bn": "{n}. {name}: {points} পয়েন্ট ({players} জন)",
+  "en": "{n}. {name}: {points} points ({players} players)"
+ },
+ "instHelp": {
+  "bn": "আপনার সাপ্তাহিক টুর্নামেন্টের পয়েন্ট আপনার প্রতিষ্ঠানের নামে যোগ হয়। কোন প্রতিষ্ঠান এগিয়ে, দেখুন!",
+  "en": "Your weekly tournament points count for your place of study. See who's ahead!"
  }
 }

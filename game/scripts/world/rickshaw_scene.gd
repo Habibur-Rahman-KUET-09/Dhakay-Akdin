@@ -37,6 +37,7 @@ const CrashWatch = preload("res://scripts/ui/crash_watch.gd")
 const SignalLights = preload("res://scripts/world/signal_lights.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
+const Goods = preload("res://scripts/rules/goods.gd")
 const League = preload("res://scripts/rules/league.gd")
 const Race = preload("res://scripts/rules/race.gd")
 const Online = preload("res://scripts/rules/online.gd")
@@ -153,6 +154,8 @@ var _queued: Array[Callable] = []
 ## Passengers, the policeman and Rahim Chacha talking.
 var _voice: Voice
 var _chat_left := Chatter.gap()
+## Friends' own rickshaws riding about the streets: {node, driver, paint}.
+var _friend_riders: Array = []
 var _first_told := false
 ## The passenger last told about (stop beside them), and the time to the
 ## next reminder to drink tea.
@@ -315,7 +318,7 @@ func _ready() -> void:
 	for w in rickshaw.get_meta("wheels"):
 		(w as MeshInstance3D).material_override = plain
 	if mode != "delivery":
-		_back_art(rickshaw)
+		_back_art(rickshaw, progress.worn("rickshaw", "plate"), progress.worn("rickshaw", "slogan"))
 	# A passenger on the seat, shown during a trip.
 	_rider_seat = MeshInstance3D.new()
 	_rider_seat.mesh = Models.seated_passenger()
@@ -339,6 +342,8 @@ func _ready() -> void:
 		_setup_live()
 	elif _race:
 		_setup_ghost()
+	elif mode == "rickshaw" and _live.is_empty():
+		_spawn_friend_riders()
 	marker = _marker()
 	add_child(marker)
 	camera = Camera3D.new()
@@ -678,6 +683,7 @@ func _process(dt: float) -> void:
 		if _notice_left <= 0.0 or (_notice_left > 1e6 and shift.driver.moving):
 			_notice = ""
 	_chat_tick(dt)
+	_move_friend_riders(dt)
 	_stop_hint()
 	_tired_nag(dt)
 	_follow(dt)
@@ -2123,8 +2129,7 @@ func _chat_tick(dt: float) -> void:
 ## Bought decorations on the back of Rahim Chacha's rickshaw, where the
 ## camera sees them all day: a painting, and a line written under it
 ## (always in Bangla, as rickshaw painters write it).
-func _back_art(on: Node3D) -> void:
-	var plate := progress.worn("rickshaw", "plate")
+func _back_art(on: Node3D, plate: Dictionary, slogan: Dictionary) -> void:
 	if not plate.is_empty():
 		var tex := load("res://textures/ui/%s.png" % str(plate.get("picture", ""))) as Texture2D
 		if tex != null:
@@ -2140,7 +2145,6 @@ func _back_art(on: Node3D) -> void:
 			art.material_override = mat
 			art.position = Vector3(0, 0.74, 0.96)
 			on.add_child(art)
-	var slogan := progress.worn("rickshaw", "slogan")
 	if not slogan.is_empty():
 		var board := MeshInstance3D.new()
 		var box := BoxMesh.new()
@@ -2195,3 +2199,82 @@ func _funny(group: String) -> void:
 		return
 	_voice.play(str(line.id), true)
 	_say(str(line.text), Look.MAGENTA, 4.5)
+
+
+# --- Friends' rickshaws in the street -------------------------------------------
+
+
+## Up to three friends' rickshaws (their own paint, painting and slogan,
+## their name over them) riding about the streets, turning as they please.
+func _spawn_friend_riders() -> void:
+	var f := Friends.of(progress.data)
+	var roads := shift.map.roads()
+	if roads.is_empty():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	for p in f.list:
+		if _friend_riders.size() >= 3:
+			break
+		var c: Dictionary = f.cards.get(p.uid, {})
+		if c.is_empty():
+			continue
+		var hood := Look.SKY
+		var body := Look.PARROT
+		var paint := Goods.look("rickshaw", str(c.get("paint", "")))
+		if not paint.is_empty():
+			hood = Color(str(paint.hood))
+			body = Color(str(paint.body))
+		var style := int(Goods.look("rickshaw", str(c.get("art", ""))).get("style", 0))
+		var node := Models.player_rickshaw(hood, body, style)
+		var own := _palette.duplicate()
+		own[0] = hood
+		own[1] = body
+		var mat := Models.traffic_material(own, false)
+		mat.set_shader_parameter("custom_data", Vector4(0.0, 1.0, 0.0, 1.0))
+		(node.get_meta("body") as MeshInstance3D).material_override = mat
+		var rider := Models.traffic_material(PackedColorArray([_palette[rng.randi() % 8], _palette[8 + rng.randi() % 8]]), false)
+		rider.set_shader_parameter("custom_data", Vector4(0.0, 1.0, 0.0, 1.0))
+		(node.get_meta("rider") as MeshInstance3D).material_override = rider
+		var plain := Models.material()
+		for w in node.get_meta("wheels"):
+			(w as MeshInstance3D).material_override = plain
+		_back_art(node, Goods.look("rickshaw", str(c.get("plate", ""))), Goods.look("rickshaw", str(c.get("slogan", ""))))
+		var tag := Label3D.new()
+		tag.text = str(p.name)
+		tag.font = Look.font(Look.BOLD)
+		tag.font_size = 40
+		tag.outline_size = 10
+		tag.modulate = Look.YELLOW
+		tag.outline_modulate = Look.OUTLINE
+		tag.pixel_size = 0.006
+		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		tag.position = Vector3(0, 2.4, 0)
+		node.add_child(tag)
+		var start: Vector2i = roads[rng.randi() % roads.size()]
+		for tries in 20:
+			if absi(start.x - shift.driver.cell.x) + absi(start.y - shift.driver.cell.y) >= 6:
+				break
+			start = roads[rng.randi() % roads.size()]
+		var d := Driver.new(shift.map, rng.randf_range(0.8, 1.1), start)
+		add_child(node)
+		_friend_riders.append({"node": node, "driver": d, "rng": rng})
+
+
+func _move_friend_riders(dt: float) -> void:
+	for r in _friend_riders:
+		var d: Driver = r.driver
+		if not d.moving or d.update(dt).has(Driver.Event.WAITING):
+			# At a junction: any way that is open, back if none.
+			var ways := [Driver.LEFT, Driver.RIGHT, Driver.BACK]
+			ways.shuffle()
+			for t in ways:
+				d.swipe(t)
+				if d.moving:
+					break
+		var node: Node3D = r.node
+		var pos := d.position()
+		var f := Vector3(RoadMap.DX[d.heading], 0, RoadMap.DY[d.heading])
+		var left := Vector3(f.z, 0, -f.x)
+		node.position = Vector3((pos.x + 0.5) * City.T, 0, (pos.y + 0.5) * City.T) + left * KEEP_LEFT
+		node.rotation.y = lerp_angle(node.rotation.y, _yaw_for(d.heading), minf(1.0, dt * 8.0))

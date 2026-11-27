@@ -132,6 +132,23 @@ static func finish(data: Dictionary, b: Balance, date: String, seconds: float, p
 	return out
 
 
+## Today's challenge board: my best and my friends' bests on this date,
+## fastest first: [{name, time, me}].
+static func board(data: Dictionary, date: String) -> Array:
+	var out := []
+	var f := Friends.of(data)
+	for p in f.list:
+		var c: Dictionary = f.cards.get(p.uid, {})
+		var r = c.get("race", {})
+		if typeof(r) == TYPE_DICTIONARY and str(r.get("date", "")) == date and float(r.get("time", 0.0)) > 0.0:
+			out.append({"name": str(p.name), "time": float(r.time), "me": false})
+	var mine := of(data)
+	if str(mine.date) == date and float(mine.best) > 0.0:
+		out.append({"name": "", "time": float(mine.best), "me": true})
+	out.sort_custom(func(a, b): return float(a.time) < float(b.time))
+	return out
+
+
 ## Today's best for the public card ({} when there is none today).
 static func card(data: Dictionary, date: String) -> Dictionary:
 	var r := of(data)

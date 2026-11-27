@@ -170,12 +170,15 @@ static func card(data: Dictionary, date: String) -> Dictionary:
 	var f := of(data)
 	_roll_week(f, date)
 	var legs: Dictionary = f.legs if f.legs_date == date else {}
-	var art := str((data.get("looks", {}).get("rickshaw", {}) as Dictionary).get("art", ""))
+	var looks: Dictionary = data.get("looks", {}).get("rickshaw", {})
+	var art := str(looks.get("art", ""))
 	return {
 		"name": str(f.name), "code": str(f.code), "level": int(data.get("mohalla", {}).get("level", 1)),
 		"week": str(f.week), "week_taka": int(f.week_taka), "prev_week": str(f.prev_week), "prev_taka": int(f.prev_taka),
 		"given": int(f.given), "legs_date": date if not legs.is_empty() else "", "legs": legs.duplicate(), "art": art,
 		"visits": (f.visits_sent as Dictionary).duplicate(),
+		# My rickshaw's looks, for it to ride by in my friends' streets.
+		"paint": str(looks.get("paint", "")), "plate": str(looks.get("plate", "")), "slogan": str(looks.get("slogan", "")),
 	}
 
 

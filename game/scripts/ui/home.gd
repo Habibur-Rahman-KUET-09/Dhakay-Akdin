@@ -34,6 +34,7 @@ const Ranked = preload("res://scripts/rules/ranked.gd")
 const Cards = preload("res://scripts/rules/cards.gd")
 const Season = preload("res://scripts/rules/season.gd")
 const Stickers = preload("res://scripts/ui/stickers.gd")
+const School = preload("res://scripts/rules/school.gd")
 const Share = preload("res://scripts/ui/share.gd")
 const Juice = preload("res://scripts/ui/juice.gd")
 const Race = preload("res://scripts/rules/race.gd")
@@ -90,6 +91,9 @@ var _lb_state := ""
 ## This week's area league as fetched: {area: {count, sum}}; "" / loading / ok.
 var _league_now := {}
 var _league_state := ""
+## The school league: "", "loading" or "ok"; its board rows.
+var _school_state := ""
+var _school_rows: Array = []
 ## Last week's tournament prize, paid when the home opened in a new week.
 var _rank_paid := {}
 ## Eid salami given when the home opened on an Eid day.
@@ -476,6 +480,7 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 		inner.add_child(_salami_card())
 	inner.add_child(_pass_card())
 	inner.add_child(_ranked_card())
+	inner.add_child(_traffic_card())
 	inner.add_child(_album_card())
 	inner.add_child(_stickers_card())
 	inner.add_child(_together_card())
@@ -2364,6 +2369,7 @@ func _board_page(page: VBoxContainer) -> void:
 		news_card.add_child(Look.label(str(news), 15, true))
 		page.add_child(news_card)
 	page.add_child(_league_card())
+	page.add_child(_school_card())
 	# The name shown in the lists.
 	var name_row := HBoxContainer.new()
 	name_row.add_theme_constant_override("separation", 8)
@@ -2499,6 +2505,7 @@ func _load_board() -> void:
 	_build()
 	await cloud.publish_card(Leaderboard.card(progress.data, progress.date()))
 	_load_league()
+	_load_schools()
 	var rows := await cloud.top(field, int(b.n("leaderboard.top")))
 	var mine := Leaderboard.mine(progress.data, _lb_period, _lb_who, progress.date())
 	var rank := await cloud.rank_of(field, mine)
@@ -3302,3 +3309,91 @@ func _send_sticker(st: Array) -> void:
 
 func _open_whatsapp_text(text: String) -> void:
 	OS.shell_open("https://wa.me/?text=" + text.uri_encode())
+
+
+# --- The Dhaka traffic challenge -------------------------------------------------
+
+
+## Today's one-minute ride, the same for everyone: my friends' times and
+## mine, fastest first, and the way in.
+func _traffic_card() -> Control:
+	var panel := _card(Color("FFF0E6"), 20)
+	panel.name = "TrafficCard"
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 6)
+	panel.add_child(col)
+	col.add_child(Look.label(s.t("trafficTitle"), 18, true, Look.VERMILION))
+	var about := Look.label(s.t("trafficAbout"), 14, false, Look.MUTED)
+	about.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(about)
+	var board := Race.board(progress.data, progress.date())
+	if board.is_empty():
+		col.add_child(Look.label(s.t("trafficNobody"), 14, true, Look.OUTLINE))
+	for i in mini(board.size(), 5):
+		var r: Dictionary = board[i]
+		var who: String = s.t("onYou") if r.me else str(r.name)
+		col.add_child(Look.label(s.t("trafficRow", {"n": i + 1, "name": who, "s": s.num("%.1f" % float(r.time))}), 15, true, Look.PARROT_DARK if r.me else Look.OUTLINE))
+	var go := Look.chunky(s.t("trafficGo"), Look.VERMILION, Color.WHITE, 17, 4, 14)
+	go.name = "TrafficGo"
+	go.pressed.connect(func():
+		Race.next = true
+		_go("res://scenes/rickshaw.tscn"))
+	col.add_child(go)
+	return panel
+
+
+# --- The school league --------------------------------------------------------------
+
+
+## Where I study (to pick), and the week's board of places.
+func _school_card() -> Control:
+	var panel := _card(Color("EEF3FF"), 18)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	box.add_child(Look.label(s.t("instTitle"), 17, true, Look.SKY_DARK))
+	var pick := OptionButton.new()
+	pick.name = "SchoolPick"
+	pick.add_theme_font_override("font", Look.font(Look.BOLD))
+	pick.add_item(s.t("instNone"))
+	var ids := [""]
+	for sc in School.list():
+		pick.add_item(str(sc.get(s.lang, sc.en)))
+		ids.append(str(sc.id))
+	pick.selected = maxi(0, ids.find(School.mine(progress.data)))
+	pick.item_selected.connect(func(i: int):
+		School.choose(progress.data, ids[i])
+		progress.save()
+		if cloud.enabled():
+			cloud.publish_card(Leaderboard.card(progress.data, progress.date()))
+		_school_state = ""
+		_load_schools())
+	box.add_child(pick)
+	if _school_state == "loading":
+		box.add_child(Look.label(s.t("leagueLoading"), 14, false, Look.MUTED))
+	elif _school_rows.is_empty():
+		box.add_child(Look.label(s.t("instEmpty"), 14, false, Look.MUTED))
+	for i in mini(_school_rows.size(), 8):
+		var r: Dictionary = _school_rows[i]
+		var mine := str(r.id) == School.mine(progress.data)
+		box.add_child(Look.label(s.t("instRow", {"n": i + 1, "name": School.name_of(str(r.id), s.lang), "points": int(r.points), "players": int(r.players)}),
+			15, true, Look.PARROT_DARK if mine else Look.OUTLINE))
+	var help := Look.label(s.t("instHelp"), 13, false, Look.MUTED)
+	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(help)
+	return panel
+
+
+## This week's points of every place, fetched once per visit to the page.
+func _load_schools() -> void:
+	if _school_state != "" or not cloud.enabled():
+		return
+	_school_state = "loading"
+	var week := Friends.week_of(progress.date())
+	var stats := {}
+	for sc in School.list():
+		stats[str(sc.id)] = await cloud.stats_of(School.field(str(sc.id), week))
+	_school_rows = School.board(stats)
+	_school_state = "ok"
+	if _page == "board":
+		_build()

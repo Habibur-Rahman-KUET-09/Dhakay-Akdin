@@ -231,3 +231,34 @@ func test_days_climb_and_a_new_week_pays_once() -> void:
 func test_week_days_left() -> void:
 	eq(Ranked.days_left("2026-11-28"), 7, "Saturday: the whole week")
 	eq(Ranked.days_left("2026-12-04"), 1, "Friday: the last day")
+
+
+# --- The school league and today's challenge board ---------------------------------
+
+
+func test_school_points_go_on_the_card() -> void:
+	var School = load("res://scripts/rules/school.gd")
+	var data := {}
+	eq(School.fields(data, DAY), {}, "no place picked: nothing")
+	School.choose(data, "kuet")
+	eq(School.fields(data, DAY), {}, "no points yet: nothing")
+	Ranked.note(data, b, 150, DAY)
+	eq(School.fields(data, DAY), {School.field("kuet", Friends.week_of(DAY)): 150}, "the week's points under KUET")
+	School.choose(data, "nowhere")
+	eq(School.mine(data), "kuet", "an unknown place is not taken")
+	var board: Array = School.board({"kuet": {"count": 2, "sum": 300.0}, "buet": {"count": 1, "sum": 500.0}, "du": {"count": 0}})
+	eq(board.map(func(r): return r.id), ["buet", "kuet"], "most points first, empty places left out")
+
+
+func test_todays_challenge_board() -> void:
+	var data := {}
+	var f := Friends.of(data)
+	f.list = [{"uid": "u1", "name": "Rakib"}, {"uid": "u2", "name": "Mim"}]
+	f.cards = {"u1": {"race": {"date": DAY, "time": 41.0}}, "u2": {"race": {"date": "2026-01-01", "time": 30.0}}}
+	var r := Race.of(data)
+	r.date = DAY
+	r.best = 38.5
+	var board := Race.board(data, DAY)
+	eq(board.size(), 2, "me and the friend who rode today")
+	check(board[0].me and float(board[0].time) == 38.5, "fastest first: me")
+	eq(str(board[1].name), "Rakib", "then Rakib")
