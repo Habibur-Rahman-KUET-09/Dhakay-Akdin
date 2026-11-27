@@ -1,0 +1,14 @@
+{
+  "about": "Rahim Chacha, the rickshaw puller: about 45, sun-darkened, lean and wiry from pedalling, a little shorter than average. Macro values are MakeHuman's (0..1; age 0.5 = 25 years, 1.0 = 90). Asset picks are words to look for in the asset file names (the first match wins).",
+  "macro": {"gender": 1.0, "age": 0.66, "muscle": 0.62, "weight": 0.32, "proportions": 0.55, "height": 0.4, "cupsize": 0.5, "firmness": 0.5,
+            "race": {"asian": 0.55, "african": 0.3, "caucasian": 0.15}},
+  "rig": "standard.game_engine",
+  "skin": [["middleage", "dark", "male"], ["middleage", "male"], ["dark", "male"], ["male"]],
+  "eyes": [["brown"]],
+  "eyebrows": [["eyebrow001"], ["eyebrow"]],
+  "eyelashes": [["eyelashes01"], ["eyelash"]],
+  "teeth": [["teeth_base"], ["teeth"]],
+  "tongue": [["tongue01"], ["tongue"]],
+  "hair": [["short02"], ["short"]],
+  "clothes": []
+}

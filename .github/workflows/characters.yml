@@ -1,0 +1,76 @@
+name: characters
+
+# By hand: makes the game's semi-realistic people with MPFB (MakeHuman in
+# Blender, CC0 assets) from tool/characters/<name>.json, and puts the
+# results (.glb and a report) on the "characters" branch to look at before
+# they go into the game.
+on:
+  workflow_dispatch:
+    inputs:
+      names:
+        description: "Who to make (space separated, e.g. rahim)"
+        default: "rahim"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: characters
+  cancel-in-progress: false
+
+env:
+  BLENDER_SERIES: "4.2"
+  MPFB_TAG: "v2.0.18"
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Blender (LTS, from blender.org)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxkbcommon0 libxrender1 libgl1 libsm6 libxxf86vm1 libxfixes3 libegl1 > /dev/null
+          tar=$(curl -s "https://download.blender.org/release/Blender${BLENDER_SERIES}/" | grep -oE "blender-${BLENDER_SERIES}\.[0-9]+-linux-x64\.tar\.xz" | sort -V | tail -1)
+          echo "Blender: $tar"
+          curl -sSL "https://download.blender.org/release/Blender${BLENDER_SERIES}/$tar" | tar -xJ -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/${tar%.tar.xz}" >> "$GITHUB_PATH"
+
+      - name: MPFB and the MakeHuman system assets (CC0)
+        run: |
+          blender --version | head -1
+          git clone -q --depth 1 --branch "$MPFB_TAG" https://github.com/makehumancommunity/mpfb2.git "$RUNNER_TEMP/mpfb2"
+          (cd "$RUNNER_TEMP/mpfb2/src" && zip -qr "$RUNNER_TEMP/mpfb.zip" mpfb)
+          blender --command extension install-file --repo user_default --enable "$RUNNER_TEMP/mpfb.zip"
+          data="$HOME/.config/blender/${BLENDER_SERIES}/extensions/.user/user_default/mpfb/data"
+          mkdir -p "$data"
+          page=https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html
+          curl -s "$page" | grep -oE 'href="[^"]+\.zip"' | sed 's/href="//; s/"$//' | sort -u | tee "$RUNNER_TEMP/zips.txt"
+          for z in $(cat "$RUNNER_TEMP/zips.txt"); do
+            case "$z" in http*) url="$z" ;; /*) url="https://static.makehumancommunity.org$z" ;; *) url="https://static.makehumancommunity.org/assets/assetpacks/$z" ;; esac
+            echo "get $url"
+            curl -sSL "$url" -o "$RUNNER_TEMP/pack.zip" && unzip -qo "$RUNNER_TEMP/pack.zip" -d "$data" || echo "failed: $url"
+          done
+          ls "$data" | head -30
+
+      - name: Make
+        run: |
+          mkdir -p out
+          for n in ${{ inputs.names }}; do
+            blender -b --python tool/characters/make_character.py -- "$n" "$PWD/out" 2>&1 | tail -80
+          done
+          ls -la out
+
+      - name: Put on the characters branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin characters || true
+          if git rev-parse -q --verify origin/characters > /dev/null; then git checkout -q -B characters origin/characters; else git checkout -q --orphan characters && git rm -rq --cached . && rm -rf game docs tool app android-plugin .github firebase.json README.md; fi
+          mkdir -p made
+          cp out/* made/
+          git add made
+          git commit -qm "Characters: ${{ inputs.names }} (run ${{ github.run_number }})" || echo "nothing new"
+          git push -q origin characters
