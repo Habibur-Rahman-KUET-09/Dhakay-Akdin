@@ -15,6 +15,7 @@ const DayLines = preload("res://scripts/ui/day_lines.gd")
 const Share = preload("res://scripts/ui/share.gd")
 const Reel = preload("res://scripts/ui/reel.gd")
 const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
+const Recap = preload("res://scripts/ui/recap.gd")
 
 signal home_pressed
 signal again_pressed
@@ -135,6 +136,10 @@ func _ready() -> void:
 	again.custom_minimum_size = Vector2(0, 56)
 	again.pressed.connect(func(): again_pressed.emit())
 	buttons.add_child(again)
+	# First the day as a story: tap through, then this page.
+	var recap := Recap.new().setup(s, info, got, progress, str(FACES.get(_who(), FACES.rickshaw)[0]))
+	recap.name = "Recap"
+	add_child(recap)
 
 
 func _banner() -> Control:

@@ -70,11 +70,25 @@ func _run() -> void:
 	words.lang = "bn"
 	var end = load("res://scripts/ui/day_end.gd").new()
 	var bal = Balance.new()
-	end.setup(words, bal, Progress.new(bal), {"kept": 533, "school": 70, "fund": 67, "xp": 130, "level_up": true, "best": true, "project": "", "challenge": true, "featured": true},
+	end.setup(words, bal, Progress.new(bal), {"kept": 533, "school": 70, "fund": 67, "xp": 130, "level_up": true, "best": true, "project": "", "challenge": true, "featured": true,
+		"card": {"id": "shahbag", "new": true, "tara": 0, "set_done": ""}},
 		{"title": words.t("dayOver"), "stars": 4.2, "sub": words.t("avgRating", {"stars": "4.2"}), "money": 670,
 		"lines": [words.t("tripsDone", {"trips": 11}), words.t("teaLine", {"n": 2, "money": 40})], "kept_label": words.t("gainKeptLabel"),
 		"extras": [words.t("targetMet", {"target": 600})], "good": true})
 	root.add_child(end)
+	await _seconds(1.5)
+	# First the day as a story: the money, the moment, the card torn out of
+	# its paper cone; then the page with everything.
+	var recap = end.get_node("Recap")
+	_save("1h-recap-money")
+	recap.next()
+	recap.next()
+	await _frames(5)
+	_save("1h-recap-cone")
+	recap._tear()
+	await _seconds(1.2)
+	_save("1h-recap-card")
+	recap._done()
 	await _frames(5)
 	_save("1h-day-end")
 	end.queue_free()

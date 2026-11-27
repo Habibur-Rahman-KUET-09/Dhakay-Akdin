@@ -5705,5 +5705,80 @@
   "bn": "রাত",
   "en": "Night",
   "bx": "Raat"
+ },
+ "recapMoney": {
+  "bn": "আজকের আয়",
+  "en": "Today's earnings",
+  "bx": "Ajker income"
+ },
+ "recapMoment": {
+  "bn": "আজকের সেরা মুহূর্ত",
+  "en": "Moment of the day",
+  "bx": "Ajker best moment"
+ },
+ "recapCard": {
+  "bn": "আজকের কার্ড",
+  "en": "Today's card",
+  "bx": "Ajker card"
+ },
+ "recapTear": {
+  "bn": "ঠোঙা ছিঁড়তে ট্যাপ করো!",
+  "en": "Tap to tear the paper cone!",
+  "bx": "Thonga chirte tap koro!"
+ },
+ "recapTap": {
+  "bn": "ট্যাপ করো",
+  "en": "Tap",
+  "bx": "Tap koro"
+ },
+ "recapSkip": {
+  "bn": "সরাসরি দেখো",
+  "en": "Skip",
+  "bx": "Skip"
+ },
+ "recapNewCard": {
+  "bn": "নতুন কার্ড!",
+  "en": "New card!",
+  "bx": "Notun card!"
+ },
+ "recapAgainCard": {
+  "bn": "আগেও পেয়েছ: +{n} তারা",
+  "en": "Had it already: +{n} stars",
+  "bx": "Agei chilo: +{n} tara"
+ },
+ "recapSetDone": {
+  "bn": "সেট পূর্ণ! +{n} তারা",
+  "en": "Set complete! +{n} stars",
+  "bx": "Set full! +{n} tara"
+ },
+ "recapPass": {
+  "bn": "সিজন পাস",
+  "en": "Season pass",
+  "bx": "Season pass"
+ },
+ "recapTier": {
+  "bn": "ধাপ {n}",
+  "en": "Tier {n}",
+  "bx": "Tier {n}"
+ },
+ "recapNewTier": {
+  "bn": "নতুন ধাপ খুলেছে!",
+  "en": "New tier open!",
+  "bx": "Notun tier unlock!"
+ },
+ "recapEnd": {
+  "bn": "দিন শেষ!",
+  "en": "Day done!",
+  "bx": "Din shesh!"
+ },
+ "recapEndLine": {
+  "bn": "রিল বানাও, ছবি শেয়ার করো, বন্ধুদের দেখাও।",
+  "en": "Make a reel, share a picture, show your friends.",
+  "bx": "Reel banao, chobi share koro, dostoder dekhao."
+ },
+ "recapSee": {
+  "bn": "দেখো",
+  "en": "See it all",
+  "bx": "Dekho"
  }
 }
