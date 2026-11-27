@@ -34,6 +34,7 @@ enum Event {
 	CHANGED, ## someone changed their (hidden) order: last_change
 	NO_CUPS, ## no clean cup left: wash some (wash)
 	CREDIT_ASK, ## a neighbour asks to pay later: credit_ask (settle_credit)
+	COMBO, ## happy customers in a row: last_combo {n, bonus}
 }
 
 ## What can be ordered, in the order shown on the counter.
@@ -64,6 +65,13 @@ var money := 0
 var tips := 0
 var sold := 0
 var served := 0
+## Happy customers in a row (a combo from combo_from pays a little extra),
+## the day's best, the last one's {n, bonus}.
+var combo := 0
+var best_combo := 0
+var last_combo := {}
+## How often each hand activity has come up today (pour, stir, paan).
+var _hands_seen := {}
 var happy := 0
 var lost := 0
 ## The customer just served, for the screen: {name, kind, bill, tip, happy}.
@@ -293,6 +301,7 @@ func update(dt: float) -> Array:
 		if c.left <= 0.0:
 			customers.erase(c)
 			lost += 1
+			combo = 0
 			if c.get("npc", "") != "":
 				npc_log.append({"id": c.npc, "delta": -1, "what": "waited"})
 			events.append(Event.LEFT)
@@ -449,6 +458,18 @@ func guide_step() -> String:
 ## A cup is wanted but none is clean: wash some first.
 func _or_wash(step: String) -> String:
 	return "wash" if step == "cup" and interactive and cups_clean <= 0 else step
+
+
+## Whether this pour, stir or paan is done by hand: the first ones of the
+## day always (to learn them), then one in hands_every (fewer in a rush),
+## the rest done quickly at a tap, so the stall keeps moving.
+func hands_now(kind: String) -> bool:
+	var n := int(_hands_seen.get(kind, 0))
+	_hands_seen[kind] = n + 1
+	if n < int(b.n("tea_stall.hands_first")):
+		return true
+	var every := int(b.n("tea_stall.hands_every_rush" if rush() else "tea_stall.hands_every"))
+	return (n - int(b.n("tea_stall.hands_first"))) % every == every - 1
 
 
 ## The spoons of sugar the next milk tea should have.
@@ -615,6 +636,17 @@ func _hand(item: String, who: Dictionary, q: float) -> Array:
 			tip += int(b.n("tea_stall.perfect_tip"))
 			money += int(b.n("tea_stall.perfect_tip"))
 			tips += int(b.n("tea_stall.perfect_tip"))
+		if glad:
+			combo += 1
+			best_combo = maxi(best_combo, combo)
+			if combo >= int(b.n("tea_stall.combo_from")):
+				var bonus := mini(combo - int(b.n("tea_stall.combo_from")) + 1, int(b.n("tea_stall.combo_most"))) * int(b.n("tea_stall.combo_tip"))
+				money += bonus
+				tips += bonus
+				last_combo = {"n": combo, "bonus": bonus}
+				events.append(Event.COMBO)
+		else:
+			combo = 0
 		if glad:
 			happy += 1
 			var t := maxi(1, roundi(who.bill * b.n("tea_stall.happy_tip_share"))) + roundi(float(festival.get("tip", 0)) * 0.5)

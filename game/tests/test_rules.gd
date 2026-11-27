@@ -266,7 +266,8 @@ func test_fares_and_ratings() -> void:
 	eq(f.counter(65), 80, "1.2 x 65 = 78, rounded to 80")
 	eq(f.stars(10.0, 10.0, 0, "normal"), 5.0, "on time")
 	eq(f.stars(11.5, 10.0, 0, "normal"), 4.0, "15% late: one star off")
-	eq(f.stars(12.5, 10.0, 0, "normal"), 3.0, "25% late: two off")
+	eq(f.stars(12.5, 10.0, 0, "normal"), 4.0, "25% late: one off (a star for every 15%)")
+	eq(f.stars(13.5, 10.0, 0, "normal"), 3.0, "35% late: two off")
 	eq(f.stars(10.0, 10.0, 2, "normal"), 4.0, "two flooded tiles: one off")
 	eq(f.stars(30.0, 10.0, 0, "normal"), 1.0, "never below one")
 	eq(f.stars(11.5, 10.0, 0, "elder"), 4.5, "elders give half a star more")
@@ -664,6 +665,46 @@ func test_following_the_hints_delivers_a_passenger() -> void:
 	check(d.average_trip_seconds() > 0.0, "an average for the day")
 
 
+func test_easy_driving_waits_at_a_red_light() -> void:
+	var e := Day.new(_mirpur(), Balance.new(), 2)
+	var p := Vector2i(-1, -1)
+	for r in e.map.roads():
+		if e.map.kind_at(r) == RoadMap.Kind.SIGNAL:
+			p = r
+			break
+	var red := RoadMap.N if e.red_at(p, RoadMap.N) else RoadMap.E
+	e.driver.cell = RoadMap.step(p, RoadMap.opposite(red))
+	e.driver.heading = red
+	e.driver.moving = true
+	e.driver.progress = 0.7
+	e.speed_now = 1.0
+	e.pedal = true
+	e.easy = true
+	var fined := false
+	for i in 10:
+		if not e.red_at(p, red):
+			break
+		fined = fined or e.update(0.05).has(Day.FINED)
+	check(not fined and e.driver.cell != p, "stood at the red light, no fine")
+
+
+func test_easy_driving_stops_for_a_waiting_passenger() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 5)
+	d.easy = true
+	d.follow_route = true
+	d.pedal = true
+	var offered := false
+	for i in 4000:
+		d.update(0.05)
+		if not d.offer_for.is_empty():
+			offered = true
+			break
+	check(offered, "with the pedal held, the rickshaw stopped by a passenger and the fare was offered")
+	for i in 40:
+		d.update(0.05)
+	check(not d.offer_for.is_empty(), "and it waits there while the fare is talked over")
+
+
 func test_short_rides_in_the_first_days() -> void:
 	eq(Day.trip_for_level(1), 5, "level 1")
 	eq(Day.trip_for_level(3), 6, "level 3")
@@ -774,3 +815,19 @@ func test_the_paper_knows_tomorrows_rain() -> void:
 			said += 1
 		day = tomorrow
 	check(said > 0, "some rain in July")
+
+
+func test_a_warning_before_he_tires() -> void:
+	var d := Day.new(_mirpur(), Balance.new(), 5)
+	d.energy = 36.0
+	d.follow_route = true
+	d.pedal = true
+	d.accel = 100.0
+	var got := []
+	for i in 3000:
+		got.append_array(d.update(0.05))
+		if got.has(Day.TIRED):
+			break
+	check(got.has(Day.ENERGY_LOW), "a warning at 35")
+	check(got.find(Day.ENERGY_LOW) < got.find(Day.TIRED), "before tiring at 20")
+	eq(got.count(Day.ENERGY_LOW), 1, "once")

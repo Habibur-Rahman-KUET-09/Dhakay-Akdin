@@ -306,6 +306,16 @@ func to_next(level: int) -> int:
 	return int(b.n("economy.xp_level_base") + b.n("economy.xp_level_step") * level)
 
 
+## Rahim Chacha's day's target: lower in the first levels, so a new player
+## can meet it (balance "rickshaw.target_by_level": [from level, taka]).
+func rickshaw_target() -> int:
+	var target := int(b.n("rickshaw.daily_target"))
+	for step in b.at("rickshaw.target_by_level"):
+		if level() >= int(step[0]):
+			target = int(step[1])
+	return target
+
+
 func level() -> int:
 	return int(data.mohalla.level)
 
@@ -452,7 +462,7 @@ func apply_day(result: Dictionary) -> Dictionary:
 	var earned := _featured("rickshaw", maxi(0, int(result.earned)), out)
 	var trips := int(result.trips)
 	var stars := float(result.stars)
-	var target := int(b.n("rickshaw.daily_target"))
+	var target := rickshaw_target()
 	out.earned = earned
 	out.met = earned >= target
 	# A tenth to the mohalla's fund, the rest is Rahim Chacha's; whatever

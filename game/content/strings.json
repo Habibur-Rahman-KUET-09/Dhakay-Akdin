@@ -5186,5 +5186,25 @@
  "teaGuideWash": {
   "bn": "পরিষ্কার কাপ নেই! আগে কাপ ধুয়ে নিন",
   "en": "No clean cups! Wash some first"
+ },
+ "stopForPassenger": {
+  "bn": "যাত্রী অপেক্ষা করছেন! ব্রেক চেপে পাশে থামুন",
+  "en": "A passenger is waiting! Brake and stop beside them"
+ },
+ "tiredAgain": {
+  "bn": "শক্তি মাত্র {n}! পথে চায়ের দোকানে থেমে এক কাপ চা খান",
+  "en": "Energy only {n}! Stop at a tea stall on the way for a cup"
+ },
+ "energyLow": {
+  "bn": "শক্তি কমে আসছে। সামনে চায়ের দোকান পেলে থামুন",
+  "en": "Energy is getting low. Stop at the next tea stall"
+ },
+ "teaCombo": {
+  "bn": "কম্বো ×{n}! +{bonus} টাকা",
+  "en": "Combo ×{n}! +Tk {bonus}"
+ },
+ "teaBestCombo": {
+  "bn": "আজকের সেরা কম্বো: ×{n}",
+  "en": "Today's best combo: ×{n}"
  }
 }

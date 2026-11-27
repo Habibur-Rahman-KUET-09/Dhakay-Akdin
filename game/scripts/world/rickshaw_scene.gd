@@ -150,6 +150,10 @@ var _queued: Array[Callable] = []
 ## Passengers, the policeman and Rahim Chacha talking.
 var _voice: Voice
 var _chat_left := Chatter.gap()
+## The passenger last told about (stop beside them), and the time to the
+## next reminder to drink tea.
+var _stop_hinted := {}
+var _nag_left := 0.0
 ## Rain: how hard (0–1, eased), the drops, the sound, the water that
 ## spreads on the roads.
 var _rain_k := 0.0
@@ -203,7 +207,7 @@ func _ready() -> void:
 		var call_share := HomeCall.plan(_call_rng, progress.level())
 		if call_share >= 0.0:
 			_call_at = call_share * shift.day_seconds
-		_target_money = int(b.n("rickshaw.daily_target")) + int(_story_effect.get("target", 0))
+		_target_money = progress.rickshaw_target() + int(_story_effect.get("target", 0))
 		shift.base_speed *= progress.speed_factor() * float(_story_effect.get("speed", 1.0))
 		shift.energy_factor = progress.energy_factor()
 		# Resting better at home (a bed, a fan): more energy to start with.
@@ -660,6 +664,8 @@ func _process(dt: float) -> void:
 		if _notice_left <= 0.0 or (_notice_left > 1e6 and shift.driver.moving):
 			_notice = ""
 	_chat_tick(dt)
+	_stop_hint()
+	_tired_nag(dt)
 	_follow(dt)
 	_honk(dt)
 	_weather(dt)
@@ -880,6 +886,8 @@ func _handle(events: Array) -> void:
 		hud.show_tea(true, int(shift.balance.n("rickshaw.tea_cost")))
 	if events.has(Day.TEA_GONE):
 		hud.show_tea(false)
+	if events.has(Day.ENERGY_LOW) and not events.has(Day.TIRED):
+		_say(strings.t("energyLow"), Look.YELLOW.darkened(0.2), 4.0)
 	if events.has(Day.TIRED):
 		_say(strings.t("tired"), Look.YELLOW.darkened(0.2), 4.0)
 	if events.has(Day.FLAT):
@@ -2131,3 +2139,27 @@ func _back_art(on: Node3D) -> void:
 		words.outline_modulate = Color("7B1FA2")
 		words.position = Vector3(0, 0.47, 0.965)
 		on.add_child(words)
+
+
+## In the first days: driving past a waiting passenger, a word to stop
+## beside them (easy driving stops by itself).
+func _stop_hint() -> void:
+	if mode != "rickshaw" or shift.easy or not shift.riding.is_empty() or not shift.offer_for.is_empty() \
+			or shift.speed_now <= 0.6 or int(progress.data.rickshaw.get("days", 0)) >= 5:
+		return
+	for w in shift.waiting:
+		if not w.refused and shift._near(w.at) <= 2 and not _stop_hinted.has(w.at):
+			_stop_hinted[w.at] = true
+			_say(strings.t("stopForPassenger"), Look.MAGENTA, 3.0)
+			return
+
+
+## Tired: a reminder now and then to stop for tea, until he does.
+func _tired_nag(dt: float) -> void:
+	if shift.energy >= float(shift.balance.n("rickshaw.tired_below")) or shift.worn_out:
+		_nag_left = float(shift.balance.n("rickshaw.tired_nag_s"))
+		return
+	_nag_left -= dt
+	if _nag_left <= 0.0 and _notice == "":
+		_nag_left = float(shift.balance.n("rickshaw.tired_nag_s"))
+		_say(strings.t("tiredAgain", {"n": int(shift.energy)}), Look.VERMILION, 4.0)

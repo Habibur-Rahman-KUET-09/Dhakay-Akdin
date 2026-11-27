@@ -597,6 +597,8 @@ func _process(dt: float) -> void:
 
 
 func _handle(events: Array) -> void:
+	if events.has(TeaDay.Event.COMBO):
+		_say(strings.t("teaCombo", {"n": int(day.last_combo.n), "bonus": int(day.last_combo.bonus)}), Look.MAGENTA, 2.0)
 	if events.has(TeaDay.Event.PHONE_PAY):
 		_check_sms.call_deferred()
 	if events.has(TeaDay.Event.CREDIT_ASK):
@@ -694,15 +696,15 @@ func _on_step(step: String) -> void:
 ## The steps done by hand, when that makes sense now: pouring the tea
 ## (cup in hand, tea in the kettle), the sugar, the whole paan.
 func _by_hand(step: String) -> bool:
-	if step == "kettle" and day.tray == ["cup"] and _tea_ready():
+	if step == "kettle" and day.tray == ["cup"] and _tea_ready() and day.hands_now("pour"):
 		_open(Pour.new(), "act_pour", _poured)
 		return true
-	if step == "sugar" and day.tray == ["cup", "kettle", "milk"]:
+	if step == "sugar" and day.tray == ["cup", "kettle", "milk"] and day.hands_now("stir"):
 		var stir := Stir.new()
 		stir.spoons_wanted = day.sugar_wanted()
 		_open(stir, "act_sugar", _sugared)
 		return true
-	if step == "betel_leaf" and day.tray.is_empty():
+	if step == "betel_leaf" and day.tray.is_empty() and day.hands_now("paan"):
 		var paan := Paan.new()
 		paan.wants_zarda = day.zarda_wanted()
 		_open(paan, "act_paan", _folded)
@@ -1060,6 +1062,8 @@ func _end_day() -> void:
 		lines.append(strings.t("teaLost", {"n": day.lost}))
 	if day.tips > 0:
 		lines.append(strings.t("teaTips", {"n": day.tips}))
+	if day.best_combo >= int(b.n("tea_stall.combo_from")):
+		lines.append(strings.t("teaBestCombo", {"n": day.best_combo}))
 	if day.washed > 0:
 		lines.append(strings.t("washLine", {"n": day.washed}))
 	if day.credit_given > 0:

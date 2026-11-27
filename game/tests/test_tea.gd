@@ -305,3 +305,35 @@ func test_first_day_guide_points_to_the_next_step() -> void:
 	day.interactive = false
 	day.customers = []
 	eq(day.guide_step(), "", "nobody waiting")
+
+
+func test_hand_games_come_now_and_then() -> void:
+	var day := TeaDay.new(Balance.new(), 3)
+	var by_hand := []
+	for i in 11:
+		by_hand.append(day.hands_now("pour"))
+	eq(by_hand.slice(0, 2), [true, true], "the first two of the day by hand, to learn")
+	eq(by_hand.count(true), 5, "then one in three: 2 + 3 of 11")
+	check(day.hands_now("stir"), "each kind counted on its own")
+
+
+func test_happy_customers_in_a_row_make_a_combo() -> void:
+	var day := TeaDay.new(Balance.new(), 3)
+	var money := 0
+	var combos := []
+	for i in 5:
+		var who := {"items": ["banana"], "ordered": ["banana"], "left": 30.0, "patience": 30.0, "bill": 10, "kind": "student", "seat": 0}
+		day.customers.append(who)
+		var before := day.money
+		var e := day._hand("banana", who, -1.0)
+		if e.has(TeaDay.Event.COMBO):
+			combos.append(day.last_combo.duplicate())
+		money += day.money - before
+	eq(combos.size(), 3, "from the third happy customer on")
+	eq(int(combos[0].bonus), 2, "a little extra at first")
+	eq(int(combos[2].bonus), 6, "more as it goes on")
+	eq(day.best_combo, 5, "the day's best")
+	var slow := {"items": ["banana"], "ordered": ["banana"], "left": 1.0, "patience": 30.0, "bill": 10, "kind": "student", "seat": 0}
+	day.customers.append(slow)
+	day._hand("banana", slow, -1.0)
+	eq(day.combo, 0, "a slow one breaks it")

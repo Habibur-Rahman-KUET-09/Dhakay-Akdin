@@ -33,6 +33,8 @@ const RAIN_END := 21
 const TIRED := 22
 ## Energy gone: he goes home (DAY_OVER comes too).
 const WORN_OUT := 23
+## Energy getting low (a warning before he tires).
+const ENERGY_LOW := 60
 ## A tyre gone soft (slower until pumped).
 const FLAT := 24
 ## Stuck in deep water in the rain (push to get out), and out again.
@@ -85,6 +87,7 @@ var energy_max := 100.0
 var energy_factor := 1.0
 var worn_out := false
 var _was_tired := false
+var _was_low := false
 ## Tea: on offer when stopped beside a stall.
 var at_tea := false
 var teas := 0
@@ -287,6 +290,13 @@ func update(dt: float) -> Array:
 		held -= dt
 		speed_factor = 0.0
 		speed_now = 0.0
+	# Easy driving waits at a red light instead of running it.
+	if easy and driver.moving and driver.progress > 0.5 and red_at(driver.next_cell(), driver.heading):
+		room = 0.0
+	# Easy driving: slow down beside a waiting passenger and stand while
+	# the fare is talked over, so the offer is not driven past.
+	if easy and riding.is_empty() and (not offer_for.is_empty() or _passenger_close()):
+		room = minf(room, 0.0 if not offer_for.is_empty() else balance.n("rickshaw.easy_stop_room"))
 	var events := super(dt)
 	events.append_array(early)
 	_time(dt)
@@ -414,6 +424,7 @@ func drink_tea() -> bool:
 	teas += 1
 	energy = minf(energy_max, energy + balance.n("rickshaw.tea_energy"))
 	_was_tired = energy < balance.n("rickshaw.tired_below")
+	_was_low = energy < balance.n("rickshaw.energy_warn")
 	at_tea = false
 	return true
 
@@ -463,6 +474,9 @@ func _entered(events: Array) -> void:
 	if night:
 		cost *= balance.n("night.energy")
 	energy = maxf(0.0, energy - cost * energy_factor)
+	if energy < balance.n("rickshaw.energy_warn") and not _was_low:
+		_was_low = true
+		events.append(ENERGY_LOW)
 	if energy < balance.n("rickshaw.tired_below") and not _was_tired:
 		_was_tired = true
 		events.append(TIRED)
@@ -528,6 +542,14 @@ func _talk(events: Array) -> void:
 			offer_for = w
 			events.append(OFFER)
 			return
+
+
+## A passenger (not one who said no) waiting within a tile.
+func _passenger_close() -> bool:
+	for w in waiting:
+		if not w.refused and _near(w.at) <= 1:
+			return true
+	return false
 
 
 func _near(p: Vector2i) -> int:

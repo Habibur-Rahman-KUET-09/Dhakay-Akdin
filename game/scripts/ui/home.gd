@@ -996,7 +996,7 @@ func _goals_card(who: String) -> Control:
 	panel.add_child(col)
 	var rows := 0
 	if who == "rickshaw" or who == "delivery" or who == "hawker" or who == "boat":
-		col.add_child(_goal_row("coin", s.t("goalTarget"), s.t("takaN", {"n": int(b.n(who + ".daily_target"))}), Color.WHITE))
+		col.add_child(_goal_row("coin", s.t("goalTarget"), s.t("takaN", {"n": progress.rickshaw_target() if who == "rickshaw" else int(b.n(who + ".daily_target"))}), Color.WHITE))
 		rows += 1
 	var c := progress.challenge()
 	if not c.is_empty() and c.who == who:
