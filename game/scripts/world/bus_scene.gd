@@ -14,6 +14,7 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const Juice = preload("res://scripts/ui/juice.gd")
 const Tips = preload("res://scripts/ui/tips.gd")
 const Chatter = preload("res://scripts/ui/chatter.gd")
 const Music = preload("res://scripts/ui/music.gd")
@@ -745,6 +746,9 @@ func _handle(events: Array) -> void:
 		var on := events.count(BusDay.Event.BOARDED)
 		print("[bus] stop %d of %d, trip %d: %d off, %d on, %d riders" % [bus.stop_i, bus.route.size() - 1, bus.trip, off, on, bus.riders.size()])
 		_say(strings.t("atStop", {"stop": _stop_name(bus.stop_i), "on": on, "off": off}), Look.SKY, 2.5)
+		# Now and then, a passenger's funny moment at the stop.
+		if randf() < 0.25:
+			get_tree().create_timer(2.7).timeout.connect(_funny.bind("bus_funny"))
 		if on > 0:
 			_voice.say("bus_board")
 		_sync_people()
@@ -982,6 +986,8 @@ func _on_call() -> void:
 		var stop := _stop_name(bus.stop_i + 1)
 		var shout := "%s! %s! %s!" % [stop, stop, stop]
 		var result := strings.t("call_" + bus.last_call)
+		if bus.last_call == "perfect":
+			Juice.celebrate(_layer, "ting")
 		_say("%s\n%s" % [shout, result], Look.PARROT if bus.last_call != "miss" else Look.OUTLINE, 2.5)
 
 
@@ -1265,3 +1271,14 @@ func _chat_tick(dt: float) -> void:
 		return
 	_voice.play(str(line.id))
 	_say(str(line.text), Look.SKY_DARK, 4.0)
+
+
+## A funny moment: a line from a group, shown and (when made) spoken.
+func _funny(group: String) -> void:
+	if not is_inside_tree() or _notice_left > 0.0:
+		return
+	var line := Chatter.pick(group, strings.lang)
+	if line.is_empty():
+		return
+	_voice.play(str(line.id))
+	_say(str(line.text), Look.MAGENTA, 4.0)

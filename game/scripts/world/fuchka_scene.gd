@@ -14,6 +14,7 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const Juice = preload("res://scripts/ui/juice.gd")
 const Tips = preload("res://scripts/ui/tips.gd")
 const Chatter = preload("res://scripts/ui/chatter.gd")
 const Music = preload("res://scripts/ui/music.gd")
@@ -499,6 +500,10 @@ func _handle(events: Array) -> void:
 	if events.has(FuchkaDay.Event.SERVED):
 		var ls: Dictionary = day.last_served
 		_ding.play()
+		if ls.verdict == "exact":
+			Juice.celebrate(_layer, "ting")
+			if randf() < 0.3:
+				get_tree().create_timer(2.7).timeout.connect(_funny.bind("fuchka_funny"))
 		_say(strings.t("fuchkaVerdict_" + str(ls.verdict), {"tip": int(ls.tip)}),
 			Look.PARROT if ls.verdict == "exact" else (Look.SKY if ls.verdict == "close" else Look.VERMILION), 2.5)
 		_voice.say("fuchka_happy" if ls.verdict != "wrong" else "fuchka_wrong")
@@ -788,3 +793,14 @@ func _show_guide() -> void:
 	if str(g.step) == "give" and target != null:
 		# Their card glows.
 		target.modulate = Color(1.25, 1.15, 0.75)
+
+
+## A funny moment: a line from a group, shown and (when made) spoken.
+func _funny(group: String) -> void:
+	if not is_inside_tree() or _notice_left > 0.0:
+		return
+	var line := Chatter.pick(group, strings.lang)
+	if line.is_empty():
+		return
+	_voice.play(str(line.id))
+	_say(str(line.text), Look.MAGENTA, 4.0)

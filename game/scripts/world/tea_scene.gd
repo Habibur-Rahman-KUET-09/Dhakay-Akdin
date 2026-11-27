@@ -14,6 +14,7 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const Juice = preload("res://scripts/ui/juice.gd")
 const Tips = preload("res://scripts/ui/tips.gd")
 const Chatter = preload("res://scripts/ui/chatter.gd")
 const Music = preload("res://scripts/ui/music.gd")
@@ -598,6 +599,7 @@ func _process(dt: float) -> void:
 
 func _handle(events: Array) -> void:
 	if events.has(TeaDay.Event.COMBO):
+		Juice.celebrate(_layer, "sparkle" if int(day.last_combo.n) % 5 == 0 else "ting")
 		_say(strings.t("teaCombo", {"n": int(day.last_combo.n), "bonus": int(day.last_combo.bonus)}), Look.MAGENTA, 2.0)
 	if events.has(TeaDay.Event.PHONE_PAY):
 		_check_sms.call_deferred()

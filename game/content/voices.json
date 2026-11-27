@@ -909,6 +909,69 @@
     "bn": "বান্ধবীরা সবাই আসতেছে, খালা, বিশ প্লেট রেডি রাখেন!",
     "en": "My friends are all coming, Khala. Get twenty plates ready!"
    }
+  ],
+  "pay_bkash": [
+   {
+    "by": "student",
+    "bn": "মামা, বিকাশে দিতেছি, নাম্বারটা কন! আরে, ব্যালেন্সই তো নাই… দাঁড়ান, নগদে দেই।",
+    "en": "Mama, I'll send it by bKash, what's the number! Oh, no balance… hold on, I'll try Nagad."
+   },
+   {
+    "by": "man",
+    "bn": "ক্যাশ নাই মামা, বিকাশ করতেছি। মেসেজটা দেখে নেন।",
+    "en": "No cash, Mama, I'm sending it by bKash. Check the message."
+   },
+   {
+    "by": "woman2",
+    "bn": "মামা, ভাংতি নাই, অনলাইনে পাঠাই? নেট একটু স্লো, একটু দাঁড়ান।",
+    "en": "No change, Mama, can I send it online? The net's slow, give me a sec."
+   }
+  ],
+  "first_ride": [
+   {
+    "by": "student",
+    "bn": "মামা, আজকে প্রথম ঢাকায় আসছি! ম্যাপে দেখতেছি পাঁচ মিনিট, আসলে কতক্ষণ লাগবে বলেন তো?",
+    "en": "Mama, it's my first day in Dhaka! The map says five minutes, how long really?"
+   }
+  ],
+  "bus_funny": [
+   {
+    "by": "man",
+    "bn": "ভাই, সিটটা একটু রাখেন, আসতেছি! …আর আসেনি।",
+    "en": "Brother, keep this seat for me, I'm coming! …and never came."
+   },
+   {
+    "by": "student",
+    "bn": "মামা, আমি তো দাঁড়ায়াই আছি, ভাড়া অর্ধেক না?",
+    "en": "Mama, I'm standing anyway, half fare, right?"
+   },
+   {
+    "by": "woman",
+    "bn": "ড্রাইভার মামা, গান বন্ধ করেন, কল ধরছি!",
+    "en": "Driver Mama, turn the music off, I'm on a call!"
+   },
+   {
+    "by": "oldman",
+    "bn": "এই বাসে উঠলে কোমর আর সোজা থাকে না।",
+    "en": "Once you ride this bus, your back is never straight again."
+   }
+  ],
+  "fuchka_funny": [
+   {
+    "by": "student",
+    "bn": "খালা, আরেকটা ফ্রি দেন না, আমি তো রেগুলার কাস্টমার!",
+    "en": "Khala, one more for free? I'm a regular!"
+   },
+   {
+    "by": "child",
+    "bn": "খালা, বেশি ঝাল হইছে, কিন্তু আরেকটা দেন!",
+    "en": "Khala, it was too hot, but give me another one!"
+   },
+   {
+    "by": "woman2",
+    "bn": "খালা, ছবিটা পোস্ট দিলাম, আপনার দোকান এখন ভাইরাল!",
+    "en": "Khala, I posted the photo, your cart's going viral now!"
+   }
   ]
  },
  "fixes": {

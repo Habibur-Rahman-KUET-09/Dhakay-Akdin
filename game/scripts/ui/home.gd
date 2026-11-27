@@ -109,6 +109,8 @@ func _ready() -> void:
 	cloud = Cloud.new()
 	add_child(cloud)
 	music = Music.new()
+	# The theme song on the home screen: the tune people hum.
+	music.track = "tune_theme"
 	music.volume_db = -6.0
 	add_child(music)
 	set_anchors_preset(Control.PRESET_FULL_RECT)

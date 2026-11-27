@@ -13,6 +13,7 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const Juice = preload("res://scripts/ui/juice.gd")
 const Tips = preload("res://scripts/ui/tips.gd")
 const Chatter = preload("res://scripts/ui/chatter.gd")
 const City = preload("res://scripts/world/city.gd")
@@ -150,6 +151,7 @@ var _queued: Array[Callable] = []
 ## Passengers, the policeman and Rahim Chacha talking.
 var _voice: Voice
 var _chat_left := Chatter.gap()
+var _first_told := false
 ## The passenger last told about (stop beside them), and the time to the
 ## next reminder to drink tea.
 var _stop_hinted := {}
@@ -861,6 +863,8 @@ func _handle(events: Array) -> void:
 		print("[trip] %d tiles: finding %.1f s, riding %.1f s; junction %.1f, traffic %.1f, held %.1f, standing %.1f; detours %d" % [
 			int(tt.get("tiles", 0)), tt.get("finding", 0.0), tt.get("riding", 0.0), tt.get("junction", 0.0),
 			tt.get("traffic", 0.0), tt.get("held", 0.0), tt.get("standing", 0.0), int(tt.get("detours", 0))])
+		if float(t.stars) >= 5.0:
+			Juice.celebrate(hud, "sparkle")
 		if float(t.stars) >= 4.0:
 			_voice.say("thanks", true)
 		elif float(t.stars) < 3.0:
@@ -904,6 +908,7 @@ func _handle(events: Array) -> void:
 	if events.has(Day.HOOD):
 		_raise_hood()
 	if events.has(Day.PHONE_PAY):
+		_funny("pay_bkash")
 		_check_sms()
 	if events.has(Day.CHAIN):
 		_say(strings.t("chainOff"), Look.VERMILION, 3.0)
@@ -1830,6 +1835,10 @@ func _on_refuse() -> void:
 
 func _boarded() -> void:
 	hud.hide_offer()
+	# The very first passenger of the very first day: a newcomer to Dhaka.
+	if mode == "rickshaw" and int(progress.data.rickshaw.get("days", 0)) == 0 and shift.trips == 0 and not _first_told:
+		_first_told = true
+		_funny.call_deferred("first_ride")
 	_rider_seat.mesh = Models.seated_passenger(randi() % Models.PEOPLE)
 	_rider_seat.visible = true
 	_say(strings.t("boarded", {"place": RoadMap.place_name(shift.riding.place, strings.lang), "fare": shift.riding.fare}), Look.SKY, 2.5)
@@ -2163,3 +2172,12 @@ func _tired_nag(dt: float) -> void:
 	if _nag_left <= 0.0 and _notice == "":
 		_nag_left = float(shift.balance.n("rickshaw.tired_nag_s"))
 		_say(strings.t("tiredAgain", {"n": int(shift.energy)}), Look.VERMILION, 4.0)
+
+
+## A funny moment: a line from a group, shown and (when made) spoken.
+func _funny(group: String) -> void:
+	var line := Chatter.pick(group, strings.lang)
+	if line.is_empty():
+		return
+	_voice.play(str(line.id), true)
+	_say(str(line.text), Look.MAGENTA, 4.5)

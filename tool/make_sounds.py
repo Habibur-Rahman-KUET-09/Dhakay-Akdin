@@ -209,7 +209,37 @@ TUNES = {
         [(79, .5), (81, .5), (79, 1), (76, 1), (74, .5), (76, .5), (79, 1), (81, 1), (79, 2)],
         [(84, 1), (81, .5), (79, .5), (81, 1), (79, 1), (76, .5), (74, .5), (76, 1), (79, 2)],
         [(76, 1), (74, .5), (72, .5), (69, 1), (72, 1), (74, .5), (76, .5), (74, 1), (72, 2)]]},
+    # The theme song: a catchy hook to hum (and the reels' music), fast,
+    # dhol under a plucked tune, in D.
+    'tune_theme': {'bpm': 132, 'voice': 'pluck', 'root': 50, 'drum': 'dhol', 'phrases': [
+        [(74, .5), (74, .5), (76, .5), (78, .5), (81, 1), (78, .5), (76, .5), (74, 1), (76, 1), (78, 2)],
+        [(74, .5), (74, .5), (76, .5), (78, .5), (81, 1), (83, .5), (81, .5), (78, 1), (76, 1), (74, 2)],
+        [(81, .5), (83, .5), (86, 1), (83, .5), (81, .5), (78, 1), (81, .5), (78, .5), (76, 1), (78, 2)],
+        [(76, .5), (78, .5), (81, .5), (78, .5), (76, 1), (74, 1), (71, .5), (74, .5), (76, 1), (74, 2)]]},
 }
+
+
+def ting():
+    """A bright little ting for a combo."""
+    out = []
+    for i in range(int(RATE * 0.35)):
+        t = i / RATE
+        v = (math.sin(2 * math.pi * 1760 * t) + 0.5 * math.sin(2 * math.pi * 2640 * t)) * math.exp(-t * 12)
+        out.append(v * 0.4)
+    return out
+
+
+def sparkle():
+    """Rising chimes for five stars."""
+    out = [0.0] * int(RATE * 0.9)
+    for k, f in enumerate([1318, 1568, 1976, 2637]):
+        start = int(k * 0.09 * RATE)
+        for i in range(int(RATE * 0.5)):
+            j = start + i
+            if j < len(out):
+                t = i / RATE
+                out[j] += math.sin(2 * math.pi * f * t) * math.exp(-t * 9) * 0.25
+    return out
 
 
 def tune(spec, seed=11):
@@ -284,6 +314,8 @@ if __name__ == '__main__':
     write('whistle.wav', whistle())
     write('thump.wav', thump())
     write('coin.wav', coin())
+    write('ting.wav', ting())
+    write('sparkle.wav', sparkle())
     for name, spec in TUNES.items():
         write_music(name, tune(spec))
     print('sounds written to', os.path.normpath(OUT))
