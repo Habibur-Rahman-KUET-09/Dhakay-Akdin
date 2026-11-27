@@ -280,6 +280,8 @@ func _build_hud() -> void:
 	var back := Look.button(strings.t("back"), Look.OUTLINE, 15)
 	back.pressed.connect(_go_home)
 	row.add_child(back)
+	# Photo mode: the scene as it is, in a frame, to share.
+	row.add_child(Photo.button(self, _layer, strings, progress.data.get("frames", [])))
 	var stop_box := PanelContainer.new()
 	stop_box.add_theme_stylebox_override("panel", Look.card(Look.CREAM.lerp(Color.WHITE, 0.3)))
 	stop_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL

@@ -12,6 +12,7 @@ const Progress = preload("res://scripts/rules/progress.gd")
 const Friends = preload("res://scripts/rules/friends.gd")
 const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
+const Photo = preload("res://scripts/ui/photo.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
 const Juice = preload("res://scripts/ui/juice.gd")
@@ -504,6 +505,8 @@ func _build_hud() -> void:
 	var back := Look.button(strings.t("back"), Look.OUTLINE, 15)
 	back.pressed.connect(_go_home)
 	row.add_child(back)
+	# Photo mode: the scene as it is, in a frame, to share.
+	row.add_child(Photo.button(self, _layer, strings, progress.data.get("frames", [])))
 	var stop_box := PanelContainer.new()
 	stop_box.add_theme_stylebox_override("panel", Look.card(Look.CREAM.lerp(Color.WHITE, 0.3)))
 	stop_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
