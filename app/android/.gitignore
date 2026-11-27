@@ -13,5 +13,3 @@ key.properties
 **/*.keystore
 **/*.jks
 
-# The shared development key for test builds (see app/build.gradle.kts) is meant to be committed.
-!dev.keystore

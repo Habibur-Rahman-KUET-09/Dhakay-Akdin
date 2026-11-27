@@ -58,7 +58,18 @@ jobs:
       - name: Build APKs
         if: github.event_name != 'pull_request'
         working-directory: app
+        # Same secret test key as the game (see game.yml).
+        env:
+          TEST_KEYSTORE_BASE64: ${{ secrets.TEST_KEYSTORE_BASE64 }}
+          TEST_KEYSTORE_PASSWORD: ${{ secrets.TEST_KEYSTORE_PASSWORD }}
         run: |
+          if [ -z "$TEST_KEYSTORE_BASE64" ] || [ -z "$TEST_KEYSTORE_PASSWORD" ]; then
+            echo "::error::Add the TEST_KEYSTORE_BASE64 and TEST_KEYSTORE_PASSWORD repository secrets to sign the APK."
+            exit 1
+          fi
+          printf '%s' "$TEST_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/test.keystore"
+          printf 'storeFile=%s\nstorePassword=%s\nkeyAlias=test\nkeyPassword=%s\n' \
+            "$RUNNER_TEMP/test.keystore" "$TEST_KEYSTORE_PASSWORD" "$TEST_KEYSTORE_PASSWORD" > android/key.properties
           flutter build apk --release --split-per-abi \
             --build-name=0.1.${{ github.run_number }} --build-number=${{ github.run_number }} \
             --obfuscate --split-debug-info=build/symbols \

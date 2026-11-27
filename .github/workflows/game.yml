@@ -129,14 +129,23 @@ jobs:
 
       - name: APK
         if: github.event_name != 'pull_request'
+        # Test APKs are signed with a key kept only in GitHub secrets
+        # (TEST_KEYSTORE_BASE64, TEST_KEYSTORE_PASSWORD), so nobody else can
+        # sign an APK that installs over ours.
         env:
-          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: ${{ github.workspace }}/keys/dev.keystore
-          GODOT_ANDROID_KEYSTORE_RELEASE_USER: androiddebugkey
-          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: android
-          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ github.workspace }}/keys/dev.keystore
-          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
-          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+          TEST_KEYSTORE_BASE64: ${{ secrets.TEST_KEYSTORE_BASE64 }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: ${{ runner.temp }}/test.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: test
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.TEST_KEYSTORE_PASSWORD }}
+          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ runner.temp }}/test.keystore
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: test
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: ${{ secrets.TEST_KEYSTORE_PASSWORD }}
         run: |
+          if [ -z "$TEST_KEYSTORE_BASE64" ] || [ -z "$GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD" ]; then
+            echo "::error::Add the TEST_KEYSTORE_BASE64 and TEST_KEYSTORE_PASSWORD repository secrets to sign the APK."
+            exit 1
+          fi
+          printf '%s' "$TEST_KEYSTORE_BASE64" | base64 -d > "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"
           v=${{ steps.v.outputs.version }}
           mkdir -p ~/.config/godot
           cat > ~/.config/godot/editor_settings-4.5.tres <<SETTINGS

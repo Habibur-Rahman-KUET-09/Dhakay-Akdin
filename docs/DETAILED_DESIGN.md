@@ -473,7 +473,7 @@ game/
   fonts/           # Hind Siliguri
   tests/           # run_tests.gd (headless), shots.gd (screenshot)
 tool/              # validate_content.py, fetch_osm.py, build_map.py
-keys/dev.keystore  # পরীক্ষার APK-র সই (Play-র key আলাদা, GitHub secret-এ)
+# পরীক্ষার APK-র সই-এর key repo-তে নেই: GitHub secret TEST_KEYSTORE_BASE64 + TEST_KEYSTORE_PASSWORD (Play-র key আলাদা)
 ```
 
 ### ৯.৩ চরিত্রের interface

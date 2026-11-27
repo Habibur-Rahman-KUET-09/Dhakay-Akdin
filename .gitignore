@@ -5,3 +5,8 @@ game/android/
 game/addons/google_sign_in/bin/
 android-plugin/build/
 android-plugin/.gradle/
+
+# Signing keys live only in GitHub secrets, never in the repo.
+*.keystore
+*.jks
+key.properties

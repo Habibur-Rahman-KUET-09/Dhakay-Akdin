@@ -8,9 +8,8 @@ plugins {
 }
 
 // Release signing comes from android/key.properties when it exists (CI writes it
-// from secrets, for Play). Otherwise every build is signed with the shared
-// development key in android/dev.keystore, so a new test APK installs over the
-// last one on any machine. Test builds only.
+// from the TEST_KEYSTORE_* secrets). Without it, a local release build is signed
+// with this machine's own debug key. Never commit a keystore or key.properties.
 val keystoreProperties = Properties().apply {
     val f = rootProject.file("key.properties")
     if (f.exists()) load(FileInputStream(f))
@@ -41,12 +40,6 @@ android {
     }
 
     signingConfigs {
-        getByName("debug") {
-            storeFile = rootProject.file("dev.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
-        }
         if (!keystoreProperties.isEmpty) {
             create("release") {
                 storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
