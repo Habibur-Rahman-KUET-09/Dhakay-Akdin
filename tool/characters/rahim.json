@@ -1,14 +1,117 @@
 {
   "about": "Rahim Chacha, the rickshaw puller: about 45, sun-darkened, lean and wiry from pedalling, a little shorter than average. Macro values are MakeHuman's (0..1; age 0.5 = 25 years, 1.0 = 90). Asset picks are words to look for in the asset file names (the first match wins).",
-  "macro": {"gender": 1.0, "age": 0.66, "muscle": 0.62, "weight": 0.32, "proportions": 0.55, "height": 0.4, "cupsize": 0.5, "firmness": 0.5,
-            "race": {"asian": 0.55, "african": 0.3, "caucasian": 0.15}},
-  "rig": "standard.game_engine",
-  "skin": [["middleage", "dark", "male"], ["middleage", "male"], ["dark", "male"], ["male"]],
-  "eyes": [["brown"]],
-  "eyebrows": [["eyebrow001"], ["eyebrow"]],
-  "eyelashes": [["eyelashes01"], ["eyelash"]],
-  "teeth": [["teeth_base"], ["teeth"]],
-  "tongue": [["tongue01"], ["tongue"]],
-  "hair": [["short02"], ["short"]],
-  "clothes": []
+  "macro": {
+    "gender": 1.0,
+    "age": 0.66,
+    "muscle": 0.62,
+    "weight": 0.32,
+    "proportions": 0.55,
+    "height": 0.4,
+    "cupsize": 0.5,
+    "firmness": 0.5,
+    "race": {
+      "asian": 0.55,
+      "african": 0.3,
+      "caucasian": 0.15
+    }
+  },
+  "rig": "game_engine",
+  "skin": [
+    [
+      "middleage",
+      "asian",
+      "male"
+    ],
+    [
+      "middleage",
+      "african",
+      "male"
+    ],
+    [
+      "male"
+    ]
+  ],
+  "eyes": [
+    [
+      "low-poly"
+    ],
+    [
+      "high-poly"
+    ]
+  ],
+  "eyebrows": [
+    [
+      "eyebrow001"
+    ],
+    [
+      "eyebrow"
+    ]
+  ],
+  "eyelashes": [
+    [
+      "eyelashes01"
+    ],
+    [
+      "eyelash"
+    ]
+  ],
+  "teeth": [],
+  "tongue": [],
+  "hair": [
+    [
+      "short04"
+    ],
+    [
+      "short02"
+    ]
+  ],
+  "clothes": [],
+  "tint": {
+    "hair": {
+      "colour": [
+        0.07,
+        0.06,
+        0.055
+      ],
+      "keep": 0.35
+    },
+    "eyebrows": {
+      "colour": [
+        0.05,
+        0.045,
+        0.04
+      ],
+      "keep": 0.2
+    }
+  },
+  "max_texture": 1024,
+  "roughness": 0.62,
+  "outfit": {
+    "lungi": {
+      "top": 0.585,
+      "bottom": 0.17,
+      "colours": [
+        "24507A",
+        "1F6B4A",
+        "24507A",
+        "CFC8B8"
+      ],
+      "stripes": 12,
+      "repeat": 3.0
+    },
+    "shirt": {
+      "colour": "C9783A",
+      "bottom": 0.55,
+      "neck": 0.835,
+      "sleeve": 0.45,
+      "lift": 0.012
+    },
+    "gamchha": {
+      "side": -1,
+      "width": 0.13
+    },
+    "sandals": {
+      "colour": "2B4C7E"
+    }
+  }
 }

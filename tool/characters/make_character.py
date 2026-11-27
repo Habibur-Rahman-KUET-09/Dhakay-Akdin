@@ -11,6 +11,9 @@ import sys
 
 import bpy
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import clothes  # noqa: E402
+
 argv = sys.argv[sys.argv.index("--") + 1:]
 NAME, OUT = argv[0], argv[1]
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -31,12 +34,34 @@ for sub, pattern in SUBDIRS.items():
 
 
 def pick(sub, wishes):
+    """The first asset whose file name has all the words of a wish, word for
+    word ("male" does not match "female")."""
     for words in wishes:
         for f in found.get(sub, []):
-            low = os.path.basename(f).lower()
-            if all(w in low for w in words):
+            tokens = os.path.splitext(os.path.basename(f))[0].lower().replace("-", "_").split("_")
+            whole = os.path.splitext(os.path.basename(f))[0].lower()
+            if all(w in tokens or w == whole for w in words):
                 return f
     return None
+
+
+def tint_images(obj, colour, keep):
+    """Recolours an asset's textures toward `colour` (hair dark, a little of
+    its own light kept, so it stays hair and not paint)."""
+    for slot in obj.material_slots:
+        m = slot.material
+        if not m or not m.use_nodes:
+            continue
+        for n in m.node_tree.nodes:
+            if n.type == "TEX_IMAGE" and n.image and n.image.size[0] > 0:
+                img = n.image
+                px = list(img.pixels)
+                for i in range(0, len(px), 4):
+                    lum = 0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2]
+                    for k in range(3):
+                        px[i + k] = colour[k] * (1.0 - keep) + lum * keep * colour[k] * 3.0
+                img.pixels[:] = px
+                img.update()
 
 
 # An empty scene.
@@ -58,15 +83,22 @@ if skin:
     except Exception as e:
         report["errors"].append("skin: %r" % e)
 
+added = {}
 for part, kind in [("eyes", "Eyes"), ("eyebrows", "Eyebrows"), ("eyelashes", "Eyelashes"), ("teeth", "Teeth"),
                    ("tongue", "Tongue"), ("hair", "Hair")]:
     f = pick(part, SPEC.get(part, []))
     report["picked"][part] = f
     if f:
         try:
-            HumanService.add_mhclo_asset(f, human, asset_type=kind, subdiv_levels=0, material_type="GAMEENGINE")
+            added[part] = HumanService.add_mhclo_asset(f, human, asset_type=kind, subdiv_levels=0, material_type="GAMEENGINE")
         except Exception as e:
             report["errors"].append("%s: %r" % (part, e))
+if SPEC.get("outfit"):
+    made = clothes.dress(human, SPEC["outfit"], report)
+    report["picked"]["outfit"] = sorted(made)
+for part, look in SPEC.get("tint", {}).items():
+    if part in added and added[part] is not None:
+        tint_images(added[part], look["colour"], look.get("keep", 0.25))
 for wishes in SPEC.get("clothes", []):
     f = pick("clothes", [wishes])
     report["picked"].setdefault("clothes", []).append(f)
@@ -76,6 +108,22 @@ for wishes in SPEC.get("clothes", []):
         except Exception as e:
             report["errors"].append("clothes %s: %r" % (wishes, e))
 
+# Skin and cloth are not wet: rougher, less shine. Textures no bigger
+# than the phone needs.
+MAX_TEX = SPEC.get("max_texture", 1024)
+for m in bpy.data.materials:
+    if m.use_nodes:
+        for n in m.node_tree.nodes:
+            if n.type == "BSDF_PRINCIPLED":
+                if not n.inputs["Roughness"].is_linked:
+                    n.inputs["Roughness"].default_value = max(n.inputs["Roughness"].default_value, SPEC.get("roughness", 0.62))
+                if "Specular IOR Level" in n.inputs and not n.inputs["Specular IOR Level"].is_linked:
+                    n.inputs["Specular IOR Level"].default_value = 0.3
+for img in bpy.data.images:
+    if img.size[0] > MAX_TEX or img.size[1] > MAX_TEX:
+        f = MAX_TEX / max(img.size[0], img.size[1])
+        img.scale(max(1, int(img.size[0] * f)), max(1, int(img.size[1] * f)))
+
 # Counts, for the phone's sake.
 report["meshes"] = {o.name: len(o.data.polygons) for o in bpy.data.objects if o.type == "MESH"}
 report["materials"] = {m.name: [n.type for n in m.node_tree.nodes] if m.use_nodes else [] for m in bpy.data.materials}
@@ -83,7 +131,7 @@ report["materials"] = {m.name: [n.type for n in m.node_tree.nodes] if m.use_node
 glb = os.path.join(OUT, NAME + ".glb")
 try:
     bpy.ops.export_scene.gltf(filepath=glb, export_format="GLB", export_apply=True, export_animations=False,
-                              export_yup=True, export_image_format="JPEG")
+                              export_yup=True, export_image_format="JPEG", export_jpeg_quality=82)
     report["glb_bytes"] = os.path.getsize(glb)
 except Exception as e:
     report["errors"].append("export: %r" % e)
