@@ -1,0 +1,172 @@
+{
+ "name": "rahim",
+ "picked": {
+  "skin": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/skins/middleage_african_female/middleage_african_female.mhmat",
+  "eyes": null,
+  "eyebrows": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyebrows/eyebrow001/eyebrow001.mhclo",
+  "eyelashes": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyelashes/eyelashes01/eyelashes01.mhclo",
+  "teeth": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/teeth/teeth_base/teeth_base.mhclo",
+  "tongue": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/tongue/tongue01/tongue01.mhclo",
+  "hair": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/hair/short02/short02.mhclo"
+ },
+ "assets": {
+  "skins": [
+   "middleage_african_female/middleage_african_female.mhmat",
+   "middleage_african_male/middleage_african_male.mhmat",
+   "middleage_asian_female/middleage_asian_female.mhmat",
+   "middleage_asian_male/middleage_asian_male.mhmat",
+   "middleage_caucasian_female/middleage_caucasian_female.mhmat",
+   "middleage_caucasian_male/middleage_caucasian_male.mhmat",
+   "old_african_female/old_african_female.mhmat",
+   "old_african_male/old_african_male.mhmat",
+   "old_asian_female/old_asian_female.mhmat",
+   "old_asian_male/old_asian_male.mhmat",
+   "old_caucasian_female/old_caucasian_female.mhmat",
+   "old_caucasian_male/old_caucasian_male.mhmat",
+   "toon01/toon01.mhmat",
+   "young_african_female/young_african_female.mhmat",
+   "young_african_male/young_african_male.mhmat",
+   "young_asian_female/young_asian_female.mhmat",
+   "young_asian_male/young_asian_male.mhmat",
+   "young_caucasian_female/young_caucasian_female.mhmat",
+   "young_caucasian_female2/young_caucasian_female2.mhmat",
+   "young_caucasian_female_special_suit/young_caucasian_female_special_suit.mhmat",
+   "young_caucasian_male/young_caucasian_male.mhmat",
+   "young_caucasian_male2/young_caucasian_male2.mhmat",
+   "young_caucasian_male_special_suit/young_caucasian_male_special_suit.mhmat"
+  ],
+  "eyes": [
+   "high-poly/high-poly.mhclo",
+   "low-poly/low-poly.mhclo"
+  ],
+  "eyebrows": [
+   "eyebrow001/eyebrow001.mhclo",
+   "eyebrow002/eyebrow002.mhclo",
+   "eyebrow003/eyebrow003.mhclo",
+   "eyebrow004/eyebrow004.mhclo",
+   "eyebrow005/eyebrow005.mhclo",
+   "eyebrow006/eyebrow006.mhclo",
+   "eyebrow007/eyebrow007.mhclo",
+   "eyebrow008/eyebrow008.mhclo",
+   "eyebrow009/eyebrow009.mhclo",
+   "eyebrow010/eyebrow010.mhclo",
+   "eyebrow011/eyebrow011.mhclo",
+   "eyebrow012/eyebrow012.mhclo"
+  ],
+  "eyelashes": [
+   "eyelashes01/eyelashes01.mhclo",
+   "eyelashes02/eyelashes02.mhclo",
+   "eyelashes03/eyelashes03.mhclo",
+   "eyelashes04/eyelashes04.mhclo"
+  ],
+  "teeth": [
+   "teeth_base/teeth_base.mhclo",
+   "teeth_shape01/teeth_shape01.mhclo",
+   "teeth_shape02/teeth_shape02.mhclo",
+   "teeth_shape03/teeth_shape03.mhclo",
+   "teeth_shape04/teeth_shape04.mhclo",
+   "teeth_shape05/teeth_shape05.mhclo"
+  ],
+  "tongue": [
+   "tongue01/tongue01.mhclo"
+  ],
+  "hair": [
+   "afro01/afro01.mhclo",
+   "bob01/bob01.mhclo",
+   "bob02/bob02.mhclo",
+   "braid01/braid01.mhclo",
+   "long01/long01.mhclo",
+   "ponytail01/ponytail01.mhclo",
+   "short01/short01.mhclo",
+   "short02/short02.mhclo",
+   "short03/short03.mhclo",
+   "short04/short04.mhclo"
+  ],
+  "clothes": [
+   "fedora01/fedora01.mhclo",
+   "fedora_cocked/fedora_cocked.mhclo",
+   "female_casualsuit01/female_casualsuit01.mhclo",
+   "female_casualsuit02/female_casualsuit02.mhclo",
+   "female_elegantsuit01/female_elegantsuit01.mhclo",
+   "female_sportsuit01/female_sportsuit01.mhclo",
+   "male_casualsuit01/male_casualsuit01.mhclo",
+   "male_casualsuit02/male_casualsuit02.mhclo",
+   "male_casualsuit03/male_casualsuit03.mhclo",
+   "male_casualsuit04/male_casualsuit04.mhclo",
+   "male_casualsuit05/male_casualsuit05.mhclo",
+   "male_casualsuit06/male_casualsuit06.mhclo",
+   "male_elegantsuit01/male_elegantsuit01.mhclo",
+   "male_worksuit01/male_worksuit01.mhclo",
+   "shoes01/shoes01.mhclo",
+   "shoes02/shoes02.mhclo",
+   "shoes03/shoes03.mhclo",
+   "shoes04/shoes04.mhclo",
+   "shoes05/shoes05.mhclo",
+   "shoes06/shoes06.mhclo"
+  ],
+  "proxymeshes": [
+   "female1605/female1605.proxy",
+   "female_generic/female_generic.proxy",
+   "female_muscle_13442/female_muscle_13442.proxy",
+   "male1591/male1591.proxy",
+   "male_generic/male_generic.proxy",
+   "male_muscle_13290/male_muscle_13290.proxy",
+   "proxy741/proxy741.proxy"
+  ]
+ },
+ "errors": [
+  "rig: OSError('Could not find the rig file: /home/runner/.config/blender/4.2/extensions/user_default/mpfb/data/rigs/standard/rig.standard.game_engine.json')"
+ ],
+ "meshes": {
+  "rahim": 18486,
+  "rahim.eyebrow001": 96,
+  "rahim.eyelashes01": 184,
+  "rahim.short02": 1672,
+  "rahim.teeth_base": 3560,
+  "rahim.tongue01": 224
+ },
+ "materials": {
+  "Dots Stroke": [],
+  "Material": [
+   "OUTPUT_MATERIAL",
+   "BSDF_PRINCIPLED"
+  ],
+  "rahim.body": [
+   "OUTPUT_MATERIAL",
+   "BSDF_PRINCIPLED",
+   "TEX_IMAGE",
+   "TEX_IMAGE"
+  ],
+  "rahim.eyebrow001": [
+   "OUTPUT_MATERIAL",
+   "BSDF_PRINCIPLED",
+   "TEX_IMAGE",
+   "TEX_IMAGE"
+  ],
+  "rahim.eyelashes01": [
+   "OUTPUT_MATERIAL",
+   "BSDF_PRINCIPLED",
+   "TEX_IMAGE",
+   "TEX_IMAGE"
+  ],
+  "rahim.short02": [
+   "OUTPUT_MATERIAL",
+   "BSDF_PRINCIPLED",
+   "TEX_IMAGE",
+   "TEX_IMAGE"
+  ],
+  "rahim.teeth_base": [
+   "OUTPUT_MATERIAL",
+   "BSDF_PRINCIPLED",
+   "TEX_IMAGE",
+   "TEX_IMAGE"
+  ],
+  "rahim.tongue01": [
+   "OUTPUT_MATERIAL",
+   "BSDF_PRINCIPLED",
+   "TEX_IMAGE",
+   "TEX_IMAGE"
+  ]
+ },
+ "glb_bytes": 11280124
+}
