@@ -103,6 +103,8 @@ var last_change := {}
 ## More or fewer customers than usual (a story day: the eviction, the
 ## cricket final), 1 as usual.
 var arrival_factor := 1.0
+## The cricket season: in the evening the stall fills up for the match.
+var cricket := false
 var _weights := {}
 ## Things sold by kind (for the day's challenge).
 var sold_items := {}
@@ -189,6 +191,8 @@ func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") ->
 		hot_chance = calendar.hot_chance(hot_chance, date)
 		festival = calendar.festival(date)
 		ramadan = calendar.ramadan(date)
+		arrival_factor *= calendar.crowd(date)
+		cricket = calendar.cricket(date)
 	if weather.randf() < rain_chance:
 		rain_at = weather.randf_range(0.15, 0.75) * day_seconds
 		rain_seconds = b.n("tea_stall.rain_seconds")
@@ -317,6 +321,8 @@ func update(dt: float) -> Array:
 		if ramadan:
 			every *= b.n("tea_stall.ramadan_day_arrivals") if hour() < 17.0 else 1.0
 		every /= maxf(0.1, arrival_factor)
+		if cricket and hour() >= 17.0:
+			every /= b.n("tea_stall.cricket_crowd")
 		_next_in = every * rng.randf_range(0.6, 1.4)
 		if _arrive():
 			events.append(Event.ARRIVED)

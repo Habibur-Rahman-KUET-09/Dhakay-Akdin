@@ -76,6 +76,7 @@ var progress: Progress
 var rickshaw: Node3D
 ## The rickshaw body's material: paints hood and body, pedals the legs.
 var _paint: ShaderMaterial
+var _rider_paint: ShaderMaterial
 var camera: Camera3D
 var marker: Node3D
 var hud: Hud
@@ -303,6 +304,12 @@ func _ready() -> void:
 	own[1] = body_colour
 	_paint = Models.traffic_material(own, false)
 	(rickshaw.get_meta("body") as MeshInstance3D).material_override = _paint
+	if rickshaw.has_meta("rider"):
+		# Rahim Chacha's clothes: an orange shirt and a blue lungi, or a
+		# bought outfit.
+		var outfit := progress.worn("rickshaw", "outfit")
+		_rider_paint = Models.traffic_material(PackedColorArray([Color(str(outfit.get("shirt", "E8892B"))), Color(str(outfit.get("lower", "2D5D8A")))]), false)
+		(rickshaw.get_meta("rider") as MeshInstance3D).material_override = _rider_paint
 	var plain := Models.material()
 	for w in rickshaw.get_meta("wheels"):
 		(w as MeshInstance3D).material_override = plain
@@ -707,6 +714,8 @@ func _follow(dt: float, snap := false) -> void:
 			w.rotate_x(-dt * d.speed * City.T / 0.34)
 	var pedalling := (shift.pedal or shift.cruise) and d.moving
 	_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if pedalling else 0.0, 0.0, 1.0))
+	if _rider_paint != null:
+		_rider_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if pedalling else 0.0, 0.0, 1.0))
 	var forward := Vector3(-sin(_yaw), 0, -cos(_yaw))
 	# Behind the rickshaw may be a building: then the camera comes closer
 	# (and a little higher) until it stands over the road.
@@ -901,7 +910,7 @@ func _handle(events: Array) -> void:
 		_say(strings.t("stuckWater"), Look.SKY, 2.5)
 		_push_out()
 	if events.has(Day.RAIN_START):
-		_say(strings.t("rainStart"), Look.SKY, 3.5)
+		_say(strings.t("rainStart") + ("\n" + strings.t("rainFares") if mode != "delivery" else ""), Look.SKY, 4.0)
 		_rain_sound.play()
 		if not shift.riding.is_empty():
 			_voice.say("rain")

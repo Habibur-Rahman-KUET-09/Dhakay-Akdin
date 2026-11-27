@@ -1,0 +1,336 @@
+{
+ "about": "The Dhaka card album (rules/cards.gd): one card after every day played, from the set that suits the character; a festival day gives that festival's card. A card already held turns into stars; a whole set pays its stars once.",
+ "sets": [
+  {
+   "id": "places",
+   "icon": "town",
+   "colour": "1E6FB0",
+   "who": [
+    "rickshaw",
+    "delivery"
+   ],
+   "name": {
+    "bn": "ঢাকার জায়গা",
+    "en": "Dhaka places"
+   },
+   "cards": [
+    {
+     "id": "shahbag",
+     "name": {
+      "bn": "শাহবাগ",
+      "en": "Shahbag"
+     },
+     "fact": {
+      "bn": "ফুলের দোকান আর জাদুঘরের মোড়।",
+      "en": "The crossing of flower stalls and the National Museum."
+     }
+    },
+    {
+     "id": "sadarghat",
+     "name": {
+      "bn": "সদরঘাট",
+      "en": "Sadarghat"
+     },
+     "fact": {
+      "bn": "বুড়িগঙ্গার পাড়ে দেশের সবচেয়ে ব্যস্ত নৌঘাটগুলোর একটা।",
+      "en": "On the Buriganga, one of the busiest river ports in the country."
+     }
+    },
+    {
+     "id": "ahsan_manzil",
+     "name": {
+      "bn": "আহসান মঞ্জিল",
+      "en": "Ahsan Manzil"
+     },
+     "fact": {
+      "bn": "বুড়িগঙ্গার তীরে গোলাপি প্রাসাদ, ঢাকার নবাবদের বাড়ি ছিল।",
+      "en": "The pink palace on the Buriganga, once home of Dhaka's Nawabs."
+     }
+    },
+    {
+     "id": "mirpur10",
+     "name": {
+      "bn": "মিরপুর ১০",
+      "en": "Mirpur 10"
+     },
+     "fact": {
+      "bn": "মেট্রোরেলের নিচে ব্যস্ত গোল মোড়।",
+      "en": "A busy roundabout under the metro line."
+     }
+    },
+    {
+     "id": "dhanmondi_lake",
+     "name": {
+      "bn": "ধানমন্ডি লেক",
+      "en": "Dhanmondi Lake"
+     },
+     "fact": {
+      "bn": "বিকেলে হাঁটা, আড্ডা আর ফুচকার জায়গা।",
+      "en": "For an evening walk, a chat and fuchka."
+     }
+    },
+    {
+     "id": "karwan_bazar",
+     "name": {
+      "bn": "কারওয়ান বাজার",
+      "en": "Karwan Bazar"
+     },
+     "fact": {
+      "bn": "ভোর রাত থেকেই সবজি আর মাছের পাইকারি হাট।",
+      "en": "A wholesale market for vegetables and fish from before dawn."
+     }
+    }
+   ]
+  },
+  {
+   "id": "food",
+   "icon": "kettle",
+   "colour": "C2185B",
+   "who": [
+    "tea",
+    "fuchka"
+   ],
+   "name": {
+    "bn": "ঢাকার খাবার",
+    "en": "Dhaka food"
+   },
+   "cards": [
+    {
+     "id": "dudh_cha",
+     "name": {
+      "bn": "দুধ চা",
+      "en": "Milk tea"
+     },
+     "fact": {
+      "bn": "কনডেন্সড মিল্কে ঘন, টং দোকানের রাজা।",
+      "en": "Thick with condensed milk: king of the roadside stall."
+     }
+    },
+    {
+     "id": "fuchka",
+     "name": {
+      "bn": "ফুচকা",
+      "en": "Fuchka"
+     },
+     "fact": {
+      "bn": "টক পানি আর ঝালে ভরা মুচমুচে পুরি।",
+      "en": "Crisp puris full of tangy water and chilli."
+     }
+    },
+    {
+     "id": "bakarkhani",
+     "name": {
+      "bn": "বাকরখানি",
+      "en": "Bakarkhani"
+     },
+     "fact": {
+      "bn": "পুরান ঢাকার মুচমুচে রুটি, চায়ের সাথে জমে।",
+      "en": "Old Dhaka's flaky bread, best with tea."
+     }
+    },
+    {
+     "id": "kacchi",
+     "name": {
+      "bn": "কাচ্চি বিরিয়ানি",
+      "en": "Kacchi biryani"
+     },
+     "fact": {
+      "bn": "খাসির মাংস আর আলু, পুরান ঢাকার গর্ব।",
+      "en": "Mutton and potato: Old Dhaka's pride."
+     }
+    },
+    {
+     "id": "pitha",
+     "name": {
+      "bn": "ভাপা পিঠা",
+      "en": "Bhapa pitha"
+     },
+     "fact": {
+      "bn": "শীতের সকালে গুড় আর নারকেলের পিঠা।",
+      "en": "A winter-morning cake of date jaggery and coconut."
+     }
+    },
+    {
+     "id": "chotpoti",
+     "name": {
+      "bn": "চটপটি",
+      "en": "Chotpoti"
+     },
+     "fact": {
+      "bn": "ডাবলি, ডিম আর তেঁতুলের টক।",
+      "en": "Yellow peas, egg and tamarind."
+     }
+    }
+   ]
+  },
+  {
+   "id": "rides",
+   "icon": "rickshaw",
+   "colour": "2E9E6B",
+   "who": [
+    "bus",
+    "hawker",
+    "boat"
+   ],
+   "name": {
+    "bn": "ঢাকার যাত্রা",
+    "en": "Dhaka rides"
+   },
+   "cards": [
+    {
+     "id": "local_bus",
+     "name": {
+      "bn": "লোকাল বাস",
+      "en": "Local bus"
+     },
+     "fact": {
+      "bn": "দরজায় ঝুলে থাকা হেলপার আর \"ওস্তাদ, বাঁয়ে!\"",
+      "en": "The helper hanging at the door: \"Ustad, left!\""
+     }
+    },
+    {
+     "id": "rickshaw_art",
+     "name": {
+      "bn": "রিকশা আর্ট",
+      "en": "Rickshaw art"
+     },
+     "fact": {
+      "bn": "রিকশার রঙিন ছবি, ইউনেস্কোর বিমূর্ত সাংস্কৃতিক ঐতিহ্যের তালিকায় আছে।",
+      "en": "The rickshaw's bright paintings, on UNESCO's intangible heritage list."
+     }
+    },
+    {
+     "id": "kheya",
+     "name": {
+      "bn": "খেয়া নৌকা",
+      "en": "Ferry boat"
+     },
+     "fact": {
+      "bn": "বৈঠা বেয়ে নদী পার, সবচেয়ে পুরনো যাত্রা।",
+      "en": "Rowing across the river: the oldest ride of all."
+     }
+    },
+    {
+     "id": "launch",
+     "name": {
+      "bn": "লঞ্চ",
+      "en": "Launch"
+     },
+     "fact": {
+      "bn": "সদরঘাট থেকে দক্ষিণের পথে রাতের লঞ্চ।",
+      "en": "The night launches south from Sadarghat."
+     }
+    },
+    {
+     "id": "cng",
+     "name": {
+      "bn": "সিএনজি",
+      "en": "CNG"
+     },
+     "fact": {
+      "bn": "সবুজ অটোরিকশা: মিটারে যাবে কি না, সেটাই প্রশ্ন।",
+      "en": "The green auto-rickshaw: will he go by the meter? That's the question."
+     }
+    },
+    {
+     "id": "metro",
+     "name": {
+      "bn": "মেট্রোরেল",
+      "en": "Metro rail"
+     },
+     "fact": {
+      "bn": "উত্তরা থেকে মতিঝিল, ঢাকার প্রথম মেট্রো।",
+      "en": "Uttara to Motijheel: Dhaka's first metro."
+     }
+    }
+   ]
+  },
+  {
+   "id": "festivals",
+   "icon": "star",
+   "colour": "F08A24",
+   "who": [],
+   "name": {
+    "bn": "উৎসব",
+    "en": "Festivals"
+   },
+   "cards": [
+    {
+     "id": "boishakh",
+     "name": {
+      "bn": "পহেলা বৈশাখ",
+      "en": "Pohela Boishakh"
+     },
+     "fact": {
+      "bn": "রঙিন শোভাযাত্রা আর পান্তা-ইলিশ।",
+      "en": "A colourful procession, and panta-ilish."
+     }
+    },
+    {
+     "id": "eid",
+     "name": {
+      "bn": "ঈদ",
+      "en": "Eid"
+     },
+     "fact": {
+      "bn": "নতুন জামা, সেমাই আর সালামি।",
+      "en": "New clothes, sweet semai and salami."
+     }
+    },
+    {
+     "id": "ekushe",
+     "name": {
+      "bn": "একুশে",
+      "en": "Ekushe"
+     },
+     "fact": {
+      "bn": "শহীদ মিনারে খালি পায়ে ফুল।",
+      "en": "Flowers, barefoot, at the Shaheed Minar."
+     }
+    },
+    {
+     "id": "bijoy",
+     "name": {
+      "bn": "বিজয় দিবস",
+      "en": "Victory Day"
+     },
+     "fact": {
+      "bn": "১৬ ডিসেম্বর, লাল-সবুজ পতাকায় শহর।",
+      "en": "16 December: a town in red and green."
+     }
+    },
+    {
+     "id": "falgun",
+     "name": {
+      "bn": "বসন্ত",
+      "en": "Spring"
+     },
+     "fact": {
+      "bn": "পহেলা ফাল্গুনে হলুদ শাড়ি আর ফুলের মালা।",
+      "en": "Yellow saris and garlands on Pohela Falgun."
+     }
+    },
+    {
+     "id": "shadhinota",
+     "name": {
+      "bn": "স্বাধীনতা দিবস",
+      "en": "Independence Day"
+     },
+     "fact": {
+      "bn": "২৬ মার্চ, স্মৃতিসৌধে শ্রদ্ধা।",
+      "en": "26 March: flowers at the National Memorial."
+     }
+    }
+   ]
+  }
+ ],
+ "festival_cards": {
+  "boishakh": "boishakh",
+  "eid_fitr": "eid",
+  "eid_adha": "eid",
+  "ekushe": "ekushe",
+  "bijoy": "bijoy",
+  "falgun": "falgun",
+  "shadhinota": "shadhinota"
+ }
+}

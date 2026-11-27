@@ -595,10 +595,19 @@ static func player_rickshaw(hood: Color, body: Color, style := 0) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Rickshaw"
 	var b := Builder.new()
-	_rickshaw(b, true, false, false, style)
+	_rickshaw(b, false, false, false, style)
 	var mi := MeshInstance3D.new()
 	mi.mesh = b.commit()
 	root.add_child(mi)
+	# Rahim Chacha on his own mesh, so his clothes (an outfit) are painted
+	# apart from the hood and body (shirt PAINT_A, lungi PAINT_B).
+	var rb := Builder.new()
+	_body(rb, Vector3(0, 1.08, -0.42), true, true, true)
+	var rider := MeshInstance3D.new()
+	rider.name = "Rider"
+	rider.mesh = rb.commit()
+	root.add_child(rider)
+	root.set_meta("rider", rider)
 	var wheels: Array[Node3D] = []
 	for at in [Vector3(-0.6, 0.34, 0.45), Vector3(0.6, 0.34, 0.45), Vector3(0, 0.34, -1.2)]:
 		var wb := Builder.new()

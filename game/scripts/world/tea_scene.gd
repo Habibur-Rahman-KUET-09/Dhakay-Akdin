@@ -314,7 +314,8 @@ func _build_stall(map: RoadMap, tile: Vector2i) -> void:
 	# Monir Mama behind the counter: white vest, checked blue lungi.
 	var mama := MeshInstance3D.new()
 	mama.mesh = Models.person()
-	var mama_paint := Models.traffic_material(PackedColorArray([Color("F4F1E8"), Color("2D5D8A")]), false)
+	var outfit := progress.worn("tea", "outfit")
+	var mama_paint := Models.traffic_material(PackedColorArray([Color(str(outfit.get("shirt", "F4F1E8"))), Color(str(outfit.get("lower", "2D5D8A")))]), false)
 	mama_paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
 	mama.material_override = mama_paint
 	mama.position = Vector3(-0.2, 0.05, 0.25)
@@ -1134,7 +1135,9 @@ func _chat_tick(dt: float) -> void:
 	_chat_left = Chatter.gap()
 	if _notice_left > 0.0 or day.customers.is_empty() or _activity != null:
 		return
-	var line := Chatter.pick("tea_chat", strings.lang)
+	# The cricket season: in the evening they talk of the match.
+	var group := "cricket_chat" if day.cricket and day.hour() >= 17.0 and randf() < 0.6 else "tea_chat"
+	var line := Chatter.pick(group, strings.lang)
 	if line.is_empty():
 		return
 	_voice.play(str(line.id))

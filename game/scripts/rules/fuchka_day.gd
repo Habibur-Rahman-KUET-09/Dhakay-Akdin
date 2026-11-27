@@ -96,6 +96,7 @@ func _init(balance: Balance, seed_value := -1, owned: Array = [], date := "") ->
 		var calendar := Calendar.new()
 		rain_chance = calendar.rain_chance(rain_chance, date)
 		festival = calendar.festival(date)
+		arrival_factor *= calendar.crowd(date)
 		var m := Calendar.month_of(date)
 		winter = m == 12 or m == 1 or m == 2
 	if weather.randf() < rain_chance:

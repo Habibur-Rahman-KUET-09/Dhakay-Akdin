@@ -1,5 +1,5 @@
 {
- "about": "The year in Dhaka. months: for each month, how much likelier rain is than balance.json's chance (x), how much likelier a hot day, and the chance of a foggy winter morning. festivals: fixed-date days; moon_festivals: the two Eids, which move with the moon, by date for each year (approximate: the day is set by the moon sighting in Bangladesh, so correct them when announced); ramadan: the month of fasting, first and last day each year,, with a greeting, an extra tip per ride, and the colours the lanes are decked in.",
+ "about": "The year in Dhaka. months: for each month, how much likelier rain is than balance.json's chance (x), how much likelier a hot day, and the chance of a foggy winter morning. festivals: fixed-date days; moon_festivals: the two Eids, which move with the moon, by date for each year (approximate: the day is set by the moon sighting in Bangladesh, so correct them when announced); ramadan: the month of fasting, first and last day each year,, with a greeting, an extra tip per ride, and the colours the lanes are decked in. crowd: more customers at the stalls on a festival. cricket_months: the cricket season, when the tea stall fills up in the evenings for the match on TV.",
  "months": [
   {
    "month": "January",
@@ -107,7 +107,8 @@
    "colours": [
     "F6C445",
     "F08A24"
-   ]
+   ],
+   "crowd": 1.3
   },
   {
    "id": "shadhinota",
@@ -124,7 +125,8 @@
    "colours": [
     "006A4E",
     "F42A41"
-   ]
+   ],
+   "crowd": 1.2
   },
   {
    "id": "boishakh",
@@ -141,7 +143,8 @@
    "colours": [
     "F42A41",
     "F4F1E8"
-   ]
+   ],
+   "crowd": 1.5
   },
   {
    "id": "bijoy",
@@ -158,7 +161,8 @@
    "colours": [
     "006A4E",
     "F42A41"
-   ]
+   ],
+   "crowd": 1.2
   }
  ],
  "moon_festivals": [
@@ -182,7 +186,8 @@
    "colours": [
     "2E9E6B",
     "F6C445"
-   ]
+   ],
+   "crowd": 1.4
   },
   {
    "id": "eid_adha",
@@ -204,7 +209,8 @@
    "colours": [
     "1C4E9B",
     "F4F1E8"
-   ]
+   ],
+   "crowd": 1.4
   }
  ],
  "ramadan": [
@@ -224,5 +230,10 @@
    "2029-01-16",
    "2029-02-14"
   ]
+ ],
+ "cricket_months": [
+  12,
+  1,
+  2
  ]
 }

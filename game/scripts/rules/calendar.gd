@@ -67,6 +67,21 @@ func festival(date: String) -> Dictionary:
 	return {}
 
 
+## How much busier the stalls are on a festival (1.0 on other days).
+func crowd(date: String) -> float:
+	return float(festival(date).get("crowd", 1.0))
+
+
+## Whether the date is in the cricket season (the match on the stall's TV).
+func cricket(date: String) -> bool:
+	return date.length() >= 7 and (_cricket_months() as Array).has(month_of(date))
+
+
+func _cricket_months() -> Array:
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/calendar.json"))
+	return parsed.get("cricket_months", []) if typeof(parsed) == TYPE_DICTIONARY else []
+
+
 ## Whether the date is in Ramadan (people hurry home before iftar).
 func ramadan(date: String) -> bool:
 	if date.length() < 10:

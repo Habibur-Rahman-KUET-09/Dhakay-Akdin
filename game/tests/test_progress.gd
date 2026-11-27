@@ -173,12 +173,15 @@ func test_streak_and_its_stars() -> void:
 
 func test_seventh_day_brings_the_festive_hood() -> void:
 	var p := _fresh()
+	var card_stars := 0
 	for i in 7:
 		p.today = Time.get_date_string_from_unix_time(Daily.day_number("2026-11-02") * 86400 + i * 86400)
 		p.daily().featured = true
-		p.apply_day({"earned": 100, "trips": 1, "stars": 3.0, "fines": 0})
+		var out := p.apply_day({"earned": 100, "trips": 1, "stars": 3.0, "fines": 0})
+		# (a card already held turns into a star: not the run's)
+		card_stars += int(out.get("card", {}).get("tara", 0))
 	check(p.data.cosmetics.has("festive_hood"), "a festive hood on the seventh day")
-	eq(p.data.tara, 5 + 5 + 10 + 10 + 10 + 15, "stars on the six days before")
+	eq(p.data.tara - card_stars, 5 + 5 + 10 + 10 + 10 + 15, "stars on the six days before")
 
 
 func test_challenge_met_gives_stars() -> void:
@@ -189,7 +192,7 @@ func test_challenge_met_gives_stars() -> void:
 	var stats := {c.stat: c.goal}
 	var got := p.apply_day({"earned": 100, "trips": 1, "stars": 3.0, "fines": 0, "stats": stats})
 	check(got.challenge, "met")
-	eq(int(p.data.tara) - before, 3 + got.streak_stars, "3 stars for it")
+	eq(int(p.data.tara) - before - int(got.get("card", {}).get("tara", 0)), 3 + got.streak_stars, "3 stars for it")
 	check(not p.apply_day({"earned": 100, "trips": 1, "stars": 3.0, "fines": 0, "stats": stats}).challenge, "once a day")
 
 
@@ -429,3 +432,15 @@ func test_the_target_is_lower_in_the_first_levels() -> void:
 	p.data.mohalla.level = 1
 	var out := p.apply_day({"earned": 400, "trips": 5, "stars": 4.0, "fines": 0})
 	check(out.met, "400 meets a new player's target")
+
+
+func test_eid_salami_once() -> void:
+	var p := _fresh()
+	p.today = "2026-03-21"
+	var before := int(p.data.taka)
+	var got := p.claim_salami()
+	eq(int(got.taka), 100, "salami on Eid ul-Fitr")
+	eq(int(p.data.taka) - before, 100, "into the savings")
+	eq(p.claim_salami(), {}, "once")
+	p.today = "2026-03-22"
+	eq(p.claim_salami(), {}, "not the next day")

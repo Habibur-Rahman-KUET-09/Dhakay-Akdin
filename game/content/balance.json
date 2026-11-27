@@ -20,7 +20,7 @@
   "rickshaw": {
     "easy_fare": 0.9, "easy_fine": 0.5, "easy_traffic": 0.6,
     "start_hour": 7, "end_hour": 21, "day_seconds": 360, "school_fee_goal": 3000, "daily_target": 600,
-    "target_by_level": [[1, 350], [4, 500], [7, 600]], "energy_warn": 35, "tired_nag_s": 45, "easy_stop_room": 0.2,
+    "target_by_level": [[1, 350], [4, 500], [7, 600]], "rain_fare": 1.25, "energy_warn": 35, "tired_nag_s": 45, "easy_stop_room": 0.2,
     "speed_tiles_per_s": 1.5, "accel_tiles_per_s2": 0.6, "coast_decel": 0.3, "brake_decel": 1.5,
     "fare_base": 25, "fare_per_tile": 1.8, "fare_round_to": 5,
     "counter_offer_factor": 1.2,
@@ -66,7 +66,7 @@
     }
   },
   "tea_stall": {
-    "cups": 8, "hands_first": 2, "hands_every": 3, "hands_every_rush": 5, "combo_from": 3, "combo_tip": 2, "combo_most": 5,
+    "cups": 8, "cricket_crowd": 1.3, "hands_first": 2, "hands_every": 3, "hands_every_rush": 5, "combo_from": 3, "combo_tip": 2, "combo_most": 5,
     "credit_chance": 0.35, "credit_days": 2, "credit_tries": 3,
     "phone_pay_chance": 0.12, "ramadan_day_arrivals": 2.5, "iftar_price": 40, "change_chance": 0.15,
     "start_hour": 6, "end_hour": 23, "day_seconds": 300, "rush_hours": [[7, 9], [17, 20]],
@@ -102,6 +102,8 @@
     "rain_chance_per_day": 0.25, "rain_seconds": 60, "rain_arrivals": 0.5, "winter_arrivals": 1.4,
     "upgrades": {"stool": {"cost": 800, "patience_bonus_s": 4}, "umbrella": {"cost": 1500}, "doi": {"cost": 2500}}
   },
+  "cards": {"repeat_tara": 1, "set_tara": 15, "new_chance": 0.7},
+  "salami": {"taka": 100, "tara": 5},
   "ranked": {"note": "The weekly tournament (rules/ranked.gd): a day's XP is its points; the week's points give the rank; a new week pays last week's rank its stars.",
     "ranks": [{"id": "notun", "points": 0, "tara": 0}, {"id": "paka", "points": 300, "tara": 3}, {"id": "ostad", "points": 700, "tara": 6},
       {"id": "raja", "points": 1200, "tara": 10}, {"id": "kingbodonti", "points": 2000, "tara": 15}]},

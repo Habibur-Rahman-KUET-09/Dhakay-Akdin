@@ -1,5 +1,5 @@
 {
- "about": "What the savings (and the stars) can be spent on besides upgrades. boosts: bought with stars (tara) for the character's next day: a good meal (more energy), a loudspeaker at the stall (more customers), a pack of small notes in the change bag. looks: paint and decorations for each one's rickshaw, stall or bus (bought once, then worn or taken off; one per slot; a prize one is not sold, it is won among friends; a tara one is bought with stars). home: things for Rahim Chacha's home in Mirpur, each makes the family glad (family) and some let him rest better (energy: more at the start of a day). phone: a phone of his own, which helps check payment SMS and talk to home. samity: the savings club, a small deposit at the end of every day, paid back with a bonus after `rounds` deposits. Rahim Chacha's rickshaw also takes a painting on the back (plate: a picture from textures/ui) and a line written under it (slogan), as rickshaw painters do; both are bought with stars.",
+ "about": "What the savings (and the stars) can be spent on besides upgrades. boosts: bought with stars (tara) for the character's next day: a good meal (more energy), a loudspeaker at the stall (more customers), a pack of small notes in the change bag. looks: paint and decorations for each one's rickshaw, stall or bus (bought once, then worn or taken off; one per slot; a prize one is not sold, it is won among friends; a tara one is bought with stars). home: things for Rahim Chacha's home in Mirpur, each makes the family glad (family) and some let him rest better (energy: more at the start of a day). phone: a phone of his own, which helps check payment SMS and talk to home. samity: the savings club, a small deposit at the end of every day, paid back with a bonus after `rounds` deposits. Rahim Chacha's rickshaw also takes a painting on the back (plate: a picture from textures/ui) and a line written under it (slogan), as rickshaw painters do; both are bought with stars. An outfit (slot outfit: shirt and lower colours) dresses Rahim Chacha, Monir Mama and Julekha Khala.",
  "looks": {
   "rickshaw": [
    {
@@ -134,6 +134,30 @@
     "slot": "slogan",
     "tara": 8,
     "icon": "star"
+   },
+   {
+    "id": "outfit_gamchha",
+    "slot": "outfit",
+    "shirt": "C62828",
+    "lower": "1B5E20",
+    "icon": "bag",
+    "price": 200
+   },
+   {
+    "id": "outfit_check",
+    "slot": "outfit",
+    "shirt": "F4F1E8",
+    "lower": "6A1B9A",
+    "icon": "bag",
+    "price": 250
+   },
+   {
+    "id": "outfit_eid",
+    "slot": "outfit",
+    "shirt": "FFFFFF",
+    "lower": "F6B800",
+    "icon": "star",
+    "tara": 15
    }
   ],
   "tea": [
@@ -168,6 +192,30 @@
     "fill": "6A1B9A",
     "outline": "F6B800",
     "icon": "star"
+   },
+   {
+    "id": "outfit_fatua",
+    "slot": "outfit",
+    "shirt": "8D6E63",
+    "lower": "263238",
+    "icon": "bag",
+    "price": 200
+   },
+   {
+    "id": "outfit_blue",
+    "slot": "outfit",
+    "shirt": "1E6FB0",
+    "lower": "ECEFF1",
+    "icon": "bag",
+    "price": 250
+   },
+   {
+    "id": "outfit_eid_tea",
+    "slot": "outfit",
+    "shirt": "2E9E6B",
+    "lower": "FFFFFF",
+    "icon": "star",
+    "tara": 15
    }
   ],
   "bus": [
@@ -217,6 +265,30 @@
     "body": "6A1B9A",
     "trim": "F6B800",
     "icon": "star"
+   },
+   {
+    "id": "sari_red",
+    "slot": "outfit",
+    "shirt": "C62828",
+    "lower": "F6B800",
+    "icon": "bag",
+    "price": 250
+   },
+   {
+    "id": "sari_blue",
+    "slot": "outfit",
+    "shirt": "1565C0",
+    "lower": "F48FB1",
+    "icon": "bag",
+    "price": 250
+   },
+   {
+    "id": "sari_jamdani",
+    "slot": "outfit",
+    "shirt": "FFF3E0",
+    "lower": "AD1457",
+    "icon": "star",
+    "tara": 20
    }
   ],
   "delivery": [

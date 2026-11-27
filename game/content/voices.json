@@ -972,6 +972,28 @@
     "bn": "খালা, ছবিটা পোস্ট দিলাম, আপনার দোকান এখন ভাইরাল!",
     "en": "Khala, I posted the photo, your cart's going viral now!"
    }
+  ],
+  "cricket_chat": [
+   {
+    "by": "student",
+    "bn": "মামা, টিভির ভলিউম বাড়ান, শেষ ওভার চলতেছে!",
+    "en": "Mama, turn the TV up, it's the last over!"
+   },
+   {
+    "by": "man",
+    "bn": "ছক্কা! আরেক কাপ চা দেন মামা, খুশির চা!",
+    "en": "Six! Another cup, Mama, a celebration cup!"
+   },
+   {
+    "by": "man2",
+    "bn": "আরে, এই বলটা ধরা যাইত না?",
+    "en": "Oh, couldn't he have caught that one?"
+   },
+   {
+    "by": "oldman",
+    "bn": "আমাদের সময় রেডিওতে খেলা শুনতাম, এখন তো রঙিন টিভি।",
+    "en": "In my day we listened on the radio; now it's colour TV."
+   }
   ]
  },
  "fixes": {

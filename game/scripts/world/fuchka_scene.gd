@@ -266,7 +266,8 @@ func _build_cart(map: RoadMap, tile: Vector2i) -> void:
 	# Julekha Khala behind the cart: a green and magenta sari.
 	var khala := MeshInstance3D.new()
 	khala.mesh = Models.person(1)
-	var sari := Models.traffic_material(PackedColorArray([Color("1C7C54"), Color("C2185B")]), false)
+	var outfit := progress.worn("fuchka", "outfit")
+	var sari := Models.traffic_material(PackedColorArray([Color(str(outfit.get("shirt", "1C7C54"))), Color(str(outfit.get("lower", "C2185B")))]), false)
 	sari.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
 	khala.material_override = sari
 	khala.position = Vector3(-0.2, 0.0, 0.75)

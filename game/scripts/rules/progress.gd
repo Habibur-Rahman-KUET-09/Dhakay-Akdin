@@ -14,6 +14,8 @@ const Friends = preload("res://scripts/rules/friends.gd")
 const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 const League = preload("res://scripts/rules/league.gd")
 const Ranked = preload("res://scripts/rules/ranked.gd")
+const Cards = preload("res://scripts/rules/cards.gd")
+const Calendar = preload("res://scripts/rules/calendar.gd")
 
 const SCHEMA := 1
 const DEFAULT_PATH := "user://save.json"
@@ -304,6 +306,18 @@ func add_family(who: String, delta: int) -> int:
 ## XP needed to go from `level` to the next.
 func to_next(level: int) -> int:
 	return int(b.n("economy.xp_level_base") + b.n("economy.xp_level_step") * level)
+
+
+## Eid salami from the family, once on an Eid day: {taka, tara}, or {}.
+func claim_salami() -> Dictionary:
+	var fest := Calendar.new().festival(date())
+	if not str(fest.get("id", "")).begins_with("eid") or str(data.get("salami", "")) == date():
+		return {}
+	data["salami"] = date()
+	var got := {"taka": int(b.n("salami.taka")), "tara": int(b.n("salami.tara"))}
+	data.taka = int(data.taka) + got.taka
+	data.tara = int(data.tara) + got.tara
+	return got
 
 
 ## Rahim Chacha's day's target: lower in the first levels, so a new player
@@ -758,6 +772,11 @@ func _day_done(who: String, result: Dictionary, out: Dictionary) -> void:
 	out.rank = int(rk.rank)
 	out.rank_up = bool(rk.up)
 	out.rank_id = Ranked.rank_id(b, int(rk.rank))
+	# A card for the album: from the character's set, a festival's on its day.
+	var card_rng := RandomNumberGenerator.new()
+	card_rng.randomize()
+	var fest := Calendar.new().festival(date())
+	out.card = Cards.draw(data, b, who, str(fest.get("id", "")), card_rng)
 	out.relay_done = Friends.claim_relay(data, b, date())
 
 

@@ -845,6 +845,9 @@ func _top_up() -> void:
 			fair_fare = fares.round_fare(fair_fare * balance.n("rickshaw.easy_fare"))
 		if night:
 			fair_fare = fares.round_fare(fair_fare * balance.n("night.fare"))
+		# In the rain everyone wants a rickshaw: fares go up, as in Dhaka.
+		if raining:
+			fair_fare = fares.round_fare(fair_fare * balance.n("rickshaw.rain_fare"))
 		_next_id += 1
 		var offered := fares.offer(who, fair_fare, rng)
 		var w := {

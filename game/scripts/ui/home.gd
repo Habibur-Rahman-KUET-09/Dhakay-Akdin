@@ -31,6 +31,8 @@ const Friends = preload("res://scripts/rules/friends.gd")
 const Leaderboard = preload("res://scripts/rules/leaderboard.gd")
 const League = preload("res://scripts/rules/league.gd")
 const Ranked = preload("res://scripts/rules/ranked.gd")
+const Cards = preload("res://scripts/rules/cards.gd")
+const Juice = preload("res://scripts/ui/juice.gd")
 const Race = preload("res://scripts/rules/race.gd")
 const Together = preload("res://scripts/rules/together.gd")
 
@@ -87,6 +89,8 @@ var _league_now := {}
 var _league_state := ""
 ## Last week's tournament prize, paid when the home opened in a new week.
 var _rank_paid := {}
+## Eid salami given when the home opened on an Eid day.
+var _salami := {}
 ## Reading aloud: on (kept from the setting), and a finger held down
 ## (where, since when) to read what is under it.
 var _read_aloud := false
@@ -103,7 +107,8 @@ func _ready() -> void:
 		_lowered = true
 	progress = Progress.new(b)
 	_rank_paid = Ranked.claim(progress.data, b, progress.date())
-	if not _rank_paid.is_empty():
+	_salami = progress.claim_salami()
+	if not _rank_paid.is_empty() or not _salami.is_empty():
 		progress.save()
 	_read_aloud = ReadAloud.wanted()
 	cloud = Cloud.new()
@@ -301,6 +306,8 @@ func _app_page() -> void:
 			_board_page(page)
 		"together":
 			_together_page(page)
+		"cards":
+			_cards_page(page)
 		_:
 			_hub_page(page, margin)
 	_let_scroll(margin)
@@ -458,7 +465,10 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 	var challenge := _challenge_card()
 	if challenge != null:
 		inner.add_child(challenge)
+	if not _salami.is_empty():
+		inner.add_child(_salami_card())
 	inner.add_child(_ranked_card())
+	inner.add_child(_album_card())
 	inner.add_child(_together_card())
 	if cloud.enabled():
 		inner.add_child(_online_card())
@@ -1275,7 +1285,7 @@ func _owned_pill(col: VBoxContainer, text: String) -> void:
 ## A look: its colour (or the slot's picture), and buy, wear or take off.
 func _look_card(l: Dictionary, who: String) -> Control:
 	var tile := _tint_of(who)
-	for key in ["hood", "fill", "colour", "body", "box", "basket"]:
+	for key in ["hood", "fill", "colour", "body", "box", "basket", "shirt"]:
 		if l.has(key):
 			tile = Color(str(l[key])).lerp(Color.WHITE, 0.35)
 			break
@@ -3024,3 +3034,98 @@ func _start(who: String, scene: String) -> void:
 func _go(scene: String) -> void:
 	CrashWatch.start(scene.get_file().get_basename())
 	get_tree().change_scene_to_file.call_deferred(scene)
+
+
+# --- The Dhaka card album ------------------------------------------------------
+
+
+## On the mohalla page: how much of the album is filled, and a way in.
+func _album_card() -> Control:
+	var panel := _card(Color("FFF6E0"))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	row.add_child(_icon_tile("book", Look.YELLOW, Look.OUTLINE))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_theme_constant_override("separation", 0)
+	row.add_child(text)
+	text.add_child(Look.label(s.t("cardsTitle"), 18, true))
+	text.add_child(Look.label(s.t("cardsCount", {"n": (Cards.of(progress.data).owned as Array).size(), "all": Cards.count()}), 14, false, Look.MUTED))
+	var go := Look.chunky(s.t("friendsOpen"), Look.YELLOW, Look.OUTLINE, 16, 4, 14)
+	go.name = "CardsOpen"
+	go.autowrap_mode = TextServer.AUTOWRAP_OFF
+	go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	go.pressed.connect(show_page.bind("cards"))
+	row.add_child(go)
+	return panel
+
+
+## The album: each set with its cards, held ones in colour with their fact,
+## the rest as a "?".
+func _cards_page(page: VBoxContainer) -> void:
+	var back := Look.chunky(s.t("friendsBack"), Color.WHITE, Look.OUTLINE, 15, 3, 14)
+	back.name = "CardsBack"
+	back.autowrap_mode = TextServer.AUTOWRAP_OFF
+	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	back.pressed.connect(show_page.bind("hub"))
+	page.add_child(back)
+	page.add_child(_caption(s.t("cardsTitle")))
+	var how := Look.label(s.t("cardsHow", {"n": int(b.n("cards.set_tara"))}), 14, false, Look.MUTED)
+	how.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(how)
+	for set_info in Cards.sets():
+		var held := Cards.held_in(progress.data, str(set_info.id))
+		var all := (set_info.cards as Array).size()
+		page.add_child(Look.label("%s · %s" % [str(set_info.name.get(s.lang, set_info.name.en)), s.num("%d/%d" % [held, all])], 17, true, Color(str(set_info.colour))))
+		var grid := GridContainer.new()
+		grid.columns = 3
+		grid.add_theme_constant_override("h_separation", 8)
+		grid.add_theme_constant_override("v_separation", 8)
+		page.add_child(grid)
+		for c in set_info.cards:
+			grid.add_child(_album_tile(c, set_info))
+
+
+func _album_tile(c: Dictionary, set_info: Dictionary) -> Control:
+	var have := Cards.owned(progress.data, str(c.id))
+	var colour := Color(str(set_info.colour))
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Look.card(colour if have else Color("E9E3D8"), 14, 3))
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.custom_minimum_size = Vector2(0, 150)
+	var col := VBoxContainer.new()
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 4)
+	panel.add_child(col)
+	var icon := Look.icon(str(set_info.icon) if have else "lock", 34, Color.WHITE if have else Look.MUTED)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	col.add_child(icon)
+	var name := Look.label(str(c.name.get(s.lang, c.name.en)) if have else "?", 14, true, Color.WHITE if have else Look.MUTED)
+	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(name)
+	if have:
+		var fact := Look.label(str(c.fact.get(s.lang, c.fact.en)), 11, false, Color(1, 1, 1, 0.92))
+		fact.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		fact.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(fact)
+	return panel
+
+
+## Eid: the family's salami, shown once on the mohalla page.
+func _salami_card() -> Control:
+	var panel := _card(Color("E8F7EE"), 20)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	row.add_child(_icon_tile("coin", Look.PARROT, Color.WHITE))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text)
+	text.add_child(Look.label(s.t("salamiTitle"), 18, true, Look.PARROT_DARK))
+	var line := Look.label(s.t("salamiLine", {"taka": int(_salami.taka), "tara": int(_salami.tara)}), 14, false)
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_child(line)
+	panel.ready.connect(func(): Juice.celebrate(self, "sparkle"))
+	return panel

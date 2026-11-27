@@ -5214,5 +5214,85 @@
  "busIdleSlaps": {
   "bn": "অকারণে চাপড়! যাত্রীরা বিরক্ত হচ্ছেন",
   "en": "Banging for nothing! The passengers are getting annoyed"
+ },
+ "look_outfit_gamchha": {
+  "bn": "লাল জামা, সবুজ লুঙ্গি",
+  "en": "Red shirt, green lungi"
+ },
+ "look_outfit_check": {
+  "bn": "সাদা জামা, বেগুনি চেক লুঙ্গি",
+  "en": "White shirt, purple check lungi"
+ },
+ "look_outfit_eid": {
+  "bn": "ঈদের পাঞ্জাবি",
+  "en": "Eid panjabi"
+ },
+ "look_outfit_fatua": {
+  "bn": "খয়েরি ফতুয়া",
+  "en": "Brown fatua"
+ },
+ "look_outfit_blue": {
+  "bn": "নীল শার্ট",
+  "en": "Blue shirt"
+ },
+ "look_outfit_eid_tea": {
+  "bn": "সবুজ পাঞ্জাবি",
+  "en": "Green panjabi"
+ },
+ "look_sari_red": {
+  "bn": "লাল-হলুদ শাড়ি",
+  "en": "Red and yellow sari"
+ },
+ "look_sari_blue": {
+  "bn": "নীল শাড়ি",
+  "en": "Blue sari"
+ },
+ "look_sari_jamdani": {
+  "bn": "জামদানি শাড়ি",
+  "en": "Jamdani sari"
+ },
+ "lookHelp_outfit": {
+  "bn": "চরিত্রের পোশাক, খেলায় দেখা যায়।",
+  "en": "The character's clothes, seen while you play."
+ },
+ "lookSlot_outfit": {
+  "bn": "পোশাক",
+  "en": "Outfit"
+ },
+ "cardsTitle": {
+  "bn": "ঢাকার কার্ড অ্যালবাম",
+  "en": "Dhaka card album"
+ },
+ "cardsCount": {
+  "bn": "{n}/{all}টা কার্ড জমেছে",
+  "en": "{n} of {all} cards collected"
+ },
+ "cardsHow": {
+  "bn": "প্রতিটা দিন খেলা শেষে একটা কার্ড। রিকশা আর ডেলিভারিতে জায়গা, চা আর ফুচকায় খাবার, বাস, হকার আর নৌকায় যাত্রা, উৎসবের দিনে সেই উৎসবের কার্ড। পুরো সেট হলে {n} তারা!",
+  "en": "A card after every day played: places for the rickshaw and deliveries, food for tea and fuchka, rides for the bus, hawker and boat, and a festival's card on its day. A whole set: {n} stars!"
+ },
+ "cardNew": {
+  "bn": "নতুন কার্ড: {name}!",
+  "en": "New card: {name}!"
+ },
+ "cardAgain": {
+  "bn": "আবার {name}: +{n} তারা",
+  "en": "{name} again: +{n} stars"
+ },
+ "cardSetDone": {
+  "bn": "পুরো সেট হলো! +{n} তারা",
+  "en": "A whole set! +{n} stars"
+ },
+ "rainFares": {
+  "bn": "বৃষ্টিতে সবাই রিকশা খোঁজে: ভাড়া এখন বেশি!",
+  "en": "In the rain everyone wants a rickshaw: fares are up!"
+ },
+ "salamiTitle": {
+  "bn": "ঈদ মোবারক! সালামি এসেছে",
+  "en": "Eid Mubarak! Salami's here"
+ },
+ "salamiLine": {
+  "bn": "পরিবার থেকে ঈদের সালামি: {taka} টাকা আর {tara} তারা।",
+  "en": "Eid salami from the family: Tk {taka} and {tara} stars."
  }
 }
