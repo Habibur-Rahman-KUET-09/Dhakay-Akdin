@@ -14,6 +14,7 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const Photo = preload("res://scripts/ui/photo.gd")
 const Juice = preload("res://scripts/ui/juice.gd")
 const Tips = preload("res://scripts/ui/tips.gd")
 const Chatter = preload("res://scripts/ui/chatter.gd")
@@ -553,6 +554,10 @@ func _build_hud() -> void:
 		if step == "kettle":
 			_kettle_button = button
 	bottom.add_child(grid)
+	# Photo mode: the stall as it is, in a frame, to share.
+	var cam := Photo.button(self, _layer, strings, progress.data.get("frames", []))
+	cam.position = Vector2(10, 84)
+	root.add_child(cam)
 	_refresh()
 
 

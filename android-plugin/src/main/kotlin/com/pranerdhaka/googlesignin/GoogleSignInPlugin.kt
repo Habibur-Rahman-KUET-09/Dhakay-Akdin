@@ -33,6 +33,8 @@ class GoogleSignInPlugin(godot: Godot) : GodotPlugin(godot) {
         SignalInfo("signed_in", String::class.java),
         SignalInfo("sign_in_failed", String::class.java),
         SignalInfo("share_failed", String::class.java),
+        SignalInfo("video_ready", String::class.java),
+        SignalInfo("video_failed", String::class.java),
     )
 
     /** Shows the account picker. webClientId: the Firebase project's web client. */
@@ -86,6 +88,49 @@ class GoogleSignInPlugin(godot: Godot) : GodotPlugin(godot) {
                 val uri = FileProvider.getUriForFile(activity, activity.packageName + ".pranerdhaka.share", File(path))
                 val send = Intent(Intent.ACTION_SEND).apply {
                     type = "image/png"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    putExtra(Intent.EXTRA_TEXT, text)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                val chooser = Intent.createChooser(send, null)
+                chooser.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                activity.startActivity(chooser)
+            } catch (e: Exception) {
+                emitSignal("share_failed", e.javaClass.simpleName)
+            }
+        }
+    }
+
+    /**
+     * Makes the day's reel: the frames the game drew (dir/f000.png, ...)
+     * and a piece of music (raw 16-bit mono PCM at sampleRate) into an MP4,
+     * on a thread of its own. Signals video_ready(path) or video_failed(why).
+     */
+    @UsedByGodot
+    fun makeVideo(dir: String, count: Int, fps: Int, audioPath: String, sampleRate: Int, outPath: String) {
+        Thread {
+            try {
+                ReelEncoder.encode(dir, count, fps, audioPath, sampleRate, outPath)
+                emitSignal("video_ready", outPath)
+            } catch (e: Exception) {
+                emitSignal("video_failed", e.javaClass.simpleName + ": " + (e.message ?: ""))
+            }
+        }.start()
+    }
+
+    /** The phone's share sheet with a video the game made (under share/). */
+    @UsedByGodot
+    fun shareVideo(path: String, text: String) {
+        val activity = activity
+        if (activity == null) {
+            emitSignal("share_failed", "NO_ACTIVITY")
+            return
+        }
+        activity.runOnUiThread {
+            try {
+                val uri = FileProvider.getUriForFile(activity, activity.packageName + ".pranerdhaka.share", File(path))
+                val send = Intent(Intent.ACTION_SEND).apply {
+                    type = "video/mp4"
                     putExtra(Intent.EXTRA_STREAM, uri)
                     putExtra(Intent.EXTRA_TEXT, text)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

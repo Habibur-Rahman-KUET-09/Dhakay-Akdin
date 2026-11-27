@@ -33,6 +33,8 @@ const League = preload("res://scripts/rules/league.gd")
 const Ranked = preload("res://scripts/rules/ranked.gd")
 const Cards = preload("res://scripts/rules/cards.gd")
 const Season = preload("res://scripts/rules/season.gd")
+const Stickers = preload("res://scripts/ui/stickers.gd")
+const Share = preload("res://scripts/ui/share.gd")
 const Juice = preload("res://scripts/ui/juice.gd")
 const Race = preload("res://scripts/rules/race.gd")
 const Together = preload("res://scripts/rules/together.gd")
@@ -311,6 +313,8 @@ func _app_page() -> void:
 			_cards_page(page)
 		"season":
 			_season_page(page)
+		"stickers":
+			_stickers_page(page)
 		_:
 			_hub_page(page, margin)
 	_let_scroll(margin)
@@ -473,6 +477,7 @@ func _hub_page(page: VBoxContainer, margin: MarginContainer) -> void:
 	inner.add_child(_pass_card())
 	inner.add_child(_ranked_card())
 	inner.add_child(_album_card())
+	inner.add_child(_stickers_card())
 	inner.add_child(_together_card())
 	if cloud.enabled():
 		inner.add_child(_online_card())
@@ -3232,3 +3237,68 @@ func _claim_tier(t: int) -> void:
 	progress.save()
 	Juice.celebrate(self, "sparkle")
 	_build()
+
+
+# --- Stickers ----------------------------------------------------------------------
+
+
+func _stickers_card() -> Control:
+	var panel := _card(Color("F0F7FF"))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	row.add_child(_icon_tile("smile", Look.SKY_DARK, Color.WHITE))
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_theme_constant_override("separation", 0)
+	row.add_child(text)
+	text.add_child(Look.label(s.t("stickersTitle"), 18, true))
+	text.add_child(Look.label(s.t("stickersLine"), 14, false, Look.MUTED))
+	var go := Look.chunky(s.t("friendsOpen"), Look.YELLOW, Look.OUTLINE, 16, 4, 14)
+	go.name = "StickersOpen"
+	go.autowrap_mode = TextServer.AUTOWRAP_OFF
+	go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	go.pressed.connect(show_page.bind("stickers"))
+	row.add_child(go)
+	return panel
+
+
+## The stickers: tap one to send it (Messenger, WhatsApp, or save it).
+func _stickers_page(page: VBoxContainer) -> void:
+	var back := Look.chunky(s.t("friendsBack"), Color.WHITE, Look.OUTLINE, 15, 3, 14)
+	back.name = "StickersBack"
+	back.autowrap_mode = TextServer.AUTOWRAP_OFF
+	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	back.pressed.connect(show_page.bind("hub"))
+	page.add_child(back)
+	page.add_child(_caption(s.t("stickersTitle")))
+	var how := Look.label(s.t("stickersHow"), 14, false, Look.MUTED)
+	how.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(how)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	page.add_child(grid)
+	for st in Stickers.LIST:
+		var cell := VBoxContainer.new()
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var view := Stickers.view(str(st[0]), s.t(str(st[1])), Color(str(st[2])), 200.0)
+		var holder := CenterContainer.new()
+		holder.add_child(view)
+		cell.add_child(holder)
+		var send := Look.chunky(s.t("stickerSend"), Look.PARROT, Color.WHITE, 15, 3, 12)
+		send.name = "Sticker_" + str(st[1])
+		send.pressed.connect(_send_sticker.bind(st))
+		cell.add_child(send)
+		grid.add_child(cell)
+
+
+func _send_sticker(st: Array) -> void:
+	var img: Image = await Stickers.picture(self, str(st[0]), s.t(str(st[1])), Color(str(st[2])))
+	if not Share.image(img, "sticker", s.t("stickerShareLine")):
+		_open_whatsapp_text(s.t("stickerShareLine"))
+
+
+func _open_whatsapp_text(text: String) -> void:
+	OS.shell_open("https://wa.me/?text=" + text.uri_encode())

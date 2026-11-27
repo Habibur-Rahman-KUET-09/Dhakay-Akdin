@@ -5342,5 +5342,113 @@
  "frame_eid": {
   "bn": "ঈদ মোবারক",
   "en": "Eid Mubarak"
+ },
+ "reelMake": {
+  "bn": "১২ সেকেন্ডের রিল বানান (ভিডিও)",
+  "en": "Make a 12-second reel (video)"
+ },
+ "reelMaking": {
+  "bn": "রিল আঁকা হচ্ছে… {n}%",
+  "en": "Drawing the reel… {n}%"
+ },
+ "reelEncoding": {
+  "bn": "ভিডিও তৈরি হচ্ছে…",
+  "en": "Making the video…"
+ },
+ "reelFailed": {
+  "bn": "রিল হলো না, ছবিটা শেয়ার করুন",
+  "en": "No reel this time: share the picture"
+ },
+ "reelDayOf": {
+  "bn": "{name}-এর একদিন",
+  "en": "A day with {name}"
+ },
+ "reelEarned": {
+  "bn": "আজকের আয়",
+  "en": "Today's money"
+ },
+ "reelMoments": {
+  "bn": "আজকের সেরা মুহূর্ত",
+  "en": "Today's best moments"
+ },
+ "reelPlay": {
+  "bn": "তুমিও খেলো!",
+  "en": "Play it too!"
+ },
+ "stickersTitle": {
+  "bn": "স্টিকার",
+  "en": "Stickers"
+ },
+ "stickersLine": {
+  "bn": "চরিত্রদের মজার স্টিকার, মেসেঞ্জার আর হোয়াটসঅ্যাপে পাঠান",
+  "en": "The characters' funny stickers, for Messenger and WhatsApp"
+ },
+ "stickersHow": {
+  "bn": "একটা চাপলে ফোনের শেয়ার খুলবে: মেসেঞ্জার, হোয়াটসঅ্যাপ বা গ্যালারিতে রাখুন।",
+  "en": "Tap one and the phone's share sheet opens: Messenger, WhatsApp or your gallery."
+ },
+ "stickerSend": {
+  "bn": "পাঠান",
+  "en": "Send"
+ },
+ "stickerShareLine": {
+  "bn": "প্রাণের ঢাকা থেকে স্টিকার: pranerdhaka.web.app",
+  "en": "A sticker from Praner Dhaka: pranerdhaka.web.app"
+ },
+ "stk_jam": {
+  "bn": "জ্যাম আমার বন্ধু",
+  "en": "The jam is my friend"
+ },
+ "stk_tea": {
+  "bn": "এক কাপ চা হবে নাকি?",
+  "en": "Fancy a cup of tea?"
+ },
+ "stk_ostad": {
+  "bn": "ওস্তাদ, বাঁয়ে!",
+  "en": "Ustad, left!"
+ },
+ "stk_tok": {
+  "bn": "টক বেশি না কম?",
+  "en": "More sour or less?"
+ },
+ "stk_order": {
+  "bn": "অর্ডার আসতেছে!",
+  "en": "Order's on its way!"
+ },
+ "stk_badam": {
+  "bn": "বাদাম! বাদাম!",
+  "en": "Peanuts! Peanuts!"
+ },
+ "stk_boat": {
+  "bn": "নৌকা ছাড়ি?",
+  "en": "Shall we cast off?"
+ },
+ "stk_fare": {
+  "bn": "ভাড়া কত দিবেন?",
+  "en": "How much will you pay?"
+ },
+ "photoButton": {
+  "bn": "ছবি",
+  "en": "Photo"
+ },
+ "photoFrame": {
+  "bn": "ফ্রেম বদলান",
+  "en": "Change frame"
+ },
+ "photoShare": {
+  "bn": "শেয়ার",
+  "en": "Share"
+ },
+ "photoClose": {
+  "bn": "বন্ধ",
+  "en": "Close"
+ },
+ "photoShareLine": {
+  "bn": "প্রাণের ঢাকায় আমার একদিন! pranerdhaka.web.app",
+  "en": "A day of mine in Praner Dhaka! pranerdhaka.web.app"
+ },
+ "frame_dhaka": {
+  "bn": "প্রাণের ঢাকা",
+  "en": "Praner Dhaka"
  }
 }

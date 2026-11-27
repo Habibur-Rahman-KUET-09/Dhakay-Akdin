@@ -12,6 +12,8 @@ const Strings = preload("res://scripts/ui/strings.gd")
 const Balance = preload("res://scripts/rules/balance.gd")
 const Progress = preload("res://scripts/rules/progress.gd")
 const DayLines = preload("res://scripts/ui/day_lines.gd")
+const Share = preload("res://scripts/ui/share.gd")
+const Reel = preload("res://scripts/ui/reel.gd")
 const ReadAloud = preload("res://scripts/ui/read_aloud.gd")
 
 signal home_pressed
@@ -40,6 +42,8 @@ var info: Dictionary
 var _photo: Image
 var _photo_view: TextureRect
 var _photo_button: Button
+var _reel_button: Button
+var _reel: Node
 
 
 func setup(strings: Strings, balance: Balance, save: Progress, gained: Dictionary, day_info: Dictionary) -> void:
@@ -236,6 +240,13 @@ func _share_card() -> Control:
 	_photo_button.visible = false
 	_photo_button.pressed.connect(_share_photo)
 	col.add_child(_photo_button)
+	# A 12-second reel (video) for statuses and reels: on the Android app.
+	if Share.can_video():
+		_reel_button = Look.chunky(s.t("reelMake"), Look.SKY_DARK, Color.WHITE, 18, 4, 14)
+		_reel_button.name = "Share_reel"
+		_reel_button.custom_minimum_size = Vector2(0, 56)
+		_reel_button.pressed.connect(_make_reel)
+		col.add_child(_reel_button)
 	var line := Look.label(str(info.share), 16, true)
 	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -554,3 +565,33 @@ static func _let_scroll(node: Node) -> void:
 		if c is Control and not (c is BaseButton or c is ScrollContainer):
 			(c as Control).mouse_filter = Control.MOUSE_FILTER_PASS
 		_let_scroll(c)
+
+
+# --- The day's reel --------------------------------------------------------------
+
+
+func _make_reel() -> void:
+	if _reel != null:
+		return
+	var who := _who()
+	var face: Array = FACES.get(who, FACES.rickshaw)
+	var lines := DayLines.lines(got, s)
+	lines.append_array(info.get("lines", []))
+	_reel = Reel.new()
+	_reel.s = s
+	_reel.info = {"face": str(face[0]), "colour": Color(str(face[1])), "name": s.t(NAMES.get(who, "rickshawName")),
+		"money": int(info.get("money", 0)), "stars": float(info.get("stars", 0.0)), "lines": lines, "url": GAME_URL.replace("https://", "")}
+	_reel.status.connect(func(text: String): _reel_button.text = text)
+	_reel.finished.connect(_reel_done)
+	_reel_button.disabled = true
+	add_child(_reel)
+	_reel.make()
+
+
+func _reel_done(path: String) -> void:
+	_reel.queue_free()
+	_reel = null
+	_reel_button.disabled = false
+	_reel_button.text = s.t("reelMake")
+	if path == "" or not Share.video(path, "%s\n%s %s" % [str(info.share), s.t("sharePlay"), GAME_URL]):
+		_reel_button.text = s.t("reelFailed")

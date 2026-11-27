@@ -305,6 +305,17 @@ def write_music(name, samples):
         os.remove(wav)
 
 
+def write_pcm(name, samples, seconds):
+    """The reel's music: raw 16-bit mono PCM (the phone's encoder takes it
+    as it is), the first `seconds` of a tune, faded out at the end."""
+    n = min(len(samples), int(RATE * seconds))
+    fade = int(RATE * 1.0)
+    with open(os.path.join(OUT, name), 'wb') as f:
+        for i in range(n):
+            v = samples[i] * min(1.0, (n - i) / fade)
+            f.write(struct.pack('<h', int(max(-1.0, min(1.0, v)) * 32000)))
+
+
 if __name__ == '__main__':
     write('bell.wav', bell())
     write('horn_cng.wav', horn(560, 700, 0.35))
@@ -318,4 +329,5 @@ if __name__ == '__main__':
     write('sparkle.wav', sparkle())
     for name, spec in TUNES.items():
         write_music(name, tune(spec))
+    write_pcm('reel_music.pcm', tune(TUNES['tune_theme']), 12.5)
     print('sounds written to', os.path.normpath(OUT))
