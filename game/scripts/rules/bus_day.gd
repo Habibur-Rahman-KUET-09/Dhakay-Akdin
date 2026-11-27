@@ -106,6 +106,10 @@ var arguments := 0
 var overpaid := 0
 var fines := 0
 var bonus := 0
+## The last trip's tip for a good rating; slaps on the moving bus for
+## nothing (when each was, for the grumbling).
+var last_trip_tip := 0
+var _idle_slaps: Array = []
 ## Seconds an argument (or asking round) holds everything up.
 var locked_left := 0.0
 ## The named neighbours who may ride today (set by the scene), how they
@@ -327,6 +331,7 @@ func call_stop() -> Array:
 	else:
 		last_call = "miss"
 		extra_boarders = 0
+		rating = clampf(rating - b.n("bus.miss_call_star_penalty"), 1.0, 5.0)
 	return [Event.CALLED]
 
 
@@ -625,6 +630,17 @@ func fix(problem: String) -> Array:
 ## Two slaps on the side: go. At a stop with everyone on, the bus pulls
 ## away; while people are still getting on, it is too early (they are
 ## cross).
+## A slap on the side of the moving bus with no stop to call: a few are
+## nothing, but banging away annoys the passengers (true then).
+func slap_idle() -> bool:
+	_idle_slaps.append(clock)
+	_idle_slaps = _idle_slaps.filter(func(t): return clock - float(t) <= b.n("bus.idle_slap_s"))
+	if _idle_slaps.size() > int(b.n("bus.idle_slaps")):
+		rating = clampf(rating - b.n("bus.idle_slap_star_penalty"), 1.0, 5.0)
+		return true
+	return false
+
+
 func slap_go() -> Array:
 	if not at_stop:
 		return []
@@ -900,6 +916,11 @@ func _collect() -> void:
 func _end_trip(events: Array) -> void:
 	if trip_clock <= target_time:
 		bonus += int(b.n("bus.on_time_bonus"))
+	# Passengers pleased with the ride leave a little more: none below 3.5
+	# stars, up to 60 taka at 5 (so careless play earns less).
+	var pleased := maxi(0, roundi((rating - b.n("bus.rating_tip_from")) * b.n("bus.rating_tip")))
+	bonus += pleased
+	last_trip_tip = pleased
 	riders.clear()
 	at_door.clear()
 	asking = {}

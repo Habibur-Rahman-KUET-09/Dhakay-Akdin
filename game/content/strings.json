@@ -5206,5 +5206,13 @@
  "teaBestCombo": {
   "bn": "আজকের সেরা কম্বো: ×{n}",
   "en": "Today's best combo: ×{n}"
+ },
+ "fuchkaGuideGive": {
+  "bn": "প্লেট তৈরি! যিনি সবচেয়ে বেশি অপেক্ষা করছেন, তাঁর কার্ডে চাপ দিন",
+  "en": "Plate ready! Tap the card of whoever has waited longest"
+ },
+ "busIdleSlaps": {
+  "bn": "অকারণে চাপড়! যাত্রীরা বিরক্ত হচ্ছেন",
+  "en": "Banging for nothing! The passengers are getting annoyed"
  }
 }

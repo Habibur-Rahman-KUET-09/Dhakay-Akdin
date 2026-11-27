@@ -355,3 +355,20 @@ func test_change_owed_is_never_lost() -> void:
 	near(t.rating, 3.9, "only a little dent", 0.01)
 	var fresh := _bus()
 	check(not fresh.make_change(475).is_empty(), "the float changes a 500 from the start")
+
+
+func test_care_pays_and_banging_annoys() -> void:
+	var bus := _bus()
+	bus.rating = 5.0
+	for i in 3:
+		check(not bus.slap_idle(), "a few slaps are nothing")
+	check(bus.slap_idle(), "banging away annoys them")
+	check(bus.rating < 5.0, "and costs a little rating")
+	var good := _bus()
+	good.rating = 5.0
+	var poor := _bus()
+	poor.rating = 3.0
+	good._end_trip([])
+	poor._end_trip([])
+	eq(good.last_trip_tip, 60, "5 stars: 60 taka from pleased passengers")
+	eq(poor.last_trip_tip, 0, "3 stars: nothing")

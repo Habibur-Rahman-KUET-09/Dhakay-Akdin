@@ -261,8 +261,8 @@ const Balance = preload("res://scripts/rules/balance.gd")
 
 func test_fares_and_ratings() -> void:
 	var f := Fares.new(Balance.new())
-	eq(f.fair(30), 65, "20 + 30 x 1.5 = 65")
-	eq(f.fair(0), 20, "the base fare")
+	eq(f.fair(30), 80, "25 + 30 x 1.8 = 79, to the nearest 5: 80")
+	eq(f.fair(0), 25, "the base fare")
 	eq(f.counter(65), 80, "1.2 x 65 = 78, rounded to 80")
 	eq(f.stars(10.0, 10.0, 0, "normal"), 5.0, "on time")
 	eq(f.stars(11.5, 10.0, 0, "normal"), 4.0, "15% late: one star off")

@@ -270,6 +270,33 @@ func step(what: String, amount := -1.0) -> Array:
 	return [Event.NOT_READY]
 
 
+## The first-day guide: the next thing to do for whoever has waited
+## longest: {step: "puri", "filling", "sour", "chilli", "doi", "discard"
+## (too much in it) or "give" (tap their card), seat}; {} with nobody here.
+func guide_step() -> Dictionary:
+	var who: Dictionary = {}
+	for c in customers:
+		if who.is_empty() or c.left < who.left:
+			who = c
+	if who.is_empty():
+		return {}
+	var step := "give"
+	if plate.is_empty():
+		step = "puri"
+	elif not plate.filled:
+		step = "filling"
+	elif int(plate.sour) > int(who.sour) or int(plate.chilli) > int(who.chilli) \
+			or (plate.doi and str(who.item) != "doi_fuchka"):
+		step = "discard"
+	elif int(plate.sour) < int(who.sour):
+		step = "sour"
+	elif int(plate.chilli) < int(who.chilli):
+		step = "chilli"
+	elif str(who.item) == "doi_fuchka" and not plate.doi and has("doi"):
+		step = "doi"
+	return {"step": step, "seat": int(who.seat)}
+
+
 func plate_ready() -> bool:
 	return not plate.is_empty() and plate.filled
 

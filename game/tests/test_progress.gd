@@ -23,10 +23,10 @@ func test_a_good_day_is_shared_out() -> void:
 	var p := _fresh()
 	var out := p.apply_day({"earned": 800, "trips": 9, "stars": 4.6, "fines": 0})
 	eq(out.fund, 80, "a tenth to the mohalla fund")
-	eq(out.school, 320, "720 kept, 320 over a new player's 400 target to the school fee")
-	eq(out.kept, 400, "the rest in his pocket")
-	eq(p.data.taka, 400, "savings")
-	eq(p.data.rickshaw.school, 320, "school fee put by")
+	eq(out.school, 370, "720 kept, 370 over a new player's 350 target to the school fee")
+	eq(out.kept, 350, "the rest in his pocket")
+	eq(p.data.taka, 350, "savings")
+	eq(p.data.rickshaw.school, 370, "school fee put by")
 	eq(p.data.fund, 80, "fund")
 	eq(out.xp, 50 + 5 * 20, "XP: 50 + 20 per star (4.6 rounds to 5)")
 	check(out.level_up, "150 XP passes the 120 needed for level 2")
@@ -421,11 +421,11 @@ func test_things_bought_with_stars() -> void:
 func test_the_target_is_lower_in_the_first_levels() -> void:
 	var p := _fresh()
 	p.data.mohalla.level = 1
-	eq(p.rickshaw_target(), 400, "level 1: 400")
+	eq(p.rickshaw_target(), 350, "level 1: 350")
 	p.data.mohalla.level = 5
 	eq(p.rickshaw_target(), 500, "level 5: 500")
 	p.data.mohalla.level = 9
 	eq(p.rickshaw_target(), 600, "level 9: 600")
 	p.data.mohalla.level = 1
-	var out := p.apply_day({"earned": 450, "trips": 6, "stars": 4.0, "fines": 0})
-	check(out.met, "450 meets a new player's target")
+	var out := p.apply_day({"earned": 400, "trips": 5, "stars": 4.0, "fines": 0})
+	check(out.met, "400 meets a new player's target")

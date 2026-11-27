@@ -112,3 +112,22 @@ func test_the_day_school_out_sumi_and_people() -> void:
 	check(sumi, "Sumi came")
 	var winter := FuchkaDay.new(b, 5, [], "2026-01-10")
 	check(winter.winter, "January is winter")
+
+
+func test_first_day_guide_for_a_plate() -> void:
+	var day := FuchkaDay.new(Balance.new(), 3)
+	day.customers = [{"seat": 1, "left": 10.0, "item": "fuchka", "sour": 2, "chilli": 1}, {"seat": 0, "left": 20.0, "item": "fuchka", "sour": 0, "chilli": 0}]
+	eq(day.guide_step(), {"step": "puri", "seat": 1}, "the longest wait first: crack the puris")
+	day.step("puri", 1.0)
+	eq(str(day.guide_step().step), "filling", "then the filling")
+	day.step("filling")
+	eq(str(day.guide_step().step), "sour", "sour to two")
+	day.step("sour")
+	day.step("sour")
+	eq(str(day.guide_step().step), "chilli", "then chilli")
+	day.step("chilli")
+	eq(day.guide_step(), {"step": "give", "seat": 1}, "ready: their card")
+	day.step("chilli")
+	eq(str(day.guide_step().step), "discard", "too hot: throw it away")
+	day.customers = []
+	eq(day.guide_step(), {}, "nobody here")

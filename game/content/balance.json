@@ -20,9 +20,9 @@
   "rickshaw": {
     "easy_fare": 0.9, "easy_fine": 0.5, "easy_traffic": 0.6,
     "start_hour": 7, "end_hour": 21, "day_seconds": 360, "school_fee_goal": 3000, "daily_target": 600,
-    "target_by_level": [[1, 400], [4, 500], [7, 600]], "energy_warn": 35, "tired_nag_s": 45, "easy_stop_room": 0.2,
+    "target_by_level": [[1, 350], [4, 500], [7, 600]], "energy_warn": 35, "tired_nag_s": 45, "easy_stop_room": 0.2,
     "speed_tiles_per_s": 1.5, "accel_tiles_per_s2": 0.6, "coast_decel": 0.3, "brake_decel": 1.5,
-    "fare_base": 20, "fare_per_tile": 1.5, "fare_round_to": 5,
+    "fare_base": 25, "fare_per_tile": 1.8, "fare_round_to": 5,
     "counter_offer_factor": 1.2,
     "eta_slack": 1.8, "late_step": 0.15, "waterlog_star_penalty": 0.5, "five_star_tip": 10,
     "energy_start": 100, "energy_per_tile": 0.25, "energy_per_tile_rain": 0.4,
@@ -30,7 +30,7 @@
     "tea_cost": 20, "tea_energy": 40,
     "wrong_way_fine": 50, "red_light_fine": 50, "signal_cycle_s": 12, "wrong_way_stop_s": 5, "signal_wait_s": 3,
     "waterlog_speed": 0.5, "rain_counter_bonus": 0.2, "rain_chance_per_day": 0.4, "rain_seconds": 60,
-    "waiting_passengers": [3, 5],
+    "waiting_passengers": [4, 6],
     "haggle_rain_bonus": 0.15, "flat_chance": 0.1, "flat_speed": 0.55, "tube_cost": 30,
     "hood_tip": 10, "hood_drag": 0.92, "phone_pay_chance": 0.16, "phone_fake_chance": 0.25,
     "chain_per_tile": 0.004, "chain_max_per_day": 2, "chain_quick_s": 4, "lost_chance": 0.12, "lost_reward": 50, "friend_shop_chance": 0.15,
@@ -51,7 +51,7 @@
     "trips_per_day": 2, "seats": 24, "ladies_seats": 4, "elder_seats": 2, "standing": 10,
     "crowded_above": 30, "seconds_between_stops": [12, 15],
     "fare_min": 10, "fare_per_stop": 5, "fare_max": 35,
-    "student_share": 0.5, "evader_chance": 0.08, "checker_fine": 20, "on_time_bonus": 50,
+    "student_share": 0.5, "evader_chance": 0.08, "checker_fine": 20, "on_time_bonus": 50, "rating_tip": 40, "rating_tip_from": 3.5, "miss_call_star_penalty": 0.1, "idle_slaps": 3, "idle_slap_s": 3, "idle_slap_star_penalty": 0.05,
     "start_change": 550, "argument_s": 3, "go_wait_s": 3, "jam_standing": 6, "sort_all_s": 2,
     "call_perfect_extra": 2, "call_good_extra": 1,
     "route": ["mirpur10", "kazipara", "shewrapara", "agargaon", "farmgate", "karwan_bazar", "shahbag", "press_club", "motijheel"],
@@ -121,7 +121,7 @@
     "upgrades": {"new_oars": {"cost": 1000, "stroke": 1.2}, "chhoi": {"cost": 1500}, "big_boat": {"cost": 2500, "capacity": 12}}
   },
   "hawker": {
-    "start_hour": 10, "end_hour": 18, "day_seconds": 300, "daily_target": 250, "capacity": 60, "wholesale": 5,
+    "start_hour": 10, "end_hour": 18, "day_seconds": 300, "daily_target": 450, "capacity": 60, "wholesale": 5,
     "price": 10, "water_price": 20, "riders": [10, 18], "want_chance": 0.4, "rain_wants": 0.6, "water_share": 0.15,
     "hot_water_share": 0.4, "free_stops": 2, "babu_free_stops": 4, "dwell_s": 3, "dropped": 2,
     "rain_chance_per_day": 0.3, "rain_seconds": 60, "hot_chance_per_day": 0.3,

@@ -862,6 +862,8 @@ func _on_slap() -> void:
 			_on_call()
 		else:
 			_thump.play()
+			if bus.slap_idle():
+				_say(strings.t("busIdleSlaps"), Look.VERMILION, 2.0)
 		return
 	_thump.play()
 	var now := Time.get_ticks_msec() / 1000.0

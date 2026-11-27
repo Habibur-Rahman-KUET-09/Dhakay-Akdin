@@ -68,6 +68,12 @@ var _call_result := {}
 var _boost := {}
 var _status: Label
 var _plate: Label
+## The first-day guide (the first few plates of the first fuchka day).
+var _guide := false
+var _guide_box: PanelContainer
+var _guide_label: Label
+var _step_buttons := {}
+var _drop: Button
 var _cover: Button
 var _notice: Label
 var _notice_box: PanelContainer
@@ -425,7 +431,17 @@ func _build_hud() -> void:
 		day.discard()
 		_refresh())
 	hand_row.add_child(drop)
+	_drop = drop
 	bottom.add_child(hand)
+	_guide = int(progress.data.fuchka.get("days", 0)) == 0
+	_guide_box = PanelContainer.new()
+	_guide_box.add_theme_stylebox_override("panel", Look.card(Color("FFF1F6"), 12, 2))
+	_guide_label = Look.label("", 16, true, Look.MAGENTA)
+	_guide_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_guide_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_guide_box.add_child(_guide_label)
+	_guide_box.visible = false
+	bottom.add_child(_guide_box)
 	var grid := GridContainer.new()
 	grid.columns = day.steps().size()
 	grid.add_theme_constant_override("h_separation", 8)
@@ -436,6 +452,7 @@ func _build_hud() -> void:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.pressed.connect(_on_step.bind(st))
 		grid.add_child(button)
+		_step_buttons[st] = button
 	bottom.add_child(grid)
 	_refresh()
 
@@ -611,6 +628,7 @@ func _refresh() -> void:
 			parts.append(strings.t("fstep_doi"))
 		_plate.text = " · ".join(parts)
 	_cover.visible = day.raining and not day.covered
+	_show_guide()
 	_status.text = "%s\n%s" % [_clock_text(), strings.t("taka", {"n": day.money})]
 
 
@@ -735,3 +753,38 @@ func _chat_tick(dt: float) -> void:
 		return
 	_voice.play(str(line.id))
 	_say(str(line.text), Look.SKY_DARK, 4.0)
+
+
+## The first-day guide: light up what to do next for whoever has waited
+## longest (a step, throwing the plate away, or their card), dim the rest;
+## it goes once three plates have been served.
+func _show_guide() -> void:
+	if _guide and day.served >= 3:
+		_guide = false
+		_say(strings.t("teaGuideDone"), Look.PARROT_DARK, 3.5)
+	var g := day.guide_step() if _guide else {}
+	_guide_box.visible = not g.is_empty()
+	var lit: Array = [_drop]
+	lit.append_array(_step_buttons.values())
+	lit.append_array(_cards)
+	for c in lit:
+		(c as Control).modulate = Color.WHITE
+	if g.is_empty():
+		return
+	var target: Control = null
+	match str(g.step):
+		"give":
+			target = _cards[int(g.seat)]
+			_guide_label.text = strings.t("fuchkaGuideGive")
+		"discard":
+			target = _drop
+			_guide_label.text = strings.t("teaGuideDiscard", {"discard": strings.t("discard")})
+		_:
+			target = _step_buttons.get(str(g.step))
+			_guide_label.text = strings.t("teaGuideNext", {"step": strings.t("fstep_" + str(g.step))})
+	for c in lit:
+		if c != target and not (c in _cards):
+			(c as Control).modulate = Color(1, 1, 1, 0.35)
+	if str(g.step) == "give" and target != null:
+		# Their card glows.
+		target.modulate = Color(1.25, 1.15, 0.75)
