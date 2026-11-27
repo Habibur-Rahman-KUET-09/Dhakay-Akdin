@@ -119,13 +119,14 @@ func _run() -> void:
 	await _frames(2)
 	# A whole day on the bus, ten times as fast, to its end screen: a
 	# Pixel 8 Pro died near the end of one. A day that never ends, or a
-	# crash, fails the run.
+	# crash, fails the run. On the build machine (1-3 frames a second) a
+	# day with many hand activities takes over 150 s, so allow 360.
 	Engine.time_scale = 10.0
 	bus = load("res://scenes/bus.tscn").instantiate()
 	root.add_child(bus)
 	var started := Time.get_ticks_msec()
 	var ended := false
-	while Time.get_ticks_msec() - started < 150000:
+	while Time.get_ticks_msec() - started < 360000:
 		await process_frame
 		if bus.bus.over:
 			ended = true
