@@ -3,8 +3,8 @@
  "picked": {
   "skin": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/skins/middleage_asian_male/middleage_asian_male.mhmat",
   "eyes": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyes/high-poly/high-poly.mhclo",
-  "eyebrows": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyebrows/eyebrow001/eyebrow001.mhclo",
-  "eyelashes": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/eyelashes/eyelashes01/eyelashes01.mhclo",
+  "eyebrows": null,
+  "eyelashes": null,
   "teeth": null,
   "tongue": null,
   "hair": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/hair/short02/short02.mhclo",
@@ -121,92 +121,50 @@
   ]
  },
  "errors": [],
+ "landmarks": {
+  "sole": -0.0,
+  "eyes": 1.5244,
+  "mouth": 1.4535,
+  "skull": 1.6317,
+  "chin": 1.3904,
+  "ear_x": [
+   -0.0828,
+   0.0828
+  ],
+  "head_y": [
+   -0.1567,
+   0.0553
+  ]
+ },
  "toned": [
   "middleage_lightskinned_male_diffuse2.png"
  ],
- "body": {
-  "height": 1.632,
-  "groups": [
-   "ball_l",
-   "ball_r",
-   "calf_l",
-   "calf_r",
-   "clavicle_l",
-   "clavicle_r",
-   "ears",
-   "fingernails",
-   "foot_l",
-   "foot_r",
-   "hand_l",
-   "hand_r",
-   "head",
-   "index_01_l",
-   "index_01_r",
-   "index_02_l",
-   "index_02_r",
-   "index_03_l",
-   "index_03_r",
-   "lips",
-   "lowerarm_l",
-   "lowerarm_r",
-   "middle_01_l",
-   "middle_01_r",
-   "middle_02_l",
-   "middle_02_r",
-   "middle_03_l",
-   "middle_03_r",
-   "neck_01",
-   "nipple",
-   "nippletip",
-   "pelvis",
-   "pinky_01_l",
-   "pinky_01_r",
-   "pinky_02_l",
-   "pinky_02_r",
-   "pinky_03_l",
-   "pinky_03_r",
-   "ring_01_l",
-   "ring_01_r",
-   "ring_02_l",
-   "ring_02_r",
-   "ring_03_l",
-   "ring_03_r",
-   "scalp",
-   "spine_01",
-   "spine_02",
-   "spine_03",
-   "thigh_l",
-   "thigh_r",
-   "thumb_01_l",
-   "thumb_01_r",
-   "thumb_02_l",
-   "thumb_02_r",
-   "thumb_03_l",
-   "thumb_03_r",
-   "toenails",
-   "upperarm_l",
-   "upperarm_r"
-  ]
+ "painted": {
+  "body": 2172976,
+  "lungi": 983356,
+  "shirt": 212205,
+  "gamchha": 1015780,
+  "sandals": 355942
  },
  "meshes": {
-  "gamchha": 8,
-  "lungi": 640,
-  "rahim": 18486,
-  "rahim.eyebrow001": 96,
-  "rahim.eyelashes01": 184,
+  "gamchha": 62,
+  "lungi": 720,
+  "rahim": 12423,
   "rahim.high-poly": 1020,
   "rahim.short02": 1672,
   "sandals": 24,
-  "shirt": 1578
+  "shirt": 1964
  },
  "materials": {
   "Dots Stroke": [],
-  "gamchha": [
+  "gamchha": [],
+  "gamchha_photo": [
    "BSDF_PRINCIPLED",
    "OUTPUT_MATERIAL",
    "TEX_IMAGE"
   ],
-  "lungi": [
+  "lungi": [],
+  "lungi_photo": [
    "BSDF_PRINCIPLED",
    "OUTPUT_MATERIAL",
    "TEX_IMAGE"
@@ -216,18 +174,6 @@
    "BSDF_PRINCIPLED"
   ],
   "rahim.body": [
-   "OUTPUT_MATERIAL",
-   "BSDF_PRINCIPLED",
-   "TEX_IMAGE",
-   "TEX_IMAGE"
-  ],
-  "rahim.eyebrow001": [
-   "OUTPUT_MATERIAL",
-   "BSDF_PRINCIPLED",
-   "TEX_IMAGE",
-   "TEX_IMAGE"
-  ],
-  "rahim.eyelashes01": [
    "OUTPUT_MATERIAL",
    "BSDF_PRINCIPLED",
    "TEX_IMAGE",
@@ -245,16 +191,27 @@
    "TEX_IMAGE",
    "TEX_IMAGE"
   ],
+  "rahim_photo": [
+   "BSDF_PRINCIPLED",
+   "OUTPUT_MATERIAL",
+   "TEX_IMAGE"
+  ],
   "sandals": [
    "BSDF_PRINCIPLED",
    "OUTPUT_MATERIAL",
    "TEX_IMAGE"
   ],
-  "shirt": [
+  "sandals_photo": [
+   "BSDF_PRINCIPLED",
+   "OUTPUT_MATERIAL",
+   "TEX_IMAGE"
+  ],
+  "shirt": [],
+  "shirt_photo": [
    "BSDF_PRINCIPLED",
    "OUTPUT_MATERIAL",
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 3085536
+ "glb_bytes": 2659068
 }
