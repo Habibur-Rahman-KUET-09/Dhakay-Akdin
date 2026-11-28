@@ -137,24 +137,28 @@
    0.0553
   ]
  },
+ "trimmed": {
+  "hair": 80,
+  "shirt": 49
+ },
  "toned": [
   "middleage_lightskinned_male_diffuse2.png"
  ],
  "painted": {
-  "body": 2973840,
-  "lungi": 1045939,
-  "shirt": 221697,
+  "body": 2333329,
+  "lungi": 1048566,
+  "shirt": 222128,
   "gamchha": 1048576,
-  "hair": 118785
+  "hair": 123468
  },
  "meshes": {
-  "gamchha": 62,
-  "hair": 326,
+  "gamchha": 78,
+  "hair": 318,
   "lungi": 720,
   "rahim": 12423,
   "rahim.high-poly": 1020,
   "sandals": 24,
-  "shirt": 1964
+  "shirt": 1915
  },
  "materials": {
   "Dots Stroke": [],
@@ -215,5 +219,5 @@
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 2417572
+ "glb_bytes": 2394812
 }
