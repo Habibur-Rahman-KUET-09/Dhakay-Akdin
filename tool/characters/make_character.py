@@ -171,71 +171,92 @@ if SPEC.get("photos"):
     lm = photo_fit.model_landmarks(body, added.get("eyes"))
     report["landmarks"] = {k: (round(v, 4) if isinstance(v, float) else [round(x, 4) for x in v]) for k, v in lm.items()}
     mapping = photo_fit.Mapping(lm, photos, P["marks"], body.height)
-    made = {}
-    for name, maker in (("lungi", lambda: photo_fit.lungi_from_photos(body, mapping, photos, P["lungi"])),
-                        ("shirt", lambda: photo_fit.shirt_from_photos(body, mapping, P["shirt"])),
-                        ("gamchha", lambda: photo_fit.gamchha_from_photos(body, mapping, photos, P["gamchha"])),
-                        ("sandals", lambda: clothes.sandals(body, P.get("sandals", {}))),
-                        ("hair", lambda: photo_fit.hair_cap(body, lm, P["hair_cap"]) if P.get("hair_cap") else None)):
+    AI = bool(P.get("ai_mesh"))
+    if AI:
+        # The AI's shape of him, painted from the photos where each camera
+        # sees it, moved by the MakeHuman rig (its weights carried over).
         try:
-            if name == "hair" and P.get("hair_cap"):
-                old_hair = added.pop("hair", None)
-                if old_hair is not None:
-                    bpy.data.objects.remove(old_hair, do_unlink=True)
-            obj = maker()
-            if obj is not None:
-                made[name] = obj
+            ai = photo_fit.ai_body(os.path.join(HERE, "ref", P["ai_mesh"]), body, P.get("ai", {}))
+            report["ai_faces"] = len(ai.data.polygons)
+            amap = photo_fit.Mapping({"sole": body.floor}, photos, {}, body.height)
+            vis = photo_fit.vertex_visibility(ai)
+            report["ai_hidden"] = {k: int((v < 0.5).sum()) for k, v in vis.items()}
+            tex = P.get("texture", {"body": 2048})
+            report["painted"] = {"ai": photo_fit.paint(ai, amap, photos, tex["body"], None, 0.8,
+                                                       side_mirror_above=body.floor + body.height * 0.86, visibility=vis)}
+            clothes.bind(ai, human)
+            for o in list(bpy.data.objects):
+                if o.type == "MESH" and o != ai:
+                    bpy.data.objects.remove(o, do_unlink=True)
         except Exception:
             import traceback
-            report["errors"].append("%s: %s" % (name, traceback.format_exc()[-700:]))
-    report["picked"]["outfit"] = sorted(made)
-    mz, pf = mapping.knots["front"]
-    try:
-        photo_fit.hide_under(human, float(np.interp(P["shirt"]["hem"], pf, mz)), float(np.interp(P["lungi"]["hem"], pf, mz)))
-    except Exception as e:
-        report["errors"].append("hide: %r" % e)
-    # Only his hair stays on the hair cap; the shirt opens at the collar
-    # where the photo shows his chest.
-    report["trimmed"] = {}
-    try:
-        if "hair" in made:
-            report["trimmed"]["hair"] = photo_fit.trim_by_colour(
-                made["hair"], mapping, photos, photo_fit.hair_like,
-                region=lambda c, n: c[:, 2] < lm["eyes"] + 0.09, side_mirror_above=lm.get("chin"))
-        if "shirt" in made:
-            chest = float(np.interp(P["shirt"].get("collar_from", 0.7), pf, mz))
-            report["trimmed"]["shirt"] = photo_fit.trim_by_colour(
-                made["shirt"], mapping, photos, lambda col: 1.0 - photo_fit.skin_like(col),
-                region=lambda c, n: (c[:, 2] > chest) & (n[:, 1] < -0.2) & (np.abs(c[:, 0]) < body.height * 0.06))
-    except Exception:
-        import traceback
-        report["errors"].append("trim: %s" % traceback.format_exc()[-700:])
-    if SPEC.get("skin_tone"):
-        report["toned"] = tone_images(human, SPEC["skin_tone"])
-    fix = photo_fit.arm_fixer(body, mapping, photos, float(np.interp(P["lungi"]["hem"], pf, mz)))
+            report["errors"].append("ai: %s" % traceback.format_exc()[-900:])
+    if not AI:
+        made = {}
+        for name, maker in (("lungi", lambda: photo_fit.lungi_from_photos(body, mapping, photos, P["lungi"])),
+                            ("shirt", lambda: photo_fit.shirt_from_photos(body, mapping, P["shirt"])),
+                            ("gamchha", lambda: photo_fit.gamchha_from_photos(body, mapping, photos, P["gamchha"])),
+                            ("sandals", lambda: clothes.sandals(body, P.get("sandals", {}))),
+                            ("hair", lambda: photo_fit.hair_cap(body, lm, P["hair_cap"]) if P.get("hair_cap") else None)):
+            try:
+                if name == "hair" and P.get("hair_cap"):
+                    old_hair = added.pop("hair", None)
+                    if old_hair is not None:
+                        bpy.data.objects.remove(old_hair, do_unlink=True)
+                obj = maker()
+                if obj is not None:
+                    made[name] = obj
+            except Exception:
+                import traceback
+                report["errors"].append("%s: %s" % (name, traceback.format_exc()[-700:]))
+        report["picked"]["outfit"] = sorted(made)
+        mz, pf = mapping.knots["front"]
+        try:
+            photo_fit.hide_under(human, float(np.interp(P["shirt"]["hem"], pf, mz)), float(np.interp(P["lungi"]["hem"], pf, mz)))
+        except Exception as e:
+            report["errors"].append("hide: %r" % e)
+        # Only his hair stays on the hair cap; the shirt opens at the collar
+        # where the photo shows his chest.
+        report["trimmed"] = {}
+        try:
+            if "hair" in made:
+                report["trimmed"]["hair"] = photo_fit.trim_by_colour(
+                    made["hair"], mapping, photos, photo_fit.hair_like,
+                    region=lambda c, n: c[:, 2] < lm["eyes"] + 0.09, side_mirror_above=lm.get("chin"))
+            if "shirt" in made:
+                chest = float(np.interp(P["shirt"].get("collar_from", 0.7), pf, mz))
+                report["trimmed"]["shirt"] = photo_fit.trim_by_colour(
+                    made["shirt"], mapping, photos, lambda col: 1.0 - photo_fit.skin_like(col),
+                    region=lambda c, n: (c[:, 2] > chest) & (n[:, 1] < -0.2) & (np.abs(c[:, 0]) < body.height * 0.06))
+        except Exception:
+            import traceback
+            report["errors"].append("trim: %s" % traceback.format_exc()[-700:])
+        if SPEC.get("skin_tone"):
+            report["toned"] = tone_images(human, SPEC["skin_tone"])
+        fix = photo_fit.arm_fixer(body, mapping, photos, float(np.interp(P["lungi"]["hem"], pf, mz)))
 
-    tex = P.get("texture", {"body": 2048, "cloth": 1024})
-    report["painted"] = {}
-    try:
-        base = base_pixels(human, tex["body"])
-        report["painted"]["body"] = photo_fit.paint(human, mapping, photos, tex["body"], fix, 0.6, base=base, side_mirror_above=lm.get("chin"),
-                                                              skin_below=lm.get("chin") - 0.02 if lm.get("chin") is not None else None)
-    except Exception:
-        import traceback
-        report["errors"].append("paint body: %s" % traceback.format_exc()[-700:])
-    for name, o in made.items():
-        if name == "sandals":
-            continue
+        tex = P.get("texture", {"body": 2048, "cloth": 1024})
+        report["painted"] = {}
         try:
-            report["painted"][name] = photo_fit.paint(o, mapping, photos, tex["cloth"], fix if name == "shirt" else None,
-                                                      0.9 if name == "hair" else 0.85,
-                                                      side_mirror_above=lm.get("chin") if name == "hair" else None)
+            base = base_pixels(human, tex["body"])
+            report["painted"]["body"] = photo_fit.paint(human, mapping, photos, tex["body"], fix, 0.6, base=base, side_mirror_above=lm.get("chin"),
+                                                                  skin_below=lm.get("chin") - 0.02 if lm.get("chin") is not None else None)
         except Exception:
             import traceback
-            report["errors"].append("paint %s: %s" % (name, traceback.format_exc()[-700:]))
-    for part, look in SPEC.get("tint", {}).items():
-        if part in added and added[part] is not None:
-            tint_images(added[part], look["colour"], look.get("keep", 0.25))
+            report["errors"].append("paint body: %s" % traceback.format_exc()[-700:])
+        for name, o in made.items():
+            if name == "sandals":
+                continue
+            try:
+                report["painted"][name] = photo_fit.paint(o, mapping, photos, tex["cloth"], fix if name == "shirt" else None,
+                                                          0.9 if name == "hair" else 0.85,
+                                                          side_mirror_above=lm.get("chin") if name == "hair" else None)
+            except Exception:
+                import traceback
+                report["errors"].append("paint %s: %s" % (name, traceback.format_exc()[-700:]))
+        for part, look in SPEC.get("tint", {}).items():
+            if part in added and added[part] is not None:
+                tint_images(added[part], look["colour"], look.get("keep", 0.25))
 elif SPEC.get("outfit"):
     made = clothes.dress(human, SPEC["outfit"], report)
     report["picked"]["outfit"] = sorted(made)

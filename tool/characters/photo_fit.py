@@ -523,6 +523,93 @@ def hide_under(body_obj, shirt_hem_z, lungi_hem_z):
 # --- Painting from the photos -----------------------------------------------------------------------
 
 
+# --- A shape made by an image-to-3D model (ai3d.py) -------------------------------------------------
+
+
+def ai_body(path, body, spec):
+    """The AI's shape of him (a .glb of one bare mesh) in place of the
+    MakeHuman body: fewer faces for a phone, his height and standing where
+    the body stands (feet on its floor, the middle of his hips on x = 0 and
+    y = 0, as the photos are measured), smooth."""
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    new = [o for o in bpy.data.objects if o not in before]
+    meshes = [o for o in new if o.type == "MESH"]
+    if not meshes:
+        raise RuntimeError("no mesh in " + path)
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    for o in meshes:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = meshes[0]
+    if len(meshes) > 1:
+        bpy.ops.object.join()
+    obj = meshes[0]
+    mw = obj.matrix_world.copy()
+    obj.parent = None
+    obj.matrix_world = mw
+    for o in bpy.context.view_layer.objects:
+        o.select_set(o == obj)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    for o in new:
+        if o != obj and o.name in bpy.data.objects:
+            bpy.data.objects.remove(o, do_unlink=True)
+    obj.name = "ai_body"
+    me = obj.data
+    me.materials.clear()
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+    bm.to_mesh(me)
+    bm.free()
+    faces = len(me.polygons)
+    target = spec.get("faces", 24000)
+    if faces > target:
+        dec = obj.modifiers.new("fewer", "DECIMATE")
+        dec.ratio = target / faces
+        dec.use_collapse_triangulate = True
+        bpy.ops.object.modifier_apply(modifier=dec.name)
+    co = np.empty(len(me.vertices) * 3, dtype=np.float64)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(-1, 3)
+    z0, z1 = co[:, 2].min(), co[:, 2].max()
+    co = (co - np.array([0.0, 0.0, z0])) * (body.height / (z1 - z0))
+    band = np.abs(co[:, 2] - body.height * 0.5) < body.height * 0.012
+    cx = (co[band, 0].min() + co[band, 0].max()) / 2.0
+    cy = (co[band, 1].min() + co[band, 1].max()) / 2.0
+    co[:, 0] -= cx
+    co[:, 1] -= cy
+    co[:, 2] += body.floor
+    me.vertices.foreach_set("co", co.ravel())
+    me.update()
+    for p in me.polygons:
+        p.use_smooth = True
+    me.update()
+    return obj
+
+
+def vertex_visibility(obj):
+    """For each vertex, whether each photo's camera sees it (1) or another
+    part of him is in the way (0): front from -Y, back from +Y, the side
+    from its own side (+X, or -X for his right, mirrored)."""
+    from mathutils.bvhtree import BVHTree
+    deps = bpy.context.evaluated_depsgraph_get()
+    tree = BVHTree.FromObject(obj, deps)
+    mw = obj.matrix_world
+    nm = mw.to_3x3()
+    n = len(obj.data.vertices)
+    vis = {"front": np.ones(n), "back": np.ones(n), "side": np.ones(n)}
+    for v in obj.data.vertices:
+        p = mw @ v.co
+        nrm = (nm @ v.normal).normalized()
+        for view, d in (("front", Vector((0, -1, 0))), ("back", Vector((0, 1, 0))),
+                        ("side", Vector((1, 0, 0)) if nrm.x >= 0 else Vector((-1, 0, 0)))):
+            hit = tree.ray_cast(p + nrm * 0.003 + d * 0.003, d)
+            if hit[0] is not None:
+                vis[view][v.index] = 0.0
+    return vis
+
+
 def ensure_uv(obj):
     if obj.data.uv_layers:
         return
@@ -535,7 +622,8 @@ def ensure_uv(obj):
     bpy.ops.object.mode_set(mode="OBJECT")
 
 
-def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mirror_above=None, skin_below=None):
+def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mirror_above=None, skin_below=None,
+          visibility=None):
     """Paints obj's texture from the photos (see the module's notes). On the
     arms and legs below skin_below (a height), only skin-coloured pixels are
     taken: where a view
@@ -604,7 +692,10 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
             # rest): no cloth colour in its texture, so none bleeds into a
             # hand or a foot when the texture is seen small.
             only_skin = pos[:, 2] < skin_below
-        col, wsum = colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, only_skin)
+        vis = None
+        if visibility is not None:
+            vis = {view: w @ v[vi] for view, v in visibility.items()}
+        col, wsum = colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, only_skin, vis)
         ok = wsum > 1e-3
         img[ty[ok], tx[ok]] = col[ok]
         have[ty[ok], tx[ok]] = True
@@ -621,7 +712,7 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
     if base is None and have.any():
         img[~have] = img[have].mean(0)
     # Fill what no photo saw (and the seams) from its neighbours.
-    for _ in range(8):
+    for _ in range(24 if visibility is not None else 8):
         grow = ~have & (np.roll(have, 1, 0) | np.roll(have, -1, 0) | np.roll(have, 1, 1) | np.roll(have, -1, 1))
         if not grow.any():
             break
@@ -652,7 +743,7 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
     return int(have.sum())
 
 
-def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, only_skin=None):
+def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, only_skin=None, vis=None):
     """The colour at model points (n, 3) with normals, from the photos."""
     n = pos.shape[0]
     acc = np.zeros((n, 3), dtype=np.float32)
@@ -674,6 +765,10 @@ def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, only_skin=N
         wv = wv * ok
         if only_skin is not None:
             wv = wv * np.where(only_skin, skin_like(col), 1.0)
+        if vis is not None and view in vis:
+            # Hidden from that camera behind another part (an arm before the
+            # body, the gamchha before the shirt): not that photo's colour.
+            wv = wv * vis[view]
         acc += col * wv[:, None]
         wsum += wv
     col = acc / np.maximum(wsum, 1e-6)[:, None]

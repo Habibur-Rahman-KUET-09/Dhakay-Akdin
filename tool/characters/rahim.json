@@ -70,7 +70,7 @@
       "keep": 0.2
     }
   },
-  "max_texture": 1024,
+  "max_texture": 2048,
   "roughness": 0.62,
   "skin_tone": [
     0.62,
@@ -149,6 +149,11 @@
       "brow": 0.035,
       "lift": 0.01,
       "volume": 0.022
+    },
+    "ai_mesh": "rahim.ai.glb",
+    "ai_source": "made/rahim.hunyuan3d-2mv.0.glb",
+    "ai": {
+      "faces": 24000
     }
   }
 }

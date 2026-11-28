@@ -10,3 +10,4 @@ android-plugin/.gradle/
 *.keystore
 *.jks
 key.properties
+tool/characters/ref/*.ai.glb
