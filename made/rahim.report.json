@@ -162,8 +162,9 @@
  },
  "ai_arm_tubes": 1542,
  "ai_split_arms": 966,
+ "ai_cut_webs": 428,
  "meshes": {
-  "ai_body": 24000
+  "ai_body": 23572
  },
  "materials": {
   "ai_body_photo": [
@@ -195,5 +196,5 @@
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 1547556
+ "glb_bytes": 1539580
 }
