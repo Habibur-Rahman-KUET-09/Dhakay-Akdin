@@ -669,29 +669,26 @@ def split_arms(obj, photos, body, margin=0.012):
     return changed
 
 
-def arm_tubes(obj, human, rig, radii=(0.085, 0.065, 0.065)):
-    """Only what lies around an arm's bones moves with that arm: within a
-    tube about the upper arm, the forearm and the hand (radii in metres,
-    roomy for a loose sleeve). Anything else that took arm weights (the
-    gamchha hanging on the chest, the shirt's front beside the arm) takes
-    instead the weights of the nearest point of the body that is not an
-    arm. Returns how many points changed."""
+def arm_tubes(obj, human, rig, radius=0.095):
+    """Above the elbows, where the arms touch the body in the photos, only
+    what lies around an upper arm's bone moves with that arm (a tube of
+    `radius` metres, roomy for a loose sleeve). Anything else up there that
+    took arm weights (the gamchha hanging on the chest, the shirt's front
+    beside the arm) takes instead the weights of the nearest point of the
+    body that is not an arm. Below the elbows split_arms does it by the
+    photo, where the arms hang apart. Returns how many points changed."""
     from mathutils.kdtree import KDTree
     mw_rig = rig.matrix_world
     chains = {}
+    elbow_z = 1e9
     for side in ("l", "r"):
-        segs = []
-        for bone, r in zip(("upperarm_" + side, "lowerarm_" + side, "hand_" + side), radii):
-            b = rig.data.bones.get(bone)
-            if b is None:
-                continue
-            head = mw_rig @ b.head_local
-            tail = mw_rig @ b.tail_local
-            if bone.startswith("hand"):
-                # On past the bone to the finger tips.
-                tail = tail + (tail - head).normalized() * 0.1
-            segs.append((head, tail, r))
-        chains[side] = segs
+        b = rig.data.bones.get("upperarm_" + side)
+        if b is None:
+            continue
+        head = mw_rig @ b.head_local
+        tail = mw_rig @ b.tail_local
+        elbow_z = min(elbow_z, tail.z)
+        chains[side] = [(head, tail, radius)]
 
     def near_arm(p, side):
         for a, b, r in chains.get(side, []):
@@ -722,7 +719,7 @@ def arm_tubes(obj, human, rig, radii=(0.085, 0.065, 0.065)):
         if not any(k in arm for k in ws):
             continue
         p = mw @ v.co
-        if near_arm(p, "l") or near_arm(p, "r"):
+        if p.z < elbow_z or near_arm(p, "l") or near_arm(p, "r"):
             continue
         _, i, _ = tree.find(p)
         for k in ws:
