@@ -64,7 +64,7 @@ class GoogleSignInPlugin(godot: Godot) : GodotPlugin(godot) {
             } catch (e: NoCredentialException) {
                 emitSignal("sign_in_failed", "NO_ACCOUNT")
             } catch (e: GetCredentialException) {
-                emitSignal("sign_in_failed", "ERROR " + e.type)
+                emitSignal("sign_in_failed", "ERROR " + e.type + " " + (e.message ?: ""))
             } catch (e: Exception) {
                 emitSignal("sign_in_failed", "ERROR " + e.javaClass.simpleName)
             }

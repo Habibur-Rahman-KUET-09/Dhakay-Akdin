@@ -78,3 +78,13 @@ func test_rahim_is_a_real_person_with_a_rig() -> void:
 	if p != null:
 		p.idle(0.5)
 		p.free()
+
+
+func test_google_sign_in_says_what_went_wrong() -> void:
+	var Cloud = load("res://scripts/ui/cloud.gd")
+	eq(Cloud.google_error("CANCELLED"), "CANCELLED", "the picker closed")
+	eq(Cloud.google_error("popup_closed"), "CANCELLED", "the browser's popup closed")
+	eq(Cloud.google_error("NO_ACCOUNT"), "NO_ACCOUNT", "no account on the phone")
+	eq(Cloud.google_error("ERROR android.credentials.GetCredentialException.TYPE_UNKNOWN [28444] Developer console is not set up correctly."), "GOOGLE_SETUP", "the app's key not in the project")
+	eq(Cloud.google_error("ERROR android.credentials.GetCredentialException.TYPE_NO_CREDENTIAL No credentials available"), "NO_ACCOUNT", "no credential")
+	eq(Cloud.google_error("ERROR android.credentials.GetCredentialException.TYPE_INTERRUPTED"), "ERROR_TYPE_INTERRUPTED", "anything else: kept, short")

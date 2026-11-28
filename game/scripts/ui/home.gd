@@ -3399,6 +3399,11 @@ func _cloud_card() -> Control:
 		return panel
 	if cloud.email != "":
 		box.add_child(Look.label(s.t("cloudLinkedGoogle" if cloud.provider == "google" else "cloudLinked", {"email": cloud.email}), 14, true, Look.PARROT_DARK))
+		# Signed in already: the copy online can be brought back here.
+		var back := Look.chunky(s.t("cloudRestore"), Color.WHITE, Look.OUTLINE, 15, 4, 14)
+		back.name = "CloudRestore"
+		back.pressed.connect(_restore_form)
+		box.add_child(back)
 	else:
 		box.add_child(Look.label(s.t("cloudHelp"), 13))
 		var grid := GridContainer.new()
@@ -3499,6 +3504,17 @@ func _signed_in(keep: bool, e: String, note: Label, go: Button) -> void:
 	go.pressed.connect(_restore.bind(back.save))
 
 
+## On a phone already signed in: looks up the copy online and offers it.
+func _restore_form() -> void:
+	var note := Look.label("", 14, true, Look.OUTLINE)
+	var go := Look.chunky(s.t("cloudRestore"), Look.SKY_DARK, Color.WHITE, 16, 5, 14)
+	go.disabled = true
+	_overlay(s.t("cloudTitle"), [Look.label(s.t("cloudRestoreHelp"), 14), go, note])
+	_working(note)
+	await _signed_in(false, "", note, go)
+	go.disabled = false
+
+
 ## Takes the progress from online in place of this phone's.
 func _restore(save: Dictionary) -> void:
 	var base := Progress.fresh()
@@ -3507,6 +3523,8 @@ func _restore(save: Dictionary) -> void:
 	progress.data = base
 	progress.save()
 	cloud.last_day = int(base.day)
+	cloud._remember()
+	Juice.tap()
 	_build()
 
 

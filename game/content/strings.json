@@ -5880,5 +5880,20 @@
   "bn": "১ মিনিটের দিন: চালু (কার্ড নেই)",
   "en": "1-minute day: on (no card)",
   "bx": "1 min er din: ON (card nai)"
+ },
+ "cloudRestore": {
+  "bn": "অনলাইনের কপি ফিরিয়ে আনুন",
+  "en": "Bring back the online copy",
+  "bx": "Online copy firiye anun"
+ },
+ "cloudRestoreHelp": {
+  "bn": "এই account-এ অনলাইনে যা জমা আছে, তা এই ফোনে আনা যাবে। এই ফোনের এখনকার অগ্রগতি এর বদলে যাবে।",
+  "en": "What is kept online for this account can come to this phone, in place of its progress now.",
+  "bx": "Ei account-e online-e ja joma ache, ta ei phone-e ana jabe. Ei phone-er ekhonkar ogrogoti er bodle jabe."
+ },
+ "cloudErr_GOOGLE_SETUP": {
+  "bn": "Google দিয়ে এখন ঢোকা যাচ্ছে না (অ্যাপের সেটআপ বাকি)। আপাতত ইমেইল দিয়ে চেষ্টা করুন।",
+  "en": "Google sign-in is not set up for this app yet. Try email for now.",
+  "bx": "Google diye ekhon dhoka jacche na (app-er setup baki). Apatoto email diye chesta korun."
  }
 }

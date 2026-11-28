@@ -635,8 +635,7 @@ func google(link: bool) -> String:
 		plugin.signIn(google_client)
 	var got: Array = await _google_done
 	if got[1] != "":
-		var why := str(got[1]).split(" ")[0]
-		return "CANCELLED" if why in ["popup_closed", "access_denied"] else why
+		return google_error(str(got[1]))
 	var credential := ("access_token=%s" if web else "id_token=%s") % got[0]
 	var body := {"requestUri": "http://localhost", "postBody": credential + "&providerId=google.com",
 		"returnSecureToken": true, "returnIdpCredential": true}
@@ -652,6 +651,23 @@ func google(link: bool) -> String:
 	provider = "google"
 	_took(reply.data)
 	return ""
+
+
+## The picker's or the browser's reason as one of ours: CANCELLED,
+## NO_ACCOUNT, GOOGLE_SETUP (the app's key or client is not set up in the
+## Firebase/Google project: Google's code 10 or 28444, "developer
+## console"), or the reason itself, short and without spaces.
+static func google_error(reason: String) -> String:
+	var r := reason.strip_edges()
+	var low := r.to_lower()
+	if low in ["popup_closed", "access_denied", "cancelled"] or "cancel" in low:
+		return "CANCELLED"
+	if "28444" in low or "developer console" in low or low.ends_with(" 10") or "developer_error" in low:
+		return "GOOGLE_SETUP"
+	if "no_credential" in low or "nocredential" in low or low == "no_account":
+		return "NO_ACCOUNT"
+	var short := r.replace("android.credentials.GetCredentialException.", "").replace(" ", "_")
+	return short.substr(0, 48)
 
 
 func _google_ok(token: String) -> void:
