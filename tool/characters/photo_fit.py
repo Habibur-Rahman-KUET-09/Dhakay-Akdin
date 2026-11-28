@@ -625,6 +625,50 @@ def ai_landmarks(obj, body, photos, marks):
     return lm
 
 
+ARM_PARTS = ("upperarm", "lowerarm", "hand", "thumb", "index", "middle", "ring", "pinky")
+
+
+def split_arms(obj, photos, body, margin=0.012):
+    """The AI's shape is one skin: weights carried from the nearest body
+    point let the shirt's side, the lungi by the hands and the gamchha on
+    the chest follow an arm (a web of cloth when he waves or holds the
+    handlebar). At each height where the front photo shows the arms apart
+    from the body, a point inside the body's span loses its arm weights and
+    a point outside it keeps only them. Returns how many points changed."""
+    ph = photos["front"]
+    names = {g.index: g.name.lower() for g in obj.vertex_groups}
+    arm = {i for i, n in names.items() if any(w in n for w in ARM_PARTS)}
+    mw = obj.matrix_world
+    changed = 0
+    for v in obj.data.vertices:
+        p = mw @ v.co
+        f = (p.z - body.floor) / body.height
+        r = ph.row(f)
+        if not r or len(r.get("spans", [])) < 3:
+            continue
+        spans = r["spans"]
+        trunk = min(spans, key=lambda s: abs((s[0] + s[1]) / 2.0))
+        # Facing the camera, his left (+x) is on the photo's right, so the
+        # spans (from the photo's middle) are in the model's x.
+        x0, x1 = trunk[0] * body.height, trunk[1] * body.height
+        inside = x0 + margin < p.x < x1 - margin
+        outside = p.x < x0 - margin or p.x > x1 + margin
+        if not (inside or outside):
+            continue
+        ws = {g.group: g.weight for g in v.groups if g.weight > 0}
+        keep = {k: w for k, w in ws.items() if (k in arm) == outside}
+        if not keep or len(keep) == len(ws):
+            continue
+        total = sum(keep.values())
+        for k in ws:
+            if k in keep:
+                obj.vertex_groups[k].add([v.index], keep[k] / total, "REPLACE")
+            else:
+                obj.vertex_groups[k].remove([v.index])
+        changed += 1
+    return changed
+
+
 def vertex_visibility(obj):
     """For each vertex, whether each photo's camera sees it (1) or another
     part of him is in the way (0): front from -Y, back from +Y, the side
