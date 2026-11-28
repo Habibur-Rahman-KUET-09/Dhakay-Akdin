@@ -202,7 +202,8 @@ if SPEC.get("photos"):
     report["painted"] = {}
     try:
         base = base_pixels(human, tex["body"])
-        report["painted"]["body"] = photo_fit.paint(human, mapping, photos, tex["body"], fix, 0.6, base=base, side_mirror_above=lm.get("chin"))
+        report["painted"]["body"] = photo_fit.paint(human, mapping, photos, tex["body"], fix, 0.6, base=base, side_mirror_above=lm.get("chin"),
+                                                              skin_below=lm.get("chin") - 0.02 if lm.get("chin") is not None else None)
     except Exception:
         import traceback
         report["errors"].append("paint body: %s" % traceback.format_exc()[-700:])

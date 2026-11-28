@@ -467,8 +467,12 @@ def ensure_uv(obj):
     bpy.ops.object.mode_set(mode="OBJECT")
 
 
-def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mirror_above=None):
-    """Paints obj's texture from the photos (see the module's notes)."""
+def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mirror_above=None, skin_below=None):
+    """Paints obj's texture from the photos (see the module's notes). Below
+    skin_below (a height), only skin-coloured pixels are taken: where a view
+    sees the shirt, the lungi or the gamchha in front of an arm or a leg (the
+    inside of the arm, the palm against the lungi, a calf behind the hem),
+    that view is left out, and the texel is filled from its neighbours."""
     ensure_uv(obj)
     mesh = obj.data
     mesh.calc_loop_triangles()
@@ -509,7 +513,7 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
         nrm /= np.linalg.norm(nrm, axis=1, keepdims=True) + 1e-9
         tx = p[inside, 0].astype(int)
         ty = p[inside, 1].astype(int)
-        col, wsum = colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above)
+        col, wsum = colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, skin_below)
         ok = wsum > 1e-3
         img[ty[ok], tx[ok]] = col[ok]
         have[ty[ok], tx[ok]] = True
@@ -547,7 +551,7 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
     return int(have.sum())
 
 
-def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above):
+def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, skin_below=None):
     """The colour at model points (n, 3) with normals, from the photos."""
     n = pos.shape[0]
     acc = np.zeros((n, 3), dtype=np.float32)
@@ -567,10 +571,24 @@ def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above):
         xs, ys = mapping.to_px(view, pos, shift)
         col, ok = photos[view].sample(xs, ys)
         wv = wv * ok
+        if skin_below is not None:
+            wv = wv * np.where(pos[:, 2] < skin_below, skin_like(col), 1.0)
         acc += col * wv[:, None]
         wsum += wv
     col = acc / np.maximum(wsum, 1e-6)[:, None]
     return col, wsum
+
+
+def skin_like(col):
+    """Skin (brown, not as bright and strong as the orange shirt) or deep
+    shadow, by colour: measured on Rahim's photos, 99% of the forearms pass
+    and 13% of the shirt."""
+    mx = col.max(1)
+    ch = mx - col.min(1)
+    r, g, b = col[:, 0], col[:, 1], col[:, 2]
+    h = np.where(mx == r, ((g - b) / (ch + 1e-6)) % 6, np.where(mx == g, (b - r) / (ch + 1e-6) + 2, (r - g) / (ch + 1e-6) + 4)) * 60.0
+    skin = (h >= 14) & (h <= 34) & (ch < 0.48) & (mx < 0.92)
+    return (skin | (mx < 0.25)).astype(np.float32)
 
 
 def arm_fixer(body, mapping, photos, leg_top=None):
