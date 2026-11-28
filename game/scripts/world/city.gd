@@ -9,6 +9,7 @@ extends RefCounted
 const RoadMap = preload("res://scripts/rules/road_map.gd")
 const Look = preload("res://scripts/ui/look.gd")
 const Clutter = preload("res://scripts/world/clutter.gd")
+const Street = preload("res://scripts/world/street.gd")
 
 ## Metres per map tile.
 const T := 6.0
@@ -60,6 +61,8 @@ static func build(map: RoadMap, lang: String, skip := Vector2i(-1, -1), festival
 	print("[town] ground and roads")
 	town.add_child(_ground(map))
 	town.add_child(_roads(map))
+	print("[town] kerbs, divider, trees, road signs")
+	town.add_child(Street.build(map, lang))
 	print("[town] blocks")
 	town.add_child(_blocks(map))
 	print("[town] poles and wires")
@@ -216,7 +219,8 @@ static func _roads(map: RoadMap) -> MeshInstance3D:
 		if k == RoadMap.Kind.MAIN_ROAD:
 			var ew := map.is_road(RoadMap.step(p, RoadMap.E)) and map.is_road(RoadMap.step(p, RoadMap.W))
 			var ns := map.is_road(RoadMap.step(p, RoadMap.N)) and map.is_road(RoadMap.step(p, RoadMap.S))
-			if ew != ns:
+			# Mirpur's straight main roads have a divider instead (street.gd).
+			if ew != ns and not (Street.modern(map) and Street.straight_main(map, p) >= 0):
 				var dash := Rect2(o + Vector2(T * 0.25, T * 0.48), Vector2(T * 0.5, 0.15)) if ew \
 					else Rect2(o + Vector2(T * 0.48, T * 0.25), Vector2(0.15, T * 0.5))
 				_quad(st, dash, 0.02, DASH)
@@ -241,7 +245,9 @@ static func _roads(map: RoadMap) -> MeshInstance3D:
 			for d in 4:
 				if map.is_road(RoadMap.step(p, d)):
 					var v := 0.9 + noise(p, d) * 0.1
-					_quad(walk, _strip(p, d, PAVEMENT), 0.15, Color(v, v * 0.97, v * 0.92))
+					# Mirpur's pavements are red brick pavers; Old Dhaka's grey.
+					var tint := Color(v, v * 0.72, v * 0.6) if Street.modern(map) else Color(v, v * 0.97, v * 0.92)
+					_quad(walk, _strip(p, d, PAVEMENT), 0.15, tint)
 	var mesh := ArrayMesh.new()
 	st.commit(mesh)
 	walk.commit(mesh)
