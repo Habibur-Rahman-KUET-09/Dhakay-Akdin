@@ -160,7 +160,8 @@
  "painted": {
   "ai": 2326661
  },
- "ai_split_arms": 966,
+ "ai_arm_tubes": 2497,
+ "ai_split_arms": 403,
  "meshes": {
   "ai_body": 24000
  },
