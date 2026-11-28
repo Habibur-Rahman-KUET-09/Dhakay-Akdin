@@ -7,14 +7,7 @@
   "eyelashes": null,
   "teeth": null,
   "tongue": null,
-  "hair": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/hair/short02/short02.mhclo",
-  "outfit": [
-   "gamchha",
-   "hair",
-   "lungi",
-   "sandals",
-   "shirt"
-  ]
+  "hair": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/hair/short02/short02.mhclo"
  },
  "assets": {
   "skins": [
@@ -137,49 +130,25 @@
    0.0553
   ]
  },
- "trimmed": {
-  "hair": 80,
-  "shirt": 49
+ "ai_faces": 24000,
+ "ai_hidden": {
+  "front": 5695,
+  "back": 6599,
+  "side": 4374
  },
- "toned": [
-  "middleage_lightskinned_male_diffuse2.png"
- ],
  "painted": {
-  "body": 2336968,
-  "lungi": 1048566,
-  "shirt": 222128,
-  "gamchha": 1048576,
-  "hair": 123468
+  "ai": 2326594
  },
  "meshes": {
-  "gamchha": 78,
-  "hair": 318,
-  "lungi": 720,
-  "rahim": 12423,
-  "rahim.high-poly": 1020,
-  "sandals": 24,
-  "shirt": 1915
+  "ai_body": 24000
  },
  "materials": {
+  "ai_body_photo": [
+   "BSDF_PRINCIPLED",
+   "OUTPUT_MATERIAL",
+   "TEX_IMAGE"
+  ],
   "Dots Stroke": [],
-  "gamchha": [],
-  "gamchha_photo": [
-   "BSDF_PRINCIPLED",
-   "OUTPUT_MATERIAL",
-   "TEX_IMAGE"
-  ],
-  "hair_cap": [],
-  "hair_photo": [
-   "BSDF_PRINCIPLED",
-   "OUTPUT_MATERIAL",
-   "TEX_IMAGE"
-  ],
-  "lungi": [],
-  "lungi_photo": [
-   "BSDF_PRINCIPLED",
-   "OUTPUT_MATERIAL",
-   "TEX_IMAGE"
-  ],
   "Material": [
    "OUTPUT_MATERIAL",
    "BSDF_PRINCIPLED"
@@ -201,23 +170,7 @@
    "BSDF_PRINCIPLED",
    "TEX_IMAGE",
    "TEX_IMAGE"
-  ],
-  "rahim_photo": [
-   "BSDF_PRINCIPLED",
-   "OUTPUT_MATERIAL",
-   "TEX_IMAGE"
-  ],
-  "sandals": [
-   "BSDF_PRINCIPLED",
-   "OUTPUT_MATERIAL",
-   "TEX_IMAGE"
-  ],
-  "shirt": [],
-  "shirt_photo": [
-   "BSDF_PRINCIPLED",
-   "OUTPUT_MATERIAL",
-   "TEX_IMAGE"
   ]
  },
- "glb_bytes": 2383524
+ "glb_bytes": 1548744
 }
