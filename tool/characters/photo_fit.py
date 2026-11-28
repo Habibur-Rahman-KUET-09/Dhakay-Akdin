@@ -41,7 +41,39 @@ class Photo:
         self.rows = view_data["rows"]
         mx = px.max(-1)
         mn = px.min(-1)
-        self.background = (mx > 0.9) & ((mx - mn) / (mx + 1e-6) < 0.08)
+        self.background = (mx > 0.86) & ((mx - mn) / (mx + 1e-6) < 0.12)
+        self._nearest()
+
+    def _nearest(self, reach=40):
+        """For each background pixel near the person, the nearest person
+        pixel (a model a little wider than the photo then takes the cloth's
+        colour at its edge, not the white)."""
+        h, w = self.background.shape
+        person = ~self.background
+        # Not the very edge (half white): a few pixels in.
+        for _ in range(5):
+            person = person & np.roll(person, 1, 0) & np.roll(person, -1, 0) & np.roll(person, 1, 1) & np.roll(person, -1, 1)
+        ny, nx = np.mgrid[0:h, 0:w]
+        ny = np.where(person, ny, -10 ** 6).astype(np.int32)
+        nx = np.where(person, nx, -10 ** 6).astype(np.int32)
+        yy, xx = np.mgrid[0:h, 0:w]
+        for _ in range(reach):
+            for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                cy = np.roll(ny, dy, 0) if dy else ny
+                cx = np.roll(nx, dy, 0) if dy else nx
+                if dx:
+                    cy = np.roll(cy, dx, 1)
+                    cx = np.roll(cx, dx, 1)
+                d_new = (cy - yy) ** 2 + (cx - xx) ** 2
+                d_old = (ny - yy) ** 2 + (nx - xx) ** 2
+                better = d_new < d_old
+                ny = np.where(better, cy, ny)
+                nx = np.where(better, cx, nx)
+        dist2 = (ny - yy) ** 2 + (nx - xx) ** 2
+        self.solid = person
+        self.near_ok = dist2 <= reach * reach
+        self.near_y = np.clip(ny, 0, h - 1)
+        self.near_x = np.clip(nx, 0, w - 1)
 
     def y_of(self, f):
         return self.bottom - f * self.hpx
@@ -55,8 +87,14 @@ class Photo:
         xi = np.clip(np.round(xs).astype(int), 0, self.w - 1)
         yi = np.clip(np.round(ys).astype(int), 0, self.h - 1)
         inside = (xs >= 0) & (xs < self.w) & (ys >= 0) & (ys < self.h)
-        ok = inside & ~self.background[yi, xi]
-        return self.px[yi, xi], ok
+        on = self.solid[yi, xi]
+        # Just off the person (or on its pale edge): the nearest solid part
+        # of the person instead.
+        near = ~on & self.near_ok[yi, xi]
+        sy = np.where(near, self.near_y[yi, xi], yi)
+        sx = np.where(near, self.near_x[yi, xi], xi)
+        ok = inside & (on | near)
+        return self.px[sy, sx], ok
 
     def row(self, f):
         i = int(round(min(max(f, 0.0), 1.0) * (len(self.rows) - 1)))

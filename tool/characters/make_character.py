@@ -199,6 +199,8 @@ if SPEC.get("photos"):
         import traceback
         report["errors"].append("paint body: %s" % traceback.format_exc()[-700:])
     for name, o in made.items():
+        if name == "sandals":
+            continue
         try:
             report["painted"][name] = photo_fit.paint(o, mapping, photos, tex["cloth"], fix if name == "shirt" else None, 0.85)
         except Exception:
