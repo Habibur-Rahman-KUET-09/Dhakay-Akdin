@@ -19,6 +19,7 @@ const Tips = preload("res://scripts/ui/tips.gd")
 const Chatter = preload("res://scripts/ui/chatter.gd")
 const City = preload("res://scripts/world/city.gd")
 const Models = preload("res://scripts/world/models.gd")
+const People = preload("res://scripts/world/people.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
 const Traffic = preload("res://scripts/world/traffic.gd")
 const Music = preload("res://scripts/ui/music.gd")
@@ -79,6 +80,8 @@ var rickshaw: Node3D
 ## The rickshaw body's material: paints hood and body, pedals the legs.
 var _paint: ShaderMaterial
 var _rider_paint: ShaderMaterial
+## Rahim Chacha from his photos, riding (person.gd); null: the old rider.
+var _person: Node3D
 var camera: Camera3D
 var marker: Node3D
 var hud: Hud
@@ -314,6 +317,17 @@ func _ready() -> void:
 		var outfit := progress.worn("rickshaw", "outfit")
 		_rider_paint = Models.traffic_material(PackedColorArray([Color(str(outfit.get("shirt", "E8892B"))), Color(str(outfit.get("lower", "2D5D8A")))]), false)
 		(rickshaw.get_meta("rider") as MeshInstance3D).material_override = _rider_paint
+	if mode != "delivery":
+		# Rahim Chacha as he really looks (people.gd), if his model is here.
+		_person = People.make("rickshaw")
+		if _person != null and _person.has_rig():
+			rickshaw.add_child(_person)
+			_person.ride()
+			_person.wear(progress.worn("rickshaw", "outfit"))
+			(rickshaw.get_meta("rider") as MeshInstance3D).visible = false
+		elif _person != null:
+			_person.free()
+			_person = null
 	var plain := Models.material()
 	for w in rickshaw.get_meta("wheels"):
 		(w as MeshInstance3D).material_override = plain
@@ -727,6 +741,8 @@ func _follow(dt: float, snap := false) -> void:
 	_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if pedalling else 0.0, 0.0, 1.0))
 	if _rider_paint != null:
 		_rider_paint.set_shader_parameter("custom_data", Vector4(0.0, 1.0 if pedalling else 0.0, 0.0, 1.0))
+	if _person != null:
+		_person.pedal(dt, pedalling, d.speed if d.moving else 0.0)
 	var forward := Vector3(-sin(_yaw), 0, -cos(_yaw))
 	# Behind the rickshaw may be a building: then the camera comes closer
 	# (and a little higher) until it stands over the road.

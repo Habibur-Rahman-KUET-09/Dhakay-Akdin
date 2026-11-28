@@ -11,6 +11,7 @@ const Look = preload("res://scripts/ui/look.gd")
 const Graphics = preload("res://scripts/ui/graphics.gd")
 const Heroes = preload("res://scripts/world/heroes.gd")
 const Voice = preload("res://scripts/ui/voice.gd")
+const People = preload("res://scripts/world/people.gd")
 
 var who := "rickshaw"
 var progress: Object
@@ -27,6 +28,9 @@ var _blink_in := 2.0
 var _blink_left := 0.0
 var _gesture_in := 2.5
 var _busy := false
+## A real-looking person (people.gd) instead of a cartoon hero: softer,
+## warmer light with shadows, and their own idle and gestures.
+var _real := false
 ## How far the camera stands, and the height it looks at (per character).
 var _dist := 5.0
 var _look_y := 1.0
@@ -48,20 +52,24 @@ func _ready() -> void:
 	_vp.transparent_bg = true
 	_vp.msaa_3d = Viewport.MSAA_DISABLED if Graphics.level() == "low" else Viewport.MSAA_2X
 	add_child(_vp)
-	var env := Environment.new()
-	env.background_mode = Environment.BG_CLEAR_COLOR
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color("8FA3D9") if night else Color("FFF4E0")
-	env.ambient_light_energy = 0.5 if night else 0.75
-	var we := WorldEnvironment.new()
-	we.environment = env
-	_vp.add_child(we)
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-50, -35, 0)
-	sun.light_energy = 0.35 if night else 1.15
-	sun.light_color = Color("AFC2FF") if night else Color.WHITE
-	_vp.add_child(sun)
-	if night:
+	_real = People.has(who)
+	if _real:
+		_real_light()
+	else:
+		var env := Environment.new()
+		env.background_mode = Environment.BG_CLEAR_COLOR
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		env.ambient_light_color = Color("8FA3D9") if night else Color("FFF4E0")
+		env.ambient_light_energy = 0.5 if night else 0.75
+		var we := WorldEnvironment.new()
+		we.environment = env
+		_vp.add_child(we)
+		var sun := DirectionalLight3D.new()
+		sun.rotation_degrees = Vector3(-50, -35, 0)
+		sun.light_energy = 0.35 if night else 1.15
+		sun.light_color = Color("AFC2FF") if night else Color.WHITE
+		_vp.add_child(sun)
+	if night and not _real:
 		var lamp := OmniLight3D.new()
 		lamp.position = Vector3(1.6, 3.0, -1.6)
 		lamp.omni_range = 9.0
@@ -87,6 +95,13 @@ func _process(dt: float) -> void:
 	if _camera != null:
 		_camera.position.y = _look_y + 0.75 + sin(_t * 0.8) * 0.02
 	if _hero == null:
+		return
+	if _real:
+		_hero.idle(dt)
+		_gesture_in -= dt
+		if _gesture_in <= 0.0 and not _busy:
+			gesture(_hero.gesture_kind)
+			_gesture_in = randf_range(5.5, 9.0)
 		return
 	# Breathing, the head swaying a little.
 	_hero.scale = Vector3(1.0, 1.0 + sin(_t * 2.2) * 0.012, 1.0)
@@ -121,6 +136,12 @@ func _place_camera() -> void:
 func poke() -> void:
 	if _hero == null or not open:
 		return
+	if _real:
+		_busy = false
+		gesture("wave")
+		if _voice != null:
+			_voice.say("catch_" + who, true)
+		return
 	var up := create_tween()
 	up.tween_property(_hero, "position:y", _hero.position.y + 0.32, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	up.tween_property(_hero, "position:y", _hero.position.y, 0.24).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
@@ -137,6 +158,10 @@ func gesture(kind: String) -> void:
 	if _hero == null or _busy:
 		return
 	_busy = true
+	if _real:
+		var t: Tween = _hero.gesture(kind)
+		t.tween_callback(func(): _busy = false)
+		return
 	var r: Node3D = _hero.get_meta("arm_r")
 	var l: Node3D = _hero.get_meta("arm_l")
 	var tw := create_tween()
@@ -282,7 +307,21 @@ func _build() -> void:
 			# The ghat's wooden steps where he stands.
 			_marks(Color("8D6E63"), [Vector3(-0.45, 0.06, -0.35)], Vector3(1.4, 0.12, 1.1))
 			hero_at = Vector3(-0.45, 0.12, -0.35)
-	_hero = Heroes.hero(who, _look("outfit") if who in ["rickshaw", "tea", "fuchka"] else {})
+	if _real:
+		_hero = People.make(who)
+		_real = _hero != null and _hero.has_rig()
+		if _real:
+			_hero.wear(_look("outfit"))
+		if _hero != null and not _real:
+			_hero.free()
+			_hero = null
+	if _real:
+		# Life size, so the camera comes closer to see his face.
+		_dist = 3.5
+		_look_y = 1.0
+		hero_at.x += 0.15
+	if _hero == null:
+		_hero = Heroes.hero(who, _look("outfit") if who in ["rickshaw", "tea", "fuchka"] else {})
 	_hero.position = hero_at
 	_hero.rotation.y = 0.25
 	_pivot.add_child(_hero)
@@ -299,6 +338,52 @@ func _paint_vehicle(v: Node3D) -> void:
 	var plain := Models.material()
 	for w in v.get_meta("wheels"):
 		(w as MeshInstance3D).material_override = plain
+
+
+## Light for a real-looking person: a soft sky all round (no HDRI file to
+## carry), a warm low sun with soft shadows, and a cool light from behind
+## that draws their edge out of the background. Filmic tones so skin and
+## cloth do not burn out.
+func _real_light() -> void:
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color("1B2A4A") if night else Color("6F9BD1")
+	sky_mat.sky_horizon_color = Color("4A4E68") if night else Color("E9D9C2")
+	sky_mat.ground_bottom_color = Color("1A1A1E") if night else Color("5A4A3C")
+	sky_mat.ground_horizon_color = Color("3A3A44") if night else Color("C9B79F")
+	sky_mat.sun_angle_max = 30.0
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	var env := Environment.new()
+	env.background_mode = Environment.BG_CLEAR_COLOR
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_energy = 0.45 if night else 0.85
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.tonemap_exposure = 1.05
+	var we := WorldEnvironment.new()
+	we.environment = env
+	_vp.add_child(we)
+	var sun := DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-38, -150, 0)
+	sun.light_energy = 0.4 if night else 1.5
+	sun.light_color = Color("AFC2FF") if night else Color("FFE6C7")
+	sun.shadow_enabled = Graphics.level() != "low"
+	sun.shadow_blur = 2.0
+	sun.directional_shadow_max_distance = 12.0
+	_vp.add_child(sun)
+	var rim := DirectionalLight3D.new()
+	rim.rotation_degrees = Vector3(-20, 35, 0)
+	rim.light_energy = 0.35 if night else 0.75
+	rim.light_color = Color("BFD4FF")
+	_vp.add_child(rim)
+	if night:
+		var lamp := OmniLight3D.new()
+		lamp.position = Vector3(1.6, 3.0, -1.6)
+		lamp.omni_range = 9.0
+		lamp.light_energy = 2.2
+		lamp.light_color = Color("FFC46B")
+		_vp.add_child(lamp)
 
 
 ## Steam rising from Monir's kettle.

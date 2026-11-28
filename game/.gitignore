@@ -1,3 +1,5 @@
 .godot/
 *.import
 !textures/*.import
+people/*.jpg
+people/*.png

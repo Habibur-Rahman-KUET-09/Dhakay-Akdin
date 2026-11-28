@@ -66,3 +66,15 @@ func test_a_quick_day_is_a_minute_with_a_smaller_target() -> void:
 	eq(b.n("hawker.daily_target"), roundf(b.plain("hawker.daily_target") * 60.0 / b.plain("hawker.day_seconds")), "the target shrinks with it")
 	eq(b.quick_share("bus"), 1.0, "the bus runs on trips, not a clock")
 	Balance.quick = was
+
+
+func test_rahim_is_a_real_person_with_a_rig() -> void:
+	var People = load("res://scripts/world/people.gd")
+	check(People.has("rickshaw"), "Rahim's model is in the game")
+	check(not People.has("tea"), "Monir stays a cartoon hero for now")
+	check(People.make("tea") == null, "no model: nothing made")
+	var p: Node3D = People.make("rickshaw")
+	check(p != null and p.has_rig(), "his rig has the bones the stage moves")
+	if p != null:
+		p.idle(0.5)
+		p.free()
