@@ -86,13 +86,20 @@ def run(space, name, out, extra):
     print("calling", space, api_name, {k: (str(v)[:60]) for k, v in kwargs.items()})
     reply = c.predict(api_name=api_name, **kwargs)
     print("reply:", str(reply)[:1500])
-    f = first_file(reply)
-    if not f:
+    # Every file in the reply: the bare shape and the textured one.
+    files = []
+    for part in (reply if isinstance(reply, (list, tuple)) else [reply]):
+        f = first_file(part)
+        if f and f not in files:
+            files.append(f)
+    if not files:
         sys.exit("no file in the reply")
     os.makedirs(out, exist_ok=True)
-    dest = os.path.join(out, "%s.ai%s" % (name, os.path.splitext(f)[1] or ".glb"))
-    shutil.copy(f, dest)
-    print("saved", dest, os.path.getsize(dest))
+    tag = space.split("/")[-1].lower().replace(".", "")
+    for i, f in enumerate(files):
+        dest = os.path.join(out, "%s.%s.%d%s" % (name, tag, i, os.path.splitext(f)[1] or ".glb"))
+        shutil.copy(f, dest)
+        print("saved", dest, os.path.getsize(dest))
 
 
 if __name__ == "__main__":
