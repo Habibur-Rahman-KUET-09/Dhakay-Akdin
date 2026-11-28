@@ -1,0 +1,59 @@
+name: ai3d
+
+# By hand: a character's 3D shape and texture from their photos by an
+# image-to-3D model on a Hugging Face Space (tool/characters/ai3d.py).
+# "api" lists what the Spaces take; "run" makes the model and puts it on
+# the "characters" branch (made/<name>.ai.glb).
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "api or run"
+        default: "api"
+      spaces:
+        description: "Space(s), e.g. tencent/Hunyuan3D-2"
+        default: "tencent/Hunyuan3D-2 tencent/Hunyuan3D-2mv tencent/Hunyuan3D-2.1 microsoft/TRELLIS"
+      name:
+        description: "Who (for run)"
+        default: "rahim"
+      args:
+        description: "For run: api_name=/x key=value ... (file:front for a photo)"
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: characters
+  cancel-in-progress: false
+
+jobs:
+  ai3d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q gradio_client
+      - name: Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          mkdir -p out
+          if [ "${{ inputs.mode }}" = "api" ]; then
+            python3 tool/characters/ai3d.py api ${{ inputs.spaces }}
+          else
+            python3 tool/characters/ai3d.py run ${{ inputs.spaces }} "${{ inputs.name }}" out ${{ inputs.args }}
+          fi
+          ls -la out
+      - name: Put on the characters branch
+        if: inputs.mode == 'run'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin characters
+          git checkout -q -B characters origin/characters
+          mkdir -p made
+          cp out/* made/
+          git add made
+          git commit -qm "AI 3D: ${{ inputs.name }} from ${{ inputs.spaces }} (run ${{ github.run_number }})" || echo "nothing new"
+          git push -q origin characters
