@@ -669,6 +669,74 @@ def split_arms(obj, photos, body, margin=0.012):
     return changed
 
 
+def arm_tubes(obj, human, rig, radii=(0.085, 0.065, 0.065)):
+    """Only what lies around an arm's bones moves with that arm: within a
+    tube about the upper arm, the forearm and the hand (radii in metres,
+    roomy for a loose sleeve). Anything else that took arm weights (the
+    gamchha hanging on the chest, the shirt's front beside the arm) takes
+    instead the weights of the nearest point of the body that is not an
+    arm. Returns how many points changed."""
+    from mathutils.kdtree import KDTree
+    mw_rig = rig.matrix_world
+    chains = {}
+    for side in ("l", "r"):
+        segs = []
+        for bone, r in zip(("upperarm_" + side, "lowerarm_" + side, "hand_" + side), radii):
+            b = rig.data.bones.get(bone)
+            if b is None:
+                continue
+            head = mw_rig @ b.head_local
+            tail = mw_rig @ b.tail_local
+            if bone.startswith("hand"):
+                # On past the bone to the finger tips.
+                tail = tail + (tail - head).normalized() * 0.1
+            segs.append((head, tail, r))
+        chains[side] = segs
+
+    def near_arm(p, side):
+        for a, b, r in chains.get(side, []):
+            ab = b - a
+            t = max(0.0, min(1.0, (p - a).dot(ab) / max(ab.length_squared, 1e-9)))
+            if (a + ab * t - p).length < r:
+                return True
+        return False
+
+    hnames = {g.index: g.name for g in human.vertex_groups}
+    arm_h = {i for i, n in hnames.items() if any(w in n.lower() for w in ARM_PARTS)}
+    body_pts = []
+    for v in human.data.vertices:
+        gs = [(g.group, g.weight) for g in v.groups if g.weight > 0.01]
+        if gs and not any(g in arm_h for g, _ in gs):
+            body_pts.append((human.matrix_world @ v.co, gs))
+    tree = KDTree(len(body_pts))
+    for i, (p, _) in enumerate(body_pts):
+        tree.insert(p, i)
+    tree.balance()
+    names = {g.index: g.name for g in obj.vertex_groups}
+    arm = {i for i, n in names.items() if any(w in n.lower() for w in ARM_PARTS)}
+    by_name = {g.name: g for g in obj.vertex_groups}
+    mw = obj.matrix_world
+    changed = 0
+    for v in obj.data.vertices:
+        ws = {g.group: g.weight for g in v.groups if g.weight > 0}
+        if not any(k in arm for k in ws):
+            continue
+        p = mw @ v.co
+        if near_arm(p, "l") or near_arm(p, "r"):
+            continue
+        _, i, _ = tree.find(p)
+        for k in ws:
+            obj.vertex_groups[k].remove([v.index])
+        total = sum(w for _, w in body_pts[i][1])
+        for g, w in body_pts[i][1]:
+            name = hnames[g]
+            if name not in by_name:
+                by_name[name] = obj.vertex_groups.new(name=name)
+            by_name[name].add([v.index], w / total, "REPLACE")
+        changed += 1
+    return changed
+
+
 def vertex_visibility(obj):
     """For each vertex, whether each photo's camera sees it (1) or another
     part of him is in the way (0): front from -Y, back from +Y, the side

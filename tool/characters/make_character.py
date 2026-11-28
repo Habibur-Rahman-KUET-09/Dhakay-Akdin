@@ -187,6 +187,7 @@ if SPEC.get("photos"):
             report["painted"] = {"ai": photo_fit.paint(ai, amap, photos, tex["body"], None, 0.8,
                                                        side_mirror_above=alm.get("chin", body.floor + body.height * 0.86), visibility=vis)}
             clothes.bind(ai, human)
+            report["ai_arm_tubes"] = photo_fit.arm_tubes(ai, human, human.parent)
             report["ai_split_arms"] = photo_fit.split_arms(ai, photos, body)
             for o in list(bpy.data.objects):
                 if o.type == "MESH" and o != ai:
