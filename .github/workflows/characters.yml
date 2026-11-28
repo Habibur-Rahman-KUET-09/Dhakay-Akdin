@@ -55,6 +55,13 @@ jobs:
           done
           ls "$data" | head -30
 
+      - name: Measure the photos
+        run: |
+          pip install -q numpy pillow
+          for n in ${{ inputs.names }}; do
+            if [ -f "tool/characters/ref/${n}_front.png" ]; then python3 tool/characters/photo_measure.py "$n"; fi
+          done
+
       - name: Make
         run: |
           mkdir -p out
@@ -71,6 +78,7 @@ jobs:
           if git rev-parse -q --verify origin/characters > /dev/null; then git checkout -q -B characters origin/characters; else git checkout -q --orphan characters && git rm -rq --cached . && rm -rf game docs tool app android-plugin .github firebase.json README.md; fi
           mkdir -p made
           cp out/* made/
+          cp tool/characters/ref/*.measure.json made/ 2>/dev/null || true
           git add made
           git commit -qm "Characters: ${{ inputs.names }} (run ${{ github.run_number }})" || echo "nothing new"
           git push -q origin characters

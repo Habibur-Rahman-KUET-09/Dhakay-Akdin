@@ -127,13 +127,90 @@ def tone_images(obj, factor):
     return sorted(done)
 
 
-if SPEC.get("skin_tone"):
+if SPEC.get("skin_tone") and not SPEC.get("photos"):
     report["toned"] = tone_images(human, SPEC["skin_tone"])
 
-if SPEC.get("outfit"):
+def base_pixels(obj, size):
+    """The object's own base colour texture as an array (bottom row first,
+    as UVs count), resized; None if it has none."""
+    for slot in obj.material_slots:
+        m = slot.material
+        if not m or not m.use_nodes:
+            continue
+        for n in m.node_tree.nodes:
+            if n.type == "TEX_IMAGE" and n.image and n.image.size[0] > 0:
+                lname = n.image.name.lower()
+                if "normal" in lname or "nrm" in lname:
+                    continue
+                img = n.image.copy()
+                img.scale(size, size)
+                import numpy as np
+                arr = np.array(img.pixels[:], dtype=np.float32).reshape(size, size, 4)[..., :3].copy()
+                bpy.data.images.remove(img)
+                return arr
+    return None
+
+
+if SPEC.get("photos"):
+    import numpy as np
+    import photo_fit
+    P = SPEC["photos"]
+    meas = json.load(open(os.path.join(HERE, "ref", NAME + ".measure.json")))
+    photos = {v: photo_fit.Photo(os.path.join(HERE, "ref", "%s_%s.png" % (NAME, v)), meas["views"][v]) for v in ("front", "side", "back")}
+    # Brows and lashes are in the photos (painted on the face).
+    for part in P.get("drop", ["eyebrows", "eyelashes"]):
+        o = added.pop(part, None)
+        if o is not None:
+            bpy.data.objects.remove(o, do_unlink=True)
+    rig = human.parent
+    try:
+        photo_fit.pose_arms_down(rig, P.get("arm_out_deg", 7.0))
+    except Exception as e:
+        report["errors"].append("pose: %r" % e)
+    body = clothes.Body(human)
+    lm = photo_fit.model_landmarks(body, added.get("eyes"))
+    report["landmarks"] = {k: (round(v, 4) if isinstance(v, float) else [round(x, 4) for x in v]) for k, v in lm.items()}
+    mapping = photo_fit.Mapping(lm, photos, P["marks"], body.height)
+    made = {}
+    for name, maker in (("lungi", lambda: photo_fit.lungi_from_photos(body, mapping, photos, P["lungi"])),
+                        ("shirt", lambda: photo_fit.shirt_from_photos(body, mapping, P["shirt"])),
+                        ("gamchha", lambda: photo_fit.gamchha_from_photos(body, mapping, photos, P["gamchha"])),
+                        ("sandals", lambda: clothes.sandals(body, P.get("sandals", {})))):
+        try:
+            made[name] = maker()
+        except Exception:
+            import traceback
+            report["errors"].append("%s: %s" % (name, traceback.format_exc()[-700:]))
+    report["picked"]["outfit"] = sorted(made)
+    mz, pf = mapping.knots["front"]
+    try:
+        photo_fit.hide_under(human, float(np.interp(P["shirt"]["hem"], pf, mz)), float(np.interp(P["lungi"]["hem"], pf, mz)))
+    except Exception as e:
+        report["errors"].append("hide: %r" % e)
+    if SPEC.get("skin_tone"):
+        report["toned"] = tone_images(human, SPEC["skin_tone"])
+    fix = photo_fit.arm_fixer(body, mapping, photos)
+    tex = P.get("texture", {"body": 2048, "cloth": 1024})
+    report["painted"] = {}
+    try:
+        base = base_pixels(human, tex["body"])
+        report["painted"]["body"] = photo_fit.paint(human, mapping, photos, tex["body"], fix, 0.6, base=base, side_mirror_above=lm.get("chin"))
+    except Exception:
+        import traceback
+        report["errors"].append("paint body: %s" % traceback.format_exc()[-700:])
+    for name, o in made.items():
+        try:
+            report["painted"][name] = photo_fit.paint(o, mapping, photos, tex["cloth"], fix if name == "shirt" else None, 0.85)
+        except Exception:
+            import traceback
+            report["errors"].append("paint %s: %s" % (name, traceback.format_exc()[-700:]))
+    for part, look in SPEC.get("tint", {}).items():
+        if part in added and added[part] is not None:
+            tint_images(added[part], look["colour"], look.get("keep", 0.25))
+elif SPEC.get("outfit"):
     made = clothes.dress(human, SPEC["outfit"], report)
     report["picked"]["outfit"] = sorted(made)
-for part, look in SPEC.get("tint", {}).items():
+for part, look in ({} if SPEC.get("photos") else SPEC.get("tint", {})).items():
     if part in added and added[part] is not None:
         tint_images(added[part], look["colour"], look.get("keep", 0.25))
 for wishes in SPEC.get("clothes", []):

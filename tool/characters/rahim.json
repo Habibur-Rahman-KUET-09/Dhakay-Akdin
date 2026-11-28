@@ -39,22 +39,8 @@
       "low-poly"
     ]
   ],
-  "eyebrows": [
-    [
-      "eyebrow001"
-    ],
-    [
-      "eyebrow"
-    ]
-  ],
-  "eyelashes": [
-    [
-      "eyelashes01"
-    ],
-    [
-      "eyelash"
-    ]
-  ],
+  "eyebrows": [],
+  "eyelashes": [],
   "teeth": [],
   "tongue": [],
   "hair": [
@@ -86,38 +72,78 @@
   },
   "max_texture": 1024,
   "roughness": 0.62,
-  "outfit": {
-    "lungi": {
-      "top": 0.585,
-      "bottom": 0.17,
-      "colours": [
-        "24507A",
-        "1F6B4A",
-        "24507A",
-        "CFC8B8"
-      ],
-      "stripes": 12,
-      "repeat": 3.0
-    },
-    "shirt": {
-      "colour": "B8733F",
-      "bottom": 0.55,
-      "neck": 0.835,
-      "sleeve": 0.45,
-      "lift": 0.012
-    },
-    "gamchha": {
-      "side": -1,
-      "width": 0.12,
-      "x": 0.06
-    },
-    "sandals": {
-      "colour": "2B4C7E"
-    }
-  },
   "skin_tone": [
     0.62,
     0.47,
     0.36
-  ]
+  ],
+  "photos": {
+    "about": "Made from ref/rahim_{front,side,back}.png (AI pictures of a made-up man). Marks are pixel rows/columns in each photo: top of the skull (under the hair), eyes, mouth, chin; ears (left, right) in front and back; nose tip and back of the head in the side photo. Fractions are of his height from the soles.",
+    "marks": {
+      "front": {
+        "skull": 40,
+        "eyes": 127,
+        "mouth": 185,
+        "chin": 222,
+        "ears": [
+          420,
+          582
+        ]
+      },
+      "side": {
+        "skull": 40,
+        "eyes": 127,
+        "mouth": 185,
+        "chin": 222,
+        "nose_back": [
+          374,
+          567
+        ]
+      },
+      "back": {
+        "skull": 42,
+        "eyes": 128,
+        "mouth": 186,
+        "chin": 222,
+        "ears": [
+          435,
+          597
+        ]
+      }
+    },
+    "arm_out_deg": 7,
+    "lungi": {
+      "waist": 0.485,
+      "hem": 0.19,
+      "ease": 0.006
+    },
+    "shirt": {
+      "hem": 0.485,
+      "neck": 0.85,
+      "sleeve": 0.665,
+      "lift": 0.016
+    },
+    "gamchha": {
+      "top": 0.85,
+      "bottom_front": 0.515,
+      "bottom_back": 0.515,
+      "x_front": [
+        0.035,
+        0.115
+      ],
+      "x_back": [
+        -0.11,
+        -0.02
+      ],
+      "thick": 0.02,
+      "off": 0.035
+    },
+    "sandals": {
+      "colour": "2B4C7E"
+    },
+    "texture": {
+      "body": 2048,
+      "cloth": 1024
+    }
+  }
 }
