@@ -734,6 +734,41 @@ def arm_tubes(obj, human, rig, radius=0.095):
     return changed
 
 
+def cut_webs(obj, rig):
+    """Below the elbows the AI's shape often joins a hand or a forearm to
+    the lungi or the shirt's side with a thin skin of faces: when the arm
+    moves it stretches into a sheet. Faces there with one corner moving
+    with an arm and another with the body go. Returns how many."""
+    mw_rig = rig.matrix_world
+    tails = [mw_rig @ rig.data.bones[b].tail_local for b in ("upperarm_l", "upperarm_r") if b in rig.data.bones]
+    if not tails:
+        return 0
+    elbow_z = min(t.z for t in tails)
+    names = {g.index: g.name.lower() for g in obj.vertex_groups}
+    arm = {i for i, n in names.items() if any(w in n for w in ARM_PARTS)}
+    share = []
+    for v in obj.data.vertices:
+        total = sum(g.weight for g in v.groups)
+        on_arm = sum(g.weight for g in v.groups if g.group in arm)
+        share.append(on_arm / total if total > 0 else 0.0)
+    mw = obj.matrix_world
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.verts.ensure_lookup_table()
+    gone = []
+    for f in bm.faces:
+        if (mw @ f.calc_center_median()).z > elbow_z:
+            continue
+        s = [share[v.index] for v in f.verts]
+        if max(s) > 0.5 and min(s) < 0.5:
+            gone.append(f)
+    bmesh.ops.delete(bm, geom=gone, context="FACES_ONLY")
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+    return len(gone)
+
+
 def vertex_visibility(obj):
     """For each vertex, whether each photo's camera sees it (1) or another
     part of him is in the way (0): front from -Y, back from +Y, the side

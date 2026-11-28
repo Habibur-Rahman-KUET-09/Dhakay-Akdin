@@ -189,6 +189,7 @@ if SPEC.get("photos"):
             clothes.bind(ai, human)
             report["ai_arm_tubes"] = photo_fit.arm_tubes(ai, human, human.parent)
             report["ai_split_arms"] = photo_fit.split_arms(ai, photos, body)
+            report["ai_cut_webs"] = photo_fit.cut_webs(ai, human.parent)
             for o in list(bpy.data.objects):
                 if o.type == "MESH" and o != ai:
                     bpy.data.objects.remove(o, do_unlink=True)
