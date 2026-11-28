@@ -406,7 +406,7 @@ def gamchha_from_photos(body, mapping, photos, spec):
     # each lying on the top of the shoulder there (the highest body point
     # near it, not the head or the arm below), so it drapes, not a flat lid.
     torso = [i for i in range(len(body.co))
-             if not any(w in body.top_group[i] for w in ("head", "ears", "scalp", "lips", "hand", "lowerarm"))]
+             if not any(w in body.top_group[i] for w in ("head", "ears", "scalp", "lips", "neck", "hand", "lowerarm"))]
 
     def top_z(x, y, floor_z):
         zs = [body.co[i].z for i in torso if abs(body.co[i].x - x) < 0.02 and abs(body.co[i].y - y) < 0.02]
@@ -423,7 +423,10 @@ def gamchha_from_photos(body, mapping, photos, spec):
                 p = a[i].lerp(b[i], t)
                 # A rounded arch: never below the line, lifted by the cloth.
                 arch = math.sin(t * math.pi) * 0.012
-                row.append(Vector((p.x, p.y, top_z(p.x, p.y, p.z - 0.2) + off * 0.8 + arch)))
+                # Never above the higher end row by more than the arch: the
+                # neck beside it must not lift the cloth.
+                z = min(top_z(p.x, p.y, p.z - 0.2) + off * 0.8, max(a[i].z, b[i].z) + 0.03) + arch
+                row.append(Vector((p.x, p.y, z)))
             mids.append(row)
         rows = front_rows + mids + back_rows
     else:
@@ -597,7 +600,10 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
         ty = p[inside, 1].astype(int)
         only_skin = None
         if limb is not None:
-            only_skin = ((w @ limb[vi]) > 0.5) & (pos[:, 2] < skin_below)
+            # Below the chin the body shows only skin (the clothes cover the
+            # rest): no cloth colour in its texture, so none bleeds into a
+            # hand or a foot when the texture is seen small.
+            only_skin = pos[:, 2] < skin_below
         col, wsum = colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, only_skin)
         ok = wsum > 1e-3
         img[ty[ok], tx[ok]] = col[ok]
