@@ -10,6 +10,7 @@
   "hair": "/home/runner/.config/blender/4.2/extensions/.user/user_default/mpfb/data/hair/short02/short02.mhclo",
   "outfit": [
    "gamchha",
+   "hair",
    "lungi",
    "sandals",
    "shirt"
@@ -140,17 +141,18 @@
   "middleage_lightskinned_male_diffuse2.png"
  ],
  "painted": {
-  "body": 2282416,
+  "body": 2290851,
   "lungi": 1045939,
   "shirt": 221697,
-  "gamchha": 1048576
+  "gamchha": 1048576,
+  "hair": 118785
  },
  "meshes": {
   "gamchha": 62,
+  "hair": 326,
   "lungi": 720,
   "rahim": 12423,
   "rahim.high-poly": 1020,
-  "rahim.short02": 1672,
   "sandals": 24,
   "shirt": 1964
  },
@@ -158,6 +160,12 @@
   "Dots Stroke": [],
   "gamchha": [],
   "gamchha_photo": [
+   "BSDF_PRINCIPLED",
+   "OUTPUT_MATERIAL",
+   "TEX_IMAGE"
+  ],
+  "hair_cap": [],
+  "hair_photo": [
    "BSDF_PRINCIPLED",
    "OUTPUT_MATERIAL",
    "TEX_IMAGE"
@@ -207,5 +215,5 @@
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 2572040
+ "glb_bytes": 2404864
 }
