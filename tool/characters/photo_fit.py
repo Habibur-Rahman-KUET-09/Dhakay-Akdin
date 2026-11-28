@@ -588,6 +588,43 @@ def ai_body(path, body, spec):
     return obj
 
 
+def ai_landmarks(obj, body, photos, marks):
+    """Where the AI's shape has the head's marks, so its face meets the
+    photo's: the tip of the nose (the most forward point between mouth and
+    eyes) sets the eyes, mouth, chin and skull at the photo's spacing; the
+    head's width at the eyes (temple to temple) and its depth at the nose
+    (tip to the back of the head) scale the face across."""
+    me = obj.data
+    co = np.empty(len(me.vertices) * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(-1, 3)
+    H, floor = body.height, body.floor
+    ph = photos["front"]
+    m = marks.get("front", {})
+    f = {k: ph.f_of_px(m[k]) for k in ("chin", "mouth", "eyes", "skull") if k in m}
+    lm = {"sole": floor}
+    if not {"mouth", "eyes"} <= set(f):
+        return lm
+    f_nose = f["mouth"] + (f["eyes"] - f["mouth"]) * 0.45
+    lo, hi = floor + (f["mouth"] - 0.01) * H, floor + (f["eyes"] + 0.01) * H
+    face = co[(co[:, 2] > lo) & (co[:, 2] < hi) & (np.abs(co[:, 0]) < 0.03)]
+    if len(face) == 0:
+        return lm
+    nose = face[np.argmin(face[:, 1])]
+    shift = nose[2] - (floor + f_nose * H)
+    for k, v in f.items():
+        lm[k] = floor + v * H + shift
+    at_eyes = co[(np.abs(co[:, 2] - lm["eyes"]) < 0.012) & (np.abs(co[:, 0]) < 0.14)]
+    if len(at_eyes):
+        lm["ear_x"] = (float(at_eyes[:, 0].min()), float(at_eyes[:, 0].max()))
+    at_nose = co[(np.abs(co[:, 2] - nose[2]) < 0.012) & (np.abs(co[:, 0]) < 0.1)]
+    if len(at_nose):
+        lm["head_y"] = (float(at_nose[:, 1].min()), float(at_nose[:, 1].max()))
+    lm["nose"] = [round(float(x), 4) for x in nose]
+    lm["shift"] = round(float(shift), 4)
+    return lm
+
+
 def vertex_visibility(obj):
     """For each vertex, whether each photo's camera sees it (1) or another
     part of him is in the way (0): front from -Y, back from +Y, the side

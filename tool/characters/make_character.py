@@ -178,12 +178,14 @@ if SPEC.get("photos"):
         try:
             ai = photo_fit.ai_body(os.path.join(HERE, "ref", P["ai_mesh"]), body, P.get("ai", {}))
             report["ai_faces"] = len(ai.data.polygons)
-            amap = photo_fit.Mapping({"sole": body.floor}, photos, {}, body.height)
+            alm = photo_fit.ai_landmarks(ai, body, photos, P["marks"])
+            report["ai_landmarks"] = {k: (round(v, 4) if isinstance(v, float) else v) for k, v in alm.items()}
+            amap = photo_fit.Mapping({k: v for k, v in alm.items() if k not in ("nose", "shift")}, photos, P["marks"], body.height)
             vis = photo_fit.vertex_visibility(ai)
             report["ai_hidden"] = {k: int((v < 0.5).sum()) for k, v in vis.items()}
             tex = P.get("texture", {"body": 2048})
             report["painted"] = {"ai": photo_fit.paint(ai, amap, photos, tex["body"], None, 0.8,
-                                                       side_mirror_above=body.floor + body.height * 0.86, visibility=vis)}
+                                                       side_mirror_above=alm.get("chin", body.floor + body.height * 0.86), visibility=vis)}
             clothes.bind(ai, human)
             for o in list(bpy.data.objects):
                 if o.type == "MESH" and o != ai:
