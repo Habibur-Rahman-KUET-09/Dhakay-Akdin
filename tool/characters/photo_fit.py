@@ -605,7 +605,9 @@ def skin_like(col):
     r, g, b = col[:, 0], col[:, 1], col[:, 2]
     h = np.where(mx == r, ((g - b) / (ch + 1e-6)) % 6, np.where(mx == g, (b - r) / (ch + 1e-6) + 2, (r - g) / (ch + 1e-6) + 4)) * 60.0
     skin = (h >= 14) & (h <= 34) & (ch < 0.48) & (mx < 0.92)
-    return (skin | (mx < 0.25)).astype(np.float32)
+    # Deep shadow on skin is still warm: a dark blue or green is the lungi.
+    shadow = (mx < 0.25) & (r >= b) & (r >= g * 0.95)
+    return (skin | shadow).astype(np.float32)
 
 
 def arm_fixer(body, mapping, photos, leg_top=None):
