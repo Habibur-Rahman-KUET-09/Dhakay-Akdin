@@ -145,7 +145,7 @@
   "middleage_lightskinned_male_diffuse2.png"
  ],
  "painted": {
-  "body": 2333329,
+  "body": 2336968,
   "lungi": 1048566,
   "shirt": 222128,
   "gamchha": 1048576,
@@ -219,5 +219,5 @@
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 2394812
+ "glb_bytes": 2383524
 }
