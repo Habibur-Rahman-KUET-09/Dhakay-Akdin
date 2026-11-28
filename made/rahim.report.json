@@ -160,6 +160,7 @@
  "painted": {
   "ai": 2326661
  },
+ "ai_split_arms": 966,
  "meshes": {
   "ai_body": 24000
  },
@@ -193,5 +194,5 @@
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 1547408
+ "glb_bytes": 1547556
 }
