@@ -194,6 +194,22 @@ if SPEC.get("photos"):
         photo_fit.hide_under(human, float(np.interp(P["shirt"]["hem"], pf, mz)), float(np.interp(P["lungi"]["hem"], pf, mz)))
     except Exception as e:
         report["errors"].append("hide: %r" % e)
+    # Only his hair stays on the hair cap; the shirt opens at the collar
+    # where the photo shows his chest.
+    report["trimmed"] = {}
+    try:
+        if "hair" in made:
+            report["trimmed"]["hair"] = photo_fit.trim_by_colour(
+                made["hair"], mapping, photos, photo_fit.hair_like,
+                region=lambda c, n: c[:, 2] < lm["eyes"] + 0.09, side_mirror_above=lm.get("chin"))
+        if "shirt" in made:
+            chest = float(np.interp(P["shirt"].get("collar_from", 0.7), pf, mz))
+            report["trimmed"]["shirt"] = photo_fit.trim_by_colour(
+                made["shirt"], mapping, photos, lambda col: 1.0 - photo_fit.skin_like(col),
+                region=lambda c, n: (c[:, 2] > chest) & (n[:, 1] < -0.2) & (np.abs(c[:, 0]) < body.height * 0.06))
+    except Exception:
+        import traceback
+        report["errors"].append("trim: %s" % traceback.format_exc()[-700:])
     if SPEC.get("skin_tone"):
         report["toned"] = tone_images(human, SPEC["skin_tone"])
     fix = photo_fit.arm_fixer(body, mapping, photos, float(np.interp(P["lungi"]["hem"], pf, mz)))

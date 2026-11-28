@@ -402,11 +402,30 @@ def gamchha_from_photos(body, mapping, photos, spec):
                 row.append(Vector((x, y, z)))
         if len(row) == 2:
             back_rows.append(row)
-    # Over the shoulder: between the top front and top back rows, raised.
+    # Over the shoulder: rows from the top front row to the top back row,
+    # each lying on the top of the shoulder there (the highest body point
+    # near it, not the head or the arm below), so it drapes, not a flat lid.
+    torso = [i for i in range(len(body.co))
+             if not any(w in body.top_group[i] for w in ("head", "ears", "scalp", "lips", "hand", "lowerarm"))]
+
+    def top_z(x, y, floor_z):
+        zs = [body.co[i].z for i in torso if abs(body.co[i].x - x) < 0.02 and abs(body.co[i].y - y) < 0.02]
+        return max([floor_z] + zs)
+
     if front_rows and back_rows:
         a, b = front_rows[-1], back_rows[0]
-        mid = [(a[i] + b[i]) / 2 + Vector((0, 0, 0.05)) for i in range(2)]
-        rows = front_rows + [mid] + back_rows
+        mids = []
+        m = 6
+        for k in range(1, m):
+            t = k / m
+            row = []
+            for i in range(2):
+                p = a[i].lerp(b[i], t)
+                # A rounded arch: never below the line, lifted by the cloth.
+                arch = math.sin(t * math.pi) * 0.012
+                row.append(Vector((p.x, p.y, top_z(p.x, p.y, p.z - 0.2) + off * 0.8 + arch)))
+            mids.append(row)
+        rows = front_rows + mids + back_rows
     else:
         rows = front_rows + back_rows
     bm = bmesh.new()
@@ -428,6 +447,52 @@ def gamchha_from_photos(body, mapping, photos, spec):
     bpy.ops.object.modifier_apply(modifier=sol.name)
     clothes.bind(obj, body.obj)
     return obj
+
+
+def trim_by_colour(obj, mapping, photos, keep, region=None, side_mirror_above=None):
+    """Takes away the faces of obj that the photos show as something else
+    (keep(colours) is False), inside region(centres, normals) if given: the
+    hair cap where there is skin, the shirt's open collar. A face goes only
+    if most faces around it go too, so the edge is clean. Returns how many
+    went."""
+    mw = obj.matrix_world
+    nm = mw.to_3x3()
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.faces.ensure_lookup_table()
+    if not bm.faces:
+        bm.free()
+        return 0
+    cs = np.array([tuple(mw @ f.calc_center_median()) for f in bm.faces])
+    ns = np.array([tuple((nm @ f.normal).normalized()) for f in bm.faces])
+    col, w = colour_at(cs, ns, mapping, photos, None, side_mirror_above)
+    go = (keep(col) < 0.5) & (w > 1e-3)
+    if region is not None:
+        go &= region(cs, ns)
+    # One pass of the majority of each face's neighbours (by edge).
+    index = {f: i for i, f in enumerate(bm.faces)}
+    smooth = go.copy()
+    for f in bm.faces:
+        near = {index[g] for e in f.edges for g in e.link_faces if g is not f}
+        if near:
+            votes = sum(1 for j in near if go[j])
+            smooth[index[f]] = (votes + (1 if go[index[f]] else 0)) * 2 > len(near) + 1
+    gone = [f for f in bm.faces if smooth[index[f]]]
+    bmesh.ops.delete(bm, geom=gone, context="FACES")
+    loose = [v for v in bm.verts if not v.link_faces]
+    bmesh.ops.delete(bm, geom=loose, context="VERTS")
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+    return len(gone)
+
+
+def hair_like(col):
+    """Hair: dark, or grey (little colour); skin is brown and stronger."""
+    mx = col.max(1)
+    ch = mx - col.min(1)
+    sat = ch / np.maximum(mx, 1e-6)
+    return ((mx < 0.42) | (sat < 0.22)).astype(np.float32)
 
 
 def hide_under(body_obj, shirt_hem_z, lungi_hem_z):
@@ -496,6 +561,10 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
                 limb[v.index] = 1.0
     img = np.zeros((size, size, 3), dtype=np.float32)
     have = np.zeros((size, size), dtype=bool)
+    # Limb texels no photo shows as skin (a palm against the lungi, a knee
+    # under it), and limb texels that took a photo's skin.
+    limb_empty = np.zeros((size, size), dtype=bool)
+    limb_done = np.zeros((size, size), dtype=bool)
     if base is not None:
         img[:] = base
     for tri in mesh.loop_triangles:
@@ -533,11 +602,20 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
         ok = wsum > 1e-3
         img[ty[ok], tx[ok]] = col[ok]
         have[ty[ok], tx[ok]] = True
+        if only_skin is not None:
+            limb_empty[ty[only_skin & ~ok], tx[only_skin & ~ok]] = True
+            limb_done[ty[only_skin & ok], tx[only_skin & ok]] = True
+    limb_empty &= ~have
+    if base is not None and limb_empty.any() and limb_done.any():
+        # The model's own skin there, in the photos' skin colour: never the
+        # neighbours' colours, which may be the lungi's under the cloth.
+        gain = img[limb_done].mean(0) / np.maximum(base[limb_done].mean(0), 1e-3)
+        img[limb_empty] = np.clip(base[limb_empty] * gain, 0, 1)
+        have |= limb_empty
     if base is None and have.any():
         img[~have] = img[have].mean(0)
-    # Fill what no photo saw (and the seams) from its neighbours: on the
-    # body, far enough to cover a knee no photo shows.
-    for _ in range(48 if limb is not None else 6):
+    # Fill what no photo saw (and the seams) from its neighbours.
+    for _ in range(8):
         grow = ~have & (np.roll(have, 1, 0) | np.roll(have, -1, 0) | np.roll(have, 1, 1) | np.roll(have, -1, 1))
         if not grow.any():
             break
@@ -699,14 +777,20 @@ def hair_cap(body, lm, spec):
     bpy.data.meshes.remove(mesh)
     bm.verts.ensure_lookup_table()
     face_y = min(c.y for c in body.co) + 0.06
+    # Behind the ears: the hair comes down to the nape there; beside and
+    # over them it stops above them.
+    ear_ys = [body.co[i].y for i in range(len(body.co)) if body.top_group[i] == "ears"]
+    ear_back = (max(ear_ys) + 0.008) if ear_ys else 0.02
+    ear_top = max([body.co[i].z for i in range(len(body.co)) if body.top_group[i] == "ears"] or [eyes])
     keep = set()
     for v in bm.verts:
         g = body.top_group[v.index] if v.index < len(body.top_group) else ""
-        if g not in ("head", "scalp", "ears"):
+        if g not in ("head", "scalp"):
             continue
         c = v.co
         front = c.y < face_y
-        if (c.z > eyes + spec.get("brow", 0.035)) or (not front and c.y > -0.02 and c.z > mouth - 0.01):
+        if (c.z > eyes + spec.get("brow", 0.035)) or (not front and c.z > ear_top + 0.005) \
+                or (c.y > ear_back and c.z > mouth - 0.01):
             keep.add(v.index)
     bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.index not in keep], context="VERTS")
     bm.normal_update()
