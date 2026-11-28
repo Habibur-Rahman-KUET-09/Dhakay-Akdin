@@ -140,11 +140,10 @@
   "middleage_lightskinned_male_diffuse2.png"
  ],
  "painted": {
-  "body": 2172976,
-  "lungi": 983356,
-  "shirt": 212205,
-  "gamchha": 1015780,
-  "sandals": 355942
+  "body": 2282416,
+  "lungi": 1045939,
+  "shirt": 221697,
+  "gamchha": 1048576
  },
  "meshes": {
   "gamchha": 62,
@@ -201,11 +200,6 @@
    "OUTPUT_MATERIAL",
    "TEX_IMAGE"
   ],
-  "sandals_photo": [
-   "BSDF_PRINCIPLED",
-   "OUTPUT_MATERIAL",
-   "TEX_IMAGE"
-  ],
   "shirt": [],
   "shirt_photo": [
    "BSDF_PRINCIPLED",
@@ -213,5 +207,5 @@
    "TEX_IMAGE"
   ]
  },
- "glb_bytes": 2659068
+ "glb_bytes": 2572040
 }
