@@ -211,7 +211,8 @@ func _painted(mesh: Mesh, a: Color, b: Color, at := Vector3.ZERO, yaw := 0.0) ->
 	m.mesh = mesh
 	var paint := Models.traffic_material(PackedColorArray([a, b]), false)
 	paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
-	paint.next_pass = Heroes.outline(0.02)
+	if not _real:
+		paint.next_pass = Heroes.outline(0.02)
 	m.material_override = paint
 	m.position = at
 	m.rotation.y = yaw
@@ -223,7 +224,8 @@ func _plain(mesh: Mesh, at := Vector3.ZERO, yaw := 0.0) -> MeshInstance3D:
 	var m := MeshInstance3D.new()
 	m.mesh = mesh
 	var mat := Models.material()
-	mat.next_pass = Heroes.outline(0.02)
+	if not _real:
+		mat.next_pass = Heroes.outline(0.02)
 	m.material_override = mat
 	m.position = at
 	m.rotation.y = yaw
@@ -243,7 +245,8 @@ func _ground(fill: Color, radius := 2.6) -> void:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = fill.darkened(0.35) if night else fill
 	m.roughness = 1.0
-	m.next_pass = Heroes.outline(0.03)
+	if not _real:
+		m.next_pass = Heroes.outline(0.03)
 	g.material_override = m
 	g.position.y = -0.06
 	_pivot.add_child(g)
@@ -333,7 +336,8 @@ func _paint_vehicle(v: Node3D) -> void:
 	var colours: Array = v.get_meta("colours")
 	var paint := Models.traffic_material(PackedColorArray([colours[0], colours[1]]), false)
 	paint.set_shader_parameter("custom_data", Vector4(0, 0, 0, 1))
-	paint.next_pass = Heroes.outline(0.02)
+	if not _real:
+		paint.next_pass = Heroes.outline(0.02)
 	(v.get_meta("body") as MeshInstance3D).material_override = paint
 	var plain := Models.material()
 	for w in v.get_meta("wheels"):

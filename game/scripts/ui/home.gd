@@ -631,15 +631,22 @@ func _story_dot(item: Dictionary, i: int) -> Control:
 	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name.autowrap_mode = TextServer.AUTOWRAP_OFF
 	col.add_child(name)
+	# The whole circle and its name are one button, drawn over them (a
+	# MarginContainer gives both the full size; inside the column the
+	# button would be a row of no size, and nothing to tap).
+	var wrap := MarginContainer.new()
+	wrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	wrap.add_child(col)
 	var tap := Button.new()
 	tap.name = "Story_" + str(item.id)
 	tap.flat = true
-	tap.set_anchors_preset(Control.PRESET_FULL_RECT)
+	tap.mouse_filter = Control.MOUSE_FILTER_PASS
 	for state in ["normal", "hover", "pressed", "focus"]:
 		tap.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 	tap.pressed.connect(_open_story.bind(i))
-	col.add_child(tap)
-	return col
+	wrap.add_child(tap)
+	return wrap
 
 
 func _share_id() -> void:
@@ -925,13 +932,17 @@ func _stage() -> Control:
 	bottom.add_child(faces)
 	for w in WHO:
 		var picked: bool = w == who
-		var holder := CenterContainer.new()
+		# The face centred, and a button the whole spot's size over it.
+		var holder := MarginContainer.new()
 		holder.custom_minimum_size = Vector2(52, 52)
-		holder.add_child(_face(w, 50 if picked else 40, picked, progress.open_characters().has(w)))
+		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var centre := CenterContainer.new()
+		centre.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		centre.add_child(_face(w, 50 if picked else 40, picked, progress.open_characters().has(w)))
+		holder.add_child(centre)
 		var tap := Button.new()
 		tap.name = "Pick_" + w
 		tap.flat = true
-		tap.set_anchors_preset(Control.PRESET_FULL_RECT)
 		for state in ["normal", "hover", "pressed", "focus"]:
 			tap.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 		tap.pressed.connect(_pick.bind(w))

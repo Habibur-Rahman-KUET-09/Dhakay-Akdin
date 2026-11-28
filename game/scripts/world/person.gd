@@ -305,12 +305,13 @@ func gesture(kind: String) -> Tween:
 				tw.tween_property(self, "nod", 0.22, 0.18).set_trans(Tween.TRANS_SINE)
 				tw.tween_property(self, "nod", 0.0, 0.18).set_trans(Tween.TRANS_SINE)
 		_:
-			# A wave: the right arm up at the side, the forearm swinging.
-			tw.tween_property(self, "arm_r", Vector3(-0.35, 0, -2.05), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-			tw.parallel().tween_property(self, "fore_r", Vector3(0, 0, -0.25), 0.35)
+			# A wave: the upper arm out at shoulder height (no higher, or the
+			# sleeve pulls), the forearm up from the elbow and swinging.
+			tw.tween_property(self, "arm_r", Vector3(-0.3, 0, -1.3), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			tw.parallel().tween_property(self, "fore_r", Vector3(0, 0, -1.7), 0.35)
 			for k in 3:
-				tw.tween_property(self, "fore_r", Vector3(0, 0, -0.75), 0.16).set_trans(Tween.TRANS_SINE)
-				tw.tween_property(self, "fore_r", Vector3(0, 0, -0.1), 0.16).set_trans(Tween.TRANS_SINE)
+				tw.tween_property(self, "fore_r", Vector3(0, 0, -2.05), 0.16).set_trans(Tween.TRANS_SINE)
+				tw.tween_property(self, "fore_r", Vector3(0, 0, -1.4), 0.16).set_trans(Tween.TRANS_SINE)
 	tw.tween_property(self, "arm_r", Vector3.ZERO, 0.4).set_trans(Tween.TRANS_SINE)
 	tw.parallel().tween_property(self, "arm_l", Vector3.ZERO, 0.4).set_trans(Tween.TRANS_SINE)
 	tw.parallel().tween_property(self, "fore_r", Vector3.ZERO, 0.4).set_trans(Tween.TRANS_SINE)
