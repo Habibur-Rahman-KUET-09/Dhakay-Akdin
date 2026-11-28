@@ -20,7 +20,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 def client(space):
     token = os.environ.get("HF_TOKEN") or None
-    return Client(space, hf_token=token, verbose=False)
+    # The keyword is "token" in new versions of gradio_client, "hf_token" before.
+    try:
+        return Client(space, token=token, verbose=False)
+    except TypeError:
+        return Client(space, hf_token=token, verbose=False)
 
 
 def api(spaces):
