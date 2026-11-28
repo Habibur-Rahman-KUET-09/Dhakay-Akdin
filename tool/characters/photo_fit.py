@@ -468,8 +468,9 @@ def ensure_uv(obj):
 
 
 def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mirror_above=None, skin_below=None):
-    """Paints obj's texture from the photos (see the module's notes). Below
-    skin_below (a height), only skin-coloured pixels are taken: where a view
+    """Paints obj's texture from the photos (see the module's notes). On the
+    arms and legs below skin_below (a height), only skin-coloured pixels are
+    taken: where a view
     sees the shirt, the lungi or the gamchha in front of an arm or a leg (the
     inside of the arm, the palm against the lungi, a calf behind the hem),
     that view is left out, and the texel is filled from its neighbours."""
@@ -481,6 +482,18 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
     nm = mw.to_3x3()
     co = np.array([tuple(mw @ v.co) for v in mesh.vertices])
     nr = np.array([tuple((nm @ v.normal).normalized()) for v in mesh.vertices])
+    limb = None
+    if skin_below is not None:
+        # Arms and legs, by the bone that moves each vertex most.
+        names = {g.index: g.name.lower() for g in obj.vertex_groups}
+        limb = np.zeros(len(mesh.vertices), dtype=np.float32)
+        for v in mesh.vertices:
+            best, w = "", 0.0
+            for g in v.groups:
+                if g.weight > w:
+                    best, w = names.get(g.group, ""), g.weight
+            if any(k in best for k in clothes.ARM_WORDS + clothes.LEG_WORDS):
+                limb[v.index] = 1.0
     img = np.zeros((size, size, 3), dtype=np.float32)
     have = np.zeros((size, size), dtype=bool)
     if base is not None:
@@ -513,14 +526,18 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
         nrm /= np.linalg.norm(nrm, axis=1, keepdims=True) + 1e-9
         tx = p[inside, 0].astype(int)
         ty = p[inside, 1].astype(int)
-        col, wsum = colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, skin_below)
+        only_skin = None
+        if limb is not None:
+            only_skin = ((w @ limb[vi]) > 0.5) & (pos[:, 2] < skin_below)
+        col, wsum = colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, only_skin)
         ok = wsum > 1e-3
         img[ty[ok], tx[ok]] = col[ok]
         have[ty[ok], tx[ok]] = True
     if base is None and have.any():
         img[~have] = img[have].mean(0)
-    # Fill what no photo saw (and the seams) from its neighbours.
-    for _ in range(6):
+    # Fill what no photo saw (and the seams) from its neighbours: on the
+    # body, far enough to cover a knee no photo shows.
+    for _ in range(48 if limb is not None else 6):
         grow = ~have & (np.roll(have, 1, 0) | np.roll(have, -1, 0) | np.roll(have, 1, 1) | np.roll(have, -1, 1))
         if not grow.any():
             break
@@ -551,7 +568,7 @@ def paint(obj, mapping, photos, size, arm_fix, roughness=0.8, base=None, side_mi
     return int(have.sum())
 
 
-def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, skin_below=None):
+def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, only_skin=None):
     """The colour at model points (n, 3) with normals, from the photos."""
     n = pos.shape[0]
     acc = np.zeros((n, 3), dtype=np.float32)
@@ -571,8 +588,8 @@ def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above, skin_below=
         xs, ys = mapping.to_px(view, pos, shift)
         col, ok = photos[view].sample(xs, ys)
         wv = wv * ok
-        if skin_below is not None:
-            wv = wv * np.where(pos[:, 2] < skin_below, skin_like(col), 1.0)
+        if only_skin is not None:
+            wv = wv * np.where(only_skin, skin_like(col), 1.0)
         acc += col * wv[:, None]
         wsum += wv
     col = acc / np.maximum(wsum, 1e-6)[:, None]
