@@ -144,6 +144,11 @@
     "texture": {
       "body": 2048,
       "cloth": 1024
+    },
+    "hair_cap": {
+      "brow": 0.035,
+      "lift": 0.01,
+      "volume": 0.022
     }
   }
 }

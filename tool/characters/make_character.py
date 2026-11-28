@@ -175,9 +175,16 @@ if SPEC.get("photos"):
     for name, maker in (("lungi", lambda: photo_fit.lungi_from_photos(body, mapping, photos, P["lungi"])),
                         ("shirt", lambda: photo_fit.shirt_from_photos(body, mapping, P["shirt"])),
                         ("gamchha", lambda: photo_fit.gamchha_from_photos(body, mapping, photos, P["gamchha"])),
-                        ("sandals", lambda: clothes.sandals(body, P.get("sandals", {})))):
+                        ("sandals", lambda: clothes.sandals(body, P.get("sandals", {}))),
+                        ("hair", lambda: photo_fit.hair_cap(body, lm, P["hair_cap"]) if P.get("hair_cap") else None)):
         try:
-            made[name] = maker()
+            if name == "hair" and P.get("hair_cap"):
+                old_hair = added.pop("hair", None)
+                if old_hair is not None:
+                    bpy.data.objects.remove(old_hair, do_unlink=True)
+            obj = maker()
+            if obj is not None:
+                made[name] = obj
         except Exception:
             import traceback
             report["errors"].append("%s: %s" % (name, traceback.format_exc()[-700:]))
@@ -189,7 +196,8 @@ if SPEC.get("photos"):
         report["errors"].append("hide: %r" % e)
     if SPEC.get("skin_tone"):
         report["toned"] = tone_images(human, SPEC["skin_tone"])
-    fix = photo_fit.arm_fixer(body, mapping, photos)
+    fix = photo_fit.arm_fixer(body, mapping, photos, float(np.interp(P["lungi"]["hem"], pf, mz)))
+
     tex = P.get("texture", {"body": 2048, "cloth": 1024})
     report["painted"] = {}
     try:
@@ -202,7 +210,9 @@ if SPEC.get("photos"):
         if name == "sandals":
             continue
         try:
-            report["painted"][name] = photo_fit.paint(o, mapping, photos, tex["cloth"], fix if name == "shirt" else None, 0.85)
+            report["painted"][name] = photo_fit.paint(o, mapping, photos, tex["cloth"], fix if name == "shirt" else None,
+                                                      0.9 if name == "hair" else 0.85,
+                                                      side_mirror_above=lm.get("chin") if name == "hair" else None)
         except Exception:
             import traceback
             report["errors"].append("paint %s: %s" % (name, traceback.format_exc()[-700:]))

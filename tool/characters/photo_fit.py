@@ -573,39 +573,54 @@ def colour_at(pos, nrm, mapping, photos, arm_fix, side_mirror_above):
     return col, wsum
 
 
-def arm_fixer(body, mapping, photos):
-    """Moves the model's arms onto the photo's arms sideways: at each height,
-    the model arm's middle against the outer span's middle in the photo
-    (all in arrays: it runs for every texel)."""
+def arm_fixer(body, mapping, photos, leg_top=None):
+    """Moves the model's arms and legs onto the photo's sideways: at each
+    height, a limb's middle in the model against the middle of the same
+    limb's span in the photo (arms: the outer spans where the row has three
+    or more; legs: the two spans below the lungi). In arrays: it runs for
+    every texel."""
     H = mapping.height
     step = 0.02
     zs = np.array([c.z for c in body.co])
     kmax = int(np.ceil(zs.max() / step)) + 2
-    mids = {}
-    for s in (1, -1):
-        acc = np.zeros(kmax)
-        cnt = np.zeros(kmax)
-        for i, c in enumerate(body.co):
-            if body.is_arm(i) and "clavicle" not in body.top_group[i] and (c.x > 0) == (s > 0):
-                k = int(round(c.z / step))
-                if 0 <= k < kmax:
-                    acc[k] += c.x
-                    cnt[k] += 1
-        m = np.full(kmax, np.nan)
-        m[cnt > 0] = acc[cnt > 0] / cnt[cnt > 0]
-        mids[s] = m
+
+    def mids_of(pick):
+        out = {}
+        for s in (1, -1):
+            acc = np.zeros(kmax)
+            cnt = np.zeros(kmax)
+            for i, c in enumerate(body.co):
+                if pick(i, c) and (c.x > 0) == (s > 0):
+                    k = int(round(c.z / step))
+                    if 0 <= k < kmax:
+                        acc[k] += c.x
+                        cnt[k] += 1
+            m = np.full(kmax, np.nan)
+            m[cnt > 0] = acc[cnt > 0] / cnt[cnt > 0]
+            out[s] = m
+        return out
+
+    arm_mids = mids_of(lambda i, c: body.is_arm(i) and "clavicle" not in body.top_group[i])
+    top = leg_top if leg_top is not None else body.floor + body.height * 0.2
+    leg_mids = mids_of(lambda i, c: body.is_leg(i) and c.z < top)
     spans = {}
     for view in ("front", "back"):
         ph = photos.get(view)
         if ph is None:
             continue
-        left = np.full(len(ph.rows), np.nan)
-        right = np.full(len(ph.rows), np.nan)
+        n = len(ph.rows)
+        al, ar, ll, lr = (np.full(n, np.nan) for _ in range(4))
         for i, r in enumerate(ph.rows):
-            if r and len(r["spans"]) >= 3:
-                left[i] = (r["spans"][0][0] + r["spans"][0][1]) / 2.0 * ph.hpx
-                right[i] = (r["spans"][-1][0] + r["spans"][-1][1]) / 2.0 * ph.hpx
-        spans[view] = (left, right)
+            if not r:
+                continue
+            sp = r["spans"]
+            if len(sp) >= 3:
+                al[i] = (sp[0][0] + sp[0][1]) / 2.0 * ph.hpx
+                ar[i] = (sp[-1][0] + sp[-1][1]) / 2.0 * ph.hpx
+            if len(sp) == 2:
+                ll[i] = (sp[0][0] + sp[0][1]) / 2.0 * ph.hpx
+                lr[i] = (sp[-1][0] + sp[-1][1]) / 2.0 * ph.hpx
+        spans[view] = (al, ar, ll, lr)
 
     def fix(view, pos):
         if view not in spans:
@@ -615,15 +630,54 @@ def arm_fixer(body, mapping, photos):
         x, z = pos[:, 0], pos[:, 2]
         s = np.where(x > 0, 1, -1)
         k = np.clip(np.round(z / step).astype(int), 0, kmax - 1)
-        mm = np.where(s > 0, mids[1][k], mids[-1][k])
-        near = ~np.isnan(mm) & (np.abs(x - np.nan_to_num(mm)) < 0.06)
         fs = mapping.f(view, z)
         ri = np.clip(np.round(fs * (len(ph.rows) - 1)).astype(int), 0, len(ph.rows) - 1)
-        left, right = spans[view]
-        # The photo's outer span on the arm's own side.
-        photo_mid = np.where(s * sign > 0, right[ri], left[ri])
-        ok = near & ~np.isnan(photo_mid)
+        al, ar, ll, lr = spans[view]
         out = np.zeros(pos.shape[0], dtype=np.float32)
-        out[ok] = sign * photo_mid[ok] - mm[ok] / H * ph.hpx
+        for mids, left, right, reach, below in ((arm_mids, al, ar, 0.06, None), (leg_mids, ll, lr, 0.07, top)):
+            mm = np.where(s > 0, mids[1][k], mids[-1][k])
+            near = ~np.isnan(mm) & (np.abs(x - np.nan_to_num(mm)) < reach)
+            if below is not None:
+                near &= z < below
+            # The photo's span on the limb's own side.
+            photo_mid = np.where(s * sign > 0, right[ri], left[ri])
+            ok = near & ~np.isnan(photo_mid) & (out == 0)
+            out[ok] = sign * photo_mid[ok] - mm[ok] / H * ph.hpx
         return out
     return fix
+
+
+def hair_cap(body, lm, spec):
+    """His own hair: the head's surface above the brows (and behind, down
+    to the ears), lifted off it, fuller on top, a little uneven: painted
+    from the photos it shows his curls and grey."""
+    eyes = lm.get("eyes", body.floor + body.height * 0.93)
+    mouth = lm.get("mouth", eyes - 0.07)
+    src = body.obj
+    deps = bpy.context.evaluated_depsgraph_get()
+    mesh = bpy.data.meshes.new_from_object(src.evaluated_get(deps))
+    mesh.transform(src.matrix_world)
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    bpy.data.meshes.remove(mesh)
+    bm.verts.ensure_lookup_table()
+    face_y = min(c.y for c in body.co) + 0.06
+    keep = set()
+    for v in bm.verts:
+        g = body.top_group[v.index] if v.index < len(body.top_group) else ""
+        if g not in ("head", "scalp", "ears"):
+            continue
+        c = v.co
+        front = c.y < face_y
+        if (c.z > eyes + spec.get("brow", 0.035)) or (not front and c.y > -0.02 and c.z > mouth - 0.01):
+            keep.add(v.index)
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.index not in keep], context="VERTS")
+    bm.normal_update()
+    rnd = __import__("random").Random(4)
+    for v in bm.verts:
+        up = max(0.0, min(1.0, (v.co.z - eyes) / 0.12))
+        v.co += v.normal * (spec.get("lift", 0.01) + spec.get("volume", 0.022) * up + 0.004 * rnd.random())
+    mat = bpy.data.materials.new("hair_cap")
+    obj = clothes.new_object("hair", bm, mat)
+    clothes.bind(obj, body.obj)
+    return obj
