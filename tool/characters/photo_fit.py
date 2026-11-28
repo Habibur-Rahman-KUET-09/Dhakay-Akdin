@@ -671,7 +671,7 @@ def split_arms(obj, photos, body, margin=0.012, margin_in=0.03):
     return changed
 
 
-def arm_tubes(obj, human, rig, radius=0.095):
+def arm_tubes(obj, human, rig, radius=0.072):
     """Above the elbows, where the arms touch the body in the photos, only
     what lies around an upper arm's bone moves with that arm (a tube of
     `radius` metres, roomy for a loose sleeve). Anything else up there that
