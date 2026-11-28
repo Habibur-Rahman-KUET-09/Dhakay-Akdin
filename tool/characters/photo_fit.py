@@ -628,7 +628,7 @@ def ai_landmarks(obj, body, photos, marks):
 ARM_PARTS = ("upperarm", "lowerarm", "hand", "thumb", "index", "middle", "ring", "pinky")
 
 
-def split_arms(obj, photos, body, margin=0.012):
+def split_arms(obj, photos, body, margin=0.012, margin_in=0.03):
     """The AI's shape is one skin: weights carried from the nearest body
     point let the shirt's side, the lungi by the hands and the gamchha on
     the chest follow an arm (a web of cloth when he waves or holds the
@@ -651,7 +651,9 @@ def split_arms(obj, photos, body, margin=0.012):
         # Facing the camera, his left (+x) is on the photo's right, so the
         # spans (from the photo's middle) are in the model's x.
         x0, x1 = trunk[0] * body.height, trunk[1] * body.height
-        inside = x0 + margin < p.x < x1 - margin
+        # Well inside only: an arm's own side, a little off where the photo
+        # puts it, must not lose its arm.
+        inside = x0 + margin_in < p.x < x1 - margin_in
         outside = p.x < x0 - margin or p.x > x1 + margin
         if not (inside or outside):
             continue
@@ -738,7 +740,8 @@ def cut_webs(obj, rig):
     """Below the elbows the AI's shape often joins a hand or a forearm to
     the lungi or the shirt's side with a thin skin of faces: when the arm
     moves it stretches into a sheet. Faces there with one corner moving
-    with an arm and another with the body go. Returns how many."""
+    plainly with an arm and another plainly with the body go (blended
+    corners stay, so the arm itself keeps its skin). Returns how many."""
     mw_rig = rig.matrix_world
     tails = [mw_rig @ rig.data.bones[b].tail_local for b in ("upperarm_l", "upperarm_r") if b in rig.data.bones]
     if not tails:
@@ -760,7 +763,7 @@ def cut_webs(obj, rig):
         if (mw @ f.calc_center_median()).z > elbow_z:
             continue
         s = [share[v.index] for v in f.verts]
-        if max(s) > 0.5 and min(s) < 0.5:
+        if max(s) > 0.8 and min(s) < 0.2:
             gone.append(f)
     bmesh.ops.delete(bm, geom=gone, context="FACES_ONLY")
     bm.to_mesh(obj.data)
